@@ -45,6 +45,7 @@
 #include "Mcpd8.CmdPacket.hpp"
 #include "Mcpd8.Parameters.hpp"
 #include "Mesytec.enums.Generator.hpp"
+#include "Mesytec.Mpsd8.hpp"
 
 
 using boost::asio::ip::udp;
@@ -79,9 +80,14 @@ namespace Mesytec {
 		udp::socket* socket;
 		unsigned short lastbufnum;
 		DataGenerator datagenerator;
-		Mesy::ModuleId modules[Mesy::Mpsd8Event::sizeSLOTS];
+		unsigned short firmware_major;
+		unsigned short firmware_minor;
+		unsigned short devid;
+		unsigned short runid;
+		Mesytec::Mpsd8::Module module[Mesy::Mpsd8Event::sizeSLOTS];
+		Mesy::ModuleId module_id[Mesy::Mpsd8Event::sizeSLOTS];
 		DeviceParameter() {
-			for (int i = 0; i < Mesy::Mpsd8Event::sizeSLOTS; i++) modules[i] = Mesy::ModuleId::NOMODULE;
+			for (int i = 0; i < Mesy::Mpsd8Event::sizeSLOTS; i++) module_id[i] = Mesy::ModuleId::NOMODULE;
 		}
 		
 	};
@@ -299,15 +305,8 @@ namespace Mesytec {
 					}
 				}
 				mp.lastbufnum = 0;
-				if (mp.datagenerator == Mesytec::DataGenerator::NucleoSimulator) {
-					//for (int i = 0; i < Mesy::Mpsd8Event::sizeSLOTS; i++) mp.modules[i] = Mesy::ModuleId::MPSD8;
-				}
-				if (mp.datagenerator == Mesytec::DataGenerator::Mcpd8 || mp.datagenerator == Mesytec::DataGenerator::NucleoSimulator) {
-					for (int i = 0; i < Mesy::Mpsd8Event::sizeSLOTS; i++) {
-						//Send(mp, Mcpd8::Cmd::GETMPSD8PLUSPARAMETERS, i);
-						
-					}
-				}
+				
+				
 				if (mp.datagenerator == Mesytec::DataGenerator::Charm || mp.datagenerator == Mesytec::DataGenerator::CharmSimulator) {
 					mp.charm_cmd_endpoint = udp::endpoint(boost::asio::ip::address::from_string(p.mcpd_ip), p.charm_port);
 				}
@@ -334,7 +333,6 @@ namespace Mesytec {
 				break;
 
 			}
-
 			for (std::pair<unsigned short, Mesytec::DeviceParameter> p : deviceparam) {
 				start_receive(deviceparam.at(p.first));
 
@@ -347,12 +345,33 @@ namespace Mesytec {
 			pio_service = &io_service;
 			worker_threads.create_thread(boost::bind(&MesytecSystem::watch_incoming_packets, this));		//worker_threads.add_thread(new boost::thread(&MesytecSystem::watch_incoming_packets, this, &io_service));
 			boost::this_thread::sleep_for(boost::chrono::milliseconds(200)); // we want watch_incoming_packets active
+		
 
 			for (int i = minid; i <= maxid; i++) {
-				//Send(deviceparam.at(i), Mcpd8::Cmd::SETID, i); // set ids for Mcpd8 devices
-				Send(deviceparam.at(i), Mcpd8::Internal_Cmd::GETVER); // 
-				//Send(deviceparam.at(i), Mcpd8::Cmd::GETPARAMETERS);
+				Mesytec::DeviceParameter mp=deviceparam.at(i);
+				Send(mp, Mcpd8::Cmd::SETID, i); // set ids for Mcpd8 devices
+				Send(mp, Mcpd8::Internal_Cmd::GETVER); // 
+				Send(mp, Mcpd8::Cmd::GETPARAMETERS);
+				Send(mp, Mcpd8::Internal_Cmd::READID);
+				if (mp.datagenerator == Mesytec::DataGenerator::Mcpd8 || mp.datagenerator == Mesytec::DataGenerator::NucleoSimulator) {
+					for (int i = 0; i < Mesy::Mpsd8Event::sizeSLOTS; i++) {
+
+						if (mp.module_id[i] == Mesy::ModuleId::MPSD8P) {
+							Send(mp, Mcpd8::Cmd::GETMPSD8PLUSPARAMETERS, i);
+						}
+						if (mp.firmware_major > 10) {}
+						if (mp.module_id[i] == Mesy::ModuleId::MPSD8 || mp.module_id[i] == Mesy::ModuleId::MPSD8OLD) {
+							Send(mp, Mcpd8::Internal_Cmd::READPERIREG, i);
+						}
+						
+
+					}
+				}
+				
 			}
+
+
+
 
 
 		}
@@ -406,17 +425,17 @@ namespace Mesytec {
 			cmdpacket.cmd = cmd;
 			switch (cmd) {
 			case Mcpd8::Internal_Cmd::CHARMPATTERNGENERATOR:
-				{
-					char cmdbytes[] = { '\x06','\x00','\x06','\x00','\x04','\x00','\x01','\x00','\x00','\x8a','\x00','\x00'};
-					if (param == 1) cmdbytes[10] = '\x01';
-					size_t bytessent=mp.socket->send_to(boost::asio::buffer(cmdbytes),mp.charm_cmd_endpoint);
+			{
+				char cmdbytes[] = { '\x06','\x00','\x06','\x00','\x04','\x00','\x01','\x00','\x00','\x8a','\x00','\x00' };
+				if (param == 1) cmdbytes[10] = '\x01';
+				size_t bytessent = mp.socket->send_to(boost::asio::buffer(cmdbytes), mp.charm_cmd_endpoint);
 
-				}
-				break;
+			}
+			break;
 			case Mcpd8::Internal_Cmd::CHARMSETEVENTRATE:
-				{
+			{
 				char cmdbytes[] = { '\x06','\x00','\x06','\x00','\x04','\x00','\x02','\x00','\x30','\x8a','\x00','\x00' };
-				unsigned short data =(unsigned short)( 50 * 1000000 / (param));
+				unsigned short data = (unsigned short)(50 * 1000000 / (param));
 
 				if (data <= 2) {
 					boost::mutex::scoped_lock lock(coutGuard);
@@ -425,28 +444,85 @@ namespace Mesytec {
 					std::cout << cmd_2 << ":data must be >2" << std::endl;
 					break;
 				}
-				short* sp = (short *)&cmdbytes[10];
+				short* sp = (short*)&cmdbytes[10];
 				*sp = data;
 				size_t bytessent = mp.socket->send_to(boost::asio::buffer(cmdbytes), mp.charm_cmd_endpoint);
 				simulatordatarate = param;
-				}
-				break;
+			}
+			break;
 			case Mcpd8::Internal_Cmd::SETNUCLEORATEEVENTSPERSECOND:
-			    {
-					unsigned long* p = reinterpret_cast<unsigned long*>(&cmdpacket.data[0]);
-					*p = param;
-					cmdpacket.Length += 2;
-			    }
-				response = Send(mp,cmdpacket);
-				simulatordatarate = param;
-				break;
+			{
+				unsigned long* p = reinterpret_cast<unsigned long*>(&cmdpacket.data[0]);
+				*p = param;
+				cmdpacket.Length += 2;
+			}
+			response = Send(mp, cmdpacket);
+			simulatordatarate = param;
+			break;
 			case Mcpd8::Internal_Cmd::GETVER:
-				response=Send(mp,cmdpacket);
+				response = Send(mp, cmdpacket);
 				{
 					boost::mutex::scoped_lock lock(coutGuard);
-					std::cout << "CPU " << response.data[0] << "." << response.data[1] << ", FPGA " << (response.data[2] & 0xff) << "." << ((response.data[2]>>8)&0xff) << std::endl;
+					std::cout << "CPU " << response.data[0] << "." << response.data[1] << ", FPGA " << (response.data[2] & 0xff) << "." << ((response.data[2] >> 8) & 0xff) << std::endl;
 				}
+				mp.firmware_major = response.data[0];
+				mp.firmware_minor = response.data[1];
 				break;
+
+
+			case Mcpd8::Internal_Cmd::READID: {
+				response = Send(mp, cmdpacket);
+				int n_modules = response.Length - response.headerLength;
+				if (n_modules < 0 || n_modules >= 20) {
+					boost::mutex::scoped_lock lock(coutGuard);
+					std::cout << "ERROR:" << response << " n_modules range [0..." << Mesy::Mpsd8Event::sizeMODID << "]" << std::endl;
+					break;
+				}
+				for (int i = 0; i < n_modules; i++) {
+					auto mid=magic_enum::enum_cast<Mesy::ModuleId>(response.data[i]);
+					if(mid.has_value())	mp.module_id[i]=mid.value();
+				}
+
+				break;
+			}
+
+			case Mcpd8::Internal_Cmd::READPERIREG:
+			{
+				assert(param >= 0 && param < Mesy::Mpsd8Event::sizeMODID);
+				cmdpacket.data[0] = param;
+				cmdpacket.Length = Mcpd8::CmdPacket::defaultLength + 1;
+				response = Send(mp, cmdpacket);
+				
+				int slot = response.data[0];
+				if (slot < 0 || slot >= Mesy::Mpsd8Event::sizeSLOTS) {
+					boost::mutex::scoped_lock lock(coutGuard);
+					std::cout << "ERROR:" << response << " response.data[0] outside range [0..." << Mesy::Mpsd8Event::sizeSLOTS << "]" <<std::endl;
+				}
+
+				int cmdindex = response.data[1];
+				if (cmdindex < 0 || cmdindex > 2) {
+					boost::mutex::scoped_lock lock(coutGuard);
+					std::cout << "ERROR:" << response << " response.data[1] outside range [0..2]" << std::endl;
+				}
+
+				switch (cmdindex) {
+				case 0:
+					mp.module[slot].tx_caps=response.data[2];
+					break;
+				case 1:
+					{
+					auto txcapsetting = magic_enum::enum_cast<Mcpd8::TX_CAP>(response.data[2]);
+					if (txcapsetting.has_value()) mp.module[slot].tx_cap_setting = txcapsetting.value();
+					
+					}
+					break;
+				case 2:
+					mp.module[slot].firmware = response.data[2];
+					break;
+				}
+				
+				break;
+			}
 			}
 		}
 
@@ -466,11 +542,13 @@ namespace Mesytec {
 			    cmdpacket.data[0] = param;
 				cmdpacket.Length = Mcpd8::CmdPacket::defaultLength + 1;
 				response=Send(mp,cmdpacket);
+				mp.devid= response.data[0];
 				break;
 			case Mcpd8::Cmd::SETRUNID:
 				cmdpacket.data[0] = param;
 				cmdpacket.Length= Mcpd8::CmdPacket::defaultLength + 1;
 				response=Send(mp,cmdpacket);
+				mp.runid = response.data[0];
 				break;
 			case Mcpd8::Cmd::GETPARAMETERS:
 				response = Send(mp,cmdpacket);
@@ -491,11 +569,11 @@ namespace Mesytec {
 					using namespace magic_enum::ostream_operators;
 					std::cout << cmd << ":MPSD device number(" << param << "),Firmware=" << cmdpacket.data[3]<<", "; 
 					if (cmdpacket.data[3] != 0) {
-						mp.modules[cmdpacket.data[0]] = Mesy::ModuleId::MPSD8;
+						mp.module_id[cmdpacket.data[0]] = Mesy::ModuleId::MPSD8;
 					
 					}
 
-					std::cout << mp.modules[cmdpacket.data[0]]<< std::endl;
+					std::cout << mp.module_id[cmdpacket.data[0]]<< std::endl;
 					 
 				}
 				
@@ -570,7 +648,7 @@ namespace Mesytec {
 						}
 						else {
 							boost::mutex::scoped_lock lock(coutGuard);
-							std::cout << "\rSEND:" << cmdpacket << " =>RESPONSE OK" << std::endl;
+							std::cout << "\rSEND:" << cmdpacket << " =>RESPONSE OK(" <<response.Length-response.headerLength<< " items)" << std::endl;
 						}
 						
 						return response;
@@ -748,7 +826,7 @@ namespace Mesytec {
 				deviceparam.at(id).lastbufnum = datapacket.Number;
 
 				for (int i = 0; i < numevents; i++) {
-					Zweistein::Event Ev = Zweistein::Event(&datapacket.events[i], headertime, offset * Mesy::Mpsd8Event::sizeSLOTS * Mesy::Mpsd8Event::sizeMODID, params.modules);
+					Zweistein::Event Ev = Zweistein::Event(&datapacket.events[i], headertime, offset * Mesy::Mpsd8Event::sizeSLOTS * Mesy::Mpsd8Event::sizeMODID, params.module_id);
 					PushNeutronEventOnly_HandleOther(Ev);
 				}
 			
@@ -762,7 +840,7 @@ namespace Mesytec {
 				deviceparam.at(id).lastbufnum = datapacket.Number;
 
 				for (int i = 0; i < numevents; i++) {
-					Zweistein::Event Ev = Zweistein::Event(Mesy::MdllEvent::fromMpsd8(&datapacket.events[i]), headertime, offset * Mesy::MdllEvent::sizeX, params.modules);
+					Zweistein::Event Ev = Zweistein::Event(Mesy::MdllEvent::fromMpsd8(&datapacket.events[i]), headertime, offset * Mesy::MdllEvent::sizeX, params.module_id);
 					PushNeutronEventOnly_HandleOther(Ev);
 				}
 			

@@ -209,7 +209,7 @@ int main(int argc, char* argv[])
 					for (std::pair<unsigned short, Mesytec::DeviceParameter> pair : ptrmsmtsystem1->deviceparam) {
 						if (pair.second.datagenerator == Mesytec::DataGenerator::NucleoSimulator) {
 						//	msmtsystem1.Send(pair.second, Mcpd8::Internal_Cmd::SETNUCLEORATEEVENTSPERSECOND, 16500);//1650000 is maximum
-						//	ptrmsmtsystem1->Send(pair.second, Mcpd8::Cmd::GETPARAMETERS);//1650000 is maximum
+						
 						}
 						if (pair.second.datagenerator == Mesytec::DataGenerator::CharmSimulator) {
 							ptrmsmtsystem1->Send(pair.second, Mcpd8::Internal_Cmd::CHARMSETEVENTRATE, 50000); // oder was du willst

@@ -144,7 +144,7 @@
     },
     {
       "name": "Raspian-Debug",
-      "generator": "Unix Makefiles",
+      "generator": "Ninja",
       "configurationType": "Debug",
       "cmakeExecutable": "/usr/bin/cmake",
       "remoteCopySourcesExclusionList": [ ".vs", ".git", "out" ],

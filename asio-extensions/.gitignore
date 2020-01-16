@@ -1,3 +1,10 @@
+out/
+.vs/
+x64/
+obj/
+CMakeFiles/
+bin/
+ARM/
 # gn-build checkout
 /build
 

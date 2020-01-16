@@ -185,7 +185,7 @@ void handle_receive(const boost::system::error_code& error,
 			assert(cp.data[0] >= 0 && cp.data[0] < N_MPSD8);
 			break;
 		}
-		/*
+		
 		case Mcpd8::Cmd::SETPULSER: {
 			assert(cp.data[0] >= 0 && cp.data[0] < N_MPSD8);
 			Module[cp.data[0]].pulserchannel = cp.data[1];
@@ -201,7 +201,13 @@ void handle_receive(const boost::system::error_code& error,
 		
 		case Mcpd8::Cmd::GETMPSD8PLUSPARAMETERS:
 		{
+		
+
 			assert(cp.data[0] >= 0 && cp.data[0] < N_MPSD8);
+			if (Module_Id[cp.data[0]] != Mesy::ModuleId::MPSD8P) {
+				cp.cmd != 0x8000;
+				break;
+			}
 			//cp.data[0] is Mpsd device num
 			cp.data[1] = Module[cp.data[0]].tx_caps;
 			cp.data[2] = Module[cp.data[0]].tx_cap_setting;
@@ -209,7 +215,7 @@ void handle_receive(const boost::system::error_code& error,
 			cp.Length = Mcpd8::CmdPacket::defaultLength+ 4;
 			break;
 		}
-		*/
+		
 		case Mcpd8::Internal_Cmd::READID:
 		{
 			for (int i = 0; i < N_MPSD8; i++) {

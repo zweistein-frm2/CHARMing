@@ -40,7 +40,7 @@ build list_install_components: phony
 # Utility command for edit_cache
 
 build CMakeFiles\edit_cache.util: CUSTOM_COMMAND
-  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetector\sigslot\out\build\x64-Debug && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E echo "No interactive CMake dialog available.""
+  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetection\sigslot\out\build\x64-Debug && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E echo "No interactive CMake dialog available.""
   DESC = No interactive CMake dialog available...
   restat = 1
 
@@ -51,7 +51,7 @@ build edit_cache: phony CMakeFiles\edit_cache.util
 # Utility command for rebuild_cache
 
 build CMakeFiles\rebuild_cache.util: CUSTOM_COMMAND
-  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetector\sigslot\out\build\x64-Debug && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -SC:\Users\alanghof\source\repos\NeutronDetector\sigslot -BC:\Users\alanghof\source\repos\NeutronDetector\sigslot\out\build\x64-Debug"
+  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetection\sigslot\out\build\x64-Debug && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -SC:\Users\alanghof\source\repos\NeutronDetection\sigslot -BC:\Users\alanghof\source\repos\NeutronDetection\sigslot\out\build\x64-Debug"
   DESC = Running CMake to regenerate build system...
   pool = console
   restat = 1
@@ -63,7 +63,7 @@ build rebuild_cache: phony CMakeFiles\rebuild_cache.util
 # Utility command for install
 
 build CMakeFiles\install.util: CUSTOM_COMMAND all
-  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetector\sigslot\out\build\x64-Debug && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -P cmake_install.cmake"
+  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetection\sigslot\out\build\x64-Debug && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -P cmake_install.cmake"
   DESC = Install the project...
   pool = console
   restat = 1
@@ -75,7 +75,7 @@ build install: phony CMakeFiles\install.util
 # Utility command for install/local
 
 build CMakeFiles\install\local.util: CUSTOM_COMMAND all
-  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetector\sigslot\out\build\x64-Debug && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake"
+  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetection\sigslot\out\build\x64-Debug && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake"
   DESC = Installing only the local directory...
   pool = console
   restat = 1
@@ -84,7 +84,7 @@ build install\local: phony CMakeFiles\install\local.util
 
 # =============================================================================
 # Write statements declared in CMakeLists.txt:
-# C:/Users/alanghof/source/repos/NeutronDetector/sigslot/CMakeLists.txt
+# C:/Users/alanghof/source/repos/NeutronDetection/sigslot/CMakeLists.txt
 # =============================================================================
 
 
@@ -131,7 +131,7 @@ build example\arguments.exe: CXX_EXECUTABLE_LINKER__arguments example\CMakeFiles
   LINK_FLAGS = /machine:x64 /debug /INCREMENTAL /subsystem:console
   LINK_LIBRARIES = kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib
   OBJECT_DIR = example\CMakeFiles\arguments.dir
-  POST_BUILD = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetector\sigslot\out\build\x64-Debug\example && powershell -noprofile -executionpolicy Bypass -file C:/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/alanghof/source/repos/NeutronDetector/sigslot/out/build/x64-Debug/example/arguments.exe -installedDir C:/vcpkg/installed/x64-windows/debug/bin -OutVariable out"
+  POST_BUILD = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetection\sigslot\out\build\x64-Debug\example && powershell -noprofile -executionpolicy Bypass -file C:/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/alanghof/source/repos/NeutronDetection/sigslot/out/build/x64-Debug/example/arguments.exe -installedDir C:/vcpkg/installed/x64-windows/debug/bin -OutVariable out"
   PRE_LINK = cd .
   TARGET_COMPILE_PDB = example\CMakeFiles\arguments.dir\
   TARGET_FILE = example\arguments.exe
@@ -176,7 +176,7 @@ build example\basic.exe: CXX_EXECUTABLE_LINKER__basic example\CMakeFiles\basic.d
   LINK_FLAGS = /machine:x64 /debug /INCREMENTAL /subsystem:console
   LINK_LIBRARIES = kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib
   OBJECT_DIR = example\CMakeFiles\basic.dir
-  POST_BUILD = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetector\sigslot\out\build\x64-Debug\example && powershell -noprofile -executionpolicy Bypass -file C:/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/alanghof/source/repos/NeutronDetector/sigslot/out/build/x64-Debug/example/basic.exe -installedDir C:/vcpkg/installed/x64-windows/debug/bin -OutVariable out"
+  POST_BUILD = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetection\sigslot\out\build\x64-Debug\example && powershell -noprofile -executionpolicy Bypass -file C:/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/alanghof/source/repos/NeutronDetection/sigslot/out/build/x64-Debug/example/basic.exe -installedDir C:/vcpkg/installed/x64-windows/debug/bin -OutVariable out"
   PRE_LINK = cd .
   TARGET_COMPILE_PDB = example\CMakeFiles\basic.dir\
   TARGET_FILE = example\basic.exe
@@ -188,7 +188,7 @@ build example\basic.exe: CXX_EXECUTABLE_LINKER__basic example\CMakeFiles\basic.d
 # Utility command for rebuild_cache
 
 build example\CMakeFiles\rebuild_cache.util: CUSTOM_COMMAND
-  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetector\sigslot\out\build\x64-Debug\example && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -SC:\Users\alanghof\source\repos\NeutronDetector\sigslot -BC:\Users\alanghof\source\repos\NeutronDetector\sigslot\out\build\x64-Debug"
+  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetection\sigslot\out\build\x64-Debug\example && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -SC:\Users\alanghof\source\repos\NeutronDetection\sigslot -BC:\Users\alanghof\source\repos\NeutronDetection\sigslot\out\build\x64-Debug"
   DESC = Running CMake to regenerate build system...
   pool = console
   restat = 1
@@ -233,7 +233,7 @@ build example\connection.exe: CXX_EXECUTABLE_LINKER__connection example\CMakeFil
   LINK_FLAGS = /machine:x64 /debug /INCREMENTAL /subsystem:console
   LINK_LIBRARIES = kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib
   OBJECT_DIR = example\CMakeFiles\connection.dir
-  POST_BUILD = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetector\sigslot\out\build\x64-Debug\example && powershell -noprofile -executionpolicy Bypass -file C:/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/alanghof/source/repos/NeutronDetector/sigslot/out/build/x64-Debug/example/connection.exe -installedDir C:/vcpkg/installed/x64-windows/debug/bin -OutVariable out"
+  POST_BUILD = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetection\sigslot\out\build\x64-Debug\example && powershell -noprofile -executionpolicy Bypass -file C:/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/alanghof/source/repos/NeutronDetection/sigslot/out/build/x64-Debug/example/connection.exe -installedDir C:/vcpkg/installed/x64-windows/debug/bin -OutVariable out"
   PRE_LINK = cd .
   TARGET_COMPILE_PDB = example\CMakeFiles\connection.dir\
   TARGET_FILE = example\connection.exe
@@ -278,7 +278,7 @@ build example\lambdas.exe: CXX_EXECUTABLE_LINKER__lambdas example\CMakeFiles\lam
   LINK_FLAGS = /machine:x64 /debug /INCREMENTAL /subsystem:console
   LINK_LIBRARIES = kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib
   OBJECT_DIR = example\CMakeFiles\lambdas.dir
-  POST_BUILD = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetector\sigslot\out\build\x64-Debug\example && powershell -noprofile -executionpolicy Bypass -file C:/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/alanghof/source/repos/NeutronDetector/sigslot/out/build/x64-Debug/example/lambdas.exe -installedDir C:/vcpkg/installed/x64-windows/debug/bin -OutVariable out"
+  POST_BUILD = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetection\sigslot\out\build\x64-Debug\example && powershell -noprofile -executionpolicy Bypass -file C:/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/alanghof/source/repos/NeutronDetection/sigslot/out/build/x64-Debug/example/lambdas.exe -installedDir C:/vcpkg/installed/x64-windows/debug/bin -OutVariable out"
   PRE_LINK = cd .
   TARGET_COMPILE_PDB = example\CMakeFiles\lambdas.dir\
   TARGET_FILE = example\lambdas.exe
@@ -323,7 +323,7 @@ build example\default-arguments.exe: CXX_EXECUTABLE_LINKER__default-arguments ex
   LINK_FLAGS = /machine:x64 /debug /INCREMENTAL /subsystem:console
   LINK_LIBRARIES = kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib
   OBJECT_DIR = example\CMakeFiles\default-arguments.dir
-  POST_BUILD = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetector\sigslot\out\build\x64-Debug\example && powershell -noprofile -executionpolicy Bypass -file C:/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/alanghof/source/repos/NeutronDetector/sigslot/out/build/x64-Debug/example/default-arguments.exe -installedDir C:/vcpkg/installed/x64-windows/debug/bin -OutVariable out"
+  POST_BUILD = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetection\sigslot\out\build\x64-Debug\example && powershell -noprofile -executionpolicy Bypass -file C:/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/alanghof/source/repos/NeutronDetection/sigslot/out/build/x64-Debug/example/default-arguments.exe -installedDir C:/vcpkg/installed/x64-windows/debug/bin -OutVariable out"
   PRE_LINK = cd .
   TARGET_COMPILE_PDB = example\CMakeFiles\default-arguments.dir\
   TARGET_FILE = example\default-arguments.exe
@@ -368,7 +368,7 @@ build example\overloads.exe: CXX_EXECUTABLE_LINKER__overloads example\CMakeFiles
   LINK_FLAGS = /machine:x64 /debug /INCREMENTAL /subsystem:console
   LINK_LIBRARIES = kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib
   OBJECT_DIR = example\CMakeFiles\overloads.dir
-  POST_BUILD = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetector\sigslot\out\build\x64-Debug\example && powershell -noprofile -executionpolicy Bypass -file C:/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/alanghof/source/repos/NeutronDetector/sigslot/out/build/x64-Debug/example/overloads.exe -installedDir C:/vcpkg/installed/x64-windows/debug/bin -OutVariable out"
+  POST_BUILD = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetection\sigslot\out\build\x64-Debug\example && powershell -noprofile -executionpolicy Bypass -file C:/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/alanghof/source/repos/NeutronDetection/sigslot/out/build/x64-Debug/example/overloads.exe -installedDir C:/vcpkg/installed/x64-windows/debug/bin -OutVariable out"
   PRE_LINK = cd .
   TARGET_COMPILE_PDB = example\CMakeFiles\overloads.dir\
   TARGET_FILE = example\overloads.exe
@@ -380,7 +380,7 @@ build example\overloads.exe: CXX_EXECUTABLE_LINKER__overloads example\CMakeFiles
 # Utility command for edit_cache
 
 build example\CMakeFiles\edit_cache.util: CUSTOM_COMMAND
-  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetector\sigslot\out\build\x64-Debug\example && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E echo "No interactive CMake dialog available.""
+  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetection\sigslot\out\build\x64-Debug\example && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E echo "No interactive CMake dialog available.""
   DESC = No interactive CMake dialog available...
   restat = 1
 
@@ -397,7 +397,7 @@ build example\list_install_components: phony
 # Utility command for install
 
 build example\CMakeFiles\install.util: CUSTOM_COMMAND example\all
-  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetector\sigslot\out\build\x64-Debug\example && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -P cmake_install.cmake"
+  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetection\sigslot\out\build\x64-Debug\example && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -P cmake_install.cmake"
   DESC = Install the project...
   pool = console
   restat = 1
@@ -409,7 +409,7 @@ build example\install: phony example\CMakeFiles\install.util
 # Utility command for install/local
 
 build example\CMakeFiles\install\local.util: CUSTOM_COMMAND example\all
-  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetector\sigslot\out\build\x64-Debug\example && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake"
+  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetection\sigslot\out\build\x64-Debug\example && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake"
   DESC = Installing only the local directory...
   pool = console
   restat = 1
@@ -457,7 +457,7 @@ build example\overloads_autogen: phony example\CMakeFiles\overloads_autogen exam
 # Custom command for example\CMakeFiles\arguments_autogen
 
 build example\CMakeFiles\arguments_autogen example\arguments_autogen\mocs_compilation.cpp: CUSTOM_COMMAND
-  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetector\sigslot\out\build\x64-Debug\example && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E cmake_autogen C:/Users/alanghof/source/repos/NeutronDetector/sigslot/out/build/x64-Debug/example/CMakeFiles/arguments_autogen.dir/AutogenInfo.cmake Debug"
+  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetection\sigslot\out\build\x64-Debug\example && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E cmake_autogen C:/Users/alanghof/source/repos/NeutronDetection/sigslot/out/build/x64-Debug/example/CMakeFiles/arguments_autogen.dir/AutogenInfo.cmake Debug"
   DESC = Automatic MOC for target arguments
   restat = 1
 
@@ -466,7 +466,7 @@ build example\CMakeFiles\arguments_autogen example\arguments_autogen\mocs_compil
 # Custom command for example\CMakeFiles\basic_autogen
 
 build example\CMakeFiles\basic_autogen example\basic_autogen\mocs_compilation.cpp: CUSTOM_COMMAND
-  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetector\sigslot\out\build\x64-Debug\example && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E cmake_autogen C:/Users/alanghof/source/repos/NeutronDetector/sigslot/out/build/x64-Debug/example/CMakeFiles/basic_autogen.dir/AutogenInfo.cmake Debug"
+  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetection\sigslot\out\build\x64-Debug\example && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E cmake_autogen C:/Users/alanghof/source/repos/NeutronDetection/sigslot/out/build/x64-Debug/example/CMakeFiles/basic_autogen.dir/AutogenInfo.cmake Debug"
   DESC = Automatic MOC for target basic
   restat = 1
 
@@ -475,7 +475,7 @@ build example\CMakeFiles\basic_autogen example\basic_autogen\mocs_compilation.cp
 # Custom command for example\CMakeFiles\connection_autogen
 
 build example\CMakeFiles\connection_autogen example\connection_autogen\mocs_compilation.cpp: CUSTOM_COMMAND
-  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetector\sigslot\out\build\x64-Debug\example && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E cmake_autogen C:/Users/alanghof/source/repos/NeutronDetector/sigslot/out/build/x64-Debug/example/CMakeFiles/connection_autogen.dir/AutogenInfo.cmake Debug"
+  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetection\sigslot\out\build\x64-Debug\example && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E cmake_autogen C:/Users/alanghof/source/repos/NeutronDetection/sigslot/out/build/x64-Debug/example/CMakeFiles/connection_autogen.dir/AutogenInfo.cmake Debug"
   DESC = Automatic MOC for target connection
   restat = 1
 
@@ -484,7 +484,7 @@ build example\CMakeFiles\connection_autogen example\connection_autogen\mocs_comp
 # Custom command for example\CMakeFiles\lambdas_autogen
 
 build example\CMakeFiles\lambdas_autogen example\lambdas_autogen\mocs_compilation.cpp: CUSTOM_COMMAND
-  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetector\sigslot\out\build\x64-Debug\example && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E cmake_autogen C:/Users/alanghof/source/repos/NeutronDetector/sigslot/out/build/x64-Debug/example/CMakeFiles/lambdas_autogen.dir/AutogenInfo.cmake Debug"
+  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetection\sigslot\out\build\x64-Debug\example && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E cmake_autogen C:/Users/alanghof/source/repos/NeutronDetection/sigslot/out/build/x64-Debug/example/CMakeFiles/lambdas_autogen.dir/AutogenInfo.cmake Debug"
   DESC = Automatic MOC for target lambdas
   restat = 1
 
@@ -493,7 +493,7 @@ build example\CMakeFiles\lambdas_autogen example\lambdas_autogen\mocs_compilatio
 # Custom command for example\CMakeFiles\default-arguments_autogen
 
 build example\CMakeFiles\default-arguments_autogen example\default-arguments_autogen\mocs_compilation.cpp: CUSTOM_COMMAND
-  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetector\sigslot\out\build\x64-Debug\example && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E cmake_autogen C:/Users/alanghof/source/repos/NeutronDetector/sigslot/out/build/x64-Debug/example/CMakeFiles/default-arguments_autogen.dir/AutogenInfo.cmake Debug"
+  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetection\sigslot\out\build\x64-Debug\example && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E cmake_autogen C:/Users/alanghof/source/repos/NeutronDetection/sigslot/out/build/x64-Debug/example/CMakeFiles/default-arguments_autogen.dir/AutogenInfo.cmake Debug"
   DESC = Automatic MOC for target default-arguments
   restat = 1
 
@@ -502,13 +502,13 @@ build example\CMakeFiles\default-arguments_autogen example\default-arguments_aut
 # Custom command for example\CMakeFiles\overloads_autogen
 
 build example\CMakeFiles\overloads_autogen example\overloads_autogen\mocs_compilation.cpp: CUSTOM_COMMAND
-  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetector\sigslot\out\build\x64-Debug\example && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E cmake_autogen C:/Users/alanghof/source/repos/NeutronDetector/sigslot/out/build/x64-Debug/example/CMakeFiles/overloads_autogen.dir/AutogenInfo.cmake Debug"
+  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetection\sigslot\out\build\x64-Debug\example && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E cmake_autogen C:/Users/alanghof/source/repos/NeutronDetection/sigslot/out/build/x64-Debug/example/CMakeFiles/overloads_autogen.dir/AutogenInfo.cmake Debug"
   DESC = Automatic MOC for target overloads
   restat = 1
 
 # =============================================================================
 # Write statements declared in CMakeLists.txt:
-# C:/Users/alanghof/source/repos/NeutronDetector/sigslot/CMakeLists.txt
+# C:/Users/alanghof/source/repos/NeutronDetection/sigslot/CMakeLists.txt
 # =============================================================================
 
 # =============================================================================
@@ -549,7 +549,7 @@ build test\signal-performance.exe: CXX_EXECUTABLE_LINKER__signal-performance tes
   LINK_FLAGS = /machine:x64 /debug /INCREMENTAL /subsystem:console
   LINK_LIBRARIES = kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib
   OBJECT_DIR = test\CMakeFiles\signal-performance.dir
-  POST_BUILD = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetector\sigslot\out\build\x64-Debug\test && powershell -noprofile -executionpolicy Bypass -file C:/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/alanghof/source/repos/NeutronDetector/sigslot/out/build/x64-Debug/test/signal-performance.exe -installedDir C:/vcpkg/installed/x64-windows/debug/bin -OutVariable out"
+  POST_BUILD = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetection\sigslot\out\build\x64-Debug\test && powershell -noprofile -executionpolicy Bypass -file C:/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/alanghof/source/repos/NeutronDetection/sigslot/out/build/x64-Debug/test/signal-performance.exe -installedDir C:/vcpkg/installed/x64-windows/debug/bin -OutVariable out"
   PRE_LINK = cd .
   TARGET_COMPILE_PDB = test\CMakeFiles\signal-performance.dir\
   TARGET_FILE = test\signal-performance.exe
@@ -596,7 +596,7 @@ build test\qt-tracking.exe: CXX_EXECUTABLE_LINKER__qt-tracking test\CMakeFiles\q
   LINK_FLAGS = /machine:x64 /debug /INCREMENTAL /subsystem:console
   LINK_LIBRARIES = C:\vcpkg\installed\x64-windows\debug\lib\Qt5Cored.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib
   OBJECT_DIR = test\CMakeFiles\qt-tracking.dir
-  POST_BUILD = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetector\sigslot\out\build\x64-Debug\test && powershell -noprofile -executionpolicy Bypass -file C:/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/alanghof/source/repos/NeutronDetector/sigslot/out/build/x64-Debug/test/qt-tracking.exe -installedDir C:/vcpkg/installed/x64-windows/debug/bin -OutVariable out"
+  POST_BUILD = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetection\sigslot\out\build\x64-Debug\test && powershell -noprofile -executionpolicy Bypass -file C:/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/alanghof/source/repos/NeutronDetection/sigslot/out/build/x64-Debug/test/qt-tracking.exe -installedDir C:/vcpkg/installed/x64-windows/debug/bin -OutVariable out"
   PRE_LINK = cd .
   TARGET_COMPILE_PDB = test\CMakeFiles\qt-tracking.dir\
   TARGET_FILE = test\qt-tracking.exe
@@ -647,7 +647,7 @@ build test\boost-tracking.exe: CXX_EXECUTABLE_LINKER__boost-tracking test\CMakeF
   LINK_FLAGS = /machine:x64 /debug /INCREMENTAL /subsystem:console
   LINK_LIBRARIES = kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib
   OBJECT_DIR = test\CMakeFiles\boost-tracking.dir
-  POST_BUILD = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetector\sigslot\out\build\x64-Debug\test && powershell -noprofile -executionpolicy Bypass -file C:/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/alanghof/source/repos/NeutronDetector/sigslot/out/build/x64-Debug/test/boost-tracking.exe -installedDir C:/vcpkg/installed/x64-windows/debug/bin -OutVariable out"
+  POST_BUILD = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetection\sigslot\out\build\x64-Debug\test && powershell -noprofile -executionpolicy Bypass -file C:/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/alanghof/source/repos/NeutronDetection/sigslot/out/build/x64-Debug/test/boost-tracking.exe -installedDir C:/vcpkg/installed/x64-windows/debug/bin -OutVariable out"
   PRE_LINK = cd .
   TARGET_COMPILE_PDB = test\CMakeFiles\boost-tracking.dir\
   TARGET_FILE = test\boost-tracking.exe
@@ -692,7 +692,7 @@ build test\function-traits.exe: CXX_EXECUTABLE_LINKER__function-traits test\CMak
   LINK_FLAGS = /machine:x64 /debug /INCREMENTAL /subsystem:console
   LINK_LIBRARIES = kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib
   OBJECT_DIR = test\CMakeFiles\function-traits.dir
-  POST_BUILD = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetector\sigslot\out\build\x64-Debug\test && powershell -noprofile -executionpolicy Bypass -file C:/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/alanghof/source/repos/NeutronDetector/sigslot/out/build/x64-Debug/test/function-traits.exe -installedDir C:/vcpkg/installed/x64-windows/debug/bin -OutVariable out"
+  POST_BUILD = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetection\sigslot\out\build\x64-Debug\test && powershell -noprofile -executionpolicy Bypass -file C:/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/alanghof/source/repos/NeutronDetection/sigslot/out/build/x64-Debug/test/function-traits.exe -installedDir C:/vcpkg/installed/x64-windows/debug/bin -OutVariable out"
   PRE_LINK = cd .
   TARGET_COMPILE_PDB = test\CMakeFiles\function-traits.dir\
   TARGET_FILE = test\function-traits.exe
@@ -737,7 +737,7 @@ build test\recursive.exe: CXX_EXECUTABLE_LINKER__recursive test\CMakeFiles\recur
   LINK_FLAGS = /machine:x64 /debug /INCREMENTAL /subsystem:console
   LINK_LIBRARIES = kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib
   OBJECT_DIR = test\CMakeFiles\recursive.dir
-  POST_BUILD = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetector\sigslot\out\build\x64-Debug\test && powershell -noprofile -executionpolicy Bypass -file C:/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/alanghof/source/repos/NeutronDetector/sigslot/out/build/x64-Debug/test/recursive.exe -installedDir C:/vcpkg/installed/x64-windows/debug/bin -OutVariable out"
+  POST_BUILD = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetection\sigslot\out\build\x64-Debug\test && powershell -noprofile -executionpolicy Bypass -file C:/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/alanghof/source/repos/NeutronDetection/sigslot/out/build/x64-Debug/test/recursive.exe -installedDir C:/vcpkg/installed/x64-windows/debug/bin -OutVariable out"
   PRE_LINK = cd .
   TARGET_COMPILE_PDB = test\CMakeFiles\recursive.dir\
   TARGET_FILE = test\recursive.exe
@@ -782,7 +782,7 @@ build test\signal-tracking.exe: CXX_EXECUTABLE_LINKER__signal-tracking test\CMak
   LINK_FLAGS = /machine:x64 /debug /INCREMENTAL /subsystem:console
   LINK_LIBRARIES = kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib
   OBJECT_DIR = test\CMakeFiles\signal-tracking.dir
-  POST_BUILD = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetector\sigslot\out\build\x64-Debug\test && powershell -noprofile -executionpolicy Bypass -file C:/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/alanghof/source/repos/NeutronDetector/sigslot/out/build/x64-Debug/test/signal-tracking.exe -installedDir C:/vcpkg/installed/x64-windows/debug/bin -OutVariable out"
+  POST_BUILD = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetection\sigslot\out\build\x64-Debug\test && powershell -noprofile -executionpolicy Bypass -file C:/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/alanghof/source/repos/NeutronDetection/sigslot/out/build/x64-Debug/test/signal-tracking.exe -installedDir C:/vcpkg/installed/x64-windows/debug/bin -OutVariable out"
   PRE_LINK = cd .
   TARGET_COMPILE_PDB = test\CMakeFiles\signal-tracking.dir\
   TARGET_FILE = test\signal-tracking.exe
@@ -827,7 +827,7 @@ build test\signal-threaded.exe: CXX_EXECUTABLE_LINKER__signal-threaded test\CMak
   LINK_FLAGS = /machine:x64 /debug /INCREMENTAL /subsystem:console
   LINK_LIBRARIES = kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib
   OBJECT_DIR = test\CMakeFiles\signal-threaded.dir
-  POST_BUILD = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetector\sigslot\out\build\x64-Debug\test && powershell -noprofile -executionpolicy Bypass -file C:/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/alanghof/source/repos/NeutronDetector/sigslot/out/build/x64-Debug/test/signal-threaded.exe -installedDir C:/vcpkg/installed/x64-windows/debug/bin -OutVariable out"
+  POST_BUILD = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetection\sigslot\out\build\x64-Debug\test && powershell -noprofile -executionpolicy Bypass -file C:/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/alanghof/source/repos/NeutronDetection/sigslot/out/build/x64-Debug/test/signal-threaded.exe -installedDir C:/vcpkg/installed/x64-windows/debug/bin -OutVariable out"
   PRE_LINK = cd .
   TARGET_COMPILE_PDB = test\CMakeFiles\signal-threaded.dir\
   TARGET_FILE = test\signal-threaded.exe
@@ -872,7 +872,7 @@ build test\signal-extended.exe: CXX_EXECUTABLE_LINKER__signal-extended test\CMak
   LINK_FLAGS = /machine:x64 /debug /INCREMENTAL /subsystem:console
   LINK_LIBRARIES = kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib
   OBJECT_DIR = test\CMakeFiles\signal-extended.dir
-  POST_BUILD = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetector\sigslot\out\build\x64-Debug\test && powershell -noprofile -executionpolicy Bypass -file C:/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/alanghof/source/repos/NeutronDetector/sigslot/out/build/x64-Debug/test/signal-extended.exe -installedDir C:/vcpkg/installed/x64-windows/debug/bin -OutVariable out"
+  POST_BUILD = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetection\sigslot\out\build\x64-Debug\test && powershell -noprofile -executionpolicy Bypass -file C:/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/alanghof/source/repos/NeutronDetection/sigslot/out/build/x64-Debug/test/signal-extended.exe -installedDir C:/vcpkg/installed/x64-windows/debug/bin -OutVariable out"
   PRE_LINK = cd .
   TARGET_COMPILE_PDB = test\CMakeFiles\signal-extended.dir\
   TARGET_FILE = test\signal-extended.exe
@@ -917,7 +917,7 @@ build test\signal.exe: CXX_EXECUTABLE_LINKER__signal test\CMakeFiles\signal.dir\
   LINK_FLAGS = /machine:x64 /debug /INCREMENTAL /subsystem:console
   LINK_LIBRARIES = kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib
   OBJECT_DIR = test\CMakeFiles\signal.dir
-  POST_BUILD = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetector\sigslot\out\build\x64-Debug\test && powershell -noprofile -executionpolicy Bypass -file C:/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/alanghof/source/repos/NeutronDetector/sigslot/out/build/x64-Debug/test/signal.exe -installedDir C:/vcpkg/installed/x64-windows/debug/bin -OutVariable out"
+  POST_BUILD = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetection\sigslot\out\build\x64-Debug\test && powershell -noprofile -executionpolicy Bypass -file C:/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/alanghof/source/repos/NeutronDetection/sigslot/out/build/x64-Debug/test/signal.exe -installedDir C:/vcpkg/installed/x64-windows/debug/bin -OutVariable out"
   PRE_LINK = cd .
   TARGET_COMPILE_PDB = test\CMakeFiles\signal.dir\
   TARGET_FILE = test\signal.exe
@@ -929,7 +929,7 @@ build test\signal.exe: CXX_EXECUTABLE_LINKER__signal test\CMakeFiles\signal.dir\
 # Utility command for edit_cache
 
 build test\CMakeFiles\edit_cache.util: CUSTOM_COMMAND
-  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetector\sigslot\out\build\x64-Debug\test && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E echo "No interactive CMake dialog available.""
+  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetection\sigslot\out\build\x64-Debug\test && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E echo "No interactive CMake dialog available.""
   DESC = No interactive CMake dialog available...
   restat = 1
 
@@ -940,7 +940,7 @@ build test\edit_cache: phony test\CMakeFiles\edit_cache.util
 # Utility command for rebuild_cache
 
 build test\CMakeFiles\rebuild_cache.util: CUSTOM_COMMAND
-  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetector\sigslot\out\build\x64-Debug\test && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -SC:\Users\alanghof\source\repos\NeutronDetector\sigslot -BC:\Users\alanghof\source\repos\NeutronDetector\sigslot\out\build\x64-Debug"
+  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetection\sigslot\out\build\x64-Debug\test && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -SC:\Users\alanghof\source\repos\NeutronDetection\sigslot -BC:\Users\alanghof\source\repos\NeutronDetection\sigslot\out\build\x64-Debug"
   DESC = Running CMake to regenerate build system...
   pool = console
   restat = 1
@@ -958,7 +958,7 @@ build test\list_install_components: phony
 # Utility command for install
 
 build test\CMakeFiles\install.util: CUSTOM_COMMAND test\all
-  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetector\sigslot\out\build\x64-Debug\test && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -P cmake_install.cmake"
+  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetection\sigslot\out\build\x64-Debug\test && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -P cmake_install.cmake"
   DESC = Install the project...
   pool = console
   restat = 1
@@ -970,7 +970,7 @@ build test\install: phony test\CMakeFiles\install.util
 # Utility command for install/local
 
 build test\CMakeFiles\install\local.util: CUSTOM_COMMAND test\all
-  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetector\sigslot\out\build\x64-Debug\test && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake"
+  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetection\sigslot\out\build\x64-Debug\test && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake"
   DESC = Installing only the local directory...
   pool = console
   restat = 1
@@ -1036,7 +1036,7 @@ build test\signal_autogen: phony test\CMakeFiles\signal_autogen test\signal_auto
 # Custom command for test\CMakeFiles\tests
 
 build test\CMakeFiles\tests: CUSTOM_COMMAND || test\boost-tracking.exe test\boost-tracking_autogen test\function-traits.exe test\function-traits_autogen test\qt-tracking.exe test\qt-tracking_autogen test\recursive.exe test\recursive_autogen test\signal-extended.exe test\signal-extended_autogen test\signal-performance.exe test\signal-performance_autogen test\signal-threaded.exe test\signal-threaded_autogen test\signal-tracking.exe test\signal-tracking_autogen test\signal.exe test\signal_autogen
-  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetector\sigslot\out\build\x64-Debug\test && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\ctest.exe" --output-on-failure"
+  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetection\sigslot\out\build\x64-Debug\test && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\ctest.exe" --output-on-failure"
   DESC = Build and run all the unit tests.
 
 
@@ -1044,7 +1044,7 @@ build test\CMakeFiles\tests: CUSTOM_COMMAND || test\boost-tracking.exe test\boos
 # Custom command for test\CMakeFiles\signal-performance_autogen
 
 build test\CMakeFiles\signal-performance_autogen test\signal-performance_autogen\mocs_compilation.cpp: CUSTOM_COMMAND
-  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetector\sigslot\out\build\x64-Debug\test && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E cmake_autogen C:/Users/alanghof/source/repos/NeutronDetector/sigslot/out/build/x64-Debug/test/CMakeFiles/signal-performance_autogen.dir/AutogenInfo.cmake Debug"
+  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetection\sigslot\out\build\x64-Debug\test && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E cmake_autogen C:/Users/alanghof/source/repos/NeutronDetection/sigslot/out/build/x64-Debug/test/CMakeFiles/signal-performance_autogen.dir/AutogenInfo.cmake Debug"
   DESC = Automatic MOC for target signal-performance
   restat = 1
 
@@ -1053,7 +1053,7 @@ build test\CMakeFiles\signal-performance_autogen test\signal-performance_autogen
 # Custom command for test\CMakeFiles\qt-tracking_autogen
 
 build test\CMakeFiles\qt-tracking_autogen test\qt-tracking_autogen\mocs_compilation.cpp: CUSTOM_COMMAND
-  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetector\sigslot\out\build\x64-Debug\test && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E cmake_autogen C:/Users/alanghof/source/repos/NeutronDetector/sigslot/out/build/x64-Debug/test/CMakeFiles/qt-tracking_autogen.dir/AutogenInfo.cmake Debug"
+  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetection\sigslot\out\build\x64-Debug\test && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E cmake_autogen C:/Users/alanghof/source/repos/NeutronDetection/sigslot/out/build/x64-Debug/test/CMakeFiles/qt-tracking_autogen.dir/AutogenInfo.cmake Debug"
   DESC = Automatic MOC for target qt-tracking
   restat = 1
 
@@ -1062,7 +1062,7 @@ build test\CMakeFiles\qt-tracking_autogen test\qt-tracking_autogen\mocs_compilat
 # Custom command for test\CMakeFiles\boost-tracking_autogen
 
 build test\CMakeFiles\boost-tracking_autogen test\boost-tracking_autogen\mocs_compilation.cpp: CUSTOM_COMMAND
-  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetector\sigslot\out\build\x64-Debug\test && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E cmake_autogen C:/Users/alanghof/source/repos/NeutronDetector/sigslot/out/build/x64-Debug/test/CMakeFiles/boost-tracking_autogen.dir/AutogenInfo.cmake Debug"
+  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetection\sigslot\out\build\x64-Debug\test && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E cmake_autogen C:/Users/alanghof/source/repos/NeutronDetection/sigslot/out/build/x64-Debug/test/CMakeFiles/boost-tracking_autogen.dir/AutogenInfo.cmake Debug"
   DESC = Automatic MOC for target boost-tracking
   restat = 1
 
@@ -1071,7 +1071,7 @@ build test\CMakeFiles\boost-tracking_autogen test\boost-tracking_autogen\mocs_co
 # Custom command for test\CMakeFiles\function-traits_autogen
 
 build test\CMakeFiles\function-traits_autogen test\function-traits_autogen\mocs_compilation.cpp: CUSTOM_COMMAND
-  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetector\sigslot\out\build\x64-Debug\test && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E cmake_autogen C:/Users/alanghof/source/repos/NeutronDetector/sigslot/out/build/x64-Debug/test/CMakeFiles/function-traits_autogen.dir/AutogenInfo.cmake Debug"
+  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetection\sigslot\out\build\x64-Debug\test && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E cmake_autogen C:/Users/alanghof/source/repos/NeutronDetection/sigslot/out/build/x64-Debug/test/CMakeFiles/function-traits_autogen.dir/AutogenInfo.cmake Debug"
   DESC = Automatic MOC for target function-traits
   restat = 1
 
@@ -1080,7 +1080,7 @@ build test\CMakeFiles\function-traits_autogen test\function-traits_autogen\mocs_
 # Custom command for test\CMakeFiles\recursive_autogen
 
 build test\CMakeFiles\recursive_autogen test\recursive_autogen\mocs_compilation.cpp: CUSTOM_COMMAND
-  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetector\sigslot\out\build\x64-Debug\test && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E cmake_autogen C:/Users/alanghof/source/repos/NeutronDetector/sigslot/out/build/x64-Debug/test/CMakeFiles/recursive_autogen.dir/AutogenInfo.cmake Debug"
+  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetection\sigslot\out\build\x64-Debug\test && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E cmake_autogen C:/Users/alanghof/source/repos/NeutronDetection/sigslot/out/build/x64-Debug/test/CMakeFiles/recursive_autogen.dir/AutogenInfo.cmake Debug"
   DESC = Automatic MOC for target recursive
   restat = 1
 
@@ -1089,7 +1089,7 @@ build test\CMakeFiles\recursive_autogen test\recursive_autogen\mocs_compilation.
 # Custom command for test\CMakeFiles\signal-tracking_autogen
 
 build test\CMakeFiles\signal-tracking_autogen test\signal-tracking_autogen\mocs_compilation.cpp: CUSTOM_COMMAND
-  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetector\sigslot\out\build\x64-Debug\test && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E cmake_autogen C:/Users/alanghof/source/repos/NeutronDetector/sigslot/out/build/x64-Debug/test/CMakeFiles/signal-tracking_autogen.dir/AutogenInfo.cmake Debug"
+  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetection\sigslot\out\build\x64-Debug\test && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E cmake_autogen C:/Users/alanghof/source/repos/NeutronDetection/sigslot/out/build/x64-Debug/test/CMakeFiles/signal-tracking_autogen.dir/AutogenInfo.cmake Debug"
   DESC = Automatic MOC for target signal-tracking
   restat = 1
 
@@ -1098,7 +1098,7 @@ build test\CMakeFiles\signal-tracking_autogen test\signal-tracking_autogen\mocs_
 # Custom command for test\CMakeFiles\signal-threaded_autogen
 
 build test\CMakeFiles\signal-threaded_autogen test\signal-threaded_autogen\mocs_compilation.cpp: CUSTOM_COMMAND
-  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetector\sigslot\out\build\x64-Debug\test && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E cmake_autogen C:/Users/alanghof/source/repos/NeutronDetector/sigslot/out/build/x64-Debug/test/CMakeFiles/signal-threaded_autogen.dir/AutogenInfo.cmake Debug"
+  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetection\sigslot\out\build\x64-Debug\test && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E cmake_autogen C:/Users/alanghof/source/repos/NeutronDetection/sigslot/out/build/x64-Debug/test/CMakeFiles/signal-threaded_autogen.dir/AutogenInfo.cmake Debug"
   DESC = Automatic MOC for target signal-threaded
   restat = 1
 
@@ -1107,7 +1107,7 @@ build test\CMakeFiles\signal-threaded_autogen test\signal-threaded_autogen\mocs_
 # Custom command for test\CMakeFiles\signal-extended_autogen
 
 build test\CMakeFiles\signal-extended_autogen test\signal-extended_autogen\mocs_compilation.cpp: CUSTOM_COMMAND
-  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetector\sigslot\out\build\x64-Debug\test && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E cmake_autogen C:/Users/alanghof/source/repos/NeutronDetector/sigslot/out/build/x64-Debug/test/CMakeFiles/signal-extended_autogen.dir/AutogenInfo.cmake Debug"
+  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetection\sigslot\out\build\x64-Debug\test && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E cmake_autogen C:/Users/alanghof/source/repos/NeutronDetection/sigslot/out/build/x64-Debug/test/CMakeFiles/signal-extended_autogen.dir/AutogenInfo.cmake Debug"
   DESC = Automatic MOC for target signal-extended
   restat = 1
 
@@ -1116,7 +1116,7 @@ build test\CMakeFiles\signal-extended_autogen test\signal-extended_autogen\mocs_
 # Custom command for test\CMakeFiles\signal_autogen
 
 build test\CMakeFiles\signal_autogen test\signal_autogen\mocs_compilation.cpp: CUSTOM_COMMAND
-  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetector\sigslot\out\build\x64-Debug\test && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E cmake_autogen C:/Users/alanghof/source/repos/NeutronDetector/sigslot/out/build/x64-Debug/test/CMakeFiles/signal_autogen.dir/AutogenInfo.cmake Debug"
+  COMMAND = cmd.exe /C "cd /D C:\Users\alanghof\source\repos\NeutronDetection\sigslot\out\build\x64-Debug\test && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E cmake_autogen C:/Users/alanghof/source/repos/NeutronDetection/sigslot/out/build/x64-Debug/test/CMakeFiles/signal_autogen.dir/AutogenInfo.cmake Debug"
   DESC = Automatic MOC for target signal
   restat = 1
 
@@ -1223,14 +1223,14 @@ build tests: phony test\tests
 # =============================================================================
 
 #############################################
-# Folder: C:/Users/alanghof/source/repos/NeutronDetector/sigslot/out/build/x64-Debug/example
+# Folder: C:/Users/alanghof/source/repos/NeutronDetection/sigslot/out/build/x64-Debug/example
 
 build example\all: phony
 
 # =============================================================================
 
 #############################################
-# Folder: C:/Users/alanghof/source/repos/NeutronDetector/sigslot/out/build/x64-Debug/test
+# Folder: C:/Users/alanghof/source/repos/NeutronDetection/sigslot/out/build/x64-Debug/test
 
 build test\all: phony
 

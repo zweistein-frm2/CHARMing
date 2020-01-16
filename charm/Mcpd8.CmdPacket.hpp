@@ -27,7 +27,7 @@ namespace Mcpd8 {
 		static const int defaultLength;
 		CmdPacket() :Type(Zweistein::reverse_u16(Mesy::BufferType::COMMAND)), Length(defaultLength),
 			headerLength(defaultLength), Number(0), deviceStatusdeviceId(0) {
-			memset(data, 0,sizeof(data));
+			//memset(data, 0,sizeof(data));
 		}
 		CmdPacket(const DataPacket & p)
 		{
@@ -59,7 +59,6 @@ namespace Mcpd8 {
 			unsigned short items = (cmdpacket.Length - cmdpacket.headerLength);
 			cmdpacket.data[items] = 0xffff;
 			cmdpacket.Length +=1;
-			//cmdpacket.Type=Zweistein::reverse_u16(cmdpacket.Type);
 			Mcpd8::DataPacket::settimeNow48bit(cmdpacket.time);
 			cmdpacket.Number = Mcpd8::sendcounter++;
 			cmdpacket.headerchksum = 0;
@@ -70,7 +69,6 @@ namespace Mcpd8 {
 			short* sp = (short*)&cmdpacket;
 			size_t len = cmdpacket.Length;
 			//for (int i = 0; i <len; i++) 	boost::endian::big_to_native_inplace(sp[i]);
-			// we send 1 short more so that terminating 0xffff is included
 			size_t bytessent=socket->send_to(boost::asio::buffer(reinterpret_cast<unsigned short*>(&cmdpacket), (cmdpacket.Length)*sizeof(short)), mcpd_endpoint);
 			
 			
