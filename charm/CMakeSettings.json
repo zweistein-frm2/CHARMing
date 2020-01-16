@@ -1,0 +1,174 @@
+﻿{
+  "configurations": [
+    {
+      "name": "x64-Debug",
+      "generator": "Ninja",
+      "configurationType": "Debug",
+      "inheritEnvironments": [ "msvc_x64_x64" ],
+      "buildRoot": "${projectDir}\\out\\build\\${name}",
+      "installRoot": "${projectDir}\\out\\install\\${name}",
+      "cmakeCommandArgs": "-DCMAKE_CXX_FLAGS:STRING=\"/D_WIN32_WINNT=0x0601 /wd\"4996\" /GS /EHsc\"",
+      "buildCommandArgs": "-v",
+      "ctestCommandArgs": "",
+      "variables": [
+        {
+          "name": "SIGSLOT_PATH",
+          "value": "${projectDir}\\..\\sigslot\\include",
+          "type": "FILEPATH"
+        },
+        {
+          "name": "ASIO_EXTENSIONS_PATH",
+          "value": "${projectDir}\\..\\asio-extensions\\include",
+          "type": "FILEPATH"
+        },
+        {
+          "name": "NETWORKCARDINTERFACE",
+          "value": "192.168.168.100",
+          "type": "STRING"
+        }
+
+      ]
+    },
+    {
+      "name": "x64-Release",
+      "generator": "Ninja",
+      "configurationType": "RelWithDebInfo",
+      "buildRoot": "${projectDir}\\out\\build\\${name}",
+      "installRoot": "${projectDir}\\out\\install\\${name}",
+      "cmakeCommandArgs": "-DCMAKE_CXX_FLAGS:STRING=\"/D_WIN32_WINNT=0x0601 /wd\"4996\" /GS /EHsc\"",
+      "buildCommandArgs": "-v",
+      "ctestCommandArgs": "",
+      "inheritEnvironments": [ "msvc_x64_x64" ],
+      "variables": [
+        {
+          "name": "SIGSLOT_PATH",
+          "value": "${projectDir}\\..\\sigslot\\include",
+          "type": "FILEPATH"
+        },
+        {
+          "name": "ASIO_EXTENSIONS_PATH",
+          "value": "${projectDir}\\..\\asio-extensions\\include",
+          "type": "FILEPATH"
+        }
+      ]
+    },
+    {
+      "name": "WSL-Debug",
+      "generator": "Unix Makefiles",
+      "configurationType": "Debug",
+      "buildRoot": "${projectDir}/out/build/${name}",
+      "installRoot": "${projectDir}/out/install/${name}",
+      "cmakeExecutable": "/usr/bin/cmake",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "inheritEnvironments": [ "linux_x64" ],
+      "wslPath": "${defaultWSLPath}",
+      "addressSanitizerRuntimeFlags": "detect_leaks=0",
+      "variables": [
+        {
+          "name": "SIGSLOT_PATH",
+          "value": "/mnt/c/users/alanghof/source/repos/sigslot/include",
+          "type": "FILEPATH"
+        },
+        {
+          "name": "ASIO_EXTENSIONS_PATH",
+          "value": "/mnt/c/users/alanghof/source/repos/asio-extensions/include",
+          "type": "FILEPATH"
+        }
+      ]
+    },
+    {
+      "name": "WSL-Release",
+      "generator": "Unix Makefiles",
+      "configurationType": "RelWithDebInfo",
+      "buildRoot": "${projectDir}/out/build/${name}",
+      "installRoot": "${projectDir}/out/install/${name}",
+      "cmakeExecutable": "/usr/bin/cmake",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "inheritEnvironments": [ "linux_x64" ],
+      "wslPath": "${defaultWSLPath}",
+      "addressSanitizerRuntimeFlags": "detect_leaks=0",
+      "variables": [
+        {
+          "name": "SIGSLOT_PATH",
+          "value": "/mnt/c/users/alanghof/source/repos/sigslot/include",
+          "type": "FILEPATH"
+        },
+        {
+          "name": "ASIO_EXTENSIONS_PATH",
+          "value": "/mnt/c/users/alanghof/source/repos/asio-extensions/include",
+          "type": "FILEPATH"
+        }
+      ]
+    },
+    {
+      "name": "Taco102-Ubuntu-Debug",
+      "generator": "Unix Makefiles",
+      "configurationType": "Debug",
+      "buildRoot": "${projectDir}/out/build/${name}",
+      "installRoot": "${projectDir}/out/install/${name}",
+      "cmakeExecutable": "/usr/bin/cmake",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "inheritEnvironments": [ "linux_x64" ],
+      "remoteMachineName": "taco102",
+      "remoteCMakeListsRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/src",
+      "remoteBuildRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/build/${name}",
+      "remoteInstallRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/install/${name}",
+      "remoteCopySources": true,
+      "rsyncCommandArgs": "-t --delete --delete-excluded",
+      "remoteCopyBuildOutput": false,
+      "remoteCopySourcesMethod": "rsync",
+       "addressSanitizerRuntimeFlags": "detect_leaks=0",
+      "variables": [
+        {
+          "name": "ASIO_EXTENSIONS_PATH",
+          "value": "/home/alanghof/asio-extensions/include",
+          "type": "FILEPATH"
+        },
+        {
+          "name": "SIGSLOT_PATH",
+          "value": "/home/alanghof/sigslot/include",
+          "type": "FILEPATH"
+        },
+        {
+          "name": "NETWORKCARDINTERFACE",
+          "value": "172.25.2.102",
+          "type": "STRING"
+        }
+      ]
+    },
+    {
+      "name": "Raspian-Debug",
+      "generator": "Unix Makefiles",
+      "configurationType": "Debug",
+      "cmakeExecutable": "/usr/bin/cmake",
+      "remoteCopySourcesExclusionList": [ ".vs", ".git", "out" ],
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "inheritEnvironments": [ "linux_arm" ],
+      "remoteMachineName": "rpi3packetsender",
+      "remoteCMakeListsRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/src",
+      "remoteBuildRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/build/${name}",
+      "remoteInstallRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/install/${name}",
+      "remoteCopySources": true,
+      "rsyncCommandArgs": "-t --delete --delete-excluded",
+      "remoteCopyBuildOutput": false,
+      "remoteCopySourcesMethod": "rsync",
+      "addressSanitizerRuntimeFlags": "detect_leaks=0",
+      "variables": [
+        {
+          "name": "SIGSLOT_PATH",
+          "value": "/home/pi/sigslot/include",
+          "type": "FILEPATH"
+        }
+        
+      ]
+    }
+  ]
+}

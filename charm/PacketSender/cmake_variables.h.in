@@ -1,0 +1,11 @@
+#ifndef CMAKE_VARIABLES_H
+#define CMAKE_VARIABLES_H
+#pragma once
+#include <string>
+
+// define your default NETWORKCARDINTERFACE
+std::string defaultNETWORKCARDINTERFACE=std::string("@NETWORKCARDINTERFACE@");
+
+
+
+#endif // CMAKE_VARIABLES_H

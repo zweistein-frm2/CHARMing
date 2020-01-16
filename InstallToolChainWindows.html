@@ -1,0 +1,70 @@
+<p>
+    1.) Install Visual Studio 2019 Comunity Edition , C++
+</p>
+<p>Vom Command prompt aus:</p>
+<p>
+    2.) Install vcpkg package manager with: (here I install an older version on purpose)
+</p>
+
+<p>
+    git clone <a href="https://github.com/microsoft/vcpkg">https://github.com/microsoft/vcpkg</a>
+    (später reicht git pull innerhalb der vcpkg directory)
+</p>
+<p>
+    &nbsp;cd vcpkg
+</p>
+<p>
+    &nbsp;(git tag -l
+</p>
+<p>
+    &nbsp;git checkout 2019.11)
+</p>
+<p>
+    &nbsp;.\bootstrap-vcpkg.bat
+</p>
+<p>
+    &nbsp;.\vcpkg integrate install
+</p>
+<p>
+    3.) Set up vcpkg to use x64 triplets by default by setting environment variable: VCPKG_DEFAULT_TRIPLET=x64-windows
+</p>
+<p>
+    &nbsp;
+</p>
+<img src="vcpkgEnvironmentVariable.png" alt="vcpkgEnvironmentVariable.png" width="542"
+     height="456">
+
+<p>
+    4.) Install boost , magic_enum und opencv with vcpkg. As per 3.) this should install only the 64bit libraries:
+</p>
+<p>vcpkg install boost</p>
+<p>vcpkg install magic-enum</p>
+<p>vcpkg install opencv</p>
+
+
+
+<p>some install issues have been resolved by</p>
+<p>  -installing also "<a href="https://github.com/microsoft/vcpkg/issues/5299#issuecomment-460411892"> VS2019 Windows 10 sdk</a></p>
+<p> - installing English language pack on your machine</p>
+
+
+<p>
+    5.) git clone https://github.com/zweistein-frm2/charm.git
+
+    git clone https://github.com/palacaze/sigslot.git
+
+    git clone https://github.com/timniederhausen/asio-extensions.git
+
+
+    You should have the following directory structure:
+
+         |-----\asio-extensions
+         |
+    -----|-----\charm
+         |
+         |-----\sigslot
+
+</p>
+
+
+

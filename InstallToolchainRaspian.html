@@ -1,0 +1,83 @@
+<p>1.) Install compiler:</p>
+<p>     sudo add-apt-repository ppa:ubuntu-toolchain-r/test</p>
+<p>     sudo apt update</p>
+<p>     sudo apt-get install gcc-9 g++-9</p>
+<p>     sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 900 --slave /usr/bin/g++ g++ /usr/bin/g++-9</p>
+<font color="grey">
+<p>(Special case:<a href="https://gist.github.com/sol-prog/95e4e7e3674ac819179acf33172de8a9"> Raspberry Pi install </a></p>
+<p>sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 800 --slave /usr/bin/g++ g++ /usr/bin/g++-8 </>
+<p>sudo update-alternatives --install /usr/bin/gcc gcc /opt/gcc-9.1.0/bin/gcc-9.1  910 --slave /usr/bin/g++ g++ /usr/bin/g++-9  )</p>
+
+<p> </p>
+</font>
+    <font color="grey">
+        <p>
+            2.) Optional: Install CMake 3.14.7
+            ( see <a href="https://vitux.com/how-to-install-cmake-on-ubuntu-18-04">https://vitux.com/how-to-install-cmake-on-ubuntu-18-04/</a> )
+        </p>
+        <p>     sudo apt-get install libssl-dev</p>
+		<p>		cd /opt</p>
+        <p>     sudo wget https://github.com/Kitware/CMake/releases/download/v3.14.7/cmake-3.14.7.tar.gz </p>
+        <p>     sudo tar -zxvf cmake-3.14.7.tar.gz  </p>
+        <p>     cd cmake-3.14.7 </p>
+        <p>     sudo ./bootstrap </p>
+        <p>     sudo make </p>
+        <p>     /usr/bin/cmake --version</p>
+        <p>     next step only if [/usr/bin/cmake] exists and not a symlink </p>
+        <p>     sudo mv /usr/bin/cmake /usr/bin/cmake-3.??.? [specify your version]  </p>
+        <p>     sudo make install </p>
+        <p>     #sudo ln -s /opt/cmake-3.14.7/cmake/bin/cmake /usr/bin/cmake )</p>
+    </font>
+    <p>3.) install vcpkg (C++ package manager)</p>
+	<p>  raspberry pi => <a href="https://github.com/microsoft/vcpkg/issues/9570">https://github.com/microsoft/vcpkg/issues/9570</a>    </p>
+    <p>     sudo apt-get install curl unzip tar</p>
+    <p>     es empfehlen sich kurze Pfade , z.B. von /usr aus </p>
+    <p>     git clone https://github.com/microsoft/vcpkg.git </p>
+    <p>     cd vcpkg</p>
+    <font color="grey">
+        <p>     optional:</p>
+        <p>         git tag -l</p>
+        <p>         git checkout 2019.11  (-f) </p>
+        <p>         git fetch</p>
+    </font>
+    <font color="grey">
+        <p>optional: [only for qt5]</p>
+        <p>     git remote add Neumann-A https://github.com/Neumann-A/vcpkg.git </p>
+        <p>     git fetch Neumann-A </p>
+        <p>     git merge Neumann-A/fix_qt_linux </p>
+    </font>
+    <p>     sudo ./bootstrap-vcpkg.sh</p>
+    <p>     ./vcpkg integrate install</p>
+
+    <p>4.)optional: [only for qt5] Install libgtk2.0-dev and pkg-config:</p>
+    <p>     sudo apt-get install libgtk2.0-dev pkg-config</p>
+    <p>     sudo apt-get install libxi-dev libgl1-mesa-dev libglu1-mesa-dev mesa-common-dev libxrandr-dev libxxf86vm-dev</p>
+
+    <p>5.) Install boost , magic-enum und opencv with vcpkg</p>
+    <p>     ./vcpkg install magic-enum</p>
+    <p>     sudo ./vcpkg install boost</p>
+    <p>     sudo ./vcpkg install opencv</p>
+    <font color="grey">
+        <p>optional:[only for qt5]</p>
+
+        <p>         sudo apt-get install libgl1-mesa-dev libglu1-mesa-dev</p>
+        <p>         sudo ./vcpkg install qt5</p>
+    </font>
+
+    <p>6.) Install source code</p>
+    <p>     git clone https://github.com/zweistein-frm2/charm.git </p>
+    <p>     git clone https://github.com/palacaze/sigslot.git </p>
+    <p>     git clone https://github.com/timniederhausen/asio-extensions.git </p>
+    <p>You should have the following directory structure:</p>
+    <p>|-----\asio-extensions</p>
+    <p>|</p>
+    <p>|-----\charm</p>
+    <p>|</p>
+    <p>|-----\sigslot</p>
+
+    <p>7.) Jetzt braucht man die Pfade aus 3.) die dann in die command line richtig eingefügt werden (also bei euch /home/alanghof oder users/alanghof mit dem bei euch vorhanden Pfad ersetzen)</p>
+    <p>     mkdir hiersolleshin</p>
+    <p>     cd Hiersolleshin</p>
+    <p>     cmake -DCMAKE_TOOLCHAIN_FILE=/vcpkg/scripts/buildsystems/vcpkg.cmake   -DASIO_EXTENSIONS_PATH=/mnt/c/users/alanghof/source/repos/asio-extensions/include -S /mnt/c/users/alanghof/source/repos/charm/ -B /mnt/c/users/alanghof/hiersolleshin/ </p>
+    <p>     make</p>
+    <p>     in [fullpath to hiersolleshin]  finden sich dann die Executables</p>
