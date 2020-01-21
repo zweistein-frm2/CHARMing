@@ -14,12 +14,14 @@
 #include "asio-rawsockets/ipv4_header.hpp"
 #include <boost/foreach.hpp>
 #include <boost/exception/all.hpp>
+#include <boost/function.hpp>
 #include "Mcpd8.DataPacket.hpp"
 #include "Mesytec.RandomData.hpp"
 #include "Zweistein.PrettyBytes.hpp"
 #include "Zweistein.GetLocalInterfaces.hpp"
 #include "Zweistein.deHumanizeNumber.hpp"
 #include "Mcpd8.CmdPacket.hpp"
+#include <boost/system/error_code.hpp>
 #include <boost/exception/error_info.hpp>
 #include <errno.h>
 #include "Zweistein.bitreverse.hpp"
@@ -33,14 +35,15 @@ boost::thread_group worker_threads;
 
 boost::array< Mcpd8::CmdPacket, 1> cmd_recv_buf;
 
-udp::socket* psocket=nullptr;
+udp::socket* psocket = nullptr;
 udp::endpoint local_endpoint;
 
-boost::atomic<unsigned short> daq_running= Mcpd8::Status::DAQ_Stopped;
+boost::atomic<unsigned short> daq_running = Mcpd8::Status::DAQ_Stopped;
 boost::atomic<unsigned short> devid = 0;
 boost::atomic<unsigned short> runid = 0;
 boost::atomic<long> requestedEventspersecond = 1 * 100;
-boost::atomic<int> nevents = 250;
+int MAX_NEVENTS = 250;
+boost::atomic<int> nevents = MAX_NEVENTS;
 boost::atomic<int> coutevery_npackets = requestedEventspersecond / nevents;
 int minRateperSecond = 51;
 
@@ -56,12 +59,12 @@ unsigned short Module_Id[N_MPSD8] = { Mesy::ModuleId::MPSD8 ,Mesy::ModuleId::MPS
 
 void setRate(long requested) {
 	std::cout << "Hello from Charm PacketSender, requested: " << requested << " Events/s" << std::endl;
-	int tmp = nevents;
-	while (requested< minRateperSecond * tmp) {
+	int tmp = MAX_NEVENTS;
+	while (requested < minRateperSecond * tmp) {
 		tmp--;
 	};
 
-	if (tmp < 1) std::cout<<"NO ACTION: Eventrate too low (Minimum Eventrate is " + std::to_string(minRateperSecond) + " Events/second)"<<std::endl;
+	if (tmp < 1) std::cout << "NO ACTION: Eventrate too low (Minimum Eventrate is " + std::to_string(minRateperSecond) + " Events/second)" << std::endl;
 	else {
 		nevents = tmp;
 		requestedEventspersecond = requested;
@@ -75,16 +78,16 @@ void start_receive();
 
 void handle_receive(const boost::system::error_code& error,
 	std::size_t bytes_transferred) {
-	
-	Mcpd8::CmdPacket& cp = cmd_recv_buf[0];
-	if (bytes_transferred>0 && cp.Type== Zweistein::reverse_u16(Mesy::BufferType::COMMAND)) {
-		
+
+	Mcpd8::CmdPacket cp = cmd_recv_buf[0];
+	if (bytes_transferred > 0 && cp.Type == Zweistein::reverse_u16(Mesy::BufferType::COMMAND)) {
+
 		bool sendanswer = true;
 		{
 			boost::mutex::scoped_lock lock(coutGuard);
 			std::cout << cp << std::endl;
 			if (bytes_transferred != cp.Length * sizeof(short)) {
-				std::cout << "cp.Length(" << cp.Length << " word(s) !=" << bytes_transferred << "(=" << bytes_transferred/sizeof(short)<<" word(s))" << std::endl;
+				std::cout <<"RECEIVED:"<< "cp.Length(" << cp.Length << " word(s) !=" << bytes_transferred << "(=" << bytes_transferred / sizeof(short) << " word(s))" << std::endl;
 			}
 		}
 		switch (cp.cmd) {
@@ -96,8 +99,9 @@ void handle_receive(const boost::system::error_code& error,
 			daq_running = Mcpd8::Status::DAQ_Stopped;
 			sendanswer = false;
 			break;
-		case Mcpd8::Cmd::SETID: 
-			devid=cp.data[0];
+		case Mcpd8::Cmd::SETID:
+			devid = cp.data[0];
+			cp.Length = Mcpd8::CmdPacket::defaultLength + 1;
 			break;
 
 		case Mcpd8::Cmd::SETPROTOCOL:
@@ -107,11 +111,13 @@ void handle_receive(const boost::system::error_code& error,
 			cp.data[8] = 0;
 			cp.data[9] = 0;
 			cp.data[10] = 0;
+			cp.Length = Mcpd8::CmdPacket::defaultLength + 14;
 			break;
 
 		}
 		case Mcpd8::Cmd::SETRUNID:
-			runid= cp.data[0];
+			runid = cp.data[0];
+			cp.Length = Mcpd8::CmdPacket::defaultLength + 1;
 			break;
 
 
@@ -126,11 +132,11 @@ void handle_receive(const boost::system::error_code& error,
 			break;
 		}
 
-		
+
 		case Mcpd8::Cmd::GETCAPABILITIES:
-			cp.data[0] = Mcpd8::TX_CAP::POS_OR_AMP| Mcpd8::TX_CAP::TOF_POS_OR_AMP| Mcpd8::TX_CAP::TOF_POS_AND_AMP;
-			cp.data[1]= Mesytec::Mpsd8::Module::tx_cap_default;
-			cp.Length = Mcpd8::CmdPacket::defaultLength+2;
+			cp.data[0] = Mcpd8::TX_CAP::POS_OR_AMP | Mcpd8::TX_CAP::TOF_POS_OR_AMP | Mcpd8::TX_CAP::TOF_POS_AND_AMP;
+			cp.data[1] = Mesytec::Mpsd8::Module::tx_cap_default;
+			cp.Length = Mcpd8::CmdPacket::defaultLength + 2;
 			break;
 
 		case Mcpd8::Cmd::SETCAPABILITIES:
@@ -165,7 +171,7 @@ void handle_receive(const boost::system::error_code& error,
 			assert(cp.data[0] >= 0 && cp.data[0] < N_MPSD8);
 			if (cp.data[1] == N_MPSD8) {
 				for (int i = 0; i < N_MPSD8; i++) Module[cp.data[0]].gain[i] = cp.data[2];
-				
+
 			}
 			else Module[cp.data[0]].gain[cp.data[1]] = cp.data[2];
 
@@ -175,7 +181,7 @@ void handle_receive(const boost::system::error_code& error,
 
 		case Mcpd8::Cmd::SETTHRESH: {
 			assert(cp.data[0] >= 0 && cp.data[0] < N_MPSD8);
-		    Module[cp.data[0]].threshold = cp.data[1];
+			Module[cp.data[0]].threshold = cp.data[1];
 
 
 			break;
@@ -185,23 +191,23 @@ void handle_receive(const boost::system::error_code& error,
 			assert(cp.data[0] >= 0 && cp.data[0] < N_MPSD8);
 			break;
 		}
-		
+
 		case Mcpd8::Cmd::SETPULSER: {
 			assert(cp.data[0] >= 0 && cp.data[0] < N_MPSD8);
 			Module[cp.data[0]].pulserchannel = cp.data[1];
 			Module[cp.data[0]].position = (Mesytec::Mpsd8::PulserPosition) cp.data[2];
 			Module[cp.data[0]].pulseramplitude = cp.data[3];
 			Module[cp.data[0]].pulseron = cp.data[4];
-		
+
 			break;
 		}
-		
 
-		
-		
+
+
+
 		case Mcpd8::Cmd::GETMPSD8PLUSPARAMETERS:
 		{
-		
+
 
 			assert(cp.data[0] >= 0 && cp.data[0] < N_MPSD8);
 			if (Module_Id[cp.data[0]] != Mesy::ModuleId::MPSD8P) {
@@ -212,16 +218,25 @@ void handle_receive(const boost::system::error_code& error,
 			cp.data[1] = Module[cp.data[0]].tx_caps;
 			cp.data[2] = Module[cp.data[0]].tx_cap_setting;
 			cp.data[3] = Module[cp.data[0]].firmware; // firmware
-			cp.Length = Mcpd8::CmdPacket::defaultLength+ 4;
+			cp.Length = Mcpd8::CmdPacket::defaultLength + 4;
 			break;
 		}
-		
+
 		case Mcpd8::Internal_Cmd::READID:
 		{
 			for (int i = 0; i < N_MPSD8; i++) {
 				cp.data[i] = Module_Id[i];
 			}
 			cp.Length = Mcpd8::CmdPacket::defaultLength + N_MPSD8;
+			{
+				boost::mutex::scoped_lock lock(coutGuard);
+				for (int i = 0; i < N_MPSD8; i++) {
+					std::cout << Module_Id[i] << " ";
+				
+				}
+				 
+			}
+
 			break;
 		}
 		case Mcpd8::Internal_Cmd::GETVER:
@@ -231,8 +246,8 @@ void handle_receive(const boost::system::error_code& error,
 			unsigned char fpgamaj = 5;
 			unsigned char fpgamin = 1;
 			cp.data[2] = (fpgamaj << 8) | fpgamin;
-			cp.Length = Mcpd8::CmdPacket::defaultLength+ 3;
-			
+			cp.Length = Mcpd8::CmdPacket::defaultLength + 3;
+
 			{
 				boost::mutex::scoped_lock lock(coutGuard);
 
@@ -245,12 +260,12 @@ void handle_receive(const boost::system::error_code& error,
 				while (m_fpgaVersion > 1)m_fpgaVersion /= 10.;
 				m_fpgaVersion += cp.data[2] >> 8;
 				//-----------------------------------------------------------------------------------------------------
-				std::cout << "Version: "<<m_version<<", FPGA Version:"<<m_fpgaVersion<<std::endl;
+				std::cout << "Version: " << m_version << ", FPGA Version:" << m_fpgaVersion << std::endl;
 
 			}
 			break;
 		}
-		
+
 
 		case Mcpd8::Internal_Cmd::READPERIREG:
 		{
@@ -258,17 +273,17 @@ void handle_receive(const boost::system::error_code& error,
 			assert(cp.data[0] >= 0 && cp.data[0] < N_MPSD8);
 			cp.data[2] = 0;
 			switch (cp.data[1]) {
-				case 0: 
-					cp.data[2] = Module[cp.data[0]].tx_caps; 
-					break;
-				case 1:
-					cp.data[2] = Module[cp.data[0]].tx_cap_setting;
-					break;
-				case 2:
-					cp.data[2] = Module[cp.data[0]].firmware;
-					break;
+			case 0:
+				cp.data[2] = Module[cp.data[0]].tx_caps;
+				break;
+			case 1:
+				cp.data[2] = Module[cp.data[0]].tx_cap_setting;
+				break;
+			case 2:
+				cp.data[2] = Module[cp.data[0]].firmware;
+				break;
 			}
-			cp.Length= Mcpd8::CmdPacket::defaultLength + 3;
+			cp.Length = Mcpd8::CmdPacket::defaultLength + 3;
 			break;
 		}
 		/*
@@ -282,17 +297,24 @@ void handle_receive(const boost::system::error_code& error,
 		}
 		*/
 
-			
+
 		case Mcpd8::Internal_Cmd::SETNUCLEORATEEVENTSPERSECOND:
 		{
-			assert(cp.Length > Mcpd8::CmdPacket::defaultLength+ 2);
+			assert(cp.Length > Mcpd8::CmdPacket::defaultLength + 2);
 			long rate = cp.data[1] << 16 | cp.data[0];
 			setRate(rate);
 			break;
 		}
-			
+
 		}
-		if(sendanswer) Mcpd8::CmdPacket::Send(psocket,cp, local_endpoint);
+		if (sendanswer) {
+			cp.deviceStatusdeviceId = daq_running | (devid << 8);
+			Mcpd8::CmdPacket::Send(psocket, cp, local_endpoint);
+			{
+				boost::mutex::scoped_lock lock(coutGuard);
+				std::cout <<"\rSENDING ANSWER:"<< cp << std::endl;
+			}
+		}
 	}
 
 
@@ -330,19 +352,35 @@ size_t raw_sendto(boost::asio::basic_raw_socket<asio::ip::raw>& sender, const ud
 	ip.destination_address(receiver_endpoint.address().to_v4());
 	ip.protocol(IPPROTO_UDP);
 	calculate_checksum(ip);
-	
+
 	boost::array<boost::asio::const_buffer, 3> buffers = { {
 	boost::asio::buffer(ip.data()),
 	boost::asio::buffer(udp.data()),
 	boost::asio::buffer(payload)
   } };
 
-	
+
 	auto bytes_transferred = sender.send_to(buffers,
 		asio::ip::raw::endpoint(receiver_endpoint.address(), receiver_endpoint.port()));
 	assert(bytes_transferred == total_length);
 	return bytes_transferred;
 }
+
+
+
+bool retry = true;
+
+void catch_ctrlc(const boost::system::error_code& error, int signal_number) {
+
+	std::cout << "handling signal " << signal_number << std::endl;
+	if (signal_number == 2) {
+		retry = false;
+		throw boost::system::system_error{ boost::system::errc::make_error_code(boost::system::errc::owner_dead) };
+		
+	}
+	
+}
+
 
 int main(int argc, char* argv[])
 {
@@ -352,10 +390,10 @@ int main(int argc, char* argv[])
 	boost::filesystem::path::imbue(std::locale());
 
 	const unsigned short port = 54321;
-	
+
 	boost::array< Mcpd8::DataPacket, 1> dp;
 
-	
+
 
 	if (argc == 1) {
 		std::cout << "Specify Event Rate per second , 2K -> 2000, 1M->1000000" << std::endl;
@@ -363,27 +401,29 @@ int main(int argc, char* argv[])
 	if (argc == 2) {
 		long long num = 0;
 		std::string argv1(argv[1]);
-		requestedEventspersecond=(long)Zweistein::Dehumanize(argv1);
+		requestedEventspersecond = (long)Zweistein::Dehumanize(argv1);
 		//requestedEventspersecond = std::stoi(argv[1]);
 	}
 
 	setRate(requestedEventspersecond);
-	
-	
+
+
 	unsigned short bufnum = 0;
 	int length = 0;
-
-	try {
+	
+	do{
+		try {
 
 		boost::asio::io_service io_service;
-		boost::asio::signal_set signals(io_service, SIGINT, SIGTERM);
-		signals.async_wait(boost::bind(&boost::asio::io_service::stop, &io_service));
-		
+		boost::asio::signal_set signals(io_service,SIGINT);
+		//signals.async_wait(boost::bind(&boost::asio::io_service::stop, &io_service));
+		signals.async_wait(&catch_ctrlc);
+	
 		std::string local_ip = defaultNETWORKCARDINTERFACE;
 		std::list<std::string> localinterfaces = std::list<std::string>();
 		//Zweistein::GetLocalInterfaces(localinterfaces, io_service);
 		Zweistein::GetLocalInterfaces(localinterfaces);
-		
+
 		auto _a = std::find(localinterfaces.begin(), localinterfaces.end(), local_ip);
 		if (_a == localinterfaces.end()) {
 			std::cout << "interfaces on this machine are:";
@@ -398,10 +438,10 @@ int main(int argc, char* argv[])
 			i = 0;
 			BOOST_FOREACH(std::string str, localinterfaces) { if (i++ == choice) local_ip = str; }
 		}
-		
+
 
 		std::cout << "using interface " << local_ip << std::endl;
-		
+
 
 		udp::socket socket(io_service);
 #ifdef _SPOOF_IP
@@ -415,10 +455,10 @@ int main(int argc, char* argv[])
 			port);
 #endif
 		local_endpoint = udp::endpoint(boost::asio::ip::address::from_string(local_ip), port);
-		
+
 
 		boost::function<void()> t;
-		t = [&io_service, &port,&socket]() {
+		t = [&io_service, &port, &socket]() {
 
 			try {
 				socket.open(udp::v4());
@@ -444,9 +484,9 @@ int main(int argc, char* argv[])
 		int iloop = 0;
 		int innerloop = 0;
 		int maxdots = 10;
-		
-		
-		
+
+
+
 		std::cout << "packages contain " << nevents << " events each." << std::endl;
 		std::cout << "coutevery_npackets=" << coutevery_npackets << std::endl;
 		long long currentcount = 0;
@@ -474,7 +514,7 @@ int main(int argc, char* argv[])
 #endif
 				currentcount += nevents;
 			}
-			
+
 			if (iloop % coutevery_npackets == 0) {
 				boost::this_thread::sleep_for(boost::chrono::nanoseconds(delaynanos));
 				boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - start;
@@ -499,10 +539,9 @@ int main(int argc, char* argv[])
 
 		} while (!io_service.stopped());
 
-		return 0;
 	}
 
-	catch (boost::system::system_error const& e) {
+		catch (boost::system::system_error const& e) {
 		std::cout << e.what() << ": " << e.code() << " - " << e.code().message() << "\n";
 		auto a = e.code();
 		int err = a.value();
@@ -511,11 +550,20 @@ int main(int argc, char* argv[])
 			std::cout << "You must run program with administrator rights" << std::endl;
 		}
 	}
-	catch (boost::exception & e) {
+		catch (boost::exception & e) {
 		boost::mutex::scoped_lock lock(coutGuard);
 		std::cout << boost::diagnostic_information(e);
-		
-	}
-	return -1;
-}
 
+	}
+
+		// if source is a Ctrl-C then exit here
+		if (retry == false) {
+			std::cout <<std::endl<< "Ctrl-C handled=>exit" << std::endl;
+			break;
+		}
+
+		boost::this_thread::sleep_for(boost::chrono::seconds(5));
+		//return -1;
+   }while (retry);
+   return 0;
+}

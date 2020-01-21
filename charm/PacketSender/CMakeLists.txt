@@ -2,7 +2,7 @@
 # project specific logic here.
 #
 cmake_minimum_required (VERSION 3.14)
-project(PacketSender)
+project(PacketSender) 
 set(CMAKE_CXX_STANDARD 17) 
 find_package(magic_enum CONFIG REQUIRED )
 set(Boost_USE_STATIC_LIBS ON) 

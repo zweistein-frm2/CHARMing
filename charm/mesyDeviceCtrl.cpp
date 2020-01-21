@@ -149,7 +149,10 @@ int main(int argc, char* argv[])
 			ptrmsmtsystem1->inputFromListmodeFile = true;
 			t = [&io_service, &ptrmsmtsystem1, &listmodeinputfiles]() {
 				try {
-					ptrmsmtsystem1->readListmode(listmodeinputfiles,io_service);
+					auto abfunc=boost::bind(&Mesytec::MesytecSystem::analyzebuffer, ptrmsmtsystem1,_1);
+					auto read=Mesytec::listmode::Read(abfunc,ptrmsmtsystem1->data, ptrmsmtsystem1->deviceparam);
+					read.files(listmodeinputfiles, io_service);
+					
 				}
 				catch (boost::exception & e) {
 					boost::mutex::scoped_lock lock(coutGuard);
@@ -205,21 +208,23 @@ int main(int argc, char* argv[])
 			std::cout << std::endl;
 			while (!io_service.stopped()) {
 				i++;
-				if (i == 1) {
+				if (true ) {
 					for (std::pair<unsigned short, Mesytec::DeviceParameter> pair : ptrmsmtsystem1->deviceparam) {
 						if (pair.second.datagenerator == Mesytec::DataGenerator::NucleoSimulator) {
-						//	msmtsystem1.Send(pair.second, Mcpd8::Internal_Cmd::SETNUCLEORATEEVENTSPERSECOND, 16500);//1650000 is maximum
-						
+							//if(i==1) ptrmsmtsystem1->Send(pair.second, Mcpd8::Internal_Cmd::SETNUCLEORATEEVENTSPERSECOND, 16500);//1650000 is maximum
+			//				ptrmsmtsystem1->Send(pair.second, Mcpd8::Internal_Cmd::GETVER);
 						}
 						if (pair.second.datagenerator == Mesytec::DataGenerator::CharmSimulator) {
-							ptrmsmtsystem1->Send(pair.second, Mcpd8::Internal_Cmd::CHARMSETEVENTRATE, 50000); // oder was du willst
-							ptrmsmtsystem1->Send(pair.second, Mcpd8::Internal_Cmd::CHARMPATTERNGENERATOR,1); // oder was du willst
-
+							if (i == 1) {
+								ptrmsmtsystem1->Send(pair.second, Mcpd8::Internal_Cmd::CHARMSETEVENTRATE, 50000); // oder was du willst
+								ptrmsmtsystem1->Send(pair.second, Mcpd8::Internal_Cmd::CHARMPATTERNGENERATOR, 1); // oder was du willst
+							}
 						}
 						
 					}
 					//ptrmsmtsystem1->SendAll(Mcpd8::Cmd::START);
 				}
+				
 				boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
 				boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - start;
 				start = boost::chrono::system_clock::now();

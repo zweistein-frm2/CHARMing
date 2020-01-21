@@ -26,7 +26,6 @@
           "value": "192.168.168.100",
           "type": "STRING"
         }
-
       ]
     },
     {
@@ -53,58 +52,6 @@
       ]
     },
     {
-      "name": "WSL-Debug",
-      "generator": "Unix Makefiles",
-      "configurationType": "Debug",
-      "buildRoot": "${projectDir}/out/build/${name}",
-      "installRoot": "${projectDir}/out/install/${name}",
-      "cmakeExecutable": "/usr/bin/cmake",
-      "cmakeCommandArgs": "",
-      "buildCommandArgs": "",
-      "ctestCommandArgs": "",
-      "inheritEnvironments": [ "linux_x64" ],
-      "wslPath": "${defaultWSLPath}",
-      "addressSanitizerRuntimeFlags": "detect_leaks=0",
-      "variables": [
-        {
-          "name": "SIGSLOT_PATH",
-          "value": "/mnt/c/users/alanghof/source/repos/sigslot/include",
-          "type": "FILEPATH"
-        },
-        {
-          "name": "ASIO_EXTENSIONS_PATH",
-          "value": "/mnt/c/users/alanghof/source/repos/asio-extensions/include",
-          "type": "FILEPATH"
-        }
-      ]
-    },
-    {
-      "name": "WSL-Release",
-      "generator": "Unix Makefiles",
-      "configurationType": "RelWithDebInfo",
-      "buildRoot": "${projectDir}/out/build/${name}",
-      "installRoot": "${projectDir}/out/install/${name}",
-      "cmakeExecutable": "/usr/bin/cmake",
-      "cmakeCommandArgs": "",
-      "buildCommandArgs": "",
-      "ctestCommandArgs": "",
-      "inheritEnvironments": [ "linux_x64" ],
-      "wslPath": "${defaultWSLPath}",
-      "addressSanitizerRuntimeFlags": "detect_leaks=0",
-      "variables": [
-        {
-          "name": "SIGSLOT_PATH",
-          "value": "/mnt/c/users/alanghof/source/repos/sigslot/include",
-          "type": "FILEPATH"
-        },
-        {
-          "name": "ASIO_EXTENSIONS_PATH",
-          "value": "/mnt/c/users/alanghof/source/repos/asio-extensions/include",
-          "type": "FILEPATH"
-        }
-      ]
-    },
-    {
       "name": "Taco102-Ubuntu-Debug",
       "generator": "Unix Makefiles",
       "configurationType": "Debug",
@@ -123,7 +70,7 @@
       "rsyncCommandArgs": "-t --delete --delete-excluded",
       "remoteCopyBuildOutput": false,
       "remoteCopySourcesMethod": "rsync",
-       "addressSanitizerRuntimeFlags": "detect_leaks=0",
+      "addressSanitizerRuntimeFlags": "detect_leaks=0",
       "variables": [
         {
           "name": "ASIO_EXTENSIONS_PATH",
@@ -140,34 +87,6 @@
           "value": "172.25.2.102",
           "type": "STRING"
         }
-      ]
-    },
-    {
-      "name": "Raspian-Debug",
-      "generator": "Ninja",
-      "configurationType": "Debug",
-      "cmakeExecutable": "/usr/bin/cmake",
-      "remoteCopySourcesExclusionList": [ ".vs", ".git", "out" ],
-      "cmakeCommandArgs": "",
-      "buildCommandArgs": "",
-      "ctestCommandArgs": "",
-      "inheritEnvironments": [ "linux_arm" ],
-      "remoteMachineName": "rpi3packetsender",
-      "remoteCMakeListsRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/src",
-      "remoteBuildRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/build/${name}",
-      "remoteInstallRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/install/${name}",
-      "remoteCopySources": true,
-      "rsyncCommandArgs": "-t --delete --delete-excluded",
-      "remoteCopyBuildOutput": false,
-      "remoteCopySourcesMethod": "rsync",
-      "addressSanitizerRuntimeFlags": "detect_leaks=0",
-      "variables": [
-        {
-          "name": "SIGSLOT_PATH",
-          "value": "/home/pi/sigslot/include",
-          "type": "FILEPATH"
-        }
-        
       ]
     }
   ]

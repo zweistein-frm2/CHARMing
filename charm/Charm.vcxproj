@@ -34,6 +34,7 @@
   <ItemGroup>
     <ClInclude Include="Mcpd8.CmdPacket.hpp" />
     <ClInclude Include="Mcpd8.DataPacket.hpp" />
+    <ClInclude Include="Mesytec.DeviceParameter.hpp" />
     <ClInclude Include="Mesytec.enums.Generator.hpp" />
     <ClInclude Include="Mesytec.hpp" />
     <ClInclude Include="Mesytec.listmode.hpp" />
@@ -43,6 +44,7 @@
     <ClInclude Include="Mcpd8.Parameters.hpp" />
     <ClInclude Include="Mesytec.config.hpp" />
     <ClInclude Include="Mesytec.Mpsd8.hpp" />
+    <ClInclude Include="MesytecSystem.Data.hpp" />
     <ClInclude Include="Zweistein.deHumanizeNumber.hpp" />
     <ClInclude Include="Zweistein.Event.hpp" />
     <ClInclude Include="Zweistein.GetLocalInterfaces.hpp" />

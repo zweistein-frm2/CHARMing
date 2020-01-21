@@ -46,59 +46,7 @@
         }
       ]
     },
-    {
-      "name": "WSL-Debug",
-      "generator": "Unix Makefiles",
-      "configurationType": "Debug",
-      "buildRoot": "${projectDir}/out/build/${name}",
-      "installRoot": "${projectDir}/out/install/${name}",
-      "cmakeExecutable": "/usr/bin/cmake",
-      "cmakeCommandArgs": "",
-      "buildCommandArgs": "",
-      "ctestCommandArgs": "",
-      "inheritEnvironments": [ "linux_x64" ],
-      "wslPath": "${defaultWSLPath}",
-      "addressSanitizerRuntimeFlags": "detect_leaks=0",
-      "variables": [
-        {
-          "name": "Charm_DIR",
-          "value": "/mnt/c/users/alanghof/source/repos/charm",
-          "type": "FILEPATH"
-        },
-        {
-          "name": "NETWORKCARDINTERFACE",
-          "value": "192.168.168.100",
-          "type": "STRING"
-        }
-      ]
-    },
-    {
-      "name": "WSL-Release",
-      "generator": "Unix Makefiles",
-      "configurationType": "RelWithDebInfo",
-      "buildRoot": "${projectDir}/out/build/${name}",
-      "installRoot": "${projectDir}/out/install/${name}",
-      "cmakeExecutable": "/usr/bin/cmake",
-      "cmakeCommandArgs": "",
-      "buildCommandArgs": "",
-      "ctestCommandArgs": "",
-      "inheritEnvironments": [ "linux_x64" ],
-      "wslPath": "${defaultWSLPath}",
-      "addressSanitizerRuntimeFlags": "detect_leaks=0",
-      "variables": [
-        {
-          "name": "Charm_DIR",
-          "value": "/mnt/c/users/alanghof/source/repos/charm",
-          "type": "FILEPATH"
-        },
-        {
-          "name": "NETWORKCARDINTERFACE",
-          "value": "192.168.168.100",
-          "type": "STRING"
-        }
-      ]
-    },
-    {
+     {
       "name": "Taco102-Ubuntu-Debug",
       "generator": "Unix Makefiles",
       "configurationType": "Debug",
@@ -166,7 +114,7 @@
       ]
     },
     {
-      "name": "Raspian-Debug",
+      "name": "Raspberrypi4-Debug",
       "generator": "Ninja",
       "configurationType": "Debug",
       "cmakeExecutable": "/opt/cmake-3.14.7/bin/cmake",
@@ -198,7 +146,7 @@
       ]
     },
     {
-      "name": "Raspian-Release",
+      "name": "Raspberrypi4-Release",
       "generator": "Ninja",
       "configurationType": "RelWithDebInfo",
       "cmakeExecutable": "/opt/cmake-3.14.7/bin/cmake",
@@ -231,6 +179,57 @@
         }
 
       ]
+    },
+    {
+      "name": "rpi3packetsender-Release",
+      "generator": "Ninja",
+      "configurationType": "RelWithDebInfo",
+      "cmakeExecutable": "/opt/cmake-3.14.7/bin/cmake",
+      "cmakeToolchain": "/vcpkg/scripts/buildsystems/vcpkg.cmake",
+      "remoteCopySourcesExclusionList": [ ".vs", ".git", "out" ],
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "inheritEnvironments": [ "linux_arm" ],
+      "remoteMachineName": "rpi3packetsender",
+      "remoteCMakeListsRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/src",
+      "remoteBuildRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/build/${name}",
+      "remoteInstallRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/install/${name}",
+      "remoteCopySources": true,
+      "rsyncCommandArgs": "-t --delete --delete-excluded",
+      "remoteCopyBuildOutput": false,
+      "remoteCopySourcesMethod": "rsync",
+      "addressSanitizerRuntimeFlags": "detect_leaks=0",
+      "variables": [
+        {
+          "name": "Charm_DIR",
+          "value": "/home/pi/charm",
+          "type": "FILEPATH"
+        },
+        {
+          "name": "magic_enum_DIR",
+          "value": "/vcpkg/installed/arm-linux/share/magic_enum",
+          "type": "FILEPATH"
+        },
+        {
+          "name": "BOOST_INCLUDEDIR",
+          "value": "/vcpkg/installed/arm-linux/include",
+          "type": "FILEPATH"
+        },
+        {
+          "name": "unofficial-libuv_DIR",
+          "value": "/vcpkg/installed/arm-linux/share/unofficial-libuv",
+          "type": "FILEPATH"
+        },
+
+        {
+          "name": "NETWORKCARDINTERFACE",
+          "value": "192.168.168.121",
+          "type": "STRING"
+        }
+
+      ]
     }
+
   ]
 }

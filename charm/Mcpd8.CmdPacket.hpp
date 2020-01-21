@@ -79,7 +79,7 @@ namespace Mcpd8 {
 			auto status = magic_enum::enum_cast<Status>(Mcpd8::DataPacket::getStatus(deviceStatusdeviceId));
 			bool understood = true;
 			unsigned short realcmd = cmd;
-			if (realcmd & 0x8000) {
+			if (realcmd!= Mcpd8::Internal_Cmd::SETNUCLEORATEEVENTSPERSECOND && realcmd & 0x8000 ) {
 				understood = false;
 				realcmd-=0x8000;
 
@@ -91,7 +91,12 @@ namespace Mcpd8 {
 			if (cmd_1.has_value()) 	ss_cmd << cmd_1 << "(" << static_cast<magic_enum::underlying_type_t<Mcpd8::Cmd>>(realcmd) << ")";
 			else {
 				ss_cmd << cmd_2;
-				if (!cmd_2.has_value()) ss_cmd << "(0x" << std::hex << cmd << std::dec << ")";
+				if (!cmd_2.has_value()) { 
+					if (realcmd == Mcpd8::Internal_Cmd::SETNUCLEORATEEVENTSPERSECOND) {
+						ss_cmd << "(SETNUCLEORATEEVENTSPERSECOND)";
+					}
+					else ss_cmd << "(0x" << std::hex << cmd << std::dec << ")"; 
+				}
 				else ss_cmd << "(" << static_cast<magic_enum::underlying_type_t<Mcpd8::Internal_Cmd>>(realcmd) << ")";
 			}
 			if (!understood) {
@@ -103,7 +108,9 @@ namespace Mcpd8 {
 			os << "items:"<<Length-headerLength<<" " << buffertype << " " << ss_cmd.str() <<", "<< Number << ", " << status  << std::endl;// << " " << numEvents() << " Events " << timeStamp() << "00ns(" << std::put_time(std::localtime(&tt), "%Y-%b-%d %X") << ")" << std::endl;
 			
 			for (int d = 0; d < Length - headerLength; d++) {
-				os << "data["<<d<<"]="<<std::hex << data[d] <<std::dec<< " ";
+				if (d!=0 && d % 8 == 0) os << std::endl;
+				os << "\tdata["<<d<<"]="<<std::hex << data[d] <<std::dec<< " ";
+				
 
 			}
 			if(Length - headerLength > 0)os << std::endl;

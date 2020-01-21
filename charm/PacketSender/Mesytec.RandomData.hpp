@@ -81,7 +81,7 @@ namespace Zweistein {
 			unsigned short x_pos = 0;
 			unsigned short position_y = 0;
 
-		 if(ncalls%2==0){
+		 if(ncalls%10!=0){
 			
 			 position_y = ((unsigned short)(l >> 10)) % Mesy::Mpsd8Event::sizeY;
 			 x_pos = (unsigned short)(l >> 20) % maxX;

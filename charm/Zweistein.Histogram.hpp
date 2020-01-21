@@ -30,8 +30,8 @@ namespace Zweistein {
 	void populateHistogram(boost::asio::io_service &io_service,Mesytec::MesytecSystem& msmtsystem1) {
 		
 		boost::this_thread::sleep_for(boost::chrono::milliseconds(2000));
-		unsigned short x_default = msmtsystem1.widthX; 
-		unsigned short y_default = msmtsystem1.widthY; 
+		unsigned short x_default = msmtsystem1.data.widthX; 
+		unsigned short y_default = msmtsystem1.data.widthY; 
 		// cc::Mat is row, column which corresponds to y, x !!!!
 		histogram = cv::Mat_<float>::zeros(y_default, x_default);
 		auto imageUpdate = [](cv::Mat& image) {
@@ -101,8 +101,8 @@ namespace Zweistein {
 						if (!initdone)
 						{
 							if (!initdonehistogramsize) {
-								maxX = msmtsystem1.widthX;
-								maxY = msmtsystem1.widthY;
+								maxX = msmtsystem1.data.widthX;
+								maxY = msmtsystem1.data.widthY;
 
 								
 								histogram = cv::Mat_<float>::zeros(maxY, maxX);
