@@ -20,7 +20,14 @@ auto operator<<(std::ostream& os, const T& t) -> decltype(t.print(os), os)
 	return os;
 }
 
-extern boost::mutex coutGuard;
-extern boost::thread_group worker_threads;
+#ifdef _WIN32
+#ifndef EXTERN_FUNCDECLTYPE
+#define EXTERN_FUNCDECLTYPE
+#endif
+#else
+#define EXTERN_FUNCDECLTYPE
+#endif
 
+EXTERN_FUNCDECLTYPE  extern boost::thread_group worker_threads;
+EXTERN_FUNCDECLTYPE extern boost::mutex coutGuard;
 // TODO: Reference additional headers your program requires here.

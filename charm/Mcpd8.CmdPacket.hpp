@@ -55,12 +55,11 @@ namespace Mcpd8 {
 			param[1] = (value >> 16) & 0xffff;
 			param[2] = (value >> 32) & 0xffff;
 		}
-		static void Send(boost::asio::ip::udp::socket* socket, CmdPacket& cmdpacket, boost::asio::ip::udp::endpoint &mcpd_endpoint) {
+		static size_t Send(boost::asio::ip::udp::socket* socket, CmdPacket& cmdpacket, boost::asio::ip::udp::endpoint &mcpd_endpoint) {
 			unsigned short items = (cmdpacket.Length - cmdpacket.headerLength);
 			cmdpacket.data[items] = 0xffff;
 			cmdpacket.Length +=1;
 			Mcpd8::DataPacket::settimeNow48bit(cmdpacket.time);
-			cmdpacket.Number = Mcpd8::sendcounter++;
 			cmdpacket.headerchksum = 0;
 			unsigned short chksum = cmdpacket.headerchksum;
 			const unsigned short* p = reinterpret_cast<const unsigned short*>(&cmdpacket);
@@ -70,7 +69,7 @@ namespace Mcpd8 {
 			size_t len = cmdpacket.Length;
 			//for (int i = 0; i <len; i++) 	boost::endian::big_to_native_inplace(sp[i]);
 			size_t bytessent=socket->send_to(boost::asio::buffer(reinterpret_cast<unsigned short*>(&cmdpacket), (cmdpacket.Length)*sizeof(short)), mcpd_endpoint);
-			
+			return bytessent;
 			
 		}
 		void print(std::ostream& os) const {

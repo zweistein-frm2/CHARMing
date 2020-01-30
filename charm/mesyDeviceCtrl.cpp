@@ -151,6 +151,7 @@ int main(int argc, char* argv[])
 				try {
 					auto abfunc=boost::bind(&Mesytec::MesytecSystem::analyzebuffer, ptrmsmtsystem1,_1);
 					auto read=Mesytec::listmode::Read(abfunc,ptrmsmtsystem1->data, ptrmsmtsystem1->deviceparam);
+					ptrmsmtsystem1->connected = true;
 					read.files(listmodeinputfiles, io_service);
 					
 				}
@@ -174,19 +175,42 @@ int main(int argc, char* argv[])
 					ptrmsmtsystem1->connect(_devlist, io_service);
 					io_service.run();
 				}
+				catch (Mesytec::my_error& x) {
+					boost::mutex::scoped_lock lock(coutGuard);
+					if (int const* mi = boost::get_error_info<Mesytec::my_info>(x)) {
+						auto  my_code = magic_enum::enum_cast<Mesytec::my_errorcode>(*mi);
+						if (my_code.has_value()) {
+							auto c1_name = magic_enum::enum_name(my_code.value());
+							std::cout << c1_name<<std::endl;
+						}
+						
+					}
+					
+				}
 				catch (boost::exception & e) {
 					boost::mutex::scoped_lock lock(coutGuard);
 					std::cout << boost::diagnostic_information(e);
+					
 				}
+				io_service.stop();
 
 			};
 		}
+
 		worker_threads.create_thread(boost::bind(t));
-		boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));// so msmtsystem1 should be connected
+		boost::this_thread::sleep_for(boost::chrono::milliseconds(500));// so msmtsystem1 should be connected
 
 		if(write2disk) worker_threads.create_thread([&io_service, &ptrmsmtsystem1] {Mesytec::writeListmode(io_service,*ptrmsmtsystem1); });
-		worker_threads.create_thread([&io_service, &ptrmsmtsystem1] {Zweistein::populateHistogram(io_service,*ptrmsmtsystem1); });
 		
+		for (int i = 0; i < 10; i++) {
+			if (ptrmsmtsystem1->connected) {
+				worker_threads.create_thread([&io_service, &ptrmsmtsystem1] {Zweistein::populateHistogram(io_service, *ptrmsmtsystem1); });
+				break;
+			
+			}
+			boost::this_thread::sleep_for(boost::chrono::milliseconds(250));
+		}
+				
 		boost::chrono::system_clock::time_point start = boost::chrono::system_clock::now();
 		int i = 0;
 		long long lastcount = 0;
@@ -205,26 +229,42 @@ int main(int argc, char* argv[])
 		}
 		else {
 			// data acquisition monitoring loop
-			std::cout << std::endl;
-			while (!io_service.stopped()) {
-				i++;
-				if (true ) {
-					for (std::pair<unsigned short, Mesytec::DeviceParameter> pair : ptrmsmtsystem1->deviceparam) {
-						if (pair.second.datagenerator == Mesytec::DataGenerator::NucleoSimulator) {
-							//if(i==1) ptrmsmtsystem1->Send(pair.second, Mcpd8::Internal_Cmd::SETNUCLEORATEEVENTSPERSECOND, 16500);//1650000 is maximum
-			//				ptrmsmtsystem1->Send(pair.second, Mcpd8::Internal_Cmd::GETVER);
-						}
-						if (pair.second.datagenerator == Mesytec::DataGenerator::CharmSimulator) {
-							if (i == 1) {
-								ptrmsmtsystem1->Send(pair.second, Mcpd8::Internal_Cmd::CHARMSETEVENTRATE, 50000); // oder was du willst
-								ptrmsmtsystem1->Send(pair.second, Mcpd8::Internal_Cmd::CHARMPATTERNGENERATOR, 1); // oder was du willst
+
+			for (int i = 0; i < 10; i++) {
+				if (ptrmsmtsystem1->connected) {
+					boost::function<void()> sendstartcmd = [&io_service, &ptrmsmtsystem1, &_devlist]() {
+						unsigned long rate = 50000;
+						try {
+							for (std::pair<unsigned short, Mesytec::DeviceParameter> pair : ptrmsmtsystem1->deviceparam) {
+								ptrmsmtsystem1->SendAll(Mcpd8::Cmd::START);
+								if (pair.second.datagenerator == Mesytec::DataGenerator::NucleoSimulator) {
+									ptrmsmtsystem1->Send(pair.second, Mcpd8::Internal_Cmd::SETNUCLEORATEEVENTSPERSECOND, rate);//1650000 is maximum
+								}
+								if (pair.second.datagenerator == Mesytec::DataGenerator::CharmSimulator) {
+									ptrmsmtsystem1->Send(pair.second, Mcpd8::Internal_Cmd::CHARMSETEVENTRATE, rate); // oder was du willst
+									ptrmsmtsystem1->Send(pair.second, Mcpd8::Internal_Cmd::CHARMPATTERNGENERATOR, 1); // oder was du willst
+								}
+								return;
 							}
 						}
+						catch (boost::exception& e) {
+							boost::mutex::scoped_lock lock(coutGuard);
+							std::cout << boost::diagnostic_information(e);
+							
+						}
 						
-					}
-					//ptrmsmtsystem1->SendAll(Mcpd8::Cmd::START);
+
+					};
+					worker_threads.create_thread(boost::bind(sendstartcmd));
+					break;
+
 				}
-				
+				boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
+			
+			}
+			std::cout << std::endl;
+			
+			while (!io_service.stopped()) {
 				boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
 				boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - start;
 				start = boost::chrono::system_clock::now();
@@ -232,14 +272,17 @@ int main(int argc, char* argv[])
 				double evtspersecond = sec.count() != 0 ? (double)(currentcount - lastcount) / sec.count() : 0;
 				{
 					boost::mutex::scoped_lock lock(coutGuard);
-					std::cout << "\r" << evtspersecond << " Events/s, (" << Zweistein::PrettyBytes((size_t)(evtspersecond * sizeof(Mesy::Mpsd8Event))) << "/s)\t";// << std::endl;
+					std::cout << "\r" <<std::setprecision(1) <<std::fixed<< evtspersecond << " Events/s, (" << Zweistein::PrettyBytes((size_t)(evtspersecond * sizeof(Mesy::Mpsd8Event))) << "/s)\t";// << std::endl;
 					lastcount = currentcount;
 					size_t inqueue = ptrmsmtsystem1->data.evntqueue.read_available();
 					if (inqueue > 0)	std::cout << inqueue << " Events in queue" << std::endl;
+#ifndef _WIN32
+					std::cout << std::flush;
+#endif
 				}
 				io_service.run_one();
 			};
-			//ptrmsmtsystem1->SendAll(Mcpd8::Cmd::STOP);
+			ptrmsmtsystem1->SendAll(Mcpd8::Cmd::STOP);
 		}
 	}
 	catch (boost::exception & e) {

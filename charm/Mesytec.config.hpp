@@ -45,12 +45,12 @@ namespace Mesytec {
 				std::string savednetworkcard;
 				if (n == 0) {
 					savednetworkcard = root.get<std::string>(s2 + "networkcard", "0.0.0.0");
+					root.put<std::string>(s2 + "networkcard", savednetworkcard);
 					p1.networkcard = Zweistein::askforInterfaceIfUnknown(savednetworkcard, io_service);
 				}
 				else p1.networkcard = root.get<std::string>(s2 + "networkcard");
-				if(savednetworkcard!= p1.networkcard)std::cout << s2 + "networkcard="<< p1.networkcard << " on puropse not saved in config" << std::endl;
-				//root.put<std::string>(s2 + "networkcard", p1.networkcard);
-				
+				if (savednetworkcard != p1.networkcard) std::cout << s2 + "networkcard=" << p1.networkcard << " on puropse not saved in config" << std::endl;
+							
 				if (n == 0) {
 					auto a3 = magic_enum::enum_name(Mcpd8::EventDataFormat::Mpsd8);
 					std::string m3 = std::string(a3.data(), a3.size());

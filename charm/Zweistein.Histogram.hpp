@@ -46,29 +46,37 @@ namespace Zweistein {
 		};
 		boost::function<void()> display = [&x_default,&y_default,&io_service, &imageUpdate]() {
 			sigslot::signal<cv::Mat&> sig;
-			cv::namedWindow("histogram");
-			cv::Mat image= cv::Mat_<unsigned char>::zeros(y_default, x_default);
-			cv::Mat colormappedimage;
-			
-			sig.connect(imageUpdate);
-			do {
-				cv::waitKey(500);
+			bool bshow = true;
+#ifndef _WIN32
+			if (NULL == getenv("DISPLAY")) bshow = false;
+#endif
+				if(bshow) cv::namedWindow("histogram");
+				
+				cv::Mat image = cv::Mat_<unsigned char>::zeros(y_default, x_default);
+				cv::Mat colormappedimage;
+
+				sig.connect(imageUpdate);
+				do {
+					cv::waitKey(500);
+					
+					{
+						//if (!initdonehistogramsize) continue;
+					}
+					sig(image);
+					if (!image.empty()) {
+						//int y = 955;
+						//int x = 54;
+						//int val=image.at<unsigned char>(y, x);
+						cv::applyColorMap(image, colormappedimage, cv::COLORMAP_JET);
+						if(bshow) cv::imshow("histogram", colormappedimage);
+					}
+				} while (!io_service.stopped());
 				{
-					//if (!initdonehistogramsize) continue;
+					boost::mutex::scoped_lock lock(coutGuard);
+					std::cout << std::endl << "display histogram exiting..." << std::endl;
 				}
-				sig(image);
-				if (!image.empty()) {
-					//int y = 955;
-					//int x = 54;
-					//int val=image.at<unsigned char>(y, x);
-					cv::applyColorMap(image, colormappedimage, cv::COLORMAP_JET);
-					cv::imshow("histogram", colormappedimage);
-				}
-			} while (!io_service.stopped());
-			{
-				boost::mutex::scoped_lock lock(coutGuard);
-				std::cout << std::endl << "display histogram exiting..." << std::endl;
-			}
+			
+			
 		};
 		worker_threads.create_thread(boost::bind(display));
 		boost::chrono::system_clock::time_point start = boost::chrono::system_clock::now();

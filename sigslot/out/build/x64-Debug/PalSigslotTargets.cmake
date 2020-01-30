@@ -51,7 +51,7 @@ add_library(Pal::Sigslot INTERFACE IMPORTED)
 set_target_properties(Pal::Sigslot PROPERTIES
   INTERFACE_COMPILE_DEFINITIONS "\$<\$<BOOL:OFF>:SIGSLOT_REDUCE_COMPILE_TIME>"
   INTERFACE_COMPILE_FEATURES "cxx_std_14"
-  INTERFACE_INCLUDE_DIRECTORIES "C:/Users/alanghof/source/repos/NeutronDetection/sigslot/include"
+  INTERFACE_INCLUDE_DIRECTORIES "C:/Users/alanghof/source/repos/Neu2d_det/sigslot/include"
   INTERFACE_LINK_LIBRARIES "Threads::Threads"
 )
 

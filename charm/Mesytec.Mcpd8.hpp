@@ -9,6 +9,7 @@
 #include "stdafx.h"
 #include <boost/exception/all.hpp>
 #include <boost/array.hpp>
+#include <boost/circular_buffer.hpp>
 #include <vector>
 #include <map>
 #include <boost/asio.hpp>
@@ -39,15 +40,30 @@
 #include "Mcpd8.Parameters.hpp"
 #include "Mesytec.DeviceParameter.hpp"
 
+
+#include <boost/thread/locks.hpp>
+#include <boost/thread/shared_mutex.hpp>
+
+typedef boost::shared_mutex Lock;
+typedef boost::unique_lock< Lock >  WriteLock;
+typedef boost::shared_lock< Lock >  ReadLock;
+
 using boost::asio::ip::udp;
 
 namespace Mesytec {
+	typedef boost::error_info<struct tag_my_info, int> my_info;
+	struct my_error : virtual boost::exception, virtual std::exception { };
+	enum my_errorcode {
+		OK=0,
+		SEND_CMD_TIMEOUT=1
+	};
+
 	
 	class MesytecSystem {
 	public:
 		static std::map<unsigned short, Mesytec::DeviceParameter> deviceparam;
-		MesytecSystem():recv_buf(),simulatordatarate(20),lastmissed_count(0), lastmissed_time(boost::chrono::system_clock::now()),
-			 inputFromListmodeFile(false), firstcallsendwaitresponse(true),cmd_target(0), pio_service(nullptr), eventdataformat(Mcpd8::EventDataFormat::Undefined),icharmid(0){
+		MesytecSystem():recv_buf(), cmd_recv_queue(5),simulatordatarate(20),lastmissed_count(0), lastmissed_time(boost::chrono::system_clock::now()),
+			 inputFromListmodeFile(false),connected(false),internalerror(my_errorcode::OK), firstcallsendwaitresponse(true),cmd_target(0), pio_service(nullptr), eventdataformat(Mcpd8::EventDataFormat::Undefined),icharmid(0){
 			data.widthX = 64;
 			data.widthY = 64;
 		}
@@ -58,13 +74,15 @@ namespace Mesytec {
 			
 		}
 		int icharmid;
+		my_errorcode internalerror;
 		boost::asio::io_service* pio_service;
 		Mcpd8::EventDataFormat eventdataformat;
 		
 		Mcpd8::Data data;
 		bool inputFromListmodeFile;
+		boost::atomic<bool> connected;
 	
-		void connect(std::list<Mcpd8::Parameters> &_devlist, boost::asio::io_service &io_service)
+		bool connect(std::list<Mcpd8::Parameters> &_devlist, boost::asio::io_service &io_service)
 		{
 			int idfirst = DeviceParameter::minid;
 			int id = idfirst;
@@ -79,7 +97,6 @@ namespace Mesytec {
 				}
 				mp.socket = new udp::socket(io_service);
 				mp.socket->open(udp::v4());
-				mp.socket->set_option(boost::asio::socket_base::broadcast(true));
 				mp.socket->set_option(boost::asio::socket_base::reuse_address(true));
 				//	socket->set_option(asio::ip::multicast::join_group((address.to_v4().any())));
 				// remember only for address in range 224.0.0.0 to 239.255...
@@ -141,7 +158,7 @@ namespace Mesytec {
 			worker_threads.create_thread(boost::bind(&MesytecSystem::watch_incoming_packets, this));		//worker_threads.add_thread(new boost::thread(&MesytecSystem::watch_incoming_packets, this, &io_service));
 			boost::this_thread::sleep_for(boost::chrono::milliseconds(200)); // we want watch_incoming_packets active
 		
-
+			
 			for (int i = DeviceParameter::minid; i <= DeviceParameter::maxid; i++) {
 				Mesytec::DeviceParameter mp=deviceparam.at(i);
 				Send(mp, Mcpd8::Cmd::SETID, i); // set ids for Mcpd8 devices
@@ -149,26 +166,28 @@ namespace Mesytec {
 				Send(mp, Mcpd8::Cmd::GETPARAMETERS);
 				Send(mp, Mcpd8::Internal_Cmd::READID);
 				if (mp.datagenerator == Mesytec::DataGenerator::Mcpd8 || mp.datagenerator == Mesytec::DataGenerator::NucleoSimulator) {
+				//	data.widthX = 0;
 					for (int i = 0; i < Mesy::Mpsd8Event::sizeSLOTS; i++) {
 
 						if (mp.module_id[i] == Mesy::ModuleId::MPSD8P) {
 							Send(mp, Mcpd8::Cmd::GETMPSD8PLUSPARAMETERS, i);
+							//data.widthX += 8;
 						}
 						if (mp.firmware_major > 10) {}
 						if (mp.module_id[i] == Mesy::ModuleId::MPSD8 || mp.module_id[i] == Mesy::ModuleId::MPSD8OLD) {
 							Send(mp, Mcpd8::Internal_Cmd::READPERIREG, i);
+							//data.widthX += 8;
 						}
 						
 
 					}
 				}
-				
 			}
+			// now calc xsize and ysize
 
 
-
-
-
+			connected = true;
+			return connected;
 		}
 		long simulatordatarate;
 		bool CmdSupported(Mesytec::DeviceParameter& mp, unsigned short cmd) {
@@ -281,41 +300,37 @@ namespace Mesytec {
 				break;
 			}
 
-			case Mcpd8::Internal_Cmd::READPERIREG:
-			{
+			case Mcpd8::Internal_Cmd::READPERIREG:{
 				assert(param >= 0 && param < Mesy::Mpsd8Event::sizeMODID);
 				cmdpacket.data[0] = param;
-				cmdpacket.Length = Mcpd8::CmdPacket::defaultLength + 1;
-				response = Send(mp, cmdpacket);
-				
-				int slot = response.data[0];
-				if (slot < 0 || slot >= Mesy::Mpsd8Event::sizeSLOTS) {
-					boost::mutex::scoped_lock lock(coutGuard);
-					std::cout << "ERROR:" << response << " response.data[0] outside range [0..." << Mesy::Mpsd8Event::sizeSLOTS << "]" <<std::endl;
-				}
 
-				int cmdindex = response.data[1];
-				if (cmdindex < 0 || cmdindex > 2) {
-					boost::mutex::scoped_lock lock(coutGuard);
-					std::cout << "ERROR:" << response << " response.data[1] outside range [0..2]" << std::endl;
-				}
-
-				switch (cmdindex) {
-				case 0:
-					mp.module[slot].tx_caps=response.data[2];
-					break;
-				case 1:
+				for (int i = 0; i <= 2; i++) {
+					unsigned short regnum = i;
+					// 0 =>tx capabilities
+					// 1 => tx cap settings
+					// 2 => firmware
+					cmdpacket.data[1] = regnum;
+					cmdpacket.Length = Mcpd8::CmdPacket::defaultLength + 2;
+					response = Send(mp, cmdpacket);
+					unsigned short slot = response.data[0];
+					unsigned short capbitmap = response.data[2];
+					unsigned short regword = response.data[1];
+					switch (regword) {
+					case 0:
+						mp.module[slot].tx_caps = response.data[2];
+						break;
+					case 1:
 					{
-					auto txcapsetting = magic_enum::enum_cast<Mcpd8::TX_CAP>(response.data[2]);
-					if (txcapsetting.has_value()) mp.module[slot].tx_cap_setting = txcapsetting.value();
-					
+						auto txcapsetting = magic_enum::enum_cast<Mcpd8::TX_CAP>(response.data[2]);
+						if (txcapsetting.has_value()) mp.module[slot].tx_cap_setting = txcapsetting.value();
+
 					}
 					break;
-				case 2:
-					mp.module[slot].firmware = response.data[2];
-					break;
+					case 2:
+						mp.module[slot].firmware = response.data[2];
+						break;
+					}
 				}
-				
 				break;
 			}
 			}
@@ -378,19 +393,23 @@ namespace Mesytec {
 			}
 		}
 		void SendAll(Mcpd8::Cmd cmd) {
-			for (std::pair<unsigned short, Mesytec::DeviceParameter> pair : deviceparam) {
-				Send(pair.second, cmd);
-			}
+			if (internalerror != Mesytec::my_errorcode::OK) return;
 			{
 				boost::mutex::scoped_lock lock(coutGuard);
 				using namespace magic_enum::ostream_operators;
 				std::cout << "SendAll(" << cmd << ")" << std::endl;
 			}
+
+			for (std::pair<unsigned short, Mesytec::DeviceParameter> pair : deviceparam) {
+				Send(pair.second, cmd);
+			}
+			
 		}
 		
 	private:
 		bool firstcallsendwaitresponse;
 		Mcpd8::CmdPacket& Send(Mesytec::DeviceParameter& mp,Mcpd8::CmdPacket& cmdpacket,bool waitresponse=true) {
+			if (internalerror != Mesytec::my_errorcode::OK) return cmdpacket;
 			if (!CmdSupported(mp, cmdpacket.cmd)) return cmdpacket;
 
 			for (auto& d : deviceparam) {
@@ -418,42 +437,62 @@ namespace Mesytec {
 			}
 			
 			
-
-			Mcpd8::CmdPacket::Send(mp.socket, cmdpacket,mp.mcpd_endpoint);
+			cmdpacket.Number = Mcpd8::sendcounter++;
+			Mcpd8::CmdPacket sentpacket = cmdpacket;
+			static Mcpd8::CmdPacket response;
 			
-			Mcpd8::CmdPacket response;
+			//static is needed on Linux 
+			boost::function<void()> send = [this,&mp, &cmdpacket]() {
+				Mcpd8::CmdPacket::Send(mp.socket, cmdpacket, mp.mcpd_endpoint);
+				pio_service->run_one();
+
+			};
+
+			if (waitresponse)	worker_threads.create_thread(boost::bind(send)); // so use thread to send and wait here
+			else Mcpd8::CmdPacket::Send(mp.socket, cmdpacket, mp.mcpd_endpoint); 
+			
+			
 			if (!waitresponse) {
 				boost::mutex::scoped_lock lock(coutGuard);
-				std::cout << "\rSEND:" << cmdpacket << " =>RESPONSE UNKNOWN (not checked)" << std::endl;
+				std::cout << "\rSENT:" << cmdpacket << " =>RESPONSE UNKNOWN (not checked)" << std::endl;
 				return response;
 			}
-			int timeout_ms = 200;
+			int timeout_ms = 2200;
 			if (firstcallsendwaitresponse) {
-				timeout_ms = 1000;
+				timeout_ms = 3200;
 				firstcallsendwaitresponse = false;
 				
 			}
 			
-			for (int l = 0; l < timeout_ms/100; l++) {
-				boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
-				while(cmd_recv_queue.pop(response)) {
-					if (response.cmd == cmdpacket.cmd ||(response.cmd == (cmdpacket.cmd|0x8000))) {
-						if (response.cmd & 0x8000) {
-							boost::mutex::scoped_lock lock(coutGuard);
-							std::cout << "\rSEND:" << cmdpacket << " =>ERROR:"<< "Send(" << ss_cmd.str() << ") NOT UNDERSTOOD! " << std::endl;
+			for (int l = 0; l < timeout_ms / 50; l++) {
+				boost::this_thread::sleep_for(boost::chrono::milliseconds(50));
+				WriteLock r_lock(cmdLock);
+				int s = cmd_recv_queue.size();
+				for (int i = 0; i < cmd_recv_queue.size(); i++) {
+					response = cmd_recv_queue[i];
+					if (response.Number == sentpacket.Number) {
+						if (response.cmd == sentpacket.cmd || (response.cmd == (sentpacket.cmd | 0x8000))) {
+							if (response.cmd & 0x8000) {
+								boost::mutex::scoped_lock lock(coutGuard);
+								std::cout << "\rSENT:" << cmdpacket << " =>WARNING:" << "Send(" << ss_cmd.str() << ") NOT UNDERSTOOD! " << std::endl;
+							}
+							else {
+								boost::mutex::scoped_lock lock(coutGuard);
+								std::cout << "\rSENT:" << cmdpacket << " =>RESPONSE OK(" << response.Length - response.headerLength << " items)" << std::endl;
+							}
+							return response;
 						}
-						else {
-							boost::mutex::scoped_lock lock(coutGuard);
-							std::cout << "\rSEND:" << cmdpacket << " =>RESPONSE OK(" <<response.Length-response.headerLength<< " items)" << std::endl;
-						}
-						
-						return response;
 					}
 				}
+				
+				
 			}
+		
 			{
 				boost::mutex::scoped_lock lock(coutGuard);
-				std::cout << "\rSEND:" << cmdpacket << " =>ERROR:" << "Send(" << ss_cmd.str() << ") timeout(" << timeout_ms << " ms)" << std::endl;
+				std::cout << "\rSENT:" << cmdpacket << " =>ERROR:" << "Send(" << ss_cmd.str() << ") timeout(" << timeout_ms << " ms)" << std::endl;
+				internalerror = Mesytec::my_errorcode::SEND_CMD_TIMEOUT;
+				throw my_error() << my_info(internalerror);
 			}
 			return response;
 		}
@@ -533,12 +572,13 @@ namespace Mesytec {
 					if (cmd_target >= DeviceParameter::minid && cmd_target <= DeviceParameter::maxid) {
 						Mcpd8::CmdPacket p = dp;
 						{
-						//	boost::mutex::scoped_lock lock(coutGuard);
-						//	std::cout<<"\rRECEIVED:"<< p << std::endl;
-
+							WriteLock w_lock(cmdLock);
+							cmd_recv_queue.push_back(p);
 						}
-						cmd_recv_queue.push(p);
-
+						{
+						//	boost::mutex::scoped_lock lock(coutGuard);
+						//	std::cout << "handle_receive: " << p;
+						}
 						start_receive(deviceparam.at(cmd_target));
 					}
 				}
@@ -621,7 +661,9 @@ namespace Mesytec {
 		udp::endpoint local_endpoint;
 		
 		boost::array< unsigned char, 64> charm_buf;
-		boost::lockfree::spsc_queue<Mcpd8::CmdPacket, boost::lockfree::capacity<10> > cmd_recv_queue;
+		boost::circular_buffer<Mcpd8::CmdPacket> cmd_recv_queue;
+		Lock cmdLock;
+
 		boost::array< Mcpd8::DataPacket, 1> recv_buf;
 		
 	};

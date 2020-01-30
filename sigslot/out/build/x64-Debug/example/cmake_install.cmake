@@ -1,8 +1,8 @@
-# Install script for directory: C:/Users/alanghof/source/repos/NeutronDetection/sigslot/example
+# Install script for directory: C:/Users/alanghof/source/repos/Neu2d_det/sigslot/example
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "C:/Users/alanghof/source/repos/NeutronDetection/sigslot/out/install/x64-Debug")
+  set(CMAKE_INSTALL_PREFIX "C:/Users/alanghof/source/repos/Neu2d_det/sigslot/out/install/x64-Debug")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 

@@ -46,44 +46,10 @@
         }
       ]
     },
-     {
-      "name": "Taco102-Ubuntu-Debug",
-      "generator": "Unix Makefiles",
-      "configurationType": "Debug",
-      "buildRoot": "${projectDir}/out/build/${name}",
-      "installRoot": "${projectDir}/out/install/${name}",
-      "cmakeExecutable": "/usr/bin/cmake",
-      "cmakeCommandArgs": "",
-      "buildCommandArgs": "",
-      "ctestCommandArgs": "",
-      "inheritEnvironments": [ "linux_x64" ],
-      "remoteMachineName": "taco102",
-      "remoteCMakeListsRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/src",
-      "remoteBuildRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/build/${name}",
-      "remoteInstallRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/install/${name}",
-      "remoteCopySources": true,
-      "rsyncCommandArgs": "-t --delete --delete-excluded",
-      "remoteCopyBuildOutput": false,
-      "remoteCopySourcesMethod": "rsync",
-      "addressSanitizerRuntimeFlags": "detect_leaks=0",
-      "variables": [
-        {
-          "name": "Charm_DIR",
-          "value": "/home/alanghof/charm",
-          "type": "FILEPATH"
-        },
-        {
-          "name": "NETWORKCARDINTERFACE",
-          "value": "172.25.2.102",
-          "type": "STRING"
-        }
-      ]
-    },
-
     {
-      "name": "Taco102-Ubuntu-Release",
+      "name": "Taco102-Ubuntu",
       "generator": "Unix Makefiles",
-      "configurationType": "RelWithDebInfo",
+      "configurationType": "Release",
       "cmakeExecutable": "/usr/bin/cmake",
       "cmakeToolchain": "/vcpkg/scripts/buildsystems/vcpkg.cmake",
       "remoteCopySourcesExclusionList": [ ".vs", ".git", "out" ],
@@ -91,7 +57,7 @@
       "buildCommandArgs": "",
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "linux_x64" ],
-      "remoteMachineName": "taco102",
+      "remoteMachineName": "166771182;taco102 (username=alanghof, port=22, authentication=Password)",
       "remoteCMakeListsRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/src",
       "remoteBuildRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/build/${name}",
       "remoteInstallRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/install/${name}",
@@ -103,8 +69,8 @@
       "variables": [
         {
           "name": "Charm_DIR",
-          "value": "/home/alanghof/charm",
-          "type": "FILEPATH"
+          "value": "/home/alanghof/repos/Neu2d_det/charm",
+          "type": "PATH"
         },
         {
           "name": "NETWORKCARDINTERFACE",
@@ -114,16 +80,16 @@
       ]
     },
     {
-      "name": "Raspberrypi4-Debug",
+      "name": "Raspberrypi4",
       "generator": "Ninja",
-      "configurationType": "Debug",
+      "configurationType": "Release",
       "cmakeExecutable": "/opt/cmake-3.14.7/bin/cmake",
       "cmakeToolchain": "/vcpkg/scripts/buildsystems/vcpkg.cmake",
       "remoteCopySourcesExclusionList": [ ".vs", ".git", "out" ],
       "buildCommandArgs": "",
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "linux_arm" ],
-      "remoteMachineName": "raspberrypi4",
+      "remoteMachineName": "-29794628;raspberrypi4 (username=pi, port=22, authentication=Password)",
       "remoteCMakeListsRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/src",
       "remoteBuildRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/build/${name}",
       "remoteInstallRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/install/${name}",
@@ -136,7 +102,7 @@
         {
           "name": "Charm_DIR",
           "value": "/home/pi/charm",
-          "type": "FILEPATH"
+          "type": "PATH"
         },
         {
           "name": "NETWORKCARDINTERFACE",
@@ -146,17 +112,28 @@
       ]
     },
     {
-      "name": "Raspberrypi4-Release",
+      "name": "Raspberrypi3",
       "generator": "Ninja",
-      "configurationType": "RelWithDebInfo",
+      "configurationType": "Release",
       "cmakeExecutable": "/opt/cmake-3.14.7/bin/cmake",
-      "cmakeToolchain": "/vcpkg/scripts/buildsystems/vcpkg.cmake",
       "remoteCopySourcesExclusionList": [ ".vs", ".git", "out" ],
-      "cmakeCommandArgs": "",
       "buildCommandArgs": "",
       "ctestCommandArgs": "",
+      "cmakeToolchain": "/vcpkg/scripts/buildsystems/vcpkg.cmake",
       "inheritEnvironments": [ "linux_arm" ],
-      "remoteMachineName": "raspberrypi4",
+      "variables": [
+        {
+          "name": "Charm_DIR",
+          "value": "/home/pi/charm",
+          "type": "PATH"
+        },
+        {
+          "name": "NETWORKCARDINTERFACE",
+          "value": "192.168.168.121",
+          "type": "STRING"
+        }
+      ],
+      "remoteMachineName": "1983989873;rpi3packetsender (username=pi, port=22, authentication=PrivateKey)",
       "remoteCMakeListsRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/src",
       "remoteBuildRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/build/${name}",
       "remoteInstallRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/install/${name}",
@@ -164,72 +141,7 @@
       "rsyncCommandArgs": "-t --delete --delete-excluded",
       "remoteCopyBuildOutput": false,
       "remoteCopySourcesMethod": "rsync",
-      "addressSanitizerRuntimeFlags": "detect_leaks=0",
-      "variables": [
-        {
-          "name": "Charm_DIR",
-          "value": "/home/pi/charm",
-          "type": "FILEPATH"
-        },
-
-        {
-          "name": "NETWORKCARDINTERFACE",
-          "value": "192.168.168.121",
-          "type": "STRING"
-        }
-
-      ]
-    },
-    {
-      "name": "rpi3packetsender-Release",
-      "generator": "Ninja",
-      "configurationType": "RelWithDebInfo",
-      "cmakeExecutable": "/opt/cmake-3.14.7/bin/cmake",
-      "cmakeToolchain": "/vcpkg/scripts/buildsystems/vcpkg.cmake",
-      "remoteCopySourcesExclusionList": [ ".vs", ".git", "out" ],
-      "cmakeCommandArgs": "",
-      "buildCommandArgs": "",
-      "ctestCommandArgs": "",
-      "inheritEnvironments": [ "linux_arm" ],
-      "remoteMachineName": "rpi3packetsender",
-      "remoteCMakeListsRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/src",
-      "remoteBuildRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/build/${name}",
-      "remoteInstallRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/install/${name}",
-      "remoteCopySources": true,
-      "rsyncCommandArgs": "-t --delete --delete-excluded",
-      "remoteCopyBuildOutput": false,
-      "remoteCopySourcesMethod": "rsync",
-      "addressSanitizerRuntimeFlags": "detect_leaks=0",
-      "variables": [
-        {
-          "name": "Charm_DIR",
-          "value": "/home/pi/charm",
-          "type": "FILEPATH"
-        },
-        {
-          "name": "magic_enum_DIR",
-          "value": "/vcpkg/installed/arm-linux/share/magic_enum",
-          "type": "FILEPATH"
-        },
-        {
-          "name": "BOOST_INCLUDEDIR",
-          "value": "/vcpkg/installed/arm-linux/include",
-          "type": "FILEPATH"
-        },
-        {
-          "name": "unofficial-libuv_DIR",
-          "value": "/vcpkg/installed/arm-linux/share/unofficial-libuv",
-          "type": "FILEPATH"
-        },
-
-        {
-          "name": "NETWORKCARDINTERFACE",
-          "value": "192.168.168.121",
-          "type": "STRING"
-        }
-
-      ]
+      "addressSanitizerRuntimeFlags": "detect_leaks=0"
     }
-
   ]
 }

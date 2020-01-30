@@ -68,50 +68,59 @@ namespace Zweistein {
 
 		auto start = boost::chrono::high_resolution_clock::now();
 		auto lastposchange= boost::chrono::system_clock::now();
+
+		unsigned long RandomData(unsigned short& x_pos, unsigned short& position_y, int i,int sizeY, int maxX = 8) {
+			unsigned long l = Zweistein::Random::xor128();
+			
+
+			if (Zweistein::Random::ncalls % 30 != 0) {
+
+				position_y = ((unsigned short)(l >> 10)) % sizeY;
+				x_pos = (unsigned short)(l >> 20) % maxX;
+				int tmp = 0;
+			}
+			else {
+				bool pixelisblack = false;
+				int cpos = 0;
+				int bytepos = 0;
+				int pixx = 0;
+				int pixy = 0;
+				int le = message.length();
+				do {
+					cpos = ((counter / (ourfont::height * ourfont::width)) % message.length());
+					int curpix = counter % (ourfont::height * ourfont::width);
+					unsigned char currentChar = message[cpos];
+					const unsigned char* pixelbytes = ourfont::font[currentChar];
+					pixx = curpix / ourfont::height;
+					pixy = curpix % ourfont::height;
+					bytepos = pixx / 8 + pixy * ((ourfont::width + 7) / 8); //ourfont::height;
+					unsigned char c = pixelbytes[bytepos];
+					counter++;
+					pixelisblack = (1 << pixx) & c;
+				} while (!pixelisblack);
+
+
+				x_pos = (((ourfont::height - 1) - pixy) + xoffset) % maxX;
+				position_y = (sizeY - (cpos * ourfont::width + pixx + yoffset)) % sizeY;
+			}
+			return l;
+
+
+		}
 		void Mpsd8EventRandomData(unsigned short data[3], int i, int maxX = 8) {
 
 
 			data[0] = data[1] = data[2] = 0;
-			unsigned long l = Zweistein::Random::xor128();
+			
+			unsigned short x_pos = 0;
+			unsigned short position_y = 0;
+
+			unsigned long l=RandomData(x_pos, position_y, i, Mesy::Mpsd8Event::sizeY, maxX);
+
 			unsigned short amplitude = l & 1023L;
 			amplitude = 1;//
 			data[1] |= (amplitude & 0x7) << 13;
 			data[2] |= (amplitude & 0x7f << 3);
-
-			unsigned short x_pos = 0;
-			unsigned short position_y = 0;
-
-		 if(ncalls%10!=0){
-			
-			 position_y = ((unsigned short)(l >> 10)) % Mesy::Mpsd8Event::sizeY;
-			 x_pos = (unsigned short)(l >> 20) % maxX;
-			 int tmp = 0;
-		 }
-			
-		 else{
-				bool pixelisblack = false;
-			int cpos = 0;
-			int bytepos = 0;
-			int pixx = 0;
-			int pixy = 0;
-			int le = message.length();
-			do {
-				cpos = ((counter / (ourfont::height * ourfont::width)) % message.length());
-				int curpix = counter % (ourfont::height * ourfont::width);
-				unsigned char currentChar = message[cpos];
-				const unsigned char* pixelbytes = ourfont::font[currentChar];
-				pixx = curpix / ourfont::height;
-				pixy = curpix % ourfont::height;
-				bytepos = pixx / 8 + pixy * ((ourfont::width + 7) / 8); //ourfont::height;
-				unsigned char c = pixelbytes[bytepos];
-				counter++;
-				pixelisblack = (1 << pixx) & c;
-			} while (!pixelisblack);
-
-
-			x_pos = (((ourfont::height - 1) - pixy) + xoffset) % maxX;
-			position_y = (Mesy::Mpsd8Event::sizeY - (cpos * ourfont::width + pixx + yoffset)) % Mesy::Mpsd8Event::sizeY;
-		}
 			/*
 			if (counter < ourfont::height * ourfont::width * message.length()) {
 				image.at<char>(position_y, x_pos) = 255;

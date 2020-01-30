@@ -14,12 +14,12 @@
         {
           "name": "SIGSLOT_PATH",
           "value": "${projectDir}\\..\\sigslot\\include",
-          "type": "FILEPATH"
+          "type": "PATH"
         },
         {
           "name": "ASIO_EXTENSIONS_PATH",
           "value": "${projectDir}\\..\\asio-extensions\\include",
-          "type": "FILEPATH"
+          "type": "PATH"
         },
         {
           "name": "NETWORKCARDINTERFACE",
@@ -42,19 +42,19 @@
         {
           "name": "SIGSLOT_PATH",
           "value": "${projectDir}\\..\\sigslot\\include",
-          "type": "FILEPATH"
+          "type": "PATH"
         },
         {
           "name": "ASIO_EXTENSIONS_PATH",
           "value": "${projectDir}\\..\\asio-extensions\\include",
-          "type": "FILEPATH"
+          "type": "PATH"
         }
       ]
     },
     {
-      "name": "Taco102-Ubuntu-Debug",
+      "name": "Taco102-Ubuntu",
       "generator": "Unix Makefiles",
-      "configurationType": "Debug",
+      "configurationType": "Release",
       "buildRoot": "${projectDir}/out/build/${name}",
       "installRoot": "${projectDir}/out/install/${name}",
       "cmakeExecutable": "/usr/bin/cmake",
@@ -74,13 +74,13 @@
       "variables": [
         {
           "name": "ASIO_EXTENSIONS_PATH",
-          "value": "/home/alanghof/asio-extensions/include",
-          "type": "FILEPATH"
+          "value": "/home/alanghof/repos/Neu2d_det/asio-extensions/include",
+          "type": "PATH"
         },
         {
           "name": "SIGSLOT_PATH",
-          "value": "/home/alanghof/sigslot/include",
-          "type": "FILEPATH"
+          "value": "/home/alanghof/repos/Neu2d_det/sigslot/include",
+          "type": "PATH"
         },
         {
           "name": "NETWORKCARDINTERFACE",
