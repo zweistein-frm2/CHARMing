@@ -17,8 +17,10 @@ namespace Mesytec {
 		std::string mesytecdevice = "MesytecDevice";
 		std::string charmdevice = "CharmDevice";
 		std::string punkt = ".";
+		const int MaxDevices = 2;
 		void get(boost::property_tree::ptree& root, std::list<Mcpd8::Parameters>& _devlist, boost::asio::io_service& io_service) {
-			for (int n = 0; n < 2; n++) {
+			
+			for (int n = 0; n < MaxDevices; n++) {
 				Mcpd8::Parameters p1;
 				std::stringstream ss;
 				ss << oursystem << punkt << mesytecdevice << n << punkt;
@@ -32,6 +34,10 @@ namespace Mesytec {
 				else p1.mcpd_port = root.get<unsigned short>(s2 + "mcpd_port");
 				root.put<unsigned short>(s2 + "mcpd_port", p1.mcpd_port);
 
+				if (n == 0) p1.mcpd_id = root.get<unsigned char>(s2 + "mcpd_id", Mcpd8::Parameters::defaultmcpd_id);
+				else p1.mcpd_id = root.get<unsigned char>(s2 + "mcpd_id");
+				root.put<unsigned char>(s2 + "mcpd_id", p1.mcpd_id);
+
 				if (n == 0) p1.data_host = root.get<std::string>(s2 + "data_host", "0.0.0.0");
 				else p1.data_host = root.get<std::string>(s2 + "data_host");
 				root.put<std::string>(s2 + "data_host", p1.data_host);
@@ -40,7 +46,7 @@ namespace Mesytec {
 				ss2 << oursystem << punkt << charmdevice << n << punkt;
 				std::string s3 = ss2.str();
 				if (n == 0) p1.charm_port = root.get<unsigned short>(s3 + "charm_port", Charm::Parameters::defaultUdpPort);
-				else p1.charm_port = root.get<unsigned short>(s3 + "charm_port");
+				else p1.charm_port = root.get<unsigned short>(s3 + "charm_port", Charm::Parameters::defaultUdpPort);
 				root.put<unsigned short>(s3 + "charm_port", p1.charm_port);
 				std::string savednetworkcard;
 				if (n == 0) {
@@ -83,7 +89,7 @@ namespace Mesytec {
 				std::string m6 = std::string(a6.data(), a6.size());
 				root.put<std::string>(s2 + "datagenerator", m6);
 
-
+				
 
 				_devlist.push_back(p1);
 

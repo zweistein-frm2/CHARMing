@@ -27,7 +27,7 @@ namespace Mcpd8 {
 		static const int defaultLength;
 		CmdPacket() :Type(Zweistein::reverse_u16(Mesy::BufferType::COMMAND)), Length(defaultLength),
 			headerLength(defaultLength), Number(0), deviceStatusdeviceId(0) {
-			//memset(data, 0,sizeof(data));
+			
 		}
 		CmdPacket(const DataPacket & p)
 		{
@@ -47,7 +47,7 @@ namespace Mcpd8 {
 				std::cout << "ERROR in CmdPacket, " << items << " > 750" << std::endl;
 				items = 750;
 			}
-			memcpy(data, &p.param[0][1], items < 750 ? items : 750);
+			memcpy(data, &p.param[0][1], items < 750 ? sizeof(unsigned short)*items : sizeof(unsigned short) * 750);
 
 		}
 		static void setparameter(unsigned short param[3],long long value) {
@@ -58,7 +58,6 @@ namespace Mcpd8 {
 		static size_t Send(boost::asio::ip::udp::socket* socket, CmdPacket& cmdpacket, boost::asio::ip::udp::endpoint &mcpd_endpoint) {
 			unsigned short items = (cmdpacket.Length - cmdpacket.headerLength);
 			cmdpacket.data[items] = 0xffff;
-			cmdpacket.Length +=1;
 			Mcpd8::DataPacket::settimeNow48bit(cmdpacket.time);
 			cmdpacket.headerchksum = 0;
 			unsigned short chksum = cmdpacket.headerchksum;

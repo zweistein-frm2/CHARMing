@@ -10,6 +10,7 @@
 #include <string>
 #include <boost/filesystem.hpp>
 
+
 namespace Zweistein {
 	boost::filesystem::path GetHomePath() {
 		std::string home;

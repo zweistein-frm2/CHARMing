@@ -6,6 +6,7 @@
  ***************************************************************************/
 
 #include <boost/array.hpp>
+#define BOOST_CHRONO_VERSION 2
 #include <boost/chrono.hpp>
 #include <boost/asio.hpp>
 #include <boost/filesystem.hpp>
@@ -104,21 +105,31 @@ void handle_receive(const boost::system::error_code& error,
 				}
 				std::cout << cp << std::endl;
 			}
+			
+			if ((cp.deviceStatusdeviceId >> 8) != devid) {
+					cp.cmd |= (unsigned short) 0x8000; 
+					boost::mutex::scoped_lock lock(coutGuard);
+					std::cout << "device id mismatch: our id= " << devid << std::endl;
+					// following switch will not find any values then
+			}
+			
+			
+
 			switch (cp.cmd) {
 			case Mcpd8::Cmd::START:
 				daq_running = Mcpd8::Status::DAQ_Running;
 				remote_endpoint=current_remote_endpoint;
-				sendanswer = false;
 				break;
 			case Mcpd8::Cmd::STOP:
 				daq_running = Mcpd8::Status::DAQ_Stopped;
 				remote_endpoint = current_remote_endpoint;
-				sendanswer = false;
 				break;
 			case Mcpd8::Cmd::SETID:
+
 				devid = cp.data[0];
 				cp.Length = Mcpd8::CmdPacket::defaultLength + 1;
 				remote_endpoint = current_remote_endpoint;
+				
 				break;
 
 			case Mcpd8::Cmd::SETPROTOCOL:
@@ -283,7 +294,7 @@ void handle_receive(const boost::system::error_code& error,
 					std::cout << "Version:" << cp.data[0] << "." << cp.data[1] << " FPGA Version:" << (cp.data[2]>>8)<<"."<<(cp.data[2]&0xff) << std::endl;
 
 				}
-				remote_endpoint = current_remote_endpoint;
+				//remote_endpoint = current_remote_endpoint;
 				break;
 			}
 
@@ -325,7 +336,13 @@ void handle_receive(const boost::system::error_code& error,
 
 			case Mcpd8::Internal_Cmd::SETNUCLEORATEEVENTSPERSECOND:
 			{
-				assert(cp.Length > Mcpd8::CmdPacket::defaultLength + 2);
+				if(cp.Length < Mcpd8::CmdPacket::defaultLength + 2) {
+					cp.cmd != 0x8000;
+					boost::mutex::scoped_lock lock(coutGuard);
+					std::cout << "needs  2 data words as parameter" << std::endl;
+					break;
+				}
+				
 				long rate = cp.data[1] << 16 | cp.data[0];
 				setRate(rate);
 				break;
@@ -337,7 +354,7 @@ void handle_receive(const boost::system::error_code& error,
 				Mcpd8::CmdPacket::Send(psocket, cp, current_remote_endpoint);
 				{
 					boost::mutex::scoped_lock lock(coutGuard);
-					std::cout << "\rSENDING ANSWER:" << cp << std::endl;
+					std::cout<<"\r"<< boost::chrono::time_fmt(boost::chrono::timezone::local) << boost::chrono::system_clock::now() << " SENDING ANSWER:" << cp << std::endl;
 				}
 			}
 		

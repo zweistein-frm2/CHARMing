@@ -9,7 +9,7 @@
 // or project specific include files.
 
 #pragma once
-
+#define BOOST_CHRONO_VERSION 2
 #include <iostream>
 #include <boost/thread.hpp>
 #include <boost/atomic.hpp>

@@ -166,19 +166,21 @@ int main(int argc, char* argv[])
 		else  {
 		    try {
 				Mesytec::Config::get(root, _devlist,io_service);
+				
 			}
 			catch (boost::exception &) { // exception expected, //std::cout << boost::diagnostic_information(e); 
 			}
 			boost::property_tree::write_json(inipath.string(), root);
+			boost::property_tree::write_json(std::cout, root);
 			t = [&io_service, &ptrmsmtsystem1, &_devlist]() {
 				try {
 					ptrmsmtsystem1->connect(_devlist, io_service);
 					io_service.run();
 				}
-				catch (Mesytec::my_error& x) {
+				catch (Mesytec::cmd_error& x) {
 					boost::mutex::scoped_lock lock(coutGuard);
 					if (int const* mi = boost::get_error_info<Mesytec::my_info>(x)) {
-						auto  my_code = magic_enum::enum_cast<Mesytec::my_errorcode>(*mi);
+						auto  my_code = magic_enum::enum_cast<Mesytec::cmd_errorcode>(*mi);
 						if (my_code.has_value()) {
 							auto c1_name = magic_enum::enum_name(my_code.value());
 							std::cout << c1_name<<std::endl;
@@ -202,15 +204,7 @@ int main(int argc, char* argv[])
 
 		if(write2disk) worker_threads.create_thread([&io_service, &ptrmsmtsystem1] {Mesytec::writeListmode(io_service,*ptrmsmtsystem1); });
 		
-		for (int i = 0; i < 10; i++) {
-			if (ptrmsmtsystem1->connected) {
-				worker_threads.create_thread([&io_service, &ptrmsmtsystem1] {Zweistein::populateHistogram(io_service, *ptrmsmtsystem1); });
-				break;
-			
-			}
-			boost::this_thread::sleep_for(boost::chrono::milliseconds(250));
-		}
-				
+					
 		boost::chrono::system_clock::time_point start = boost::chrono::system_clock::now();
 		int i = 0;
 		long long lastcount = 0;
@@ -221,6 +215,7 @@ int main(int argc, char* argv[])
 		
 
 		if (inputfromlistfile) {
+			worker_threads.create_thread([&io_service, &ptrmsmtsystem1] {Zweistein::populateHistogram(io_service, *ptrmsmtsystem1); });
 			// nothing to do really,
 			while (!io_service.stopped()) {
 				boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
@@ -232,19 +227,19 @@ int main(int argc, char* argv[])
 
 			for (int i = 0; i < 10; i++) {
 				if (ptrmsmtsystem1->connected) {
+					worker_threads.create_thread([&io_service, &ptrmsmtsystem1] {Zweistein::populateHistogram(io_service, *ptrmsmtsystem1); });
 					boost::function<void()> sendstartcmd = [&io_service, &ptrmsmtsystem1, &_devlist]() {
-						unsigned long rate = 50000;
+						unsigned long rate = 1850000;
 						try {
-							for (std::pair<unsigned short, Mesytec::DeviceParameter> pair : ptrmsmtsystem1->deviceparam) {
-								ptrmsmtsystem1->SendAll(Mcpd8::Cmd::START);
-								if (pair.second.datagenerator == Mesytec::DataGenerator::NucleoSimulator) {
-									ptrmsmtsystem1->Send(pair.second, Mcpd8::Internal_Cmd::SETNUCLEORATEEVENTSPERSECOND, rate);//1650000 is maximum
+							ptrmsmtsystem1->SendAll(Mcpd8::Cmd::START);
+							for (auto& kvp : ptrmsmtsystem1->deviceparam) {
+								if (kvp.second.datagenerator == Mesytec::DataGenerator::NucleoSimulator) {
+									ptrmsmtsystem1->Send(kvp, Mcpd8::Internal_Cmd::SETNUCLEORATEEVENTSPERSECOND, rate);//1650000 is maximum
 								}
-								if (pair.second.datagenerator == Mesytec::DataGenerator::CharmSimulator) {
-									ptrmsmtsystem1->Send(pair.second, Mcpd8::Internal_Cmd::CHARMSETEVENTRATE, rate); // oder was du willst
-									ptrmsmtsystem1->Send(pair.second, Mcpd8::Internal_Cmd::CHARMPATTERNGENERATOR, 1); // oder was du willst
+								if (kvp.second.datagenerator == Mesytec::DataGenerator::CharmSimulator) {
+									ptrmsmtsystem1->Send(kvp, Mcpd8::Internal_Cmd::CHARMSETEVENTRATE, rate); // oder was du willst
+									ptrmsmtsystem1->Send(kvp, Mcpd8::Internal_Cmd::CHARMPATTERNGENERATOR, 1); // oder was du willst
 								}
-								return;
 							}
 						}
 						catch (boost::exception& e) {
@@ -252,8 +247,6 @@ int main(int argc, char* argv[])
 							std::cout << boost::diagnostic_information(e);
 							
 						}
-						
-
 					};
 					worker_threads.create_thread(boost::bind(sendstartcmd));
 					break;
@@ -282,14 +275,17 @@ int main(int argc, char* argv[])
 				}
 				io_service.run_one();
 			};
-			ptrmsmtsystem1->SendAll(Mcpd8::Cmd::STOP);
 		}
 	}
 	catch (boost::exception & e) {
 		boost::mutex::scoped_lock lock(coutGuard);
 		std::cout<< boost::diagnostic_information(e);
 	}
-	if (ptrmsmtsystem1)delete ptrmsmtsystem1;
+	if (ptrmsmtsystem1) {
+		ptrmsmtsystem1->SendAll(Mcpd8::Cmd::STOP);
+		delete ptrmsmtsystem1;
+	}
+
 	boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
 	{
 		boost::mutex::scoped_lock lock(coutGuard);

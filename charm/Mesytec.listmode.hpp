@@ -17,10 +17,10 @@ namespace Mesytec {
 		class Read {
 			boost::array< Mcpd8::DataPacket, 1> recv_buf;
 		public:
-			Read(boost::function<void(Mcpd8::DataPacket &)> abfunc,Mcpd8::Data &_Data, std::map<unsigned short, Mesytec::DeviceParameter> &_deviceparam):deviceparam(_deviceparam),data(_Data),ab(abfunc),listmoderead_first(true){}
+			Read(boost::function<void(Mcpd8::DataPacket &)> abfunc,Mcpd8::Data &_Data, std::map<const unsigned short, Mesytec::DeviceParameter> &_deviceparam):deviceparam(_deviceparam),data(_Data),ab(abfunc),listmoderead_first(true){}
 		private:
 			Mcpd8::Data& data;
-			std::map<unsigned short, Mesytec::DeviceParameter>& deviceparam;
+			std::map<const unsigned short, Mesytec::DeviceParameter>& deviceparam;
 			bool listmoderead_first ;
 			boost::function<void(Mcpd8::DataPacket &)> ab;
 			void listmoderead_analyzebuffer(const boost::system::error_code& error,
@@ -29,9 +29,6 @@ namespace Mesytec {
 					listmoderead_first = false;
 					Mesytec::DeviceParameter mp;
 					mp.lastbufnum = datapacket.Number - 1;
-
-					DeviceParameter::minid = Mcpd8::DataPacket::getId(datapacket.deviceStatusdeviceId);
-					DeviceParameter::maxid = Mcpd8::DataPacket::getId(datapacket.deviceStatusdeviceId);
 
 					switch (datapacket.GetBuffertype()) {
 					case Mesy::BufferType::DATA:

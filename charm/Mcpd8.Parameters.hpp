@@ -14,16 +14,23 @@ namespace Mcpd8 {
 	struct Parameters {
 		static const std::string defaultIpAddress;
 		static const unsigned short defaultUdpPort;
+		static const unsigned char defaultmcpd_id;
 		EventDataFormat eventdataformat;
 		std::string networkcard;
 		std::string mcpd_ip;
 		std::string data_host;
 		unsigned short mcpd_port;
 		unsigned short charm_port;
+		unsigned char mcpd_id;
 		Mesytec::DataGenerator datagenerator;
+		void print(std::ostream& os) const {
+			using namespace magic_enum::ostream_operators;
+			std::cout << "mcpd_ip:" << mcpd_ip << " networkcard:" << networkcard << " data_host:" << data_host << " mcpd_port:" << mcpd_port << " eventdataformat:" << eventdataformat << " datagenerator:" << " mcpd_id:" << mcpd_id << std::endl;
+		}
 	};
 	const std::string Parameters::defaultIpAddress = "192.168.168.121";
 	const unsigned short Parameters::defaultUdpPort = 54321;
+	const unsigned char Parameters::defaultmcpd_id = 0;
 }
 
 namespace Charm {
