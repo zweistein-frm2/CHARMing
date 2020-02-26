@@ -50,6 +50,8 @@
     <ClInclude Include="Zweistein.GetLocalInterfaces.hpp" />
     <ClInclude Include="Zweistein.Histogram.hpp" />
     <ClInclude Include="Zweistein.HomePath.hpp" />
+    <ClInclude Include="Zweistein.Locks.hpp" />
+    <ClInclude Include="Zweistein.populateHistograms.hpp" />
     <ClInclude Include="Zweistein.PrettyBytes.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

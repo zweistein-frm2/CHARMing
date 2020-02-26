@@ -40,7 +40,12 @@ add_custom_command(
         TARGET ${PROJECT_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
                 ${CMAKE_SOURCE_DIR}/test.py
-                ${CMAKE_CURRENT_BINARY_DIR}/test.py)
+                ${CMAKE_CURRENT_BINARY_DIR}/test.py
+        COMMAND ${CMAKE_COMMAND} -E copy
+                ${CMAKE_SOURCE_DIR}/charm.py
+                ${CMAKE_CURRENT_BINARY_DIR}/charm.py
+                
+              )
 
 target_sources(${PROJECT_NAME}
 PRIVATE

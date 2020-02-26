@@ -54,7 +54,7 @@
       "name": "x64-Release",
       "generator": "Ninja",
       "configurationType": "RelWithDebInfo",
-      "buildRoot": "${projectDir}\\out\\build\\${name}",
+      "buildRoot": "C:\\users\\alanghof\\source\\repos\\entangle\\entangle\\device\\charm",
       "installRoot": "${projectDir}\\out\\install\\${name}",
       "cmakeCommandArgs": "",
       "buildCommandArgs": "-v",

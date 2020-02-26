@@ -10,7 +10,7 @@
 namespace Mcpd8 {
 	class Data {
 	public:
-		static const int EVENTQUEUESIZE = 500000; // high number needed
+		static const int EVENTQUEUESIZE = 1000*1000; // high number needed
 		boost::atomic<long long> evntcount = 0;
 		boost::lockfree::spsc_queue<Zweistein::Event, boost::lockfree::capacity<EVENTQUEUESIZE>> evntqueue;
 		boost::atomic<EventDataFormat> Format = EventDataFormat::Undefined;

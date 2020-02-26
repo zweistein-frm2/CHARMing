@@ -36,15 +36,18 @@
 #include "Mcpd8.Parameters.hpp"
 #include "Mesytec.config.hpp"
 #include "Mesytec.enums.Generator.hpp"
-#include "Zweistein.Histogram.hpp"
+#include "Zweistein.populateHistograms.hpp"
 #include <opencv2/highgui.hpp>
+#include <Zweistein.ThreadPriority.hpp>
 
 std::string PROJECT_NAME("charm");
 
 using boost::asio::ip::udp;
 
-boost::mutex coutGuard;
-boost::thread_group worker_threads;
+EXTERN_FUNCDECLTYPE boost::mutex coutGuard;
+EXTERN_FUNCDECLTYPE boost::thread_group worker_threads;
+
+std::vector<Histogram> histograms = std::vector<Histogram>(4);
 
 namespace po = boost::program_options;
 void conflicting_options(const po::variables_map& vm,
@@ -199,7 +202,14 @@ int main(int argc, char* argv[])
 			};
 		}
 
-		worker_threads.create_thread(boost::bind(t));
+		auto pt = new boost::thread(boost::bind(t));
+#ifdef WIN32
+		Zweistein::Thread::SetThreadPriority(pt->native_handle(), Zweistein::Thread::PRIORITY::HIGH);
+#else
+		Zweistein::Thread::SetThreadPriority(pt->native_handle(), Zweistein::Thread::PRIORITY::REALTIME);
+		// linux needs realtime priority , otherwise occasional missed packets
+#endif
+		worker_threads.add_thread(pt);
 		boost::this_thread::sleep_for(boost::chrono::milliseconds(500));// so msmtsystem1 should be connected
 
 		if(write2disk) worker_threads.create_thread([&io_service, &ptrmsmtsystem1] {Mesytec::writeListmode(io_service,*ptrmsmtsystem1); });
@@ -215,7 +225,7 @@ int main(int argc, char* argv[])
 		
 
 		if (inputfromlistfile) {
-			worker_threads.create_thread([&io_service, &ptrmsmtsystem1] {Zweistein::populateHistogram(io_service, *ptrmsmtsystem1); });
+			worker_threads.create_thread([&io_service, &ptrmsmtsystem1] {Zweistein::populateHistograms(io_service, *ptrmsmtsystem1); });
 			// nothing to do really,
 			while (!io_service.stopped()) {
 				boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
@@ -227,7 +237,7 @@ int main(int argc, char* argv[])
 
 			for (int i = 0; i < 10; i++) {
 				if (ptrmsmtsystem1->connected) {
-					worker_threads.create_thread([&io_service, &ptrmsmtsystem1] {Zweistein::populateHistogram(io_service, *ptrmsmtsystem1); });
+					worker_threads.create_thread([&io_service, &ptrmsmtsystem1] {Zweistein::populateHistograms(io_service, *ptrmsmtsystem1); });
 					boost::function<void()> sendstartcmd = [&io_service, &ptrmsmtsystem1, &_devlist]() {
 						unsigned long rate = 1850000;
 						try {
@@ -249,13 +259,21 @@ int main(int argc, char* argv[])
 						}
 					};
 					worker_threads.create_thread(boost::bind(sendstartcmd));
+					boost::this_thread::sleep_for(boost::chrono::milliseconds(500));
 					break;
 
 				}
 				boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
 			
 			}
-			std::cout << std::endl;
+
+
+			{
+				boost::mutex::scoped_lock lock(coutGuard);
+				std::cout << std::endl;
+				std::cout << "EVENTQUEUESIZE=" << Mcpd8::Data::EVENTQUEUESIZE << std::endl;
+			}
+
 			
 			while (!io_service.stopped()) {
 				boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
@@ -265,7 +283,7 @@ int main(int argc, char* argv[])
 				double evtspersecond = sec.count() != 0 ? (double)(currentcount - lastcount) / sec.count() : 0;
 				{
 					boost::mutex::scoped_lock lock(coutGuard);
-					std::cout << "\r" <<std::setprecision(1) <<std::fixed<< evtspersecond << " Events/s, (" << Zweistein::PrettyBytes((size_t)(evtspersecond * sizeof(Mesy::Mpsd8Event))) << "/s)\t";// << std::endl;
+					std::cout << "\r" <<std::setprecision(0) <<std::fixed<< evtspersecond << " Events/s, (" << Zweistein::PrettyBytes((size_t)(evtspersecond * sizeof(Mesy::Mpsd8Event))) << "/s)\t";// << std::endl;
 					lastcount = currentcount;
 					size_t inqueue = ptrmsmtsystem1->data.evntqueue.read_available();
 					if (inqueue > 0)	std::cout << inqueue << " Events in queue" << std::endl;
@@ -281,8 +299,11 @@ int main(int argc, char* argv[])
 		boost::mutex::scoped_lock lock(coutGuard);
 		std::cout<< boost::diagnostic_information(e);
 	}
+	
+
 	if (ptrmsmtsystem1) {
-		ptrmsmtsystem1->SendAll(Mcpd8::Cmd::STOP);
+		try {ptrmsmtsystem1->SendAll(Mcpd8::Cmd::STOP);}
+		catch (Mesytec::cmd_error& x) {}
 		delete ptrmsmtsystem1;
 	}
 

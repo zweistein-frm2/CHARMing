@@ -2,53 +2,125 @@
 //
 #define PY_ARRAY_UNIQUE_SYMBOL pbcvt_ARRAY_API
 #include <boost/python.hpp>
+#include <boost/python/tuple.hpp>
 #include <pyboostcvconverter/pyboostcvconverter.hpp>
 #include <boost/python/numpy.hpp>
 #include <iostream>
 #include "../charm/PacketSender/Mesytec.RandomData.hpp"
 #include <opencv2/core.hpp>
 #include <opencv2/core/mat.hpp>
+
+#include <boost/geometry.hpp>
+#include <boost/geometry/geometries/point_xy.hpp>
+#include <boost/geometry/geometries/polygon.hpp>
+
+#include <boost/geometry/io/wkt/wkt.hpp>
+#include "../charm/Zweistein.Histogram.hpp"
 namespace p = boost::python;
 namespace np = boost::python::numpy;
 
+typedef boost::geometry::model::d2::point_xy<int> point_type;
+typedef boost::geometry::model::polygon<point_type> polygon_type;
 
-np::ndarray GetHistogram() {
+np::ndarray GetHistogramNumpy() {
 
     int maxX = 3;
-    int maxY = 4;
-    p::tuple shape = p::make_tuple(maxY,maxX);
+    int maxY = 40;
+    p::tuple shape = p::make_tuple(maxY, maxX);
     np::dtype dtype = np::dtype::get_builtin<float>();
-    np::ndarray a = np::zeros(shape, dtype);
+    np::ndarray histogram = np::zeros(shape, dtype);
     int z = 0;
 
     unsigned  short x_pos;
     unsigned short position_y;
-    for (int i = 0; i < 1000; i++) {
-        unsigned long l = Zweistein::Random::RandomData(x_pos, position_y, i, maxY, maxX);
-        a[x_pos,position_y] += 1;
-    }
-            
-    return a;
-}
-
-cv::Mat GetHistogram_cv() {
-    int maxX = 64;
-    int maxY = 1024;
-    cv::Mat_<float> histogram;
-    histogram = cv::Mat_<float>::zeros(maxY,maxX);
-
-    unsigned  short x_pos;
-    unsigned short position_y;
-    long imax = maxX * maxY;
+    long imax = 10 * maxX * maxY;
     for (int i = 0; i < imax; i++) {
         unsigned long l = Zweistein::Random::RandomData(x_pos, position_y, i, maxY, maxX);
-        histogram.at<float>(position_y, x_pos) += 1.0;
+        histogram[x_pos, maxY - position_y - 1] += 1;
     }
-    
-   
+
     return histogram;
+}
+/*
+void GetHistogramOpenCV(cv::Mat &histogram) {
+   
+       
+    unsigned  short x_pos;
+    unsigned short position_y;
+    long imax = 10 * histogram.cols * histogram.rows;
+    for (int i = 0; i < imax; i++) {
+        unsigned long l = Zweistein::Random::RandomData(x_pos, position_y, i, histogram.rows, histogram.cols);
+        histogram.at<int32_t>(histogram.rows - position_y - 1, x_pos) += 1;
+    }
+
+
+    
 
 }
+
+
+//https://www.boost.org/doc/libs/1_72_0/libs/geometry/doc/html/geometry/reference/algorithms/within/within_2.html
+// boost::geometry::within(p, poly)
+//https://www.boost.org/doc/libs/1_72_0/libs/geometry/doc/html/geometry/reference/algorithms/envelope/envelope_2.html
+struct Histogram {
+    polygon_type roi;
+    boost::geometry::model::box<point_type> box;
+    long long count;
+    cv::Mat histogram;
+    Histogram() {
+        std::string wkt = "";
+        setRoi(wkt);
+    }
+    void setRoi(std::string &wkt) {
+        boost::geometry::read_wkt(
+            "POLYGON((0 0,64 0,64 1024, 0 0),())", roi);
+     
+        boost::geometry::envelope(roi, box);
+        int width=box.max_corner().get<0>() - box.min_corner().get<0>();
+        int height = box.max_corner().get<1>() - box.min_corner().get<1>();
+        histogram = cv::Mat_<int32_t>::zeros(height,width);
+        std::cout << "setRoi:" << width << "," << height << std::endl;
+        
+    }
+    boost::python::tuple get() {
+
+        GetHistogramOpenCV(histogram);
+        return boost::python::make_tuple(count, &histogram);
+    }
+};
+
+*/
+
+std::vector<Histogram> histograms = std::vector<Histogram>(1);
+
+struct NeutronMeasurement {
+    NeutronMeasurement() {
+     
+    }
+    ~NeutronMeasurement() {
+        std::cout << "~NeutronMeasurement()" << std::endl;
+    }
+
+    void connectmesytec(){}
+    void connectcharm(){}
+    void start(){}
+    void stop() {}
+    void _continue() {}
+  
+   Histogram* getHistogram(){
+       //auto a = histogram[0].get();
+            return &histograms[0];
+    }
+
+private:
+    long long MaxCount;
+    long long DurationNanoSeconds;
+    
+    
+
+};
+
+
 
 #if (PY_VERSION_HEX >= 0x03000000)
 
@@ -73,8 +145,18 @@ BOOST_PYTHON_MODULE(numpycpp)
       to_python_converter<cv::Mat,
         pbcvt::matToNDArrayBoostConverter>();
     pbcvt::matFromNDArrayBoostConverter();
-    def("GetHistogram", GetHistogram);
-    def("GetHistogram_cv", GetHistogram_cv);
+    class_<Histogram>("Histogram")
+        .def("get", &Histogram::get)
+        ;
+    class_< NeutronMeasurement>("NeutronMeasurement")
+        .def("connectmesytec",&NeutronMeasurement::connectmesytec)
+        .def("connectcharm", &NeutronMeasurement::connectcharm)
+        .def("start", &NeutronMeasurement::start)
+        .def("stop", &NeutronMeasurement::stop)
+        .def("getHistogram", &NeutronMeasurement::getHistogram, return_internal_reference<>())
+        ;
+    def("GetHistogramNumpy", GetHistogramNumpy);
+   
 }
 
 

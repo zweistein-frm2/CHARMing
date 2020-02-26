@@ -86,14 +86,14 @@ namespace Mcpd8 {
 			auto cmd_2 = magic_enum::enum_cast<Mcpd8::Internal_Cmd>(realcmd);
 			
 			std::stringstream ss_cmd;
-			if (cmd_1.has_value()) 	ss_cmd << cmd_1 << "(" << static_cast<magic_enum::underlying_type_t<Mcpd8::Cmd>>(realcmd) << ")";
+			if (cmd_1.has_value()) 	ss_cmd << cmd_1 << "("<< static_cast<magic_enum::underlying_type_t<Mcpd8::Cmd>>(realcmd) << ")";
 			else {
 				ss_cmd << cmd_2;
 				if (!cmd_2.has_value()) { 
 					if (realcmd == Mcpd8::Internal_Cmd::SETNUCLEORATEEVENTSPERSECOND) {
 						ss_cmd << "(SETNUCLEORATEEVENTSPERSECOND)";
 					}
-					else ss_cmd << "(0x" << std::hex << cmd << std::dec << ")"; 
+					else ss_cmd << "(" << cmd << ")"; 
 				}
 				else ss_cmd << "(" << static_cast<magic_enum::underlying_type_t<Mcpd8::Internal_Cmd>>(realcmd) << ")";
 			}

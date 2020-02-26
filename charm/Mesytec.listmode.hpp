@@ -17,10 +17,10 @@ namespace Mesytec {
 		class Read {
 			boost::array< Mcpd8::DataPacket, 1> recv_buf;
 		public:
-			Read(boost::function<void(Mcpd8::DataPacket &)> abfunc,Mcpd8::Data &_Data, std::map<const unsigned short, Mesytec::DeviceParameter> &_deviceparam):deviceparam(_deviceparam),data(_Data),ab(abfunc),listmoderead_first(true){}
+			Read(boost::function<void(Mcpd8::DataPacket &)> abfunc,Mcpd8::Data &_Data, std::map<const unsigned char, Mesytec::DeviceParameter> &_deviceparam):deviceparam(_deviceparam),data(_Data),ab(abfunc),listmoderead_first(true){}
 		private:
 			Mcpd8::Data& data;
-			std::map<const unsigned short, Mesytec::DeviceParameter>& deviceparam;
+			std::map<const unsigned char, Mesytec::DeviceParameter>& deviceparam;
 			bool listmoderead_first ;
 			boost::function<void(Mcpd8::DataPacket &)> ab;
 			void listmoderead_analyzebuffer(const boost::system::error_code& error,
@@ -48,7 +48,7 @@ namespace Mesytec {
 
 						break;
 					}
-					deviceparam.insert(std::pair<unsigned short, Mesytec::DeviceParameter>(Mcpd8::DataPacket::getId(datapacket.deviceStatusdeviceId), mp));
+					deviceparam.insert(std::pair<unsigned char, Mesytec::DeviceParameter>(Mcpd8::DataPacket::getId(datapacket.deviceStatusdeviceId), mp));
 					boost::this_thread::sleep_for(boost::chrono::milliseconds(500));
 				}
 				ab(datapacket);

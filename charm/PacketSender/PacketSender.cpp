@@ -32,7 +32,7 @@
 
 using boost::asio::ip::udp;
 boost::mutex coutGuard;
-boost::thread_group worker_threads;
+boost::thread_group worker_threads; // not used
 
 boost::array< Mcpd8::CmdPacket, 1> cmd_recv_buf;
 
@@ -58,6 +58,14 @@ Mesytec::Mpsd8::Module Module[N_MPSD8];
 unsigned short Module_Id[N_MPSD8] = { Mesy::ModuleId::MPSD8 ,Mesy::ModuleId::MPSD8 ,Mesy::ModuleId::MPSD8 ,Mesy::ModuleId::MPSD8 ,
 									Mesy::ModuleId::MPSD8 ,Mesy::ModuleId::MPSD8 ,Mesy::ModuleId::MPSD8 ,Mesy::ModuleId::MPSD8 };
 
+unsigned short adc[2];
+unsigned short daq[2];
+unsigned short ttloutputs;
+unsigned short ttlinputs;
+unsigned short eventcounter[3];
+unsigned short param[4][3];
+
+unsigned short auxtimer[4];
 
 
 void setRate(long requested) {
@@ -151,10 +159,14 @@ void handle_receive(const boost::system::error_code& error,
 
 
 			case Mcpd8::Cmd::SETCELL: {
+				//
 				break;
 			}
 
 			case Mcpd8::Cmd::SETAUXTIMER: {
+				assert(cp.data[0] >= 0 && cp.data[0] < 4);
+				auxtimer[cp.data[0]] = cp.data[1];
+				cp.Length = Mcpd8::CmdPacket::defaultLength + 2;
 				break;
 			}
 			case Mcpd8::Cmd::SETPARAMETERS: {
@@ -175,12 +187,15 @@ void handle_receive(const boost::system::error_code& error,
 
 			case Mcpd8::Cmd::GETPARAMETERS:
 			{
-				cp.data[0] = 0; //ADC1
-				cp.data[1] = 0; //ADC2
-				cp.data[2] = 0; //DAC1
-				cp.data[3] = 0; //DAC2
-				cp.data[4] = 0; // TTLOUTPUTS (2bits)
-				cp.data[5] = 0; // TTL inputs (6 bits)
+				cp.data[0] = adc[0]; //ADC1
+				cp.data[1] = adc[1]; //ADC2
+				cp.data[2] = daq[0]; //DAC1
+				cp.data[3] = daq[1]; //DAC2
+				cp.data[4] = ttloutputs; // TTLOUTPUTS (2bits)
+				cp.data[5] = ttlinputs; // TTL inputs (6 bits)
+				memcpy(&cp.data[6], &eventcounter[0], sizeof(unsigned short) * 3);
+				memcpy(&cp.data[9], &param[0][0], sizeof(unsigned short) * 12);
+				/*
 				long long eventcounter = 0;
 				long long param0 = 0;
 				long long param1 = 0;
@@ -192,6 +207,7 @@ void handle_receive(const boost::system::error_code& error,
 				Mcpd8::CmdPacket::setparameter(&cp.data[12], param1);
 				Mcpd8::CmdPacket::setparameter(&cp.data[15], param2);
 				Mcpd8::CmdPacket::setparameter(&cp.data[18], param3);
+				*/
 				cp.Length = Mcpd8::CmdPacket::defaultLength + 21;
 				break;
 			}
@@ -199,25 +215,29 @@ void handle_receive(const boost::system::error_code& error,
 			case Mcpd8::Cmd::SETGAIN_MPSD: {
 				assert(cp.data[0] >= 0 && cp.data[0] < N_MPSD8);
 				if (cp.data[1] == N_MPSD8) {
-					for (int i = 0; i < N_MPSD8; i++) Module[cp.data[0]].gain[i] = cp.data[2];
-
+					for (int i = 0; i < N_MPSD8; i++) Module[cp.data[0]].gain[i] = (unsigned char) cp.data[2];
 				}
-				else Module[cp.data[0]].gain[cp.data[1]] = cp.data[2];
-
+				else Module[cp.data[0]].gain[cp.data[1]] = (unsigned char)cp.data[2];
+				cp.Length = Mcpd8::CmdPacket::defaultLength + 3;
 
 				break;
 			}
 
+			
 			case Mcpd8::Cmd::SETTHRESH: {
 				assert(cp.data[0] >= 0 && cp.data[0] < N_MPSD8);
-				Module[cp.data[0]].threshold = cp.data[1];
-
+				Module[cp.data[0]].threshold = (unsigned char) cp.data[1];
+				cp.Length = Mcpd8::CmdPacket::defaultLength + 2;
 
 				break;
 			}
 			case Mcpd8::Cmd::SETMODE: {
 				if (cp.data[0] == N_MPSD8) for (int i = 0; i < N_MPSD8; i++) Module[i].mode = (Mesytec::Mpsd8::Mode) cp.data[1];
-				assert(cp.data[0] >= 0 && cp.data[0] < N_MPSD8);
+				else {
+					assert(cp.data[0] >= 0 && cp.data[0] < N_MPSD8);
+					Module[cp.data[0]].mode = (Mesytec::Mpsd8::Mode) cp.data[1];
+				}
+				cp.Length = Mcpd8::CmdPacket::defaultLength + 2;
 				break;
 			}
 
@@ -253,19 +273,15 @@ void handle_receive(const boost::system::error_code& error,
 
 			case Mcpd8::Internal_Cmd::READID:
 			{
-				for (int i = 0; i < N_MPSD8; i++) {
-					cp.data[i] = Module_Id[i];
-				}
-				cp.Length = Mcpd8::CmdPacket::defaultLength + N_MPSD8;
+				for (int i = 0; i < N_MPSD8; i++) {	cp.data[i] = Module_Id[i];	}
+				cp.data[N_MPSD8] = 0xadea;
 				{
 					boost::mutex::scoped_lock lock(coutGuard);
 					for (int i = 0; i < N_MPSD8; i++) {
 						std::cout << Module_Id[i] << " ";
-
 					}
-
 				}
-
+				cp.Length = Mcpd8::CmdPacket::defaultLength + N_MPSD8 + 1;
 				break;
 			}
 			case Mcpd8::Internal_Cmd::GETVER:
@@ -453,8 +469,9 @@ int main(int argc, char* argv[])
 	int length = 0;
 	
 	do{
+		boost::thread_group worker_threads2;
 		try {
-
+			
 			boost::asio::io_service io_service;
 			boost::asio::signal_set signals(io_service, SIGINT, SIGSEGV);
 			//signals.async_wait(boost::bind(&boost::asio::io_service::stop, &io_service));
@@ -511,7 +528,7 @@ int main(int argc, char* argv[])
 				}
 
 			};
-			worker_threads.create_thread(boost::bind(t));
+			worker_threads2.create_thread(boost::bind(t));
 			boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
 			int iloop = 0;
 			int innerloop = 0;
@@ -598,8 +615,9 @@ int main(int argc, char* argv[])
 			break;
 		}
 		
-		worker_threads.interrupt_all();
+		worker_threads2.interrupt_all();
 		boost::this_thread::sleep_for(boost::chrono::seconds(5));
+		
 		
 		//return -1;
    }while (retry);

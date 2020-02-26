@@ -21,7 +21,7 @@ namespace Zweistein {
 		Event(Mesy::Mpsd8Event *mpsd8ev,const unsigned long long &headertime,unsigned short offsetX, Mesy::ModuleId modules[Mesy::Mpsd8Event::sizeSLOTS] ) {
 			nanoseconds = mpsd8ev->TIMESTAMP()+headertime;
 			Amplitude = mpsd8ev->AMPLITUDE();
-			Y = mpsd8ev->POSITION();
+			Y = Mesy::Mpsd8Event::sizeY-  mpsd8ev->POSITION()-1;
 			//Y = _test % 1024;
 			//_test++;
 			type = mpsd8ev->ID();
@@ -47,7 +47,7 @@ namespace Zweistein {
 			type = mdllev->ID();
 			nanoseconds = mdllev->TIMESTAMP() + headertime;
 			Amplitude = mdllev->AMPLITUDE();
-			Y = mdllev->YPOSITION();
+			Y = Mesy::MdllEvent::sizeY - mdllev->YPOSITION()-1;
 			X = offsetX+ mdllev->XPOSITION();
 		}
 

@@ -44,9 +44,6 @@
     <ClInclude Include="Zweistein.GetLocalInterfaces.hpp">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="Zweistein.Histogram.hpp">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
     <ClInclude Include="Zweistein.HomePath.hpp">
       <Filter>Headerdateien</Filter>
     </ClInclude>
@@ -81,6 +78,15 @@
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="MesytecSystem.Data.hpp">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="Zweistein.Histogram.hpp">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="Zweistein.Locks.hpp">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="Zweistein.populateHistograms.hpp">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>

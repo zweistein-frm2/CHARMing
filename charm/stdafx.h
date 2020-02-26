@@ -28,6 +28,6 @@ auto operator<<(std::ostream& os, const T& t) -> decltype(t.print(os), os)
 #define EXTERN_FUNCDECLTYPE
 #endif
 
-EXTERN_FUNCDECLTYPE  extern boost::thread_group worker_threads;
-EXTERN_FUNCDECLTYPE extern boost::mutex coutGuard;
+extern EXTERN_FUNCDECLTYPE   boost::thread_group worker_threads;
+extern EXTERN_FUNCDECLTYPE  boost::mutex coutGuard;
 // TODO: Reference additional headers your program requires here.

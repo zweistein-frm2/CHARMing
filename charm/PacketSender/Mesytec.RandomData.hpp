@@ -72,8 +72,8 @@ namespace Zweistein {
 		unsigned long RandomData(unsigned short& x_pos,unsigned short& position_y, int i,int sizeY, int maxX = 8) {
 			unsigned long l = Zweistein::Random::xor128();
 			//int ratio = 4 +(unsigned short)(l >> 27);
-			int ratio = 30;
-			if (Zweistein::Random::ncalls % ratio != 0) {
+			int ratio = 50;
+			if (Zweistein::Random::ncalls++ % ratio != 0) {
 
 				position_y = ((unsigned short)(l >> 10)) % sizeY;
 				x_pos = (unsigned short)(l >> 20) % maxX;
@@ -101,7 +101,7 @@ namespace Zweistein {
 
 
 				x_pos = (((ourfont::height - 1) - pixy) + xoffset) % maxX;
-				position_y = (unsigned int) (sizeY - (cpos * ourfont::width + pixx + yoffset)) % sizeY;
+				position_y = (unsigned int) (sizeY-(cpos * ourfont::width + pixx + yoffset)-1) % sizeY;
 			}
 			return l;
 
@@ -147,7 +147,7 @@ namespace Zweistein {
 			auto diff = boost::chrono::high_resolution_clock::now() - start;
 			auto nsec = boost::chrono::duration_cast<boost::chrono::nanoseconds>(diff);
 			Mesy::Mpsd8Event::settime19bit(data, nsec.count());
-			ncalls++;
+			
 		}
 	}
 }

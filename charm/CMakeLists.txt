@@ -3,11 +3,15 @@
 #
 cmake_minimum_required (VERSION 3.14)
 project(charm)
+
+if(${CMAKE_CXX_COMPILER_ID} MATCHES "MSVC")
+    add_compile_definitions(_WIN32_WINNT=0x0601)
+endif()
   
 add_compile_definitions(ASIOEXT_USE_BOOST_ASIO)
  
 set(CMAKE_CXX_STANDARD 17) 
-
+find_package (Python COMPONENTS Interpreter Development NumPy)
 find_package(magic_enum CONFIG REQUIRED )
 set(Boost_USE_STATIC_LIBS ON) 
 set(Boost_USE_STATIC_RUNTIME ON)  
@@ -17,7 +21,9 @@ find_package(OpenCV REQUIRED)
 find_package(unofficial-libuv CONFIG REQUIRED)
 #include_directories(${Boost_INCLUDE_DIR} ${OpenCV_INCLUDE_DIRS})
 include_directories(${ASIO_EXTENSIONS_PATH})
+include_directories(./)
 include_directories(${SIGSLOT_PATH})
+include_directories(${_Python_INCLUDE_DIR})
 # Add source to this project's executable.
 add_executable (${PROJECT_NAME} "mesyDeviceCtrl.cpp" "OptionPrinter.cpp" "CustomOptionDescription.cpp")
 
