@@ -89,9 +89,23 @@ namespace Mesytec {
 				std::string m6 = std::string(a6.data(), a6.size());
 				root.put<std::string>(s2 + "datagenerator", m6);
 
-				
+				bool bcanpushback = true;
 
-				_devlist.push_back(p1);
+				for (auto& d : _devlist) {
+					if (d.networkcard == p1.networkcard && d.mcpd_ip == p1.mcpd_ip) {
+						bcanpushback = false;
+						std::cout << "CONFIGURATION ERROR:" << s2 + "mcpd_ip("<<p1.mcpd_ip << ") already in use =>skipped" << std::endl;
+
+					}
+					if (d.mcpd_id == p1.mcpd_id) {
+						bcanpushback = false;
+						std::cout << "CONFIGURATION ERROR:" << s2 +"mcpd_id("<<p1.mcpd_id << ") already in use =>skipped" << std::endl;
+					}
+				}
+				// for devices on same network interface ip addresses must be distinct
+				// for all devices devid must be distinct
+				if(bcanpushback) _devlist.push_back(p1);
+
 
 			}
 		}

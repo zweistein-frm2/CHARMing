@@ -16,11 +16,18 @@
 
 #include <boost/geometry/io/wkt/wkt.hpp>
 #include "../charm/Zweistein.Histogram.hpp"
+
+
+EXTERN_FUNCDECLTYPE boost::mutex coutGuard;
+EXTERN_FUNCDECLTYPE boost::thread_group worker_threads;
+
 namespace p = boost::python;
 namespace np = boost::python::numpy;
 
 typedef boost::geometry::model::d2::point_xy<int> point_type;
 typedef boost::geometry::model::polygon<point_type> polygon_type;
+
+
 
 np::ndarray GetHistogramNumpy() {
 
@@ -145,15 +152,16 @@ BOOST_PYTHON_MODULE(numpycpp)
       to_python_converter<cv::Mat,
         pbcvt::matToNDArrayBoostConverter>();
     pbcvt::matFromNDArrayBoostConverter();
-    class_<Histogram>("Histogram")
+    class_<Histogram, boost::noncopyable>("Histogram", boost::python::no_init)
         .def("get", &Histogram::get)
+        .def("setRoi",&Histogram::setRoi)
         ;
     class_< NeutronMeasurement>("NeutronMeasurement")
         .def("connectmesytec",&NeutronMeasurement::connectmesytec)
         .def("connectcharm", &NeutronMeasurement::connectcharm)
         .def("start", &NeutronMeasurement::start)
         .def("stop", &NeutronMeasurement::stop)
-        .def("getHistogram", &NeutronMeasurement::getHistogram, return_internal_reference<>())
+        .def("getHistogram", &NeutronMeasurement::getHistogram, return_internal_reference<1, with_custodian_and_ward_postcall<1,0>>())
         ;
     def("GetHistogramNumpy", GetHistogramNumpy);
    

@@ -27,17 +27,19 @@
 
 namespace Zweistein {
 	static boost::atomic<bool> initdonehistogramsize = false;
-	void populateHistograms(boost::asio::io_service &io_service,Mesytec::MesytecSystem& msmtsystem1) {
+	void populateHistograms(boost::asio::io_service &io_service,Mesytec::MesytecSystem *pmsmtsystem1) {
 		
 		boost::this_thread::sleep_for(boost::chrono::milliseconds(2000));
-		unsigned short x_default = msmtsystem1.data.widthX; 
-		unsigned short y_default = msmtsystem1.data.widthY; 
+
+		unsigned short x_default= pmsmtsystem1->data.widthX;
+		unsigned short y_default= pmsmtsystem1->data.widthY;
+	
 
 		// cc::Mat is row, column which corresponds to y, x !!!!
 		auto imageUpdate = [](cv::Mat& image) {
 			double minVal, maxVal;
 			cv::Point minLoc, maxLoc;
-			Zweistein::ReadLock r_lock(histograms[0].lock);
+			//Zweistein::ReadLock r_lock(histograms[0].lock);
 			cv::minMaxLoc(histograms[0].histogram, &minVal, &maxVal, &minLoc, &maxLoc);
 			{
 				//boost::mutex::scoped_lock lock(coutGuard);
@@ -92,29 +94,27 @@ namespace Zweistein {
 			boost::chrono::system_clock::time_point current = boost::chrono::system_clock::now();
 			boost::chrono::nanoseconds elapsed;
 			do {
-				if (true) { // for speed reasons we do check only every 50th loop
 					current = boost::chrono::system_clock::now();
 					elapsed = current - start;
-					if (elapsed.count() > 500L * 1000L * 1000L) { // we update every 500 ms
+					if (elapsed.count() > 1000L * 1000L * 1000L) { // we check  every 1000 ms
 						start = boost::chrono::system_clock::now();
-						if (max_inqueue == Mcpd8::Data::EVENTQUEUESIZE) {
+						if (max_inqueue >= 9*Mcpd8::Data::EVENTQUEUESIZE/10) {
 							boost::mutex::scoped_lock lock(coutGuard);
-							std::cout << "EVENT QUEUE FULL (" << max_inqueue << "), dropped excess from histogram input " << std::endl;
+							std::cout << "EVENT QUEUE ALMOST FULL (" << max_inqueue << "), drops likely from histogram input " << std::endl;
 							max_inqueue = 0;
 						}
 					}
-				}
+				
 				if (!initdone) {
-					size_t inqueue = msmtsystem1.data.evntqueue.read_available();
+					size_t inqueue = pmsmtsystem1->data.evntqueue.read_available();
 					if (inqueue > 0) {
 						if (!initdone)
 						{
 							if (!initdonehistogramsize) {
-								maxX = msmtsystem1.data.widthX;
-								maxY = msmtsystem1.data.widthY;
+								maxX = pmsmtsystem1->data.widthX;
+								maxY = pmsmtsystem1->data.widthY;
 
 								{
-									Zweistein::WriteLock w_lock(histograms[0].lock); // we fill only first histogram
 									std::stringstream ssroi;
 									int left = 0;
 									int bottom = 0;
@@ -140,31 +140,26 @@ namespace Zweistein {
 					continue;
 				}
 				long evntspopped = 0;
-				while (msmtsystem1.data.evntqueue.pop(ev)) {
+				while (pmsmtsystem1->data.evntqueue.pop(ev)) {
 					if ((ev.X < 0 || ev.X >= maxX) || (ev.Y < 0 || ev.Y >= maxY)) {
 						boost::mutex::scoped_lock lock(coutGuard);
 						std::cout << " Event.X or Event.Y ouside bounds" << std::endl;
 					}
 					evntspopped++;
 					if (evntspopped > Mcpd8::Data::EVENTQUEUESIZE*3/4) {
-						size_t inqueue = msmtsystem1.data.evntqueue.read_available();
+						size_t inqueue = pmsmtsystem1->data.evntqueue.read_available();
 						if (inqueue >= max_inqueue) max_inqueue = inqueue;
 					}
 					//histogram.at<float>(ev.Y, ev.X) += ev.Amplitude;
 					//if(ev.X>=8 && ev.X<16)	
 
 					for (auto& h : histograms) {
-						Zweistein::WriteLock w_lock(h.lock); 
+						//Zweistein::WriteLock w_lock(h.lock); 
 						point_type p(ev.X, ev.Y);
 						if (boost::geometry::covered_by(p, h.roi)) {
 							h.histogram.at<int32_t>(ev.Y - h.box.min_corner().get<1>(), ev.X- h.box.min_corner().get<0>()) += 1;
 							h.count += 1;
 						}
-						else {
-							int g = 0;
-
-						}
-
 					}
 				
 

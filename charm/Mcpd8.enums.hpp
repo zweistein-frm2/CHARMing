@@ -16,10 +16,9 @@ namespace Mcpd8 {
 		Charm = 3
 	};
 	enum Status {
-		DAQ_Stopped = 0,
 		DAQ_Running = 1,
 		sync_ok = 2,
-		sync_error = 3
+		
 	};
 	enum Cmd {
 		RESET = 0,
@@ -69,9 +68,9 @@ namespace Mcpd8 {
 
 	enum TX_CAP {
 
-		POS_OR_AMP=1,
-		TOF_POS_OR_AMP=2,
-		TOF_POS_AND_AMP=4
+		P=1,
+		TP=2,
+		TPA=4
 
 	};
 		

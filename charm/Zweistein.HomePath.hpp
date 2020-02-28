@@ -9,7 +9,7 @@
 #include <codecvt>
 #include <string>
 #include <boost/filesystem.hpp>
-
+#include <boost/exception/all.hpp>
 
 namespace Zweistein {
 	boost::filesystem::path GetHomePath() {

@@ -73,8 +73,14 @@ namespace Mcpd8 {
 		}
 		void print(std::ostream& os) const {
 			using namespace magic_enum::ostream_operators;
+			using namespace magic_enum::bitwise_operators;
 			auto buffertype = magic_enum::enum_cast<Mesy::BufferType>(Zweistein::reverse_u16(Type));
-			auto status = magic_enum::enum_cast<Status>(Mcpd8::DataPacket::getStatus(deviceStatusdeviceId));
+			auto status =Mcpd8::DataPacket::getStatus(deviceStatusdeviceId);
+			std::stringstream ss_status;
+			for (auto s : magic_enum::enum_values<Status>()) {
+				if (s & status) ss_status << s<<" ";
+			}
+			
 			bool understood = true;
 			unsigned short realcmd = cmd;
 			if (realcmd!= Mcpd8::Internal_Cmd::SETNUCLEORATEEVENTSPERSECOND && realcmd & 0x8000 ) {
@@ -86,16 +92,16 @@ namespace Mcpd8 {
 			auto cmd_2 = magic_enum::enum_cast<Mcpd8::Internal_Cmd>(realcmd);
 			
 			std::stringstream ss_cmd;
-			if (cmd_1.has_value()) 	ss_cmd << cmd_1 << "("<< static_cast<magic_enum::underlying_type_t<Mcpd8::Cmd>>(realcmd) << ")";
+			if (cmd_1.has_value()) 	ss_cmd << cmd_1 << "(0x"<<std::hex<< static_cast<magic_enum::underlying_type_t<Mcpd8::Cmd>>(realcmd) << std::dec << ")";
 			else {
 				ss_cmd << cmd_2;
 				if (!cmd_2.has_value()) { 
 					if (realcmd == Mcpd8::Internal_Cmd::SETNUCLEORATEEVENTSPERSECOND) {
 						ss_cmd << "(SETNUCLEORATEEVENTSPERSECOND)";
 					}
-					else ss_cmd << "(" << cmd << ")"; 
+					else ss_cmd << "(0x" <<std::hex << cmd << std::dec << ")";
 				}
-				else ss_cmd << "(" << static_cast<magic_enum::underlying_type_t<Mcpd8::Internal_Cmd>>(realcmd) << ")";
+				else ss_cmd << "(0x" << std::hex << static_cast<magic_enum::underlying_type_t<Mcpd8::Internal_Cmd>>(realcmd) << std::dec << ")";
 			}
 			if (!understood) {
 				ss_cmd << "( NOT UNDERSTOOD)";
@@ -103,11 +109,11 @@ namespace Mcpd8 {
 			//long long timestamp = timeStamp() * 100; // nanoseconds 
 			//boost::chrono::system_clock::time_point t(boost::chrono::microseconds(timestamp / 1000));
 			//std::time_t tt = boost::chrono::system_clock::to_time_t(t);
-			os << "items:"<<Length-headerLength<<" " << buffertype << " " << ss_cmd.str() <<", "<< Number << ", " << status  << std::endl;// << " " << numEvents() << " Events " << timeStamp() << "00ns(" << std::put_time(std::localtime(&tt), "%Y-%b-%d %X") << ")" << std::endl;
+			os << "items:"<<Length-headerLength<<" " << buffertype<<"(0x"<< std::hex <<Type <<")" << " " << ss_cmd.str() <<", "<< Number << "(0x" << std::hex << Number << ")" << ", " << ss_status.str() << "(0x" << std::hex << status << ")" << std::endl;// << " " << numEvents() << " Events " << timeStamp() << "00ns(" << std::put_time(std::localtime(&tt), "%Y-%b-%d %X") << ")" << std::endl;
 			
 			for (int d = 0; d < Length - headerLength; d++) {
 				if (d!=0 && d % 8 == 0) os << std::endl;
-				os << "\tdata["<<d<<"]="<<std::hex << data[d] <<std::dec<< " ";
+				os << "\tdata["<<d<<"]=0x"<<std::hex << data[d] <<std::dec<< " ";
 				
 
 			}

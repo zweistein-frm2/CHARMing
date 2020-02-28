@@ -5,6 +5,21 @@
 #include <boost/python/numpy.hpp>
 namespace p = boost::python;
 namespace np = boost::python::numpy;
+
+template <typename T>
+boost::python::object transfer_to_python(T* t)
+{
+    // Transfer ownership to a smart pointer, allowing for proper cleanup incase Boost.Python throws.
+    std::unique_ptr<T> ptr(t);
+    // Use the manage_new_object generator to transfer ownership to Python.
+    typename p::manage_new_object::apply<T*>::type converter;
+    // Transfer ownership to the Python handler and release ownership from C++.
+    p::handle<> handle(converter(*ptr));
+    ptr.release();
+    return p::object(handle);
+}
+
+
 #endif
 
 #include <iostream>
@@ -68,7 +83,10 @@ typedef boost::geometry::model::polygon<point_type> polygon_type;
 
             setRoi(roi);
         }
+      //  Histogram(const Histogram& origin) {
+ //       }
         void setRoi(std::string& wkt) {
+            Zweistein::WriteLock w_lock(lock); // we fill only first histogram
             int width = 1;
             int height = 1;
             bool illformedwkt = true;
@@ -99,9 +117,17 @@ typedef boost::geometry::model::polygon<point_type> polygon_type;
         }
 #ifdef BOOST_PYTHON_MODULE
         boost::python::tuple get() {
+            {
+                Zweistein::WriteLock w_lock(lock);
+                GetHistogramOpenCV(histogram);
 
-            GetHistogramOpenCV(histogram);
-            return boost::python::make_tuple(count, &histogram);
+            }
+            auto x1 = std::make_unique<cv::Mat>();
+            {
+                Zweistein::ReadLock r_lock(lock);
+                histogram.copyTo(*x1);
+            }
+            return boost::python::make_tuple(count, transfer_to_python(x1.release()));
         }
 #endif
     };

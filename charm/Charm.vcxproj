@@ -53,6 +53,7 @@
     <ClInclude Include="Zweistein.Locks.hpp" />
     <ClInclude Include="Zweistein.populateHistograms.hpp" />
     <ClInclude Include="Zweistein.PrettyBytes.hpp" />
+    <ClInclude Include="Zweistein.ThreadPriority.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

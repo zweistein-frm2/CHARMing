@@ -42,7 +42,7 @@ udp::endpoint remote_endpoint;
 udp::endpoint listen_endpoint;
 
 boost::atomic<unsigned short> daq_running = Mcpd8::Status::DAQ_Stopped;
-boost::atomic<unsigned short> devid = 0;
+boost::atomic<unsigned short> devid = 1;
 boost::atomic<unsigned short> runid = 0;
 boost::atomic<long> requestedEventspersecond = 100; // default value at startup
 int MAX_NEVENTS = 250;
@@ -310,7 +310,7 @@ void handle_receive(const boost::system::error_code& error,
 					std::cout << "Version:" << cp.data[0] << "." << cp.data[1] << " FPGA Version:" << (cp.data[2]>>8)<<"."<<(cp.data[2]&0xff) << std::endl;
 
 				}
-				//remote_endpoint = current_remote_endpoint;
+				remote_endpoint = current_remote_endpoint;
 				break;
 			}
 

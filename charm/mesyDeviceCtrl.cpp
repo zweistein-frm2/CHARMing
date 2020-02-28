@@ -38,7 +38,8 @@
 #include "Mesytec.enums.Generator.hpp"
 #include "Zweistein.populateHistograms.hpp"
 #include <opencv2/highgui.hpp>
-#include <Zweistein.ThreadPriority.hpp>
+#include "Zweistein.ThreadPriority.hpp"
+
 
 std::string PROJECT_NAME("charm");
 
@@ -47,7 +48,7 @@ using boost::asio::ip::udp;
 EXTERN_FUNCDECLTYPE boost::mutex coutGuard;
 EXTERN_FUNCDECLTYPE boost::thread_group worker_threads;
 
-std::vector<Histogram> histograms = std::vector<Histogram>(4);
+std::vector<Histogram> histograms = std::vector<Histogram>(1);
 
 namespace po = boost::program_options;
 void conflicting_options(const po::variables_map& vm,
@@ -59,6 +60,7 @@ void conflicting_options(const po::variables_map& vm,
 			+ opt1 + "' and '" + opt2 + "'.");
 }
 
+boost::asio::io_service io_service;
 
 int main(int argc, char* argv[])
 {
@@ -66,7 +68,7 @@ int main(int argc, char* argv[])
 	setlocale(LC_ALL, "de-DE");
 	boost::filesystem::path::imbue(std::locale());
 	std::string appName = boost::filesystem::basename(argv[0]);
-	boost::asio::io_service io_service;
+	
 	auto ptrmsmtsystem1 = new Mesytec::MesytecSystem();
 	try
 	{
@@ -150,7 +152,7 @@ int main(int argc, char* argv[])
 		boost::function<void()> t;
 		if (inputfromlistfile) {
 			ptrmsmtsystem1->inputFromListmodeFile = true;
-			t = [&io_service, &ptrmsmtsystem1, &listmodeinputfiles]() {
+			t = [ &ptrmsmtsystem1, &listmodeinputfiles]() {
 				try {
 					auto abfunc=boost::bind(&Mesytec::MesytecSystem::analyzebuffer, ptrmsmtsystem1,_1);
 					auto read=Mesytec::listmode::Read(abfunc,ptrmsmtsystem1->data, ptrmsmtsystem1->deviceparam);
@@ -175,7 +177,7 @@ int main(int argc, char* argv[])
 			}
 			boost::property_tree::write_json(inipath.string(), root);
 			boost::property_tree::write_json(std::cout, root);
-			t = [&io_service, &ptrmsmtsystem1, &_devlist]() {
+			t = [ &ptrmsmtsystem1, &_devlist]() {
 				try {
 					ptrmsmtsystem1->connect(_devlist, io_service);
 					io_service.run();
@@ -203,16 +205,14 @@ int main(int argc, char* argv[])
 		}
 
 		auto pt = new boost::thread(boost::bind(t));
-#ifdef WIN32
+
+		Zweistein::Thread::CheckSetUdpKernelBufferSize();
 		Zweistein::Thread::SetThreadPriority(pt->native_handle(), Zweistein::Thread::PRIORITY::HIGH);
-#else
-		Zweistein::Thread::SetThreadPriority(pt->native_handle(), Zweistein::Thread::PRIORITY::REALTIME);
-		// linux needs realtime priority , otherwise occasional missed packets
-#endif
+
 		worker_threads.add_thread(pt);
 		boost::this_thread::sleep_for(boost::chrono::milliseconds(500));// so msmtsystem1 should be connected
 
-		if(write2disk) worker_threads.create_thread([&io_service, &ptrmsmtsystem1] {Mesytec::writeListmode(io_service,*ptrmsmtsystem1); });
+		if(write2disk) worker_threads.create_thread([ &ptrmsmtsystem1] {Mesytec::writeListmode(io_service,*ptrmsmtsystem1); });
 		
 					
 		boost::chrono::system_clock::time_point start = boost::chrono::system_clock::now();
@@ -225,7 +225,7 @@ int main(int argc, char* argv[])
 		
 
 		if (inputfromlistfile) {
-			worker_threads.create_thread([&io_service, &ptrmsmtsystem1] {Zweistein::populateHistograms(io_service, *ptrmsmtsystem1); });
+			worker_threads.create_thread([ &ptrmsmtsystem1] {Zweistein::populateHistograms(io_service, ptrmsmtsystem1); });
 			// nothing to do really,
 			while (!io_service.stopped()) {
 				boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
@@ -237,8 +237,8 @@ int main(int argc, char* argv[])
 
 			for (int i = 0; i < 10; i++) {
 				if (ptrmsmtsystem1->connected) {
-					worker_threads.create_thread([&io_service, &ptrmsmtsystem1] {Zweistein::populateHistograms(io_service, *ptrmsmtsystem1); });
-					boost::function<void()> sendstartcmd = [&io_service, &ptrmsmtsystem1, &_devlist]() {
+					worker_threads.create_thread([ &ptrmsmtsystem1] {Zweistein::populateHistograms(io_service,ptrmsmtsystem1); });
+					boost::function<void()> sendstartcmd = [ &ptrmsmtsystem1, &_devlist]() {
 						unsigned long rate = 1850000;
 						try {
 							ptrmsmtsystem1->SendAll(Mcpd8::Cmd::START);
@@ -274,9 +274,10 @@ int main(int argc, char* argv[])
 				std::cout << "EVENTQUEUESIZE=" << Mcpd8::Data::EVENTQUEUESIZE << std::endl;
 			}
 
-			
+		
 			while (!io_service.stopped()) {
 				boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
+			
 				boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - start;
 				start = boost::chrono::system_clock::now();
 				long long currentcount = ptrmsmtsystem1->data.evntcount;
@@ -303,11 +304,15 @@ int main(int argc, char* argv[])
 
 	if (ptrmsmtsystem1) {
 		try {ptrmsmtsystem1->SendAll(Mcpd8::Cmd::STOP);}
-		catch (Mesytec::cmd_error& x) {}
-		delete ptrmsmtsystem1;
+		catch (boost::exception& e) {
+			boost::mutex::scoped_lock lock(coutGuard);
+			std::cout << boost::diagnostic_information(e);
+		}
+	//	delete ptrmsmtsystem1;
+	//	ptrmsmtsystem1 = nullptr;
 	}
 
-	boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
+	boost::this_thread::sleep_for(boost::chrono::milliseconds(2000));
 	{
 		boost::mutex::scoped_lock lock(coutGuard);
 		std::cout << "main() exiting..." << std::endl;

@@ -89,5 +89,8 @@
     <ClInclude Include="Zweistein.populateHistograms.hpp">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="Zweistein.ThreadPriority.hpp">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

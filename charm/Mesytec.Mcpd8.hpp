@@ -215,7 +215,7 @@ namespace Mesytec {
 			boost::chrono::milliseconds ms = boost::chrono::duration_cast<boost::chrono::milliseconds> (boost::chrono::system_clock::now() - start);
 			{
 				boost::mutex::scoped_lock lock(coutGuard);
-				std::cout << "MESYTECHSYSTEM CONNECTED: +" << ms << "ms" << std::endl;
+				std::cout << "MESYTECHSYSTEM CONNECTED: +" << ms  << std::endl;
 			}
 			return connected;
 		}
@@ -317,7 +317,7 @@ namespace Mesytec {
 
 				{
 					boost::mutex::scoped_lock lock(coutGuard);
-					std::cout << "CPU " << response.data[0] << "." << response.data[1] << ", FPGA " << (response.data[2] & 0xff) << "." << ((response.data[2] >> 8) & 0xff) << std::endl;
+					std::cout << "CPU " << response.data[0] << "." << response.data[1] << ", FPGA " << ((response.data[2] >> 8) & 0xff) << "." << (response.data[2] & 0xff) << std::endl;
 				}
 				kvp.second.firmware_major = response.data[0];
 				kvp.second.firmware_minor = response.data[1];
@@ -393,9 +393,13 @@ namespace Mesytec {
 			case Mcpd8::Cmd::RESET:
 			case Mcpd8::Cmd::START:
 				kvp.second.lastbufnum = 0;
-			case Mcpd8::Cmd::STOP:
+			
 			case Mcpd8::Cmd::CONTINUE:
 				Send(kvp, cmdpacket, true);
+				break;
+
+			case Mcpd8::Cmd::STOP:
+				Send(kvp, cmdpacket, false);
 				break;
 			case Mcpd8::Cmd::SETID:{
 				cmdpacket.data[0] = param;
@@ -443,7 +447,7 @@ namespace Mesytec {
 				{
 					boost::mutex::scoped_lock lock(coutGuard);
 					using namespace magic_enum::ostream_operators;
-					std::cout<< (kvp.second.mcpd_endpoint.address()).to_string()<<" " << cmd << " ERROR :requested=" << param << " returned=" << response.data[0] << std::endl;
+					std::cout<< (kvp.second.mcpd_endpoint.address()).to_string()<<" " << cmd << " ERROR :requested=0x" <<std::hex << param << " returned=0x" << response.data[0] <<std::dec << std::endl;
 				}
 				
 				break;
@@ -463,7 +467,7 @@ namespace Mesytec {
 				if (response.data[0] >= 8) {
 					boost::mutex::scoped_lock lock(coutGuard);
 					using namespace magic_enum::ostream_operators;
-					std::cout << cmd << "RESPONSE OUTSIDE RANGE: data[0]=" << response.data[0] << std::endl;
+					std::cout << cmd << "RESPONSE OUTSIDE RANGE: data[0]=0x" <<std::hex<< response.data[0] <<std::dec<< std::endl;
 
 				}
 				else {
@@ -476,7 +480,7 @@ namespace Mesytec {
 						if (response.data[1] & c) std::cout << c << " ";
 					}
 					std::cout << ")" << std::endl;
-					std::cout << " Firmware=" << response.data[3] << std::endl;
+					std::cout << " Firmware=" << ((response.data[3]>>8) & 0xff) <<"."<<( response.data[3] & 0xff)  << std::endl;
 					std::cout << "Current tx format:";
 					for (auto& c : magic_enum::enum_values<Mcpd8::TX_CAP>()) {
 						if (response.data[2] & c) std::cout << c << " ";
@@ -518,7 +522,7 @@ namespace Mesytec {
 	private:
 		boost::atomic<bool> wait_response;
 		Mcpd8::CmdPacket& Send(std::pair<const unsigned char, Mesytec::DeviceParameter>& kvp,Mcpd8::CmdPacket& cmdpacket,bool waitresponse=true) {
-			int timeout_ms = 250; //GETVER takes  on MPCD8
+			int timeout_ms = 550; //GETVER takes up to 520 ms if no MPSD8(+) is connected
 			for (int i = 0; i < timeout_ms / 50; i++) {
 				if (wait_response == false) break;
 				boost::this_thread::sleep_for(boost::chrono::milliseconds(50));
@@ -529,11 +533,11 @@ namespace Mesytec {
 			auto cmd_1 = magic_enum::enum_cast<Mcpd8::Cmd>(cmdpacket.cmd);
 			auto cmd_2 = magic_enum::enum_cast<Mcpd8::Internal_Cmd>(cmdpacket.cmd);
 			std::stringstream ss_cmd;
-			if (cmd_1.has_value()) 	ss_cmd << cmd_1 << "(" << static_cast<magic_enum::underlying_type_t<Mcpd8::Cmd>>(cmdpacket.cmd) << ")";
+			if (cmd_1.has_value()) 	ss_cmd << cmd_1 << "(0x" << std::hex << static_cast<magic_enum::underlying_type_t<Mcpd8::Cmd>>(cmdpacket.cmd) << std::dec << ")";
 			else {
 				ss_cmd << cmd_2;
 				if (!cmd_2.has_value()) ss_cmd << "(0x" << std::hex << cmdpacket.cmd << ")"<<std::dec;
-				else ss_cmd << "(" << static_cast<magic_enum::underlying_type_t<Mcpd8::Internal_Cmd>>(cmdpacket.cmd) << ")";
+				else ss_cmd << "(0x" << std::hex << static_cast<magic_enum::underlying_type_t<Mcpd8::Internal_Cmd>>(cmdpacket.cmd) << std::dec << ")";
 			}
 			if (inputFromListmodeFile) {
 				boost::mutex::scoped_lock lock(coutGuard);
@@ -583,14 +587,14 @@ namespace Mesytec {
 							if (response.cmd & 0x8000) {
 								boost::mutex::scoped_lock lock(coutGuard);
 								boost::chrono::milliseconds ms = boost::chrono::duration_cast<boost::chrono::milliseconds> (boost::chrono::system_clock::now() - start);
-								std::cout <<  " =>WARNING: NOT UNDERSTOOD! +"<<ms<<"ms" << std::endl;
+								std::cout <<  " =>WARNING: NOT UNDERSTOOD! +"<<ms << std::endl;
 								internalerror = Mesytec::cmd_errorcode::CMD_NOT_UNDERSTOOD;
 								throw cmd_error() << my_info(internalerror);
 							}
 							else {
 								boost::mutex::scoped_lock lock(coutGuard);
 								boost::chrono::milliseconds ms = boost::chrono::duration_cast<boost::chrono::milliseconds> (boost::chrono::system_clock::now() - start);
-								std::cout << " =>RESPONSE OK(" << response.Length - response.headerLength << " items) +"<<ms <<"ms"<< std::endl;
+								std::cout << " =>RESPONSE OK(" << response.Length - response.headerLength << " items) +"<<ms << std::endl;
 							}
 							return response;
 							internalerror = Mesytec::cmd_errorcode::OK;
@@ -714,7 +718,7 @@ namespace Mesytec {
 		public:
 		void analyzebuffer(Mcpd8::DataPacket &datapacket)
 		{
-			unsigned short id = Mcpd8::DataPacket::getId(datapacket.deviceStatusdeviceId);
+			unsigned char id = Mcpd8::DataPacket::getId(datapacket.deviceStatusdeviceId);
 			auto &params = deviceparam[id];
 			unsigned short numevents = datapacket.numEvents();
 			long long headertime = datapacket.timeStamp();
