@@ -8,22 +8,27 @@ from entangle.core.states import BUSY, UNKNOWN
 from entangle.core.errors import InvalidValue, InvalidOperation, \
     ConfigurationError
 
-Measurement = numpycpp.NeutronMeasurement()
+o = numpycpp.NeutronMeasurement()
 
 class Histogram(base.ImageChannel):
 
     def init(self):
-        self.histogram = Measurement.getHistogram()
+        self.count = 0;
+        self.Roi = ""
+        self.mat = np.zeros((1,1,1),dtype="int32")
+        self.Histogram = o.getHistogram()
 
     def Clear(self):
         return
     def read_detectorSize(self):
-        return [64,1024]
+        return self.Histogram.Size
     def read_value(self):
-        return self.histogram.get()[1].flatten()
+        t=self.Histogram.update(self.mat)
+        self.count=t[0];
+        return self.mat.flatten()
 
     def Start(self):
-        Measurement.start()
+        o.start()
 
     def Stop(self):
-        Measurement.stop()
+        o.stop()

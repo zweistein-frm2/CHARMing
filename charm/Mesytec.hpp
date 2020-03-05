@@ -34,6 +34,10 @@ namespace Mesy {
 		MWPCHR=110
 	};
 
+	enum TimePoint {
+		ZERO =0,
+		NOW = 1
+	};
 	
 	class alignas(2) Mpsd8Event {
 		unsigned short data[3];

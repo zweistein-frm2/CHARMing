@@ -55,7 +55,7 @@ namespace Mesytec {
 			}
 
 		public:
-			void files(std::vector<std::string>& filenames, boost::asio::io_service& io_service) {
+			void files(std::vector<std::string>& filenames,boost::asio::io_service& io_service) {
 				for (std::string fname : filenames) {
 					asioext::file source(io_service, fname, asioext::open_flags::access_read | asioext::open_flags::open_existing);
 					char buffer[0x5ef]; // 0x5ef  is naughty boundary

@@ -6,7 +6,7 @@
 #include <pyboostcvconverter/pyboostcvconverter.hpp>
 #include <boost/python/numpy.hpp>
 #include <iostream>
-#include "../charm/PacketSender/Mesytec.RandomData.hpp"
+#include "Mesytec.RandomData.hpp"
 #include <opencv2/core.hpp>
 #include <opencv2/core/mat.hpp>
 
@@ -108,8 +108,7 @@ struct NeutronMeasurement {
         std::cout << "~NeutronMeasurement()" << std::endl;
     }
 
-    void connectmesytec(){}
-    void connectcharm(){}
+    void connect(std::string config){}
     void start(){}
     void stop() {}
     void _continue() {}
@@ -153,12 +152,12 @@ BOOST_PYTHON_MODULE(numpycpp)
         pbcvt::matToNDArrayBoostConverter>();
     pbcvt::matFromNDArrayBoostConverter();
     class_<Histogram, boost::noncopyable>("Histogram", boost::python::no_init)
-        .def("get", &Histogram::get)
-        .def("setRoi",&Histogram::setRoi)
+        .def("update", &Histogram::update)
+        .add_property("Roi", &Histogram::getRoi, &Histogram::setRoi)
+        .add_property("Size", &Histogram::getSize)
         ;
     class_< NeutronMeasurement>("NeutronMeasurement")
-        .def("connectmesytec",&NeutronMeasurement::connectmesytec)
-        .def("connectcharm", &NeutronMeasurement::connectcharm)
+        .def("connect",&NeutronMeasurement::connect)
         .def("start", &NeutronMeasurement::start)
         .def("stop", &NeutronMeasurement::stop)
         .def("getHistogram", &NeutronMeasurement::getHistogram, return_internal_reference<1, with_custodian_and_ward_postcall<1,0>>())

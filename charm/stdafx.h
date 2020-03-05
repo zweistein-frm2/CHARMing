@@ -13,6 +13,24 @@
 #include <iostream>
 #include <boost/thread.hpp>
 #include <boost/atomic.hpp>
+
+template<typename T>
+std::string hexfmt(T const& t) {
+    std::ostringstream oss;
+    oss << "(0x";
+    oss<< std::setfill('0') << std::setw(2) << std::hex;
+    oss << t;
+    oss << ")";
+    oss << std::dec;
+    return oss.str();
+}
+
+std::ostream& f2hex(std::ostream& out)
+{
+    out << std::setfill('0') << std::setw(2) << std::hex;
+    return out;
+}
+
 template<class T>
 auto operator<<(std::ostream& os, const T& t) -> decltype(t.print(os), os)
 {

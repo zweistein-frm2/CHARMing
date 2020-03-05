@@ -22,6 +22,11 @@
           "type": "PATH"
         },
         {
+          "name": "PacketSender_DIR",
+          "value": "${projectDir}\\..\\PacketSender",
+          "type": "PATH"
+        },
+        {
           "name": "NETWORKCARDINTERFACE",
           "value": "192.168.168.100",
           "type": "STRING"
@@ -47,6 +52,11 @@
         {
           "name": "ASIO_EXTENSIONS_PATH",
           "value": "${projectDir}\\..\\asio-extensions\\include",
+          "type": "PATH"
+        },
+        {
+          "name": "PacketSender_DIR",
+          "value": "${projectDir}\\..\\PacketSender",
           "type": "PATH"
         }
       ]
@@ -75,6 +85,11 @@
         {
           "name": "ASIO_EXTENSIONS_PATH",
           "value": "/home/alanghof/repos/Neu2d_det/asio-extensions/include",
+          "type": "PATH"
+        },
+        {
+          "name": "PacketSender_DIR",
+          "value": "/home/alanghof/repos/Neu2d_det/PacketSender",
           "type": "PATH"
         },
         {

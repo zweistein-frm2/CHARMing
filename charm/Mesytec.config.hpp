@@ -18,7 +18,7 @@ namespace Mesytec {
 		std::string charmdevice = "CharmDevice";
 		std::string punkt = ".";
 		const int MaxDevices = 2;
-		void get(boost::property_tree::ptree& root, std::list<Mcpd8::Parameters>& _devlist, boost::asio::io_service& io_service) {
+		void get(boost::property_tree::ptree& root, std::list<Mcpd8::Parameters>& _devlist) {
 			
 			for (int n = 0; n < MaxDevices; n++) {
 				Mcpd8::Parameters p1;
@@ -52,7 +52,7 @@ namespace Mesytec {
 				if (n == 0) {
 					savednetworkcard = root.get<std::string>(s2 + "networkcard", "0.0.0.0");
 					root.put<std::string>(s2 + "networkcard", savednetworkcard);
-					p1.networkcard = Zweistein::askforInterfaceIfUnknown(savednetworkcard, io_service);
+					p1.networkcard = Zweistein::askforInterfaceIfUnknown(savednetworkcard);
 				}
 				else p1.networkcard = root.get<std::string>(s2 + "networkcard");
 				if (savednetworkcard != p1.networkcard) std::cout << s2 + "networkcard=" << p1.networkcard << " on puropse not saved in config" << std::endl;

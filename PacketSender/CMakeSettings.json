@@ -13,7 +13,7 @@
       "variables": [
         {
           "name": "Charm_DIR",
-          "value": "${projectDir}\\..",
+          "value": "${projectDir}\\..\\charm",
           "type": "PATH"
         },
         {
@@ -36,7 +36,7 @@
       "variables": [
         {
           "name": "Charm_DIR",
-          "value": "${projectDir}\\..",
+          "value": "${projectDir}\\..\\charm",
           "type": "PATH"
         },
         {
@@ -133,7 +133,7 @@
           "type": "STRING"
         }
       ],
-      "remoteMachineName": "1983989873;rpi3packetsender (username=pi, port=22, authentication=PrivateKey)",
+      "remoteMachineName": "1636644432;rpi3packetsender (username=pi, port=22, authentication=Password)",
       "remoteCMakeListsRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/src",
       "remoteBuildRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/build/${name}",
       "remoteInstallRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/install/${name}",

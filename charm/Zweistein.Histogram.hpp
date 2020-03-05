@@ -23,7 +23,7 @@ boost::python::object transfer_to_python(T* t)
 #endif
 
 #include <iostream>
-#include "PacketSender/Mesytec.RandomData.hpp"
+#include "Mesytec.RandomData.hpp"
 #include <opencv2/core.hpp>
 #include <opencv2/core/mat.hpp>
 
@@ -64,16 +64,21 @@ typedef boost::geometry::model::polygon<point_type> polygon_type;
         Zweistein::Lock lock;
         polygon_type roi;
         boost::geometry::model::box<point_type> box;
-        long long count;
+        long count;
         cv::Mat histogram;
-        Histogram() {
-            std::stringstream ssroi;
-            int left = 0;
-            int bottom = 0;
-            int maxX = 1;
-            int maxY = 1;
+            Histogram():count(0) {
+                setRoiRect(0,0,1,1);
+        }
+  
 
-         
+        std::string getRoi() {
+
+            std::stringstream ss_wkt;
+            ss_wkt << boost::geometry::wkt(roi);
+            return ss_wkt.str();
+        }
+        void setRoiRect(int left, int bottom, int maxX, int maxY) {
+            std::stringstream ssroi;
             ssroi << ("POLYGON((") << left << " " << bottom << ",";
             ssroi << left << " " << maxY << ",";
             ssroi << maxX << " " << maxY << ",";
@@ -83,12 +88,10 @@ typedef boost::geometry::model::polygon<point_type> polygon_type;
 
             setRoi(roi);
         }
-      //  Histogram(const Histogram& origin) {
- //       }
         void setRoi(std::string& wkt) {
             Zweistein::WriteLock w_lock(lock); // we fill only first histogram
             int width = 1;
-            int height = 1;
+            int height = 1; 
             bool illformedwkt = true;
             try {
                 if (!wkt.empty()) {
@@ -112,22 +115,31 @@ typedef boost::geometry::model::polygon<point_type> polygon_type;
             height = box.max_corner().get<1>() - box.min_corner().get<1>();
 
             histogram = cv::Mat_<int32_t>::zeros(height, width);
-            std::cout << "setRoi:" << width << "," << height << std::endl;
+            {
+                boost::mutex::scoped_lock lock(coutGuard);
+                std::cout << "setRoi:box: width=" << width << ",height=" << height << std::endl;
+            }
 
         }
 #ifdef BOOST_PYTHON_MODULE
-        boost::python::tuple get() {
+        boost::python::tuple update(cv::Mat mat) {
             {
-                Zweistein::WriteLock w_lock(lock);
+                // Zweistein::WriteLock w_lock(lock);
+                setRoiRect(0,0,64, 1024);
                 GetHistogramOpenCV(histogram);
 
             }
-            auto x1 = std::make_unique<cv::Mat>();
-            {
-                Zweistein::ReadLock r_lock(lock);
-                histogram.copyTo(*x1);
-            }
-            return boost::python::make_tuple(count, transfer_to_python(x1.release()));
+            histogram.copyTo(mat);
+            return boost::python::make_tuple(count, mat);
+        }
+
+        boost::python::tuple getSize() {
+           
+            int width = box.max_corner().get<0>() - box.min_corner().get<0>();
+            int height = box.max_corner().get<1>() - box.min_corner().get<1>();
+            return boost::python::make_tuple(width,height);
+                     
+           
         }
 #endif
     };

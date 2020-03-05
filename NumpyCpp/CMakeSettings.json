@@ -17,6 +17,11 @@
           "type": "PATH"
         },
         {
+          "name": "PacketSender_DIR",
+          "value": "${projectDir}\\..\\PacketSender",
+          "type": "PATH"
+        },
+        {
           "name": "pyboostcvconverter_DIR",
           "value": "C:\\users\\alanghof\\source\\repos\\Neu2d_det\\pyboostcvconverter",
           "type": "PATH"
@@ -47,6 +52,11 @@
           "name": "Charm_DIR",
           "value": "/home/alanghof/repos/Neu2d_det/charm",
           "type": "PATH"
+        },
+        {
+          "name": "PacketSender_DIR",
+          "value": "/home/alanghof/repos/Neu2d_det/charm",
+          "type": "PATH"
         }
       ]
     },
@@ -64,6 +74,11 @@
         {
           "name": "Charm_DIR",
           "value": "${projectDir}\\..\\charm",
+          "type": "PATH"
+        },
+        {
+          "name": "PacketSender_DIR",
+          "value": "${projectDir}\\..\\PacketSender",
           "type": "PATH"
         },
         {

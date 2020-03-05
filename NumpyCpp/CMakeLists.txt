@@ -22,6 +22,7 @@ find_package(OpenCV REQUIRED)
 include_directories(${SIGSLOT_PATH})
 include_directories(${_Python_INCLUDE_DIR})
 include_directories(${Charm_DIR})
+include_directories(${PacketSender_DIR})
 include_directories(${pyboostcvconverter_DIR}/include)
 # Add source to this project's executable.
 include_directories(${_Python_NumPy_INCLUDE_DIR})

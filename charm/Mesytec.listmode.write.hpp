@@ -24,7 +24,7 @@ namespace Mesytec {
 		return tmppath.string() + std::string("YYmmdd_H-M-S.mdat)");
 	}
 	
-	void writeListmode(boost::asio::io_service& io_service,Mesytec::MesytecSystem &device1) {
+	void writeListmode(boost::asio::io_service& io_service, boost::shared_ptr < Mesytec::MesytecSystem> device1) {
 
 		namespace bio = boost::iostreams;
 		boost::filesystem::path tmppath = Zweistein::GetHomePath();
@@ -56,7 +56,7 @@ namespace Mesytec {
 			Mcpd8::DataPacket dp;
 			int i = 0;
 			do {
-				while (device1.data.listmodequeue.pop(dp)) {
+				while (device1->data.listmodequeue.pop(dp)) {
 					/*
 					i++;
 					{

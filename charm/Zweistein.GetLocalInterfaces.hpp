@@ -37,32 +37,11 @@ void GetLocalInterfaces(std::list<std::string>& localinterfaces) {
 
 }
 
-void GetLocalInterfaces(std::list<std::string>& localinterfaces, boost::asio::io_service& io_service) {
-		boost::asio::ip::tcp::resolver resolver(io_service);
-		std::string hn = boost::asio::ip::host_name();
-		boost::asio::ip::tcp::resolver::query query(hn, "");
-		boost::asio::ip::tcp::resolver::iterator it = resolver.resolve(query);
-		while (it != boost::asio::ip::tcp::resolver::iterator())
-		{
-			boost::asio::ip::address addr = (it++)->endpoint().address();
-			/*
-			if (addr.is_v6()) {
-				std::cout << "ipv6 address: ";
-			}
-			else std::cout << "ipv4 address: ";
-			std::cout << addr.to_string() << std::endl;
-			*/
-			localinterfaces.push_back(addr.to_string());
-		}
 
-	}
-
-
-	std::string askforInterfaceIfUnknown(std::string proposed, boost::asio::io_service& io_service) {
+	std::string askforInterfaceIfUnknown(std::string proposed) {
 
 		std::list<std::string> localinterfaces = std::list<std::string>();
-		//Zweistein::GetLocalInterfaces(localinterfaces, io_service);
-		Zweistein::GetLocalInterfaces(localinterfaces);
+	    Zweistein::GetLocalInterfaces(localinterfaces);
 		auto _a = std::find(localinterfaces.begin(), localinterfaces.end(), proposed);
 		if (_a == localinterfaces.end()) {
 			std::cout << "interfaces on this machine are:";

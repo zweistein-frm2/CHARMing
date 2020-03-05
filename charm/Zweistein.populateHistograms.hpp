@@ -7,6 +7,7 @@
 
 #pragma once
 #include <boost/function.hpp>
+#include <boost/shared_ptr.hpp>
 #include <boost/chrono.hpp>
 #include "Zweistein.Event.hpp"
 #include "Mesytec.Mcpd8.hpp"
@@ -26,119 +27,29 @@
 #include "Zweistein.Histogram.hpp"
 
 namespace Zweistein {
-	static boost::atomic<bool> initdonehistogramsize = false;
-	void populateHistograms(boost::asio::io_service &io_service,Mesytec::MesytecSystem *pmsmtsystem1) {
-		
-		boost::this_thread::sleep_for(boost::chrono::milliseconds(2000));
-
-		unsigned short x_default= pmsmtsystem1->data.widthX;
-		unsigned short y_default= pmsmtsystem1->data.widthY;
+	void populateHistograms(boost::asio::io_service & io_service, boost::shared_ptr < Mesytec::MesytecSystem> pmsmtsystem1) {
 	
-
-		// cc::Mat is row, column which corresponds to y, x !!!!
-		auto imageUpdate = [](cv::Mat& image) {
-			double minVal, maxVal;
-			cv::Point minLoc, maxLoc;
-			//Zweistein::ReadLock r_lock(histograms[0].lock);
-			cv::minMaxLoc(histograms[0].histogram, &minVal, &maxVal, &minLoc, &maxLoc);
-			{
-				//boost::mutex::scoped_lock lock(coutGuard);
-				//std::cout << "histogram: minVal=" << minVal <<"("<<minLoc.x<<","<<minLoc.y<<")" << ", maxVal=" << maxVal << "(" << maxLoc.x << "," << maxLoc.y << ")" << std::endl;
-			}
-			histograms[0].histogram.convertTo(image, CV_8U, maxVal != 0 ? 255.0 / maxVal : 0, 0);
-		};
-		boost::function<void()> display = [&x_default,&y_default,&io_service, &imageUpdate]() {
-			sigslot::signal<cv::Mat&> sig;
-			bool bshow = true;
-#ifndef _WIN32
-			if (NULL == getenv("DISPLAY")) bshow = false;
-#endif
-				if(bshow) cv::namedWindow("histogram");
-				
-				cv::Mat image = cv::Mat_<unsigned char>::zeros(y_default, x_default);
-				cv::Mat colormappedimage;
-
-				sig.connect(imageUpdate);
-				do {
-					cv::waitKey(500);
-					
-					{
-						//if (!initdonehistogramsize) continue;
-					}
-					sig(image);
-					if (!image.empty()) {
-						//int y = 955;
-						//int x = 54;
-						//int val=image.at<unsigned char>(y, x);
-						cv::applyColorMap(image, colormappedimage, cv::COLORMAP_JET);
-						if(bshow) cv::imshow("histogram", colormappedimage);
-					}
-				} while (!io_service.stopped());
-				{
-					boost::mutex::scoped_lock lock(coutGuard);
-					std::cout << std::endl << "display histogram exiting..." << std::endl;
-				}
-			
-			
-		};
-		worker_threads.create_thread(boost::bind(display));
+		unsigned short maxX = pmsmtsystem1->data.widthX;
+		unsigned short maxY = pmsmtsystem1->data.widthY;
+		int left = 0;
+		int bottom = 0;
+		histograms[0].setRoiRect(left, bottom, maxX,maxY);
+		{
+			boost::mutex::scoped_lock lock(coutGuard);
+		//	std::cout << "Histogram size intialized to: rows(" << maxY << ") x columns(" << maxX << ") " << std::endl;
+		}
+	
 		boost::chrono::system_clock::time_point start = boost::chrono::system_clock::now();
 		try {
 			Zweistein::Event ev;
 			int i = 0;
-			size_t max_inqueue = 0;
-			unsigned short maxX= x_default;
-			unsigned short maxY= y_default;
-			bool initdone = false;
+			
 			long long nloop = 0;
 			boost::chrono::system_clock::time_point current = boost::chrono::system_clock::now();
 			boost::chrono::nanoseconds elapsed;
 			do {
-					current = boost::chrono::system_clock::now();
-					elapsed = current - start;
-					if (elapsed.count() > 1000L * 1000L * 1000L) { // we check  every 1000 ms
-						start = boost::chrono::system_clock::now();
-						if (max_inqueue >= 9*Mcpd8::Data::EVENTQUEUESIZE/10) {
-							boost::mutex::scoped_lock lock(coutGuard);
-							std::cout << "EVENT QUEUE ALMOST FULL (" << max_inqueue << "), drops likely from histogram input " << std::endl;
-							max_inqueue = 0;
-						}
-					}
+									
 				
-				if (!initdone) {
-					size_t inqueue = pmsmtsystem1->data.evntqueue.read_available();
-					if (inqueue > 0) {
-						if (!initdone)
-						{
-							if (!initdonehistogramsize) {
-								maxX = pmsmtsystem1->data.widthX;
-								maxY = pmsmtsystem1->data.widthY;
-
-								{
-									std::stringstream ssroi;
-									int left = 0;
-									int bottom = 0;
-									ssroi << ("POLYGON((") << left << " " << bottom << ",";
-									ssroi << left << " " << maxY << ",";
-									ssroi << maxX << " " << maxY << ",";
-									ssroi << maxX << " " << bottom << ",";
-									ssroi << left << " " << bottom << "),())";
-									std::string roi = ssroi.str();
-									histograms[0].setRoi(roi);
-								}
-								
-								
-								{
-									boost::mutex::scoped_lock lock(coutGuard);
-									std::cout << "Histogram size intialized to: rows("<<maxY<<") x columns("<<maxX<<") " << std::endl;
-								}
-								initdonehistogramsize = true;
-								initdone = true;
-							}
-						}
-					}
-					continue;
-				}
 				long evntspopped = 0;
 				while (pmsmtsystem1->data.evntqueue.pop(ev)) {
 					if ((ev.X < 0 || ev.X >= maxX) || (ev.Y < 0 || ev.Y >= maxY)) {
@@ -146,10 +57,7 @@ namespace Zweistein {
 						std::cout << " Event.X or Event.Y ouside bounds" << std::endl;
 					}
 					evntspopped++;
-					if (evntspopped > Mcpd8::Data::EVENTQUEUESIZE*3/4) {
-						size_t inqueue = pmsmtsystem1->data.evntqueue.read_available();
-						if (inqueue >= max_inqueue) max_inqueue = inqueue;
-					}
+					
 					//histogram.at<float>(ev.Y, ev.X) += ev.Amplitude;
 					//if(ev.X>=8 && ev.X<16)	
 

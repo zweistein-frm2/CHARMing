@@ -58,7 +58,7 @@ namespace Mcpd8 {
 		static size_t Send(boost::asio::ip::udp::socket* socket, CmdPacket& cmdpacket, boost::asio::ip::udp::endpoint &mcpd_endpoint) {
 			unsigned short items = (cmdpacket.Length - cmdpacket.headerLength);
 			cmdpacket.data[items] = 0xffff;
-			Mcpd8::DataPacket::settimeNow48bit(cmdpacket.time);
+			Mcpd8::DataPacket::settimeNow48bit(&cmdpacket.time[0]);
 			cmdpacket.headerchksum = 0;
 			unsigned short chksum = cmdpacket.headerchksum;
 			const unsigned short* p = reinterpret_cast<const unsigned short*>(&cmdpacket);
@@ -92,28 +92,37 @@ namespace Mcpd8 {
 			auto cmd_2 = magic_enum::enum_cast<Mcpd8::Internal_Cmd>(realcmd);
 			
 			std::stringstream ss_cmd;
-			if (cmd_1.has_value()) 	ss_cmd << cmd_1 << "(0x"<<std::hex<< static_cast<magic_enum::underlying_type_t<Mcpd8::Cmd>>(realcmd) << std::dec << ")";
+			if (cmd_1.has_value()) 	ss_cmd << cmd_1 << hexfmt( static_cast<magic_enum::underlying_type_t<Mcpd8::Cmd>>(realcmd));
 			else {
 				ss_cmd << cmd_2;
 				if (!cmd_2.has_value()) { 
 					if (realcmd == Mcpd8::Internal_Cmd::SETNUCLEORATEEVENTSPERSECOND) {
 						ss_cmd << "(SETNUCLEORATEEVENTSPERSECOND)";
 					}
-					else ss_cmd << "(0x" <<std::hex << cmd << std::dec << ")";
+					else ss_cmd << hexfmt(cmd);
 				}
-				else ss_cmd << "(0x" << std::hex << static_cast<magic_enum::underlying_type_t<Mcpd8::Internal_Cmd>>(realcmd) << std::dec << ")";
+				else ss_cmd << hexfmt(static_cast<magic_enum::underlying_type_t<Mcpd8::Internal_Cmd>>(realcmd));
 			}
 			if (!understood) {
 				ss_cmd << "( NOT UNDERSTOOD)";
 			}
-			//long long timestamp = timeStamp() * 100; // nanoseconds 
-			//boost::chrono::system_clock::time_point t(boost::chrono::microseconds(timestamp / 1000));
-			//std::time_t tt = boost::chrono::system_clock::to_time_t(t);
-			os << "items:"<<Length-headerLength<<" " << buffertype<<"(0x"<< std::hex <<Type <<")" << " " << ss_cmd.str() <<", "<< Number << "(0x" << std::hex << Number << ")" << ", " << ss_status.str() << "(0x" << std::hex << status << ")" << std::endl;// << " " << numEvents() << " Events " << timeStamp() << "00ns(" << std::put_time(std::localtime(&tt), "%Y-%b-%d %X") << ")" << std::endl;
-			
+
+			long long timestamp = Mcpd8::DataPacket::timeStamp(&time[0]); // nanoseconds 
+			boost::chrono::microseconds micros(timestamp / 10);
+			long fractionalseconds = timestamp % 10000000;
+
+			boost::chrono::system_clock::time_point t2(micros);
+			std::time_t tt = boost::chrono::system_clock::to_time_t(t2);
+
+
+			os << buffertype << " " << ss_cmd.str() << ", ";
+			os << "Buffer Number:" << hexfmt(Number) << ", ";
+			os<< "Status:"<<ss_status.str() << hexfmt((unsigned short) status)  << " ";
+			os << "Timestamp:" <<  std::put_time(std::localtime(&tt), "%Y-%b-%d %X") << "." << fractionalseconds  << std::endl;
+			os << " ITEMS:" << Length - headerLength << std::endl;
 			for (int d = 0; d < Length - headerLength; d++) {
-				if (d!=0 && d % 8 == 0) os << std::endl;
-				os << "\tdata["<<d<<"]=0x"<<std::hex << data[d] <<std::dec<< " ";
+				if (d!=0 && d % 5 == 0) os << std::endl;
+				os << "\tdata["<<d<<"]=0x" << f2hex << data[d] <<std::dec<< " ";
 				
 
 			}

@@ -29,7 +29,7 @@
 #include "rfc1071_checksum.hpp"
 #include "cmake_variables.h"
 #include "Mesytec.Mpsd8.hpp"
-
+#include "PacketSender.Params.hpp"
 using boost::asio::ip::udp;
 boost::mutex coutGuard;
 boost::thread_group worker_threads; // not used
@@ -41,16 +41,14 @@ udp::endpoint current_remote_endpoint;
 udp::endpoint remote_endpoint;
 udp::endpoint listen_endpoint;
 
-boost::atomic<unsigned short> daq_running = Mcpd8::Status::DAQ_Stopped;
-boost::atomic<unsigned short> devid = 1;
+boost::atomic<unsigned short> daq_status = Mcpd8::Status::sync_ok;
+boost::atomic<unsigned short> devid = 0;
 boost::atomic<unsigned short> runid = 0;
 boost::atomic<long> requestedEventspersecond = 100; // default value at startup
 int MAX_NEVENTS = 250;
 boost::atomic<int> nevents = MAX_NEVENTS;
 boost::atomic<int> coutevery_npackets = requestedEventspersecond / nevents;
 int minRateperSecond = 51;
-
-
 
 const int N_MPSD8 = 8;
 
@@ -111,10 +109,10 @@ void handle_receive(const boost::system::error_code& error,
 					cp.Length = Mcpd8::CmdPacket::defaultLength;
 
 				}
-				std::cout << cp << std::endl;
+				std::cout <<std::endl << "RECEIVED:" << cp << std::endl;
 			}
 			
-			if ((cp.deviceStatusdeviceId >> 8) != devid) {
+			if (cp.cmd!= Mcpd8::Cmd::SETID && (cp.deviceStatusdeviceId >> 8) != devid) {
 					cp.cmd |= (unsigned short) 0x8000; 
 					boost::mutex::scoped_lock lock(coutGuard);
 					std::cout << "device id mismatch: our id= " << devid << std::endl;
@@ -125,16 +123,24 @@ void handle_receive(const boost::system::error_code& error,
 
 			switch (cp.cmd) {
 			case Mcpd8::Cmd::START:
-				daq_running = Mcpd8::Status::DAQ_Running;
+				daq_status|= Mcpd8::Status::DAQ_Running;
 				remote_endpoint=current_remote_endpoint;
 				break;
 			case Mcpd8::Cmd::STOP:
-				daq_running = Mcpd8::Status::DAQ_Stopped;
+				daq_status &= ~Mcpd8::Status::DAQ_Running;
 				remote_endpoint = current_remote_endpoint;
 				break;
 			case Mcpd8::Cmd::SETID:
-
-				devid = cp.data[0];
+				if (cp.data[0] > 7) {
+					cp.cmd |= (unsigned short)0x8000;
+					boost::mutex::scoped_lock lock(coutGuard);
+					std::cout << "device id ("<< cp.data[0]<<" requested must be < 8" << std::endl;
+					// following switch will not find any values then
+				}
+				else {
+					PacketSenderParams::setDevId(cp.data[0]);
+					devid = cp.data[0];
+				}
 				cp.Length = Mcpd8::CmdPacket::defaultLength + 1;
 				remote_endpoint = current_remote_endpoint;
 				
@@ -158,6 +164,16 @@ void handle_receive(const boost::system::error_code& error,
 				break;
 
 
+
+			case Mcpd8::Cmd::SETCLOCK:
+			{
+				long long tstamp = Mcpd8::DataPacket::timeStamp(&cp.data[0]);
+				unsigned short time[3];
+				Mcpd8::DataPacket::settimeNow48bit(&time[0]);
+				long long ourtstamp = Mcpd8::DataPacket::timeStamp(&time[0]);
+				Mcpd8::DataPacket::tstamp_started -= tstamp-ourtstamp;
+				break;
+			}
 			case Mcpd8::Cmd::SETCELL: {
 				//
 				break;
@@ -175,7 +191,7 @@ void handle_receive(const boost::system::error_code& error,
 
 
 			case Mcpd8::Cmd::GETCAPABILITIES:
-				cp.data[0] = Mcpd8::TX_CAP::POS_OR_AMP | Mcpd8::TX_CAP::TOF_POS_OR_AMP | Mcpd8::TX_CAP::TOF_POS_AND_AMP;
+				cp.data[0] = Mcpd8::TX_CAP::P | Mcpd8::TX_CAP::TP | Mcpd8::TX_CAP::TPA;
 				cp.data[1] = Mesytec::Mpsd8::Module::tx_cap_default;
 				cp.Length = Mcpd8::CmdPacket::defaultLength + 2;
 				break;
@@ -260,7 +276,7 @@ void handle_receive(const boost::system::error_code& error,
 
 				assert(cp.data[0] >= 0 && cp.data[0] < N_MPSD8);
 				if (Module_Id[cp.data[0]] != Mesy::ModuleId::MPSD8P) {
-					cp.cmd != 0x8000;
+					cp.cmd |= 0x8000;
 					break;
 				}
 				//cp.data[0] is Mpsd device num
@@ -320,7 +336,7 @@ void handle_receive(const boost::system::error_code& error,
 				//cp.data[0] = channel   //mcpsd8 channel (up to 8)
 				
 				if (cp.data[0] < 0 || cp.data[0] >= N_MPSD8) {
-					cp.cmd != 0x8000;
+					cp.cmd |= 0x8000;
 					break;
 				}
 				cp.data[2] = 0;
@@ -353,7 +369,7 @@ void handle_receive(const boost::system::error_code& error,
 			case Mcpd8::Internal_Cmd::SETNUCLEORATEEVENTSPERSECOND:
 			{
 				if(cp.Length < Mcpd8::CmdPacket::defaultLength + 2) {
-					cp.cmd != 0x8000;
+					cp.cmd |= 0x8000;
 					boost::mutex::scoped_lock lock(coutGuard);
 					std::cout << "needs  2 data words as parameter" << std::endl;
 					break;
@@ -366,7 +382,7 @@ void handle_receive(const boost::system::error_code& error,
 
 			}
 			if (sendanswer) {
-				cp.deviceStatusdeviceId = daq_running | (devid << 8);
+				cp.deviceStatusdeviceId = daq_status | (devid << 8);
 				Mcpd8::CmdPacket::Send(psocket, cp, current_remote_endpoint);
 				{
 					boost::mutex::scoped_lock lock(coutGuard);
@@ -446,8 +462,16 @@ int main(int argc, char* argv[])
 	char* cLocal = setlocale(LC_ALL, NULL);
 	setlocale(LC_ALL, "de-DE");
 	boost::filesystem::path::imbue(std::locale());
+	std::string appName = boost::filesystem::basename(argv[0]);
+	PacketSenderParams::ReadIni(appName,"charm");
+	devid = PacketSenderParams::getDevId();
 	const unsigned short port = 54321;
 	boost::array< Mcpd8::DataPacket, 1> dp;
+
+	Mcpd8::DataPacket::settimeNow48bit(&dp[0].time[0]);
+	Mcpd8::DataPacket::tstamp_started=Mcpd8::DataPacket::timeStamp(&dp[0].time[0]);
+
+
 	if (argc == 1) {
 		boost::mutex::scoped_lock lock(coutGuard);
 		std::cout << "Specify Event Rate per second , 2K -> 2000, 1M->1000000" << std::endl;
@@ -551,11 +575,16 @@ int main(int argc, char* argv[])
 				Zweistein::Random::Mpsd8EventRandomData((unsigned short*)(&dp[0].events[i]), i, maxX);
 
 			}
-			dp[0].deviceStatusdeviceId = daq_running | (devid << 8); // set to running
+			dp[0].deviceStatusdeviceId = daq_status | (devid << 8); // set to running
 			dp[0].Length = nevents * 3 + dp[0].headerLength;
 			dp[0].Type = Mesy::BufferType::DATA;
-			Mcpd8::DataPacket::settimeNow48bit(dp[0].time);
-			if (daq_running) {
+			
+			Mcpd8::DataPacket::settimeNow48bit(&dp[0].time[0]);
+			unsigned long long tstamp_current = Mcpd8::DataPacket::timeStamp(&dp[0].time[0]);
+			Mcpd8::DataPacket::setTimeStamp(&dp[0].time[0], tstamp_current -Mcpd8::DataPacket::tstamp_started);
+			
+			
+			if (daq_status&Mcpd8::Status::DAQ_Running) {
 #ifdef _SPOOF_IP
 				//size_t bytessent = raw_sendto(rawsocket, spoofed_endpoint, remote_endpoint, boost::asio::buffer((void*)(&dp[0]), dp[0].Length * sizeof(unsigned short)));
 #else
