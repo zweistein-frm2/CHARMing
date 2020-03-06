@@ -77,13 +77,43 @@ int main(int argc, char* argv[])
 		if (argc == 1) {
 			std::cout << "--help for usage info" << std::endl;
 		}
-		boost::filesystem::path homepath= Zweistein::GetHomePath();
-		boost::filesystem::path inidirectory = homepath;
-		inidirectory /= "." + std::string(PROJECT_NAME);
-		if (!boost::filesystem::exists(inidirectory)) {
-			boost::filesystem::create_directory(inidirectory);
+
+		boost::filesystem::path  r("/");
+		std::string ee =r.root_directory().string();
+		r /= "etc";
+		bool use_etcdir = true;
+		boost::system::error_code ec;
+		if (!boost::filesystem::exists(r)) {
+				use_etcdir = boost::filesystem::create_directory(r,ec);
 		}
-		homepath += boost::filesystem::path::preferred_separator;
+		
+		if (ec) std::cout<<ec.message() <<":"<<r.string();
+		else {
+
+			r /= PROJECT_NAME;// +"-frm2";
+
+			if (!boost::filesystem::exists(r)) {
+				use_etcdir = boost::filesystem::create_directory(r, ec);
+			}
+			if (ec) std::cout << ec.message() << r.string();
+		}
+		if (ec) use_etcdir = false;
+		
+		boost::filesystem::path inidirectory;
+		if (!use_etcdir) {
+			boost::filesystem::path homepath = Zweistein::GetHomePath();
+			inidirectory = homepath;
+			inidirectory /= "." + std::string(PROJECT_NAME);
+			if (!boost::filesystem::exists(inidirectory)) {
+				boost::filesystem::create_directory(inidirectory);
+			}
+			inidirectory += boost::filesystem::path::preferred_separator;
+		}
+		else inidirectory = r;
+
+		
+		
+		
 		boost::filesystem::path inipath = inidirectory;
 		const char* HELP="help";
 		const char* LISTMODE_FILE="listmodefile(s)";

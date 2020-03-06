@@ -14,7 +14,10 @@
 <p>		sudo apt-get install curl</p>
 <p>		sudo apt install python3-pip python3-dev</p>
 <p>		sudo pip3 install numpy</p>
-<p>		sudo ln -s /usr/bin/python3 /usr/bin/python</p>
+<p>		sudo pip3 install opencv</p>
+<p>		sudo apt-get install libxxf86vm-dev</p>
+<p>		sudo apt-get install libboost-python-dev</p>
+<p>		sudo apt-get install python3-tango</p>
 
 
 <p>sudo apt-get install build-essential libpq-dev libssl-dev openssl libffi-dev zlib1g-dev</p>
@@ -22,7 +25,7 @@
 
 
 
-    <p>4.) install vcpkg (C++ package manager)</p>
+    <p>2.) install vcpkg (C++ package manager)</p>
 	<p>      cd /</p>
 	<p>		sudo mkdir vcpkg</p>
 	<p>		sudo chmod 777 vcpkg</p>
@@ -32,7 +35,7 @@
     <p>     sudo ./vcpkg integrate install</p>
  
 
-    <p>5.) Install boost , magic-enum libuv und opencv with vcpkg</p>
+    <p>3.) Install boost , magic-enum libuv und opencv with vcpkg</p>
     <p>     sudo ./vcpkg install magic-enum</p>
 	<p>     sudo ./vcpkg install libuv</p>
     <p>     sudo ./vcpkg install boost</p>
@@ -47,7 +50,7 @@
 
 
 
-    <p>6.) Install source code</p>
+    <p>4.) Install source code</p>
     <p>     git clone https://github.com/zweistein-frm2/Neu2d_det.git </p>
     
     <p>You should have the following directory structure:</p>
@@ -57,7 +60,7 @@
     <p>|</p>
     <p>|-----\sigslot</p>
 
-	<p>7.)  Jetzt braucht man den C++ 17 compiler (gcc 9):</p>
+	<p>5.)  Jetzt braucht man den C++ 17 compiler (gcc 9):</p>
 	<p>		sudo update-alternatives -- config gcc</p>
 	<p>		choose 0</p>
     <p>     Jetzt braucht man die Pfade aus 3.) die dann in die command line richtig eingefügt werden (also bei euch /home/alanghof oder users/alanghof mit dem bei euch vorhanden Pfad ersetzen)</p>

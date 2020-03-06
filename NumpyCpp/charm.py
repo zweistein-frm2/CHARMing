@@ -1,12 +1,13 @@
-from entangle.device.charm import numpycpp
-import numpy as np
-import cv2 as cv
-
 from entangle import base
 from entangle.core import Prop, uint16
 from entangle.core.states import BUSY, UNKNOWN
 from entangle.core.errors import InvalidValue, InvalidOperation, \
     ConfigurationError
+
+import numpy as np
+import cv2 as cv
+
+from entangle.device.charm import numpycpp
 
 o = numpycpp.NeutronMeasurement()
 
@@ -23,7 +24,10 @@ class Histogram(base.ImageChannel):
     def read_detectorSize(self):
         return self.Histogram.Size
     def read_value(self):
+        print("read_value")
         t=self.Histogram.update(self.mat)
+        self.mat=t[1]
+        print(self.mat.shape)
         self.count=t[0];
         return self.mat.flatten()
 

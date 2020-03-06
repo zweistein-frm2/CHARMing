@@ -29,7 +29,7 @@
       ]
     },
     {
-      "name": "Taco102-Ubuntu",
+      "name": "Taco102-Ubuntu18.04",
       "generator": "Unix Makefiles",
       "configurationType": "Release",
       "cmakeExecutable": "/usr/bin/cmake",
@@ -55,7 +55,50 @@
         },
         {
           "name": "PacketSender_DIR",
-          "value": "/home/alanghof/repos/Neu2d_det/charm",
+          "value": "/home/alanghof/repos/Neu2d_det/PacketSender",
+          "type": "PATH"
+        },
+        {
+          "name": "pyboostcvconverter_DIR",
+          "value": "/home/alanghof/repos/Neu2d_det/pyboostcvconverter",
+          "type": "PATH"
+        }
+      ]
+    },
+    {
+      "name": "Taco07-Ubuntu20",
+      "generator": "Unix Makefiles",
+      "configurationType": "Release",
+      "cmakeExecutable": "/usr/bin/cmake",
+      "remoteCopySourcesExclusionList": [ ".vs", ".git", "out" ],
+      "cmakeToolchain": "/vcpkg/scripts/buildsystems/vcpkg.cmake",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "inheritEnvironments": [ "linux_x64" ],
+      "remoteMachineName": "taco07",
+      "remoteCMakeListsRoot": "\"$HOME/.vs/${projectDirName}/${workspaceHash}/src,",
+      "remoteBuildRoot": "$HOME/entangle/entangle/device/charm",
+      "remoteInstallRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/install/${name}",
+      "remoteCopySources": true,
+      "rsyncCommandArgs": "-t --delete --delete-excluded",
+      "remoteCopyBuildOutput": false,
+      "remoteCopySourcesMethod": "rsync",
+      "addressSanitizerRuntimeFlags": "detect_leaks=0",
+      "variables": [
+        {
+          "name": "Charm_DIR",
+          "value": "/home/localadmin/repos/Neu2d_det/charm",
+          "type": "PATH"
+        },
+        {
+          "name": "PacketSender_DIR",
+          "value": "/home/localadmin/repos/Neu2d_det/PacketSender",
+          "type": "PATH"
+        },
+        {
+          "name": "pyboostcvconverter_DIR",
+          "value": "/home/localadmin/repos/Neu2d_det/pyboostcvconverter",
           "type": "PATH"
         }
       ]

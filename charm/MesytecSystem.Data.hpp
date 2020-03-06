@@ -15,7 +15,7 @@ namespace Mcpd8 {
 		boost::lockfree::spsc_queue<Zweistein::Event, boost::lockfree::capacity<EVENTQUEUESIZE>> evntqueue;
 		boost::atomic<EventDataFormat> Format = EventDataFormat::Undefined;
 		boost::atomic<long long> listmodepacketcount = 0;
-		static const int LISTMODEWRITEQUEUESIZE = 20000;
+		static const int LISTMODEWRITEQUEUESIZE = 50000;
 		boost::lockfree::spsc_queue<DataPacket, boost::lockfree::capacity<LISTMODEWRITEQUEUESIZE>> listmodequeue;
 		boost::atomic<long long> packetqueuecount = 0;
 		static const int PACKETQUEUESIZE = 20000;

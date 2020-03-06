@@ -67,6 +67,7 @@ typedef boost::geometry::model::polygon<point_type> polygon_type;
         long count;
         cv::Mat histogram;
             Histogram():count(0) {
+               
                 setRoiRect(0,0,1,1);
         }
   
@@ -116,8 +117,8 @@ typedef boost::geometry::model::polygon<point_type> polygon_type;
 
             histogram = cv::Mat_<int32_t>::zeros(height, width);
             {
-                boost::mutex::scoped_lock lock(coutGuard);
-                std::cout << "setRoi:box: width=" << width << ",height=" << height << std::endl;
+            //    boost::mutex::scoped_lock lock(coutGuard);
+             //   std::cout << "setRoi:box: width=" << width << ",height=" << height << std::endl;
             }
 
         }
@@ -125,9 +126,13 @@ typedef boost::geometry::model::polygon<point_type> polygon_type;
         boost::python::tuple update(cv::Mat mat) {
             {
                 // Zweistein::WriteLock w_lock(lock);
-                setRoiRect(0,0,64, 1024);
+                setRoiRect(0,0,128, 1024);
                 GetHistogramOpenCV(histogram);
 
+            }
+            {
+                boost::mutex::scoped_lock lock(coutGuard);
+                std::cout << "Histogram.update()" << std::endl;
             }
             histogram.copyTo(mat);
             return boost::python::make_tuple(count, mat);

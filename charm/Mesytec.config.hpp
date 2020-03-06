@@ -12,13 +12,24 @@
 #include "Zweistein.GetLocalInterfaces.hpp"
 
 namespace Mesytec {
-	namespace Config { 
-		std::string oursystem = "MsmtSystem";
-		std::string mesytecdevice = "MesytecDevice";
-		std::string charmdevice = "CharmDevice";
-		std::string punkt = ".";
-		const int MaxDevices = 2;
+	
+	 namespace Config { 
+		
+		std::string DATAHOME;
+		
 		void get(boost::property_tree::ptree& root, std::list<Mcpd8::Parameters>& _devlist) {
+
+			std::string oursystem = "MsmtSystem";
+			std::string mesytecdevice = "MesytecDevice";
+			std::string charmdevice = "CharmDevice";
+			std::string punkt = ".";
+			std::string mcpd_ip = "mcpd_ip";
+			std::string datahome = "datahome";
+			const int MaxDevices = 4;
+
+
+			DATAHOME = root.get<std::string>(oursystem+ punkt +datahome, "/home");
+			root.put<std::string>(oursystem + punkt + datahome, DATAHOME);
 			
 			for (int n = 0; n < MaxDevices; n++) {
 				Mcpd8::Parameters p1;
@@ -26,9 +37,9 @@ namespace Mesytec {
 				ss << oursystem << punkt << mesytecdevice << n << punkt;
 				std::string s2 = ss.str();
 
-				if (n == 0) p1.mcpd_ip = root.get<std::string>(s2 + "mcpd_ip", Mcpd8::Parameters::defaultIpAddress);
-				else p1.mcpd_ip = root.get<std::string>(s2 + "mcpd_ip");
-				root.put<std::string>(s2 + "mcpd_ip", p1.mcpd_ip);
+				if (n == 0) p1.mcpd_ip = root.get<std::string>(s2 + mcpd_ip, Mcpd8::Parameters::defaultIpAddress);
+				else p1.mcpd_ip = root.get<std::string>(s2 + mcpd_ip);
+				root.put<std::string>(s2 +mcpd_ip, p1.mcpd_ip);
 
 				if (n == 0) p1.mcpd_port = root.get<unsigned short>(s2 + "mcpd_port", Mcpd8::Parameters::defaultUdpPort);
 				else p1.mcpd_port = root.get<unsigned short>(s2 + "mcpd_port");
@@ -94,7 +105,7 @@ namespace Mesytec {
 				for (auto& d : _devlist) {
 					if (d.networkcard == p1.networkcard && d.mcpd_ip == p1.mcpd_ip) {
 						bcanpushback = false;
-						std::cout << "CONFIGURATION ERROR:" << s2 + "mcpd_ip("<<p1.mcpd_ip << ") already in use =>skipped" << std::endl;
+						std::cout << "CONFIGURATION ERROR:" << s2 + mcpd_ip+"("<<p1.mcpd_ip << ") already in use =>skipped" << std::endl;
 
 					}
 					if (d.mcpd_id == p1.mcpd_id) {
@@ -110,5 +121,5 @@ namespace Mesytec {
 			}
 		}
 	}
-
+	
 }

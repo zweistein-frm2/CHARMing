@@ -4,21 +4,21 @@
 cmake_minimum_required (VERSION 3.14)
 project(numpycpp)
 
-
-  #add_compile_definitions(ASIOEXT_USE_BOOST_ASIO)
- 
 set(CMAKE_CXX_STANDARD 17) 
 
 find_package (Python COMPONENTS Interpreter Development NumPy)
 
 find_package(magic_enum CONFIG REQUIRED )
-set(Boost_USE_STATIC_LIBS ON) 
-set(Boost_USE_STATIC_RUNTIME ON)  
+message(************************************************)
+set(BOOST_ROOT /usr )
+set(Boost_INCLUDE_DIR ${BOOST_ROOT}/include)
 find_package(Boost 1.71 REQUIRED COMPONENTS python${Python_VERSION_MAJOR}${Python_VERSION_MINOR} numpy${Python_VERSION_MAJOR}${Python_VERSION_MINOR} filesystem chrono thread iostreams) # header only libraries must not be added here
-#find_path(Boost_INCLUDE_DIR boost)
+find_path(Boost_INCLUDE_DIR boost)
+message(************************************************)
+message(${Boost_INCLUDE_DIR})
+message(${BOOST_ROOT})
 find_package(OpenCV REQUIRED)
-#include_directories(${Boost_INCLUDE_DIR} ${OpenCV_INCLUDE_DIRS})
-#include_directories(${ASIO_EXTENSIONS_PATH})
+include_directories(${Boost_INCLUDE_DIR})
 include_directories(${SIGSLOT_PATH})
 include_directories(${_Python_INCLUDE_DIR})
 include_directories(${Charm_DIR})
@@ -32,11 +32,13 @@ add_library(${PROJECT_NAME} SHARED )
 
 
 target_link_libraries(${PROJECT_NAME} PRIVATE magic_enum::magic_enum ${Boost_LIBRARIES} ${OpenCV_LIBS}    )
-target_link_libraries(${PROJECT_NAME} PRIVATE ${Python_LIBRARY_RELEASE} $<$<CXX_COMPILER_ID:GNU>:${Boost_PYTHON36_LIBRARY_RELEASE}> $<$<CXX_COMPILER_ID:GNU>:${Boost_NUMPY36_LIBRARY_RELEASE}>)
-target_link_options(${PROJECT_NAME} PRIVATE $<$<CXX_COMPILER_ID:GNU>:$<$<CONFIG:RELEASE>:-static-libstdc++> $<$<CONFIG:DEBUG>:-static-libstdc++> > PRIVATE $<$<CXX_COMPILER_ID:GNU>:-static-libgcc>  )
+target_link_libraries(${PROJECT_NAME} PRIVATE ${Python_LIBRARY_RELEASE} $<$<CXX_COMPILER_ID:GNU>:${Boost_PYTHON38_LIBRARY_RELEASE}> $<$<CXX_COMPILER_ID:GNU>:${Boost_NUMPY38_LIBRARY_RELEASE}>)
 
+if(MSVC)
 set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".pyd")
-
+else()
+set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "")
+endif()
 add_custom_command(
         TARGET ${PROJECT_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
