@@ -7,12 +7,13 @@
 #pragma once
 #include "stdafx.h"
 #include <iostream>
+#include <sstream>
 #include <boost/exception/all.hpp>
 #include <boost/chrono.hpp>
 #include "Mesytec.hpp"
 #include "Mcpd8.enums.hpp"
 #include "Zweistein.bitreverse.hpp"
-
+#include "simpleLogger.h"
 
 namespace Mcpd8
 {
@@ -35,23 +36,23 @@ namespace Mcpd8
 		DataPacket() : Type(Zweistein::reverse_u16(Mesy::BufferType::DATA)), Length(21),
 			headerLength(21), Number(0), runID(0), deviceStatusdeviceId(0) {}
 
-		static long long tstamp_started;
-		static void settimeNow48bit(unsigned short time[3]) {
-
-			auto Now = boost::chrono::duration_cast<boost::chrono::nanoseconds>( boost::chrono::system_clock::now().time_since_epoch());
-			long long c=Now.count()/100- tstamp_started;
-			time[0] = c & 0xffff;
-			time[1] = (c >> 16) & 0xffff;
-			time[2] = (c >> 32) & 0xffff;
-			
-			
-		}
+		
 		friend struct CmdPacket;
 		static unsigned char getId(unsigned short deviceStatusdeviceId){
 			return deviceStatusdeviceId >> 8;
 		}
 		static unsigned char getStatus(unsigned short deviceStatusdeviceId) {
 			return deviceStatusdeviceId & 0xff;
+		}
+		static std::string deviceStatus(unsigned short deviceStatusdeviceId) {
+			using namespace magic_enum::bitwise_operators;
+			using namespace magic_enum::ostream_operators;
+			auto status = Mcpd8::DataPacket::getStatus(deviceStatusdeviceId);
+			std::stringstream ss_status;
+			for (auto s : magic_enum::enum_values<Mcpd8::Status>()) {
+				if (s & status) ss_status << s << " ";
+			}
+			return ss_status.str();
 		}
 		unsigned short BytesUsed() {
 			return Length * sizeof(unsigned short);
@@ -68,11 +69,13 @@ namespace Mcpd8
 			if (bt.has_value()) return bt.value();
 			else {
 				boost::mutex::scoped_lock lock(coutGuard);
-				std::cout << " BufferType undefined" << std::endl;
+				LOG_WARNING  << " BufferType undefined" << std::endl;
 				return Mesy::BufferType::COMMAND;
 			}
 		}
-		static long long timeStamp(const unsigned short time[3]){
+
+		
+		static boost::chrono::nanoseconds  timeStamp(const unsigned short time[3]){
 			/*
 			 DONT USE:  *U reads past time[3]
 			   typedef union {
@@ -84,18 +87,23 @@ namespace Mcpd8
 
 			return ptStamp->timeStamp;
 			 */
-			long long tstamp = time[0] + (((long long)time[1]) << 16) + (((long long)time[2]) << 32);
-			return tstamp;
+			long long tstamp = (long long)time[0] + (((long long)time[1]) << 16) + (((long long)time[2]) << 32);
+
+			boost::chrono::nanoseconds ns(tstamp * 100);
+			return ns;
 		}
 
-		static void setTimeStamp(unsigned short time[3],unsigned long long tstamp) {
+		static void setTimeStamp(unsigned short time[3], boost::chrono::nanoseconds nanos) {
+			long long tstamp = nanos.count() / 100;
 
 			time[0] = tstamp & 0xffff;
 			time[1] = (tstamp >> 16) & 0xffff;
 			time[2] = (tstamp >> 32) & 0xffff;
 		}
 
-		void print(std::ostream & os) const {
+		//void print(boost::log::formatting_ostream & os) const {
+		void print(std::stringstream & os) const {
+
 			using namespace magic_enum::ostream_operators;
 			auto buffertype = magic_enum::enum_cast<Mesy::BufferType>(Zweistein::reverse_u16(Type));
 			auto status = Mcpd8::DataPacket::getStatus(deviceStatusdeviceId);
@@ -105,24 +113,31 @@ namespace Mcpd8
 				if (s & status) ss_status << s << " ";
 			}
 
-			long long timestamp = Mcpd8::DataPacket::timeStamp(&time[0]); // nanoseconds 
-			boost::chrono::microseconds micros(timestamp / 10);
-			long fractionalseconds = timestamp % 10000000;
-
-			boost::chrono::system_clock::time_point t2(micros);
-			std::time_t tt = boost::chrono::system_clock::to_time_t(t2);
+					
 			os << buffertype << ", ";
 			os << "Buffer Number:" << hexfmt(Number) << ", ";
 			os << "Status:" << ss_status.str() << hexfmt((unsigned short)status);
 			os << "RunID:" << runID << ", " << numEvents() << " Events ";
-			os << "Timestamp:"<< std::put_time(std::localtime(&tt), "%Y-%b-%d %X") << "." << fractionalseconds  << std::endl;
+			os << "Timestamp:"<< boost::chrono::duration_cast<boost::chrono::milliseconds>(Mcpd8::DataPacket::timeStamp(time)) << std::endl;
 			
 			int rest = (Length - headerLength) % 3;
 			if (rest) { os << std::endl << "WARNING: trailing " << rest << " Bytes"; }
 		}
+		
+
 	};
+	
+}
 
-	long long DataPacket::tstamp_started = 0;
-
-
+std::ostream& operator<<(std::ostream& p, Mcpd8::DataPacket& dp) {
+	std::stringstream ss;
+	dp.print(ss);
+	p << ss.str();
+	return p;
+}
+boost::log::BOOST_LOG_VERSION_NAMESPACE::basic_record_ostream<char>& operator<<(boost::log::BOOST_LOG_VERSION_NAMESPACE::basic_record_ostream<char>& p, Mcpd8::DataPacket& dp) {
+	std::stringstream ss;
+	dp.print(ss);
+	p << ss.str();
+	return p;
 }

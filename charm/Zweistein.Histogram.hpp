@@ -6,19 +6,6 @@
 namespace p = boost::python;
 namespace np = boost::python::numpy;
 
-template <typename T>
-boost::python::object transfer_to_python(T* t)
-{
-    // Transfer ownership to a smart pointer, allowing for proper cleanup incase Boost.Python throws.
-    std::unique_ptr<T> ptr(t);
-    // Use the manage_new_object generator to transfer ownership to Python.
-    typename p::manage_new_object::apply<T*>::type converter;
-    // Transfer ownership to the Python handler and release ownership from C++.
-    p::handle<> handle(converter(*ptr));
-    ptr.release();
-    return p::object(handle);
-}
-
 
 #endif
 
@@ -34,12 +21,13 @@ boost::python::object transfer_to_python(T* t)
 #include <boost/geometry/io/wkt/wkt.hpp>
 
 #include "Zweistein.Locks.hpp"
-
+#include "simpleLogger.h"
 
 
 typedef boost::geometry::model::d2::point_xy<int> point_type;
 typedef boost::geometry::model::polygon<point_type> polygon_type;
 
+extern boost::mutex histogramsGuard;
 
     void GetHistogramOpenCV(cv::Mat& histogram) {
 
@@ -61,17 +49,21 @@ typedef boost::geometry::model::polygon<point_type> polygon_type;
     // boost::geometry::within(p, poly)
     //https://www.boost.org/doc/libs/1_72_0/libs/geometry/doc/html/geometry/reference/algorithms/envelope/envelope_2.html
     struct Histogram {
-        Zweistein::Lock lock;
+       
         polygon_type roi;
         boost::geometry::model::box<point_type> box;
         long count;
         cv::Mat histogram;
             Histogram():count(0) {
-               
+                resize(1, 1);
                 setRoiRect(0,0,1,1);
         }
   
+        void resize(int rows, int cols) {
 
+            histogram = cv::Mat_<int32_t>::zeros(rows,cols);
+           
+        }
         std::string getRoi() {
 
             std::stringstream ss_wkt;
@@ -90,7 +82,6 @@ typedef boost::geometry::model::polygon<point_type> polygon_type;
             setRoi(roi);
         }
         void setRoi(std::string& wkt) {
-            Zweistein::WriteLock w_lock(lock); // we fill only first histogram
             int width = 1;
             int height = 1; 
             bool illformedwkt = true;
@@ -102,39 +93,35 @@ typedef boost::geometry::model::polygon<point_type> polygon_type;
             }
             catch (boost::exception& e) {
                 boost::mutex::scoped_lock lock(coutGuard);
-                std::cout << boost::diagnostic_information(e);
+                LOG_ERROR << boost::diagnostic_information(e);
             }
 
             if (illformedwkt) {
+                height =histogram.size[0];
+                width=histogram.size[1];
+
                 std::vector<point_type> coor = { {0, 0}, {0,height}, {width, height}, {width,0},{0,0} };
                 roi.outer().clear();
                 for (auto& p : coor) roi.outer().push_back(p);
             }
 
             boost::geometry::envelope(roi, box);
-            width = box.max_corner().get<0>() - box.min_corner().get<0>();
-            height = box.max_corner().get<1>() - box.min_corner().get<1>();
+            int roiwidth = box.max_corner().get<0>() - box.min_corner().get<0>();
+            int roiheight = box.max_corner().get<1>() - box.min_corner().get<1>();
 
-            histogram = cv::Mat_<int32_t>::zeros(height, width);
-            {
-            //    boost::mutex::scoped_lock lock(coutGuard);
-             //   std::cout << "setRoi:box: width=" << width << ",height=" << height << std::endl;
-            }
+           
+           
 
         }
 #ifdef BOOST_PYTHON_MODULE
         boost::python::tuple update(cv::Mat mat) {
             {
-                // Zweistein::WriteLock w_lock(lock);
-                setRoiRect(0,0,128, 1024);
-                GetHistogramOpenCV(histogram);
-
+                boost::mutex::scoped_lock lock(histogramsGuard);
+                 
+                // resize(128, 1024);
+               //  GetHistogramOpenCV(histogram);
+                 histogram.copyTo(mat);
             }
-            {
-                boost::mutex::scoped_lock lock(coutGuard);
-                std::cout << "Histogram.update()" << std::endl;
-            }
-            histogram.copyTo(mat);
             return boost::python::make_tuple(count, mat);
         }
 
@@ -148,5 +135,5 @@ typedef boost::geometry::model::polygon<point_type> polygon_type;
         }
 #endif
     };
-
+   
     extern std::vector<Histogram> histograms;

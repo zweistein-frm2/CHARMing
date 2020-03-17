@@ -1,4 +1,4 @@
-import numpycpp
+import mesytecsystem
 import numpy as np
 import cv2 as cv
 
@@ -14,7 +14,7 @@ def makeRoiWkt( parameter):
     wkt=wkt[:-1]
     wkt+="),())"
 
-o = numpycpp.NeutronMeasurement()
+o = mesytecsystem.NeutronMeasurement()
 h = o.getHistogram()
 mat = np.zeros((1,1,1),dtype="int32")
 t= h.update(mat)

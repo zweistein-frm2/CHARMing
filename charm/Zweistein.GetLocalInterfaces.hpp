@@ -36,7 +36,19 @@ void GetLocalInterfaces(std::list<std::string>& localinterfaces) {
 	
 
 }
+	bool InterfaceExists(std::string proposed) {
 
+		std::list<std::string> localinterfaces = std::list<std::string>();
+		Zweistein::GetLocalInterfaces(localinterfaces);
+		auto _a = std::find(localinterfaces.begin(), localinterfaces.end(), proposed);
+		if (_a == localinterfaces.end()) {
+			LOG_ERROR << "interfaces on this machine are:";
+			int i = 0;
+			BOOST_FOREACH(std::string str, localinterfaces) { LOG_ERROR << str << "(" << i++ << ")  "; }
+			return false;
+		}
+		return true;
+	}
 
 	std::string askforInterfaceIfUnknown(std::string proposed) {
 

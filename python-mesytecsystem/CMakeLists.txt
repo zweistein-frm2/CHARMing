@@ -2,23 +2,31 @@
 # project specific logic here.
 #
 cmake_minimum_required (VERSION 3.14)
-project(numpycpp)
+project(mesytecsystem)
 
+if(MSVC)
+    add_compile_definitions(_WIN32_WINNT=0x0601)
+else()
+message("on linux boost must be installed :  sudo apt-get install libboost-python-dev")
+set(BOOST_ROOT /usr )
+set(Boost_INCLUDE_DIR ${BOOST_ROOT}/include)
+endif()
+  
+add_compile_definitions(ASIOEXT_USE_BOOST_ASIO)
 set(CMAKE_CXX_STANDARD 17) 
 
 find_package (Python COMPONENTS Interpreter Development NumPy)
 
 find_package(magic_enum CONFIG REQUIRED )
-message(************************************************)
-set(BOOST_ROOT /usr )
-set(Boost_INCLUDE_DIR ${BOOST_ROOT}/include)
-find_package(Boost 1.71 REQUIRED COMPONENTS python${Python_VERSION_MAJOR}${Python_VERSION_MINOR} numpy${Python_VERSION_MAJOR}${Python_VERSION_MINOR} filesystem chrono thread iostreams) # header only libraries must not be added here
+
+find_package(Boost 1.65 REQUIRED COMPONENTS python${Python_VERSION_MAJOR}${Python_VERSION_MINOR} numpy${Python_VERSION_MAJOR}${Python_VERSION_MINOR} filesystem chrono thread iostreams log log_setup) # header only libraries must not be added here
 find_path(Boost_INCLUDE_DIR boost)
-message(************************************************)
-message(${Boost_INCLUDE_DIR})
-message(${BOOST_ROOT})
+
+message(********************Using Boost :${Boost_INCLUDE_DIR}  ******************************)
 find_package(OpenCV REQUIRED)
+find_package(unofficial-libuv CONFIG REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
+include_directories(${ASIO_EXTENSIONS_PATH})
 include_directories(${SIGSLOT_PATH})
 include_directories(${_Python_INCLUDE_DIR})
 include_directories(${Charm_DIR})
@@ -31,7 +39,7 @@ include_directories(${_Python_NumPy_INCLUDE_DIR})
 add_library(${PROJECT_NAME} SHARED )
 
 
-target_link_libraries(${PROJECT_NAME} PRIVATE magic_enum::magic_enum ${Boost_LIBRARIES} ${OpenCV_LIBS}    )
+target_link_libraries(${PROJECT_NAME} PRIVATE magic_enum::magic_enum ${Boost_LIBRARIES} ${OpenCV_LIBS}  unofficial::libuv::libuv   )
 target_link_libraries(${PROJECT_NAME} PRIVATE ${Python_LIBRARY_RELEASE} $<$<CXX_COMPILER_ID:GNU>:${Boost_PYTHON38_LIBRARY_RELEASE}> $<$<CXX_COMPILER_ID:GNU>:${Boost_NUMPY38_LIBRARY_RELEASE}>)
 
 if(MSVC)
@@ -52,9 +60,10 @@ add_custom_command(
 
 target_sources(${PROJECT_NAME}
 PRIVATE
-${PROJECT_SOURCE_DIR}/NumpyCpp.cpp
+"mesytecsystem.cpp"
 ${pyboostcvconverter_DIR}/src/pyboost_cv2_converter.cpp
 ${pyboostcvconverter_DIR}/src/pyboost_cv3_converter.cpp
 ${pyboostcvconverter_DIR}/src/pyboost_cv4_converter.cpp
+${Charm_DIR}/simpleLogger.cpp
 
 )

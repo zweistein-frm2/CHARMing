@@ -35,8 +35,7 @@ namespace Mesy {
 	};
 
 	enum TimePoint {
-		ZERO =0,
-		NOW = 1
+		ZERO =0
 	};
 	
 	class alignas(2) Mpsd8Event {
@@ -61,14 +60,17 @@ namespace Mesy {
 			unsigned short rv = (data[1] >>3) &0b1111111111;
 			return rv;
 		}
-		unsigned long long TIMESTAMP() const {
+		boost::chrono::nanoseconds TIMESTAMP() const {
 			unsigned long long rv = (unsigned long long)(data[1] & 0b111) << 16;
 			rv += data[0];
-			return rv;
+			boost::chrono::nanoseconds ns(rv * 100);
+			return ns;
+			
 		}
-		static void settime19bit(unsigned short data[3],long long nsec) {
-			data[0] = nsec/100 & 0xffff;
-			data[1] |= (nsec/100 & 0b1110000000000000000) >> 16;
+		static void settime19bit(unsigned short data[3], boost::chrono::nanoseconds nsec) {
+			
+			data[0] = nsec.count()/100 & 0xffff;
+			data[1] |= (nsec.count()/100 & 0b1110000000000000000) >> 16;
 
 		}
 	
@@ -114,10 +116,11 @@ namespace Mesy {
 			unsigned short rv = (data[1] >> 3) & 0x3ff;
 			return rv;
 		}
-		unsigned long long TIMESTAMP() const {
+		boost::chrono::nanoseconds TIMESTAMP() const {
 			unsigned long long rv = (unsigned long long)(data[1] & 0x7) << 16;
 			rv += data[0];
-			return rv;
+			boost::chrono::nanoseconds ns(rv * 100);
+			return ns;
 		}
 		static MdllEvent* fromMpsd8(Mpsd8Event * mpsd8) {
 			return reinterpret_cast<MdllEvent *>(mpsd8);

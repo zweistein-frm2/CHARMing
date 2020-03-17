@@ -12,6 +12,8 @@ namespace Mcpd8 {
 	public:
 		static const int EVENTQUEUESIZE = 1000*1000; // high number needed
 		boost::atomic<long long> evntcount = 0;
+		boost::atomic<long long> unprocessedcounts = 0;
+		boost::atomic<unsigned short> last_deviceStatusdeviceId = 0;
 		boost::lockfree::spsc_queue<Zweistein::Event, boost::lockfree::capacity<EVENTQUEUESIZE>> evntqueue;
 		boost::atomic<EventDataFormat> Format = EventDataFormat::Undefined;
 		boost::atomic<long long> listmodepacketcount = 0;

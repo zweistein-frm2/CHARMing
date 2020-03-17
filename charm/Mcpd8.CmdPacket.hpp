@@ -10,7 +10,7 @@
 #include <boost/asio.hpp>
 #include "Mcpd8.DataPacket.hpp"
 #include "Zweistein.bitreverse.hpp"
-
+#include "simpleLogger.h"
 namespace Mcpd8 {
 	static unsigned short sendcounter = 0;
 	struct alignas(2) CmdPacket
@@ -44,7 +44,7 @@ namespace Mcpd8 {
 			unsigned short items = (Length - headerLength)+1; // we want trailing 0xffff also 
 			if (items > 750) {
 				boost::mutex::scoped_lock lock(coutGuard);
-				std::cout << "ERROR in CmdPacket, " << items << " > 750" << std::endl;
+				LOG_ERROR << "ERROR in CmdPacket, " << items << " > 750" << std::endl;
 				items = 750;
 			}
 			memcpy(data, &p.param[0][1], items < 750 ? sizeof(unsigned short)*items : sizeof(unsigned short) * 750);
@@ -58,7 +58,6 @@ namespace Mcpd8 {
 		static size_t Send(boost::asio::ip::udp::socket* socket, CmdPacket& cmdpacket, boost::asio::ip::udp::endpoint &mcpd_endpoint) {
 			unsigned short items = (cmdpacket.Length - cmdpacket.headerLength);
 			cmdpacket.data[items] = 0xffff;
-			Mcpd8::DataPacket::settimeNow48bit(&cmdpacket.time[0]);
 			cmdpacket.headerchksum = 0;
 			unsigned short chksum = cmdpacket.headerchksum;
 			const unsigned short* p = reinterpret_cast<const unsigned short*>(&cmdpacket);
@@ -71,7 +70,9 @@ namespace Mcpd8 {
 			return bytessent;
 			
 		}
-		void print(std::ostream& os) const {
+
+		
+		void print(std::stringstream& os) const {
 			using namespace magic_enum::ostream_operators;
 			using namespace magic_enum::bitwise_operators;
 			auto buffertype = magic_enum::enum_cast<Mesy::BufferType>(Zweistein::reverse_u16(Type));
@@ -107,28 +108,36 @@ namespace Mcpd8 {
 				ss_cmd << "( NOT UNDERSTOOD)";
 			}
 
-			long long timestamp = Mcpd8::DataPacket::timeStamp(&time[0]); // nanoseconds 
-			boost::chrono::microseconds micros(timestamp / 10);
-			long fractionalseconds = timestamp % 10000000;
-
-			boost::chrono::system_clock::time_point t2(micros);
-			std::time_t tt = boost::chrono::system_clock::to_time_t(t2);
-
+			
 
 			os << buffertype << " " << ss_cmd.str() << ", ";
 			os << "Buffer Number:" << hexfmt(Number) << ", ";
 			os<< "Status:"<<ss_status.str() << hexfmt((unsigned short) status)  << " ";
-			os << "Timestamp:" <<  std::put_time(std::localtime(&tt), "%Y-%b-%d %X") << "." << fractionalseconds  << std::endl;
-			os << " ITEMS:" << Length - headerLength << std::endl;
+			os << "Timestamp:" << boost::chrono::duration_cast<boost::chrono::milliseconds>(Mcpd8::DataPacket::timeStamp(time)) << std::endl;
+
+			//os << " ITEMS:" << Length - headerLength << std::endl;
 			for (int d = 0; d < Length - headerLength; d++) {
 				if (d!=0 && d % 5 == 0) os << std::endl;
-				os << "\tdata["<<d<<"]=0x" << f2hex << data[d] <<std::dec<< " ";
-				
-
-			}
+				os << "\tdata["<<d<<"]=0x" << std::setfill('0') << std::setw(2) << std::hex << data[d] <<std::dec<< " ";
+				}
 			if(Length - headerLength > 0)os << std::endl;
-			
 		}
+
 	};
+	
 	const int CmdPacket::defaultLength = 10;
+}
+
+std::ostream& operator<<(std::ostream& p, Mcpd8::CmdPacket& cp) {
+	std::stringstream ss;
+	cp.print(ss);
+	p << ss.str();
+	return p;
+}
+
+boost::log::BOOST_LOG_VERSION_NAMESPACE::basic_record_ostream<char>& operator<<(boost::log::BOOST_LOG_VERSION_NAMESPACE::basic_record_ostream<char>& p, Mcpd8::CmdPacket& cp) {
+	std::stringstream ss;
+	cp.print(ss);
+	p << ss.str();
+	return p;
 }

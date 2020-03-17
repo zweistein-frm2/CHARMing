@@ -25,7 +25,7 @@ namespace Mcpd8 {
 		Mesytec::DataGenerator datagenerator;
 		void print(std::ostream& os) const {
 			using namespace magic_enum::ostream_operators;
-			std::cout << "mcpd_ip:" << mcpd_ip << " networkcard:" << networkcard << " data_host:" << data_host << " mcpd_port:" << mcpd_port << " eventdataformat:" << eventdataformat << " datagenerator:" << " mcpd_id:" << mcpd_id << std::endl;
+			os << "mcpd_ip:" << mcpd_ip << " networkcard:" << networkcard << " data_host:" << data_host << " mcpd_port:" << mcpd_port << " eventdataformat:" << eventdataformat << " datagenerator:" << " mcpd_id:" << mcpd_id << std::endl;
 		}
 	};
 	const std::string Parameters::defaultIpAddress = "192.168.168.121";

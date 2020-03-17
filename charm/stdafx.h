@@ -13,7 +13,7 @@
 #include <iostream>
 #include <boost/thread.hpp>
 #include <boost/atomic.hpp>
-
+#include <boost/log/utility/formatting_ostream.hpp>
 template<typename T>
 std::string hexfmt(T const& t) {
     std::ostringstream oss;
@@ -25,18 +25,7 @@ std::string hexfmt(T const& t) {
     return oss.str();
 }
 
-std::ostream& f2hex(std::ostream& out)
-{
-    out << std::setfill('0') << std::setw(2) << std::hex;
-    return out;
-}
 
-template<class T>
-auto operator<<(std::ostream& os, const T& t) -> decltype(t.print(os), os)
-{
-	t.print(os);
-	return os;
-}
 
 #ifdef _WIN32
 #ifndef EXTERN_FUNCDECLTYPE

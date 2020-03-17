@@ -9,6 +9,7 @@
 #include "Mesytec.DeviceParameter.hpp"
 
 namespace Mesytec {
+	boost::atomic<bool> stopwriting = false;
 	namespace listmode {
 		const  char header_separator[] =	{ '\x00','\x00','\x55','\x55','\xAA','\xAA','\xFF','\xFF' };
 		const  char datablock_separator[] = { '\x00','\x00','\xFF','\xFF','\x55','\x55','\xAA','\xAA' };

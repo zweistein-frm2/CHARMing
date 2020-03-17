@@ -41,6 +41,10 @@ udp::endpoint current_remote_endpoint;
 udp::endpoint remote_endpoint;
 udp::endpoint listen_endpoint;
 
+boost::chrono::nanoseconds zeropoint = boost::chrono::nanoseconds::zero();
+
+
+
 boost::atomic<unsigned short> daq_status = Mcpd8::Status::sync_ok;
 boost::atomic<unsigned short> devid = 0;
 boost::atomic<unsigned short> runid = 0;
@@ -167,11 +171,11 @@ void handle_receive(const boost::system::error_code& error,
 
 			case Mcpd8::Cmd::SETCLOCK:
 			{
-				long long tstamp = Mcpd8::DataPacket::timeStamp(&cp.data[0]);
-				unsigned short time[3];
-				Mcpd8::DataPacket::settimeNow48bit(&time[0]);
-				long long ourtstamp = Mcpd8::DataPacket::timeStamp(&time[0]);
-				Mcpd8::DataPacket::tstamp_started -= tstamp-ourtstamp;
+
+
+				boost::chrono::nanoseconds requested = Mcpd8::DataPacket::timeStamp(&cp.data[0]);
+				boost::chrono::nanoseconds ns = boost::chrono::steady_clock::now().time_since_epoch();
+				zeropoint = ns - requested;
 				break;
 			}
 			case Mcpd8::Cmd::SETCELL: {
@@ -383,6 +387,8 @@ void handle_receive(const boost::system::error_code& error,
 			}
 			if (sendanswer) {
 				cp.deviceStatusdeviceId = daq_status | (devid << 8);
+				boost::chrono::nanoseconds ns = boost::chrono::steady_clock::now().time_since_epoch();
+				Mcpd8::DataPacket::setTimeStamp(cp.time, ns - zeropoint);
 				Mcpd8::CmdPacket::Send(psocket, cp, current_remote_endpoint);
 				{
 					boost::mutex::scoped_lock lock(coutGuard);
@@ -468,10 +474,8 @@ int main(int argc, char* argv[])
 	const unsigned short port = 54321;
 	boost::array< Mcpd8::DataPacket, 1> dp;
 
-	Mcpd8::DataPacket::settimeNow48bit(&dp[0].time[0]);
-	Mcpd8::DataPacket::tstamp_started=Mcpd8::DataPacket::timeStamp(&dp[0].time[0]);
-
-
+	zeropoint= boost::chrono::steady_clock::now().time_since_epoch();
+	
 	if (argc == 1) {
 		boost::mutex::scoped_lock lock(coutGuard);
 		std::cout << "Specify Event Rate per second , 2K -> 2000, 1M->1000000" << std::endl;
@@ -578,10 +582,9 @@ int main(int argc, char* argv[])
 			dp[0].deviceStatusdeviceId = daq_status | (devid << 8); // set to running
 			dp[0].Length = nevents * 3 + dp[0].headerLength;
 			dp[0].Type = Mesy::BufferType::DATA;
-			
-			Mcpd8::DataPacket::settimeNow48bit(&dp[0].time[0]);
-			unsigned long long tstamp_current = Mcpd8::DataPacket::timeStamp(&dp[0].time[0]);
-			Mcpd8::DataPacket::setTimeStamp(&dp[0].time[0], tstamp_current -Mcpd8::DataPacket::tstamp_started);
+
+			boost::chrono::nanoseconds ns=boost::chrono::steady_clock::now().time_since_epoch();
+			Mcpd8::DataPacket::setTimeStamp(&dp[0].time[0],ns-zeropoint);
 			
 			
 			if (daq_status&Mcpd8::Status::DAQ_Running) {
@@ -609,7 +612,9 @@ int main(int argc, char* argv[])
 				int dots = innerloop % maxdots;
 				{
 					boost::mutex::scoped_lock lock(coutGuard);
-					std::cout << "\r" << evtspersecond << " Events/s, (" << Zweistein::PrettyBytes((size_t)(evtspersecond * sizeof(Mesy::Mpsd8Event))) << "/s)" << "\t";
+					boost::chrono::duration<double> elapsed(ns - zeropoint);
+					
+					std::cout << "\r" << evtspersecond << " Events/s, (" << Zweistein::PrettyBytes((size_t)(evtspersecond * sizeof(Mesy::Mpsd8Event))) << "/s)" <<" elapsed:"<< elapsed;
 					if (innerloop != 0 /*first gives wrong results*/) for (int i = 0; i < maxdots; i++) std::cout << (dots == i ? "." : " ");
 					std::cout.flush();
 				}

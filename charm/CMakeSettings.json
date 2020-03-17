@@ -8,6 +8,7 @@
       "buildRoot": "${projectDir}\\out\\build\\${name}",
       "installRoot": "${projectDir}\\out\\install\\${name}",
       "cmakeCommandArgs": "-DCMAKE_CXX_FLAGS:STRING=\"/D_WIN32_WINNT=0x0601 /wd\"4996\" /GS /EHsc\"",
+      "cmakeToolchain": "C:\\vcpkg\\scripts\\buildsystems\\vcpkg.cmake",
       "buildCommandArgs": "-v",
       "ctestCommandArgs": "",
       "variables": [
@@ -40,6 +41,7 @@
       "buildRoot": "${projectDir}\\out\\build\\${name}",
       "installRoot": "${projectDir}\\out\\install\\${name}",
       "cmakeCommandArgs": "-DCMAKE_CXX_FLAGS:STRING=\"/D_WIN32_WINNT=0x0601 /wd\"4996\" /GS /EHsc\"",
+      "cmakeToolchain": "C:\\vcpkg\\scripts\\buildsystems\\vcpkg.cmake",
       "buildCommandArgs": "-v",
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "msvc_x64_x64" ],
@@ -68,6 +70,7 @@
       "buildRoot": "${projectDir}/out/build/${name}",
       "installRoot": "${projectDir}/out/install/${name}",
       "cmakeExecutable": "/usr/bin/cmake",
+      "cmakeToolchain": "/vcpkg/scripts/buildsystems/vcpkg.cmake",
       "cmakeCommandArgs": "",
       "buildCommandArgs": "",
       "ctestCommandArgs": "",

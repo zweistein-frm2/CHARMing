@@ -11,6 +11,7 @@ namespace  Mesytec {
 
 		unsigned long lastmissed_count;
 		boost::chrono::system_clock::time_point lastmissed_time;
+		boost::chrono::nanoseconds starttime;
 		udp::endpoint mcpd_endpoint;
 		udp::endpoint charm_cmd_endpoint;
 		udp::socket* socket;

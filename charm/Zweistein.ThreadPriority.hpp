@@ -3,6 +3,8 @@
 #include <iostream>
 #include <boost/process.hpp>
 #include <boost/algorithm/string.hpp>
+#include "simpleLogger.h"
+
 #ifndef WIN32
 #include <sched.h>
 #if defined(__cplusplus)
@@ -84,7 +86,7 @@ namespace Zweistein {
 					if (c.running()) c.terminate();
 				
 					if (bdenied) {
-						std::cout << std::endl << "ERROR  changing udp buffer size from " << buffersize << " to 26214400  => check permissions (sudo needed)" << std::endl;
+						LOG_ERROR << " cannot change udp buffer size from " << buffersize << " to 26214400  => check permissions (sudo needed)" << std::endl;
 						return false;
 					}
 
@@ -93,7 +95,7 @@ namespace Zweistein {
 			}
 			catch (boost::exception& e) {
 				boost::mutex::scoped_lock lock(coutGuard);
-				std::cout << boost::diagnostic_information(e);
+				LOG_ERROR << boost::diagnostic_information(e);
 			}
 			return false;
 #endif
@@ -115,7 +117,7 @@ namespace Zweistein {
 			pthread_t threadID = (pthread_t)nh;
 			int retval = pthread_setschedparam(threadID, th_mapPolicy[POLICY_TYPE::FIFO], &my_param);
 			if (retval != 0) {
-				std::cout<< std::endl<< "ERROR setting Thread Priority => check permissions (sudo needed)" << std::endl;
+				LOG_ERROR<< "Cannot set thread priority => check permissions (sudo needed)" << std::endl;
 			}
 			if (retval == 0) rv = true;
 #endif

@@ -19,6 +19,7 @@
 #include <opencv2/imgproc.hpp>
 #include <boost/asio.hpp>
 #include "Zweistein.Histogram.hpp"
+#include "simpleLogger.h"
 
 namespace Zweistein {
 	void displayHistogram(boost::asio::io_service& io_service, boost::shared_ptr<Mesytec::MesytecSystem> pmsmtsystem1) {
@@ -30,11 +31,11 @@ namespace Zweistein {
 		auto imageUpdate = [](cv::Mat& image) {
 			double minVal, maxVal;
 			cv::Point minLoc, maxLoc;
-			//Zweistein::ReadLock r_lock(histograms[0].lock);
+			boost::mutex::scoped_lock lock(histogramsGuard);
 			cv::minMaxLoc(histograms[0].histogram, &minVal, &maxVal, &minLoc, &maxLoc);
 			{
-				//boost::mutex::scoped_lock lock(coutGuard);
-				//std::cout << "histogram: minVal=" << minVal <<"("<<minLoc.x<<","<<minLoc.y<<")" << ", maxVal=" << maxVal << "(" << maxLoc.x << "," << maxLoc.y << ")" << std::endl;
+			//	boost::mutex::scoped_lock lock(coutGuard);
+			//	std::cout << "histogram: minVal=" << minVal <<"("<<minLoc.x<<","<<minLoc.y<<")" << ", maxVal=" << maxVal << "(" << maxLoc.x << "," << maxLoc.y << ")" << std::endl;
 			}
 			histograms[0].histogram.convertTo(image, CV_8U, maxVal != 0 ? 255.0 / maxVal : 0, 0);
 		};
@@ -55,16 +56,13 @@ namespace Zweistein {
 
 				sig(image);
 				if (!image.empty()) {
-					//int y = 955;
-					//int x = 54;
-					//int val=image.at<unsigned char>(y, x);
 					cv::applyColorMap(image, colormappedimage, cv::COLORMAP_JET);
 					if (bshow) cv::imshow("histogram", colormappedimage);
 				}
 			} while (!io_service.stopped());
 			{
 				boost::mutex::scoped_lock lock(coutGuard);
-				std::cout << std::endl << "display histogram exiting..." << std::endl;
+				LOG_DEBUG << "display histogram exiting..." << std::endl;
 			}
 
 

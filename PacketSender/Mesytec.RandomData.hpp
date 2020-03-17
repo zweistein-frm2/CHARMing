@@ -146,7 +146,7 @@ namespace Zweistein {
 			if (i == 0) start = boost::chrono::high_resolution_clock::now();
 			auto diff = boost::chrono::high_resolution_clock::now() - start;
 			auto nsec = boost::chrono::duration_cast<boost::chrono::nanoseconds>(diff);
-			Mesy::Mpsd8Event::settime19bit(data, nsec.count());
+			Mesy::Mpsd8Event::settime19bit(data, nsec);
 			
 		}
 	}

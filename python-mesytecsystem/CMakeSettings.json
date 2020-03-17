@@ -17,6 +17,11 @@
           "type": "PATH"
         },
         {
+          "name": "ASIO_EXTENSIONS_PATH",
+          "value": "${projectDir}\\..\\asio-extensions\\include",
+          "type": "PATH"
+        },
+        {
           "name": "PacketSender_DIR",
           "value": "${projectDir}\\..\\PacketSender",
           "type": "PATH"
@@ -51,6 +56,11 @@
         {
           "name": "Charm_DIR",
           "value": "/home/alanghof/repos/Neu2d_det/charm",
+          "type": "PATH"
+        },
+        {
+          "name": "ASIO_EXTENSIONS_PATH",
+          "value": "/home/alanghof/repos/Neu2d_det/asio-extensions/include",
           "type": "PATH"
         },
         {
@@ -92,6 +102,11 @@
           "type": "PATH"
         },
         {
+          "name": "ASIO_EXTENSIONS_PATH",
+          "value": "/home/localadmin/repos/Neu2d_det/asio-extensions/include",
+          "type": "PATH"
+        },
+        {
           "name": "PacketSender_DIR",
           "value": "/home/localadmin/repos/Neu2d_det/PacketSender",
           "type": "PATH"
@@ -117,6 +132,11 @@
         {
           "name": "Charm_DIR",
           "value": "${projectDir}\\..\\charm",
+          "type": "PATH"
+        },
+        {
+          "name": "ASIO_EXTENSIONS_PATH",
+          "value": "${projectDir}\\..\\asio-extensions\\include",
           "type": "PATH"
         },
         {

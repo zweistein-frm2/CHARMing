@@ -18,12 +18,16 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="mesytecsystem.cpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <ProjectGuid>{D2671EDC-0D48-4125-9A40-45635153706A}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>NumpyCpp</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>mesytecsystem</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -104,7 +108,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\alanghof\source\repos\Neu2d_det\charm;C:\Users\alanghof\AppData\Local\Programs\Python\Python37\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\alanghof\source\repos\Neu2d_det\pyboostcvconverter\include;C:\Users\alanghof\source\repos\Neu2d_det\PacketSender;C:\Users\alanghof\source\repos\Neu2d_det\charm;C:\Users\alanghof\AppData\Local\Programs\Python\Python37\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -152,9 +156,6 @@
       <AdditionalLibraryDirectories>C:\Users\alanghof\AppData\Local\Programs\Python\Python37\libs</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="NumpyCpp.cpp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

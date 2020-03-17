@@ -40,6 +40,8 @@
 #include "Zweistein.displayHistogram.hpp"
 #include <opencv2/highgui.hpp>
 #include "Zweistein.ThreadPriority.hpp"
+#include "Zweistein.GetConfigDir.hpp"
+#include "simpleLogger.h"
 
 
 std::string PROJECT_NAME("charm");
@@ -48,8 +50,8 @@ using boost::asio::ip::udp;
 
 EXTERN_FUNCDECLTYPE boost::mutex coutGuard;
 EXTERN_FUNCDECLTYPE boost::thread_group worker_threads;
-
-std::vector<Histogram> histograms = std::vector<Histogram>(1);
+boost::mutex histogramsGuard;
+std::vector<Histogram> histograms = std::vector<Histogram>(2);
 
 namespace po = boost::program_options;
 void conflicting_options(const po::variables_map& vm,
@@ -78,40 +80,8 @@ int main(int argc, char* argv[])
 			std::cout << "--help for usage info" << std::endl;
 		}
 
-		boost::filesystem::path  r("/");
-		std::string ee =r.root_directory().string();
-		r /= "etc";
-		bool use_etcdir = true;
-		boost::system::error_code ec;
-		if (!boost::filesystem::exists(r)) {
-				use_etcdir = boost::filesystem::create_directory(r,ec);
-		}
-		
-		if (ec) std::cout<<ec.message() <<":"<<r.string();
-		else {
+		boost::filesystem::path inidirectory = Zweistein::Config::GetConfigDirectory();
 
-			r /= PROJECT_NAME;// +"-frm2";
-
-			if (!boost::filesystem::exists(r)) {
-				use_etcdir = boost::filesystem::create_directory(r, ec);
-			}
-			if (ec) std::cout << ec.message() << r.string();
-		}
-		if (ec) use_etcdir = false;
-		
-		boost::filesystem::path inidirectory;
-		if (!use_etcdir) {
-			boost::filesystem::path homepath = Zweistein::GetHomePath();
-			inidirectory = homepath;
-			inidirectory /= "." + std::string(PROJECT_NAME);
-			if (!boost::filesystem::exists(inidirectory)) {
-				boost::filesystem::create_directory(inidirectory);
-			}
-			inidirectory += boost::filesystem::path::preferred_separator;
-		}
-		else inidirectory = r;
-
-		
 		
 		
 		boost::filesystem::path inipath = inidirectory;
@@ -154,7 +124,7 @@ int main(int argc, char* argv[])
 		else {
 			inipath.append(appName + ".json");
 		}
-		std::cout << "Using config file:" << inipath << " " << std::endl;
+		LOG_INFO << "Using config file:" << inipath << " " << std::endl;
 		std::vector<std::string> listmodeinputfiles = std::vector<std::string>();
 		
 		if (vm.count(LISTMODE_FILE))
@@ -177,7 +147,10 @@ int main(int argc, char* argv[])
 		signals.async_wait(boost::bind(&boost::asio::io_service::stop, &io_service));
 		boost::property_tree::ptree root;
 		try {boost::property_tree::read_json(inipath.string(), root);}
-		catch(std::exception){}
+		catch (std::exception& e) {
+			LOG_ERROR << e.what() << " for reading.";
+		}
+		
 		std::list<Mcpd8::Parameters> _devlist = std::list<Mcpd8::Parameters>();
 		
 		ptrmsmtsystem1->data.Format = Mcpd8::EventDataFormat::Mpsd8;
@@ -194,21 +167,29 @@ int main(int argc, char* argv[])
 				}
 				catch (boost::exception & e) {
 					boost::mutex::scoped_lock lock(coutGuard);
-					std::cout << boost::diagnostic_information(e);
+					LOG_ERROR << boost::diagnostic_information(e);
 				}
 
 			};
 
 		}
 		else  {
-		    try {
-				Mesytec::Config::get(root, _devlist);
-				
+			bool configok = Mesytec::Config::get(root, _devlist, inidirectory.string());
+			
+			
+			std::stringstream ss_1;
+			boost::property_tree::write_json(ss_1, root);
+			LOG_INFO << ss_1.str();
+
+			if (!configok) return -1;
+			Add_File_Sink((Mesytec::Config::DATAHOME/=appName+".log").string());
+			try {
+				boost::property_tree::write_json(inipath.string(), root);
 			}
-			catch (boost::exception &) { // exception expected, //std::cout << boost::diagnostic_information(e); 
+			catch(std::exception& e) { // exception expected, //std::cout << boost::diagnostic_information(e); 
+				LOG_ERROR << e.what()<<" for writing.";
 			}
-			boost::property_tree::write_json(inipath.string(), root);
-			boost::property_tree::write_json(std::cout, root);
+		
 			t = [ &ptrmsmtsystem1, &_devlist,&write2disk]() {
 				try {
 					ptrmsmtsystem1->write2disk=write2disk;
@@ -221,7 +202,7 @@ int main(int argc, char* argv[])
 						auto  my_code = magic_enum::enum_cast<Mesytec::cmd_errorcode>(*mi);
 						if (my_code.has_value()) {
 							auto c1_name = magic_enum::enum_name(my_code.value());
-							std::cout << c1_name<<std::endl;
+							LOG_ERROR << c1_name<<std::endl;
 						}
 						
 					}
@@ -229,7 +210,7 @@ int main(int argc, char* argv[])
 				}
 				catch (boost::exception & e) {
 					boost::mutex::scoped_lock lock(coutGuard);
-					std::cout << boost::diagnostic_information(e);
+					LOG_ERROR << boost::diagnostic_information(e);
 					
 				}
 				io_service.stop();
@@ -243,9 +224,9 @@ int main(int argc, char* argv[])
 		Zweistein::Thread::SetThreadPriority(pt->native_handle(), Zweistein::Thread::PRIORITY::HIGH);
 
 		worker_threads.add_thread(pt);
-		boost::this_thread::sleep_for(boost::chrono::milliseconds(500));// so msmtsystem1 should be connected
-		if(write2disk) worker_threads.create_thread([ &ptrmsmtsystem1] {Mesytec::writeListmode(io_service,ptrmsmtsystem1); });
-		worker_threads.create_thread([&ptrmsmtsystem1] {Zweistein::populateHistograms(io_service, ptrmsmtsystem1); });
+		boost::this_thread::sleep_for(boost::chrono::milliseconds(3300));// so msmtsystem1 should be connected
+		
+		worker_threads.create_thread([&ptrmsmtsystem1] {Zweistein::populateHistograms(io_service, ptrmsmtsystem1,Mesytec::Config::BINNINGFILE.string(),""); });
 					
 		boost::chrono::system_clock::time_point start = boost::chrono::system_clock::now();
 		int i = 0;
@@ -270,9 +251,10 @@ int main(int argc, char* argv[])
 			for (int i = 0; i < 10; i++) {
 				if (ptrmsmtsystem1->connected) {
 					worker_threads.create_thread([ &ptrmsmtsystem1] {Zweistein::displayHistogram(io_service,ptrmsmtsystem1); });
-					boost::function<void()> sendstartcmd = [ &ptrmsmtsystem1, &_devlist]() {
+					boost::function<void()> sendstartcmd = [ &ptrmsmtsystem1, &_devlist, &write2disk]() {
 						unsigned long rate = 1850000;
 						try {
+							if (write2disk) worker_threads.create_thread([&ptrmsmtsystem1] {Mesytec::writeListmode(io_service, ptrmsmtsystem1); });
 							ptrmsmtsystem1->SendAll(Mcpd8::Cmd::START);
 							for (auto& kvp : ptrmsmtsystem1->deviceparam) {
 								if (kvp.second.datagenerator == Mesytec::DataGenerator::NucleoSimulator) {
@@ -286,7 +268,7 @@ int main(int argc, char* argv[])
 						}
 						catch (boost::exception& e) {
 							boost::mutex::scoped_lock lock(coutGuard);
-							std::cout << boost::diagnostic_information(e);
+							LOG_ERROR << boost::diagnostic_information(e);
 							
 						}
 					};
@@ -308,7 +290,9 @@ int main(int argc, char* argv[])
 				double evtspersecond = sec.count() != 0 ? (double)(currentcount - lastcount) / sec.count() : 0;
 				{
 					boost::mutex::scoped_lock lock(coutGuard);
-					std::cout << "\r" <<std::setprecision(0) <<std::fixed<< evtspersecond << " Events/s, (" << Zweistein::PrettyBytes((size_t)(evtspersecond * sizeof(Mesy::Mpsd8Event))) << "/s)\t";// << std::endl;
+					boost::chrono::system_clock::time_point tps(ptrmsmtsystem1->started);
+					boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - tps;
+					std::cout << "\r" <<std::setprecision(0) <<std::fixed<< evtspersecond << " Events/s, (" << Zweistein::PrettyBytes((size_t)(evtspersecond * sizeof(Mesy::Mpsd8Event))) << "/s)\t" << Mcpd8::DataPacket::deviceStatus(ptrmsmtsystem1->data.last_deviceStatusdeviceId)<<" elapsed:"<<sec <<"      " ;// << std::endl;
 					lastcount = currentcount;
 #ifndef _WIN32
 					std::cout << std::flush;
@@ -320,7 +304,7 @@ int main(int argc, char* argv[])
 	}
 	catch (boost::exception & e) {
 		boost::mutex::scoped_lock lock(coutGuard);
-		std::cout<< boost::diagnostic_information(e);
+		LOG_ERROR<< boost::diagnostic_information(e);
 	}
 	
 
@@ -328,16 +312,14 @@ int main(int argc, char* argv[])
 		try {ptrmsmtsystem1->SendAll(Mcpd8::Cmd::STOP);}
 		catch (boost::exception& e) {
 			boost::mutex::scoped_lock lock(coutGuard);
-			std::cout << boost::diagnostic_information(e);
+			LOG_ERROR << boost::diagnostic_information(e);
 		}
 	//	delete ptrmsmtsystem1;
 	//	ptrmsmtsystem1 = nullptr;
 	}
 
-	boost::this_thread::sleep_for(boost::chrono::milliseconds(2000));
-	{
-		boost::mutex::scoped_lock lock(coutGuard);
-		std::cout << "main() exiting..." << std::endl;
-	}
+	worker_threads.join_all();
+	LOG_DEBUG << "main() exiting..." << std::endl;
+	
 	return 0;
 }

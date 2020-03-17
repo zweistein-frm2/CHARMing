@@ -12,13 +12,16 @@
 namespace Zweistein {
 	//int _test = 0;
 	struct Event {
-		unsigned long long nanoseconds;
+		enum EventTypeOther {
+			RESET=3
+		};
+		boost::chrono::nanoseconds nanoseconds;
 		unsigned short X;
 		unsigned short Y;
 		unsigned short Amplitude;
 		unsigned char type;
 		unsigned char ModId;
-		Event(Mesy::Mpsd8Event *mpsd8ev,const unsigned long long &headertime,unsigned short offsetX, Mesy::ModuleId modules[Mesy::Mpsd8Event::sizeSLOTS] ) {
+		Event(Mesy::Mpsd8Event *mpsd8ev,const boost::chrono::nanoseconds &headertime,unsigned short offsetX, Mesy::ModuleId modules[Mesy::Mpsd8Event::sizeSLOTS] ) {
 			nanoseconds = mpsd8ev->TIMESTAMP()+headertime;
 			Amplitude = mpsd8ev->AMPLITUDE();
 			Y = Mesy::Mpsd8Event::sizeY-  mpsd8ev->POSITION()-1;
@@ -43,7 +46,7 @@ namespace Zweistein {
 			
 		}
 
-		Event(Mesy::MdllEvent* mdllev, const unsigned long long& headertime, unsigned short offsetX, Mesy::ModuleId modules[Mesy::Mpsd8Event::sizeSLOTS]) {
+		Event(Mesy::MdllEvent* mdllev, const boost::chrono::nanoseconds& headertime, unsigned short offsetX, Mesy::ModuleId modules[Mesy::Mpsd8Event::sizeSLOTS]) {
 			type = mdllev->ID();
 			nanoseconds = mdllev->TIMESTAMP() + headertime;
 			Amplitude = mdllev->AMPLITUDE();
@@ -52,7 +55,12 @@ namespace Zweistein {
 		}
 
 		Event():nanoseconds(0),Amplitude(0),X(0),Y(0),type(0),ModId(0){}
-		
+		static Event Reset() {
+			Event ev;
+			ev.type = EventTypeOther::RESET;
+			return ev;
+
+		}
 	};
 
 	

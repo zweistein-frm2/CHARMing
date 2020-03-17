@@ -9,25 +9,33 @@
 #include <boost/function.hpp>
 #include "Mesytec.Mcpd8.hpp"
 #include "Mesytec.listmode.hpp"
+#include "Mesytec.config.hpp"
 #include <iomanip>
 #include <ctime>
 #include <sstream>
 #include <boost/iostreams/stream.hpp>
 #include <boost/iostreams/code_converter.hpp>
 #include <boost/iostreams/device/mapped_file.hpp>
-
+#include <boost/atomic.hpp>
 
 namespace Mesytec {
 
 	std::string writelistmodeFileNameInfo() {
-		boost::filesystem::path tmppath = Zweistein::GetHomePath();
+		boost::filesystem::path tmppath = Mesytec::Config::DATAHOME;
 		return tmppath.string() + std::string("YYmmdd_H-M-S.mdat)");
 	}
 	
 	void writeListmode(boost::asio::io_service& io_service, boost::shared_ptr < Mesytec::MesytecSystem> device1) {
 
+		for (int i = 0; i < 4*5; i++) {
+			if (stopwriting) boost::this_thread::sleep_for(boost::chrono::milliseconds(250)); 
+		}
+		if (stopwriting) {
+			std::cout << "ERROR in Mesytec::writeListmode: waiting for other writelistmode thread to finish" << std::endl;
+		}
+		
 		namespace bio = boost::iostreams;
-		boost::filesystem::path tmppath = Zweistein::GetHomePath();
+		boost::filesystem::path tmppath = Mesytec::Config::DATAHOME;
 		boost::filesystem::space_info si = boost::filesystem::space(tmppath);
 		auto t = std::time(nullptr);
 		auto tm = *std::localtime(&t);
@@ -69,20 +77,24 @@ namespace Mesytec {
 					f.write(reinterpret_cast<char*>(&dp), len);
 					f.write(Mesytec::listmode::datablock_separator, sizeof(Mesytec::listmode::datablock_separator));
 				}
+				if (stopwriting) break;
 			} while (!io_service.stopped());
 			f.write(Mesytec::listmode::closing_signature, sizeof(Mesytec::listmode::closing_signature));
 			byteswritten =f.tellp();
 			f.close();
 		}
-		catch (std::exception & e) {
+		catch (boost::exception& e) {
 			boost::mutex::scoped_lock lock(coutGuard);
-			std::cerr << e.what() << std::endl;
+			std::cout << boost::diagnostic_information(e);
+
 		}
+		
 		std::filesystem::resize_file(tmppath.string(), byteswritten);
 		{
 			boost::mutex::scoped_lock lock(coutGuard);
 			std::cout << Zweistein::PrettyBytes(byteswritten) << " written to:"<< tmppath.string() << std::endl;
 		}
+		stopwriting = false; // rearm for next, but must start new thread again
 	}
 
 
