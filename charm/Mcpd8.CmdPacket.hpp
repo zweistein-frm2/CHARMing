@@ -10,7 +10,8 @@
 #include <boost/asio.hpp>
 #include "Mcpd8.DataPacket.hpp"
 #include "Zweistein.bitreverse.hpp"
-#include "simpleLogger.h"
+#include "Zweistein.Logger.hpp"
+
 namespace Mcpd8 {
 	static unsigned short sendcounter = 0;
 	struct alignas(2) CmdPacket
@@ -25,7 +26,7 @@ namespace Mcpd8 {
 		unsigned short headerchksum;
 		unsigned short data[750];
 		static const int defaultLength;
-		CmdPacket() :Type(Zweistein::reverse_u16(Mesy::BufferType::COMMAND)), Length(defaultLength),
+		CmdPacket() :Type(Mesy::BufferType::COMMAND), Length(defaultLength),
 			headerLength(defaultLength), Number(0), deviceStatusdeviceId(0) {
 			
 		}
@@ -93,7 +94,7 @@ namespace Mcpd8 {
 			auto cmd_2 = magic_enum::enum_cast<Mcpd8::Internal_Cmd>(realcmd);
 			
 			std::stringstream ss_cmd;
-			if (cmd_1.has_value()) 	ss_cmd << cmd_1 << hexfmt( static_cast<magic_enum::underlying_type_t<Mcpd8::Cmd>>(realcmd));
+			if (cmd_1.has_value()) 	ss_cmd << cmd_1 ;
 			else {
 				ss_cmd << cmd_2;
 				if (!cmd_2.has_value()) { 
@@ -102,7 +103,7 @@ namespace Mcpd8 {
 					}
 					else ss_cmd << hexfmt(cmd);
 				}
-				else ss_cmd << hexfmt(static_cast<magic_enum::underlying_type_t<Mcpd8::Internal_Cmd>>(realcmd));
+				else ss_cmd ;
 			}
 			if (!understood) {
 				ss_cmd << "( NOT UNDERSTOOD)";
@@ -111,8 +112,9 @@ namespace Mcpd8 {
 			
 
 			os << buffertype << " " << ss_cmd.str() << ", ";
-			os << "Buffer Number:" << hexfmt(Number) << ", ";
-			os<< "Status:"<<ss_status.str() << hexfmt((unsigned short) status)  << " ";
+			os << "Buffer Number:" << Number<< ", ";
+			os<< "Status:"<<ss_status.str() << hexfmt((unsigned char) status)  << ", ";
+			os << "Id:" <<(unsigned short) Mcpd8::DataPacket::getId(deviceStatusdeviceId) << ", ";
 			os << "Timestamp:" << boost::chrono::duration_cast<boost::chrono::milliseconds>(Mcpd8::DataPacket::timeStamp(time)) << std::endl;
 
 			//os << " ITEMS:" << Length - headerLength << std::endl;
@@ -128,16 +130,17 @@ namespace Mcpd8 {
 	const int CmdPacket::defaultLength = 10;
 }
 
-std::ostream& operator<<(std::ostream& p, Mcpd8::CmdPacket& cp) {
+inline std::ostream& operator<<(std::ostream& p, Mcpd8::CmdPacket& cp) {
 	std::stringstream ss;
 	cp.print(ss);
 	p << ss.str();
 	return p;
 }
-
-boost::log::BOOST_LOG_VERSION_NAMESPACE::basic_record_ostream<char>& operator<<(boost::log::BOOST_LOG_VERSION_NAMESPACE::basic_record_ostream<char>& p, Mcpd8::CmdPacket& cp) {
+#ifdef simpleLogger_hpp__
+inline boost::log::BOOST_LOG_VERSION_NAMESPACE::basic_record_ostream<char>& operator<<(boost::log::BOOST_LOG_VERSION_NAMESPACE::basic_record_ostream<char>& p, Mcpd8::CmdPacket& cp) {
 	std::stringstream ss;
 	cp.print(ss);
 	p << ss.str();
 	return p;
 }
+#endif

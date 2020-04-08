@@ -13,7 +13,7 @@
 #include "Mesytec.hpp"
 #include "Mcpd8.enums.hpp"
 #include "Zweistein.bitreverse.hpp"
-#include "simpleLogger.h"
+#include "Zweistein.Logger.hpp"
 
 namespace Mcpd8
 {
@@ -33,7 +33,7 @@ namespace Mcpd8
 		//unsigned short data[750];	//!< the events, length of the data = length of the buffer - length of the header
 	public:
 		Mesy::Mpsd8Event events[250];
-		DataPacket() : Type(Zweistein::reverse_u16(Mesy::BufferType::DATA)), Length(21),
+		DataPacket() : Type(Mesy::BufferType::DATA), Length(21),
 			headerLength(21), Number(0), runID(0), deviceStatusdeviceId(0) {}
 
 		
@@ -65,11 +65,11 @@ namespace Mcpd8
 
 		static_assert(sizeof(Mesy::Mpsd8Event) == 6, "Event must be sizeof(6)");
 		Mesy::BufferType GetBuffertype() {
-			auto bt = magic_enum::enum_cast<Mesy::BufferType>(Zweistein::reverse_u16(Type));
+			auto bt = magic_enum::enum_cast<Mesy::BufferType>(Type);
 			if (bt.has_value()) return bt.value();
 			else {
 				boost::mutex::scoped_lock lock(coutGuard);
-				LOG_WARNING  << " BufferType undefined" << std::endl;
+				LOG_WARNING  << " BufferType undefined("<< std::bitset<16>(Type)<<")" << std::endl;
 				return Mesy::BufferType::COMMAND;
 			}
 		}
@@ -115,8 +115,9 @@ namespace Mcpd8
 
 					
 			os << buffertype << ", ";
-			os << "Buffer Number:" << hexfmt(Number) << ", ";
-			os << "Status:" << ss_status.str() << hexfmt((unsigned short)status);
+			os << "Buffer Number:" << Number << ", ";
+			os << "Status:" << ss_status.str() << hexfmt((unsigned char)status);
+			os << "Id:" << (unsigned short)Mcpd8::DataPacket::getId(deviceStatusdeviceId) << ", ";
 			os << "RunID:" << runID << ", " << numEvents() << " Events ";
 			os << "Timestamp:"<< boost::chrono::duration_cast<boost::chrono::milliseconds>(Mcpd8::DataPacket::timeStamp(time)) << std::endl;
 			
@@ -129,15 +130,19 @@ namespace Mcpd8
 	
 }
 
-std::ostream& operator<<(std::ostream& p, Mcpd8::DataPacket& dp) {
+inline std::ostream& operator<<(std::ostream& p, Mcpd8::DataPacket& dp) {
 	std::stringstream ss;
 	dp.print(ss);
 	p << ss.str();
 	return p;
 }
-boost::log::BOOST_LOG_VERSION_NAMESPACE::basic_record_ostream<char>& operator<<(boost::log::BOOST_LOG_VERSION_NAMESPACE::basic_record_ostream<char>& p, Mcpd8::DataPacket& dp) {
+#ifdef simpleLogger_hpp__
+inline boost::log::BOOST_LOG_VERSION_NAMESPACE::basic_record_ostream<char>& operator<<(boost::log::BOOST_LOG_VERSION_NAMESPACE::basic_record_ostream<char>& p, Mcpd8::DataPacket& dp) {
 	std::stringstream ss;
 	dp.print(ss);
 	p << ss.str();
 	return p;
 }
+#endif
+
+

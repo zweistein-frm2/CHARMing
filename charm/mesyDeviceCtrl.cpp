@@ -41,9 +41,13 @@
 #include <opencv2/highgui.hpp>
 #include "Zweistein.ThreadPriority.hpp"
 #include "Zweistein.GetConfigDir.hpp"
-#include "simpleLogger.h"
+#include "Zweistein.Logger.hpp"
 
-
+#ifdef _DEBUG
+boost::log::trivial::severity_level SEVERITY_THRESHOLD = boost::log::trivial::trace;
+#else
+boost::log::trivial::severity_level SEVERITY_THRESHOLD = boost::log::trivial::info;
+#endif
 std::string PROJECT_NAME("charm");
 
 using boost::asio::ip::udp;
@@ -73,6 +77,8 @@ int main(int argc, char* argv[])
 	std::string appName = boost::filesystem::basename(argv[0]);
 	
 	boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1 = boost::shared_ptr < Mesytec::MesytecSystem>(new Mesytec::MesytecSystem());
+	ptrmsmtsystem1->initatomicortime_point();
+	
 	
 	try
 	{
@@ -124,7 +130,7 @@ int main(int argc, char* argv[])
 		else {
 			inipath.append(appName + ".json");
 		}
-		LOG_INFO << "Using config file:" << inipath << " " << std::endl;
+		LOG_INFO << "Using config file:" << inipath << " " <<std::endl ;
 		std::vector<std::string> listmodeinputfiles = std::vector<std::string>();
 		
 		if (vm.count(LISTMODE_FILE))
@@ -148,7 +154,7 @@ int main(int argc, char* argv[])
 		boost::property_tree::ptree root;
 		try {boost::property_tree::read_json(inipath.string(), root);}
 		catch (std::exception& e) {
-			LOG_ERROR << e.what() << " for reading.";
+			LOG_ERROR << e.what() << " for reading." << std::endl;
 		}
 		
 		std::list<Mcpd8::Parameters> _devlist = std::list<Mcpd8::Parameters>();
@@ -167,7 +173,7 @@ int main(int argc, char* argv[])
 				}
 				catch (boost::exception & e) {
 					boost::mutex::scoped_lock lock(coutGuard);
-					LOG_ERROR << boost::diagnostic_information(e);
+					LOG_ERROR << boost::diagnostic_information(e) << std::endl;
 				}
 
 			};
@@ -179,15 +185,15 @@ int main(int argc, char* argv[])
 			
 			std::stringstream ss_1;
 			boost::property_tree::write_json(ss_1, root);
-			LOG_INFO << ss_1.str();
+			LOG_INFO << ss_1.str() << std::endl;
 
 			if (!configok) return -1;
-			Add_File_Sink((Mesytec::Config::DATAHOME/=appName+".log").string());
+			Zweistein::Logger::Add_File_Sink(Mesytec::Config::DATAHOME.string()+appName+".log");
 			try {
 				boost::property_tree::write_json(inipath.string(), root);
 			}
 			catch(std::exception& e) { // exception expected, //std::cout << boost::diagnostic_information(e); 
-				LOG_ERROR << e.what()<<" for writing.";
+				LOG_ERROR << e.what()<<" for writing." << std::endl;
 			}
 		
 			t = [ &ptrmsmtsystem1, &_devlist,&write2disk]() {
@@ -210,7 +216,7 @@ int main(int argc, char* argv[])
 				}
 				catch (boost::exception & e) {
 					boost::mutex::scoped_lock lock(coutGuard);
-					LOG_ERROR << boost::diagnostic_information(e);
+					LOG_ERROR << boost::diagnostic_information(e) << std::endl;
 					
 				}
 				io_service.stop();
@@ -224,7 +230,7 @@ int main(int argc, char* argv[])
 		Zweistein::Thread::SetThreadPriority(pt->native_handle(), Zweistein::Thread::PRIORITY::HIGH);
 
 		worker_threads.add_thread(pt);
-		boost::this_thread::sleep_for(boost::chrono::milliseconds(3300));// so msmtsystem1 should be connected
+		boost::this_thread::sleep_for(boost::chrono::milliseconds(2500));// so msmtsystem1 should be connected
 		
 		worker_threads.create_thread([&ptrmsmtsystem1] {Zweistein::populateHistograms(io_service, ptrmsmtsystem1,Mesytec::Config::BINNINGFILE.string(),""); });
 					
@@ -241,7 +247,7 @@ int main(int argc, char* argv[])
 			worker_threads.create_thread([&ptrmsmtsystem1] {Zweistein::displayHistogram(io_service, ptrmsmtsystem1); });
 			// nothing to do really,
 			while (!io_service.stopped()) {
-				boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
+				boost::this_thread::sleep_for(boost::chrono::milliseconds(1500));
 				io_service.run_one();
 			}
 		}
@@ -252,7 +258,7 @@ int main(int argc, char* argv[])
 				if (ptrmsmtsystem1->connected) {
 					worker_threads.create_thread([ &ptrmsmtsystem1] {Zweistein::displayHistogram(io_service,ptrmsmtsystem1); });
 					boost::function<void()> sendstartcmd = [ &ptrmsmtsystem1, &_devlist, &write2disk]() {
-						unsigned long rate = 1850000;
+						unsigned long rate = 5100;
 						try {
 							if (write2disk) worker_threads.create_thread([&ptrmsmtsystem1] {Mesytec::writeListmode(io_service, ptrmsmtsystem1); });
 							ptrmsmtsystem1->SendAll(Mcpd8::Cmd::START);
@@ -266,9 +272,22 @@ int main(int argc, char* argv[])
 								}
 							}
 						}
+						catch (Mesytec::cmd_error& x) {
+							boost::mutex::scoped_lock lock(coutGuard);
+							if (int const* mi = boost::get_error_info<Mesytec::my_info>(x)) {
+								auto  my_code = magic_enum::enum_cast<Mesytec::cmd_errorcode>(*mi);
+								if (my_code.has_value()) {
+									auto c1_name = magic_enum::enum_name(my_code.value());
+									LOG_ERROR << c1_name << std::endl;
+								}
+
+							}
+
+						}
+						
 						catch (boost::exception& e) {
 							boost::mutex::scoped_lock lock(coutGuard);
-							LOG_ERROR << boost::diagnostic_information(e);
+							LOG_ERROR << boost::diagnostic_information(e) << std::endl;
 							
 						}
 					};
@@ -292,7 +311,7 @@ int main(int argc, char* argv[])
 					boost::mutex::scoped_lock lock(coutGuard);
 					boost::chrono::system_clock::time_point tps(ptrmsmtsystem1->started);
 					boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - tps;
-					std::cout << "\r" <<std::setprecision(0) <<std::fixed<< evtspersecond << " Events/s, (" << Zweistein::PrettyBytes((size_t)(evtspersecond * sizeof(Mesy::Mpsd8Event))) << "/s)\t" << Mcpd8::DataPacket::deviceStatus(ptrmsmtsystem1->data.last_deviceStatusdeviceId)<<" elapsed:"<<sec <<"      " ;// << std::endl;
+					std::cout << "\r" <<std::setprecision(0) <<std::fixed<< evtspersecond << " Events/s, (" << Zweistein::PrettyBytes((size_t)(evtspersecond * sizeof(Mesy::Mpsd8Event))) << "/s)\t" << Mcpd8::DataPacket::deviceStatus(ptrmsmtsystem1->data.last_deviceStatusdeviceId)<<" elapsed:"<<sec <<" " ;// << std::endl;
 					lastcount = currentcount;
 #ifndef _WIN32
 					std::cout << std::flush;
@@ -304,15 +323,15 @@ int main(int argc, char* argv[])
 	}
 	catch (boost::exception & e) {
 		boost::mutex::scoped_lock lock(coutGuard);
-		LOG_ERROR<< boost::diagnostic_information(e);
+		LOG_ERROR<< boost::diagnostic_information(e) << std::endl;
 	}
 	
 
 	if (ptrmsmtsystem1) {
-		try {ptrmsmtsystem1->SendAll(Mcpd8::Cmd::STOP);}
+		try {ptrmsmtsystem1->SendAll(Mcpd8::Cmd::STOP_UNCHECKED);}
 		catch (boost::exception& e) {
 			boost::mutex::scoped_lock lock(coutGuard);
-			LOG_ERROR << boost::diagnostic_information(e);
+			LOG_ERROR << boost::diagnostic_information(e) << std::endl;
 		}
 	//	delete ptrmsmtsystem1;
 	//	ptrmsmtsystem1 = nullptr;

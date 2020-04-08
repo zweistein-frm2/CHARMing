@@ -9,6 +9,8 @@
 #include <random>
 #include "Mesytec.hpp"
 
+
+
 namespace Zweistein {
 	//int _test = 0;
 	struct Event {
@@ -21,10 +23,10 @@ namespace Zweistein {
 		unsigned short Amplitude;
 		unsigned char type;
 		unsigned char ModId;
-		Event(Mesy::Mpsd8Event *mpsd8ev,const boost::chrono::nanoseconds &headertime,unsigned short offsetX, Mesy::ModuleId modules[Mesy::Mpsd8Event::sizeSLOTS] ) {
+		Event(Mesy::Mpsd8Event *mpsd8ev,const boost::chrono::nanoseconds &headertime,unsigned short offsetX, Mesy::ModuleId modules[Mpsd8_sizeSLOTS] ) {
 			nanoseconds = mpsd8ev->TIMESTAMP()+headertime;
 			Amplitude = mpsd8ev->AMPLITUDE();
-			Y = Mesy::Mpsd8Event::sizeY-  mpsd8ev->POSITION()-1;
+			Y = Mpsd8_sizeY-  mpsd8ev->POSITION()-1;
 			//Y = _test % 1024;
 			//_test++;
 			type = mpsd8ev->ID();
@@ -35,7 +37,7 @@ namespace Zweistein {
 				Y >>= 2;
 			}
 			unsigned short slotid = mpsd8ev->SLOTID();
-			X = offsetX +  ModId * Mesy::Mpsd8Event::sizeSLOTS + slotid;
+			X = offsetX +  ModId * Mpsd8_sizeSLOTS + slotid;
 			/* // generate fast random data
 			if (Amplitude == 0) {
 				unsigned long l = xor128();
@@ -46,11 +48,11 @@ namespace Zweistein {
 			
 		}
 
-		Event(Mesy::MdllEvent* mdllev, const boost::chrono::nanoseconds& headertime, unsigned short offsetX, Mesy::ModuleId modules[Mesy::Mpsd8Event::sizeSLOTS]) {
+		Event(Mesy::MdllEvent* mdllev, const boost::chrono::nanoseconds& headertime, unsigned short offsetX, Mesy::ModuleId modules[Mpsd8_sizeSLOTS]) {
 			type = mdllev->ID();
 			nanoseconds = mdllev->TIMESTAMP() + headertime;
 			Amplitude = mdllev->AMPLITUDE();
-			Y = Mesy::MdllEvent::sizeY - mdllev->YPOSITION()-1;
+			Y = Mdll_sizeY - mdllev->YPOSITION()-1;
 			X = offsetX+ mdllev->XPOSITION();
 		}
 

@@ -16,6 +16,7 @@
 #include <boost/foreach.hpp>
 #include <boost/exception/all.hpp>
 #include <boost/function.hpp>
+#include <iostream>
 #include "Mcpd8.DataPacket.hpp"
 #include "Mesytec.RandomData.hpp"
 #include "Zweistein.PrettyBytes.hpp"
@@ -29,6 +30,7 @@
 #include "rfc1071_checksum.hpp"
 #include "cmake_variables.h"
 #include "Mesytec.Mpsd8.hpp"
+#include "Mcpd8.enums.hpp"
 #include "PacketSender.Params.hpp"
 using boost::asio::ip::udp;
 boost::mutex coutGuard;
@@ -44,15 +46,18 @@ udp::endpoint listen_endpoint;
 boost::chrono::nanoseconds zeropoint = boost::chrono::nanoseconds::zero();
 
 
-
 boost::atomic<unsigned short> daq_status = Mcpd8::Status::sync_ok;
 boost::atomic<unsigned short> devid = 0;
 boost::atomic<unsigned short> runid = 0;
-boost::atomic<long> requestedEventspersecond = 100; // default value at startup
+
+Mcpd8::EventDataFormat dataformat = Mcpd8::EventDataFormat::Mpsd8;
+
+boost::atomic<long> requestedEventspersecond = 1; // default value at startup
 int MAX_NEVENTS = 250;
 boost::atomic<int> nevents = MAX_NEVENTS;
 boost::atomic<int> coutevery_npackets = requestedEventspersecond / nevents;
-int minRateperSecond = 51;
+boost::atomic<int>DataeveryNOnly = 1;
+int minHeartbeatRate = 51;
 
 const int N_MPSD8 = 8;
 
@@ -72,20 +77,39 @@ unsigned short auxtimer[4];
 
 void setRate(long requested) {
 	boost::mutex::scoped_lock lock(coutGuard);
-	std::cout << "Hello from Charm PacketSender, requested: " << requested << " Events/s" << std::endl;
-	int tmp = MAX_NEVENTS;
-	while (requested < minRateperSecond * tmp) {
-		tmp--;
-	};
+	std::string df = "MPSD8";
+	if(dataformat == Mcpd8::EventDataFormat::Mdll) df="MDLL";
 
-	if (tmp < 1) std::cout << "NO ACTION: Eventrate too low (Minimum Eventrate is " + std::to_string(minRateperSecond) + " Events/second)" << std::endl;
-	else {
-		nevents = tmp;
-		requestedEventspersecond = requested;
-		
+	std::cout << "Hello from Charm PacketSender, requested "<<df<<"  : " << requested << " Events/s" << std::endl;
+	if (requested < 1) {
+		std::cout << "OUT OF RANGE: setting new rate to 1 Event/second" << std::endl;
+		requested = 1;
 	}
+	int tmp = MAX_NEVENTS;
+
+	if (requested < minHeartbeatRate) { tmp = 0; }
+	else {
+		while (requested < minHeartbeatRate * tmp) {
+			tmp--;
+		};
+	}
+
+	
+
+	if (tmp < 1) {
+		tmp = 1;
+		// so some rate between minHeartbeatRate and 0
+		DataeveryNOnly = minHeartbeatRate / requested;
+	}
+	else DataeveryNOnly = 1;
+	nevents = tmp;
+	requestedEventspersecond = requested;
 	coutevery_npackets = requestedEventspersecond / nevents;
-	if (coutevery_npackets < minRateperSecond) 	coutevery_npackets = minRateperSecond;
+	if (coutevery_npackets < minHeartbeatRate) 	coutevery_npackets = minHeartbeatRate;
+	std::cout << "packages contain " << nevents << " events each." << std::endl;
+	std::cout << "coutevery_npackets=" << coutevery_npackets << std::endl;
+	std::cout << "DataeveryNOnly=" << DataeveryNOnly << std::endl;
+	
 }
 
 void start_receive();
@@ -93,13 +117,13 @@ void start_receive();
 void handle_receive(const boost::system::error_code& error,
 	std::size_t bytes_transferred) {
 	Mcpd8::CmdPacket cp = cmd_recv_buf[0];
-	if (cp.Type != Zweistein::reverse_u16(Mesy::BufferType::COMMAND)) {
+	if (cp.Type != Mesy::BufferType::COMMAND) {
 		boost::mutex::scoped_lock lock(coutGuard);
-			std::cout << "handle_receive(" << error << "," << bytes_transferred << ")" << " SKIPPED: NOT A COMMAND PACKET" << std::endl;
+			//std::cout << "cp.Type="<< std::bitset<16>(cp.Type)<<" handle_receive(error=" << error << ", bytes_transferred=" << bytes_transferred << ")" << " SKIPPED: NOT A COMMAND PACKET" << std::endl;
 	}
 	else if (bytes_transferred > sizeof(Mcpd8::CmdPacket)) {
 		boost::mutex::scoped_lock lock(coutGuard);
-			std::cout << "handle_receive(" << error << "," << bytes_transferred << ")" << " SKIPPED: >sizeof(Mcpd8::CmdPacket)" << std::endl;
+		std::cout << "handle_receive(" << error << "," << bytes_transferred << ")" << " SKIPPED: >sizeof(Mcpd8::CmdPacket)" << std::endl;
 	}
 	else {
 		
@@ -126,6 +150,7 @@ void handle_receive(const boost::system::error_code& error,
 			
 
 			switch (cp.cmd) {
+			case Mcpd8::Cmd::CONTINUE:
 			case Mcpd8::Cmd::START:
 				daq_status|= Mcpd8::Status::DAQ_Running;
 				remote_endpoint=current_remote_endpoint;
@@ -478,20 +503,25 @@ int main(int argc, char* argv[])
 	
 	if (argc == 1) {
 		boost::mutex::scoped_lock lock(coutGuard);
-		std::cout << "Specify Event Rate per second , 2K -> 2000, 1M->1000000" << std::endl;
+		std::cout << "Specify Event Rate per second , 2K -> 2000, 1M->1000000  [MDLL]" << std::endl;
 	}
-	if (argc == 2) {
+	if (argc >= 2) {
 		long long num = 0;
 		std::string argv1(argv[1]);
 		requestedEventspersecond = (long)Zweistein::Dehumanize(argv1);
 		//requestedEventspersecond = std::stoi(argv[1]);
 	}
+	
+	if (argc == 3) {
+		std::string argv2 = argv[2];
+		if (argv2 == "MDLL") 	dataformat = Mcpd8::EventDataFormat::Mdll;
+	}
+			
 	{
 		boost::mutex::scoped_lock lock(coutGuard);
 		std::cout << "waiting for START command" << std::endl;
 	}
 	setRate(requestedEventspersecond);
-
 
 	unsigned short bufnum = 0;
 	int length = 0;
@@ -561,11 +591,7 @@ int main(int argc, char* argv[])
 			int iloop = 0;
 			int innerloop = 0;
 			int maxdots = 10;
-			{
-				boost::mutex::scoped_lock lock(coutGuard);
-				std::cout << "packages contain " << nevents << " events each." << std::endl;
-				std::cout << "coutevery_npackets=" << coutevery_npackets << std::endl;
-			}
+			
 		long long currentcount = 0;
 		long long lastcount = 0;
 		long delaynanos = 0;
@@ -573,15 +599,24 @@ int main(int argc, char* argv[])
 		const int maxX = 64; //8 slots with 8 channels each
 
 		do {
-
+			int newcounts = 0;
 			dp[0].Number = bufnum++;
-			for (int i = 0; i < nevents; i++) {
-				Zweistein::Random::Mpsd8EventRandomData((unsigned short*)(&dp[0].events[i]), i, maxX);
-
+			dp[0].Length = dp[0].headerLength;
+			
+			if (iloop%DataeveryNOnly==0) {
+				
+				for (int i = 0; i < nevents; i++) {
+					if(dataformat==Mcpd8::EventDataFormat::Mpsd8)	Zweistein::Random::Mpsd8EventRandomData((unsigned short*)(&dp[0].events[i]), i, maxX);
+					if(dataformat==Mcpd8::EventDataFormat::Mdll) Zweistein::Random::MdllEventRandomData((unsigned short*)(&dp[0].events[i]), i);
+				}
+				newcounts = nevents;
 			}
+			else 	newcounts = 0;
+			
 			dp[0].deviceStatusdeviceId = daq_status | (devid << 8); // set to running
-			dp[0].Length = nevents * 3 + dp[0].headerLength;
-			dp[0].Type = Mesy::BufferType::DATA;
+			dp[0].Length = newcounts * 3 + dp[0].headerLength;
+			if (dataformat == Mcpd8::EventDataFormat::Mpsd8) dp[0].Type = Mesy::BufferType::DATA;
+			if (dataformat == Mcpd8::EventDataFormat::Mdll) dp[0].Type = Mesy::BufferType::MDLL;
 
 			boost::chrono::nanoseconds ns=boost::chrono::steady_clock::now().time_since_epoch();
 			Mcpd8::DataPacket::setTimeStamp(&dp[0].time[0],ns-zeropoint);
@@ -593,10 +628,10 @@ int main(int argc, char* argv[])
 #else
 				size_t bytessent = socket.send_to(boost::asio::buffer((void*)(&dp[0]), dp[0].Length * sizeof(unsigned short)), remote_endpoint);
 #endif
-				currentcount += nevents;
+				currentcount += newcounts;
 			}
-
-			if (iloop % coutevery_npackets == 0) {
+			
+			if (iloop % (coutevery_npackets*DataeveryNOnly) == 0) {
 				boost::this_thread::sleep_for(boost::chrono::nanoseconds(delaynanos));
 				boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - start;
 				start = boost::chrono::system_clock::now();
@@ -614,7 +649,7 @@ int main(int argc, char* argv[])
 					boost::mutex::scoped_lock lock(coutGuard);
 					boost::chrono::duration<double> elapsed(ns - zeropoint);
 					
-					std::cout << "\r" << evtspersecond << " Events/s, (" << Zweistein::PrettyBytes((size_t)(evtspersecond * sizeof(Mesy::Mpsd8Event))) << "/s)" <<" elapsed:"<< elapsed;
+					std::cout << "\r" << std::setprecision(0) << std::fixed << evtspersecond << " Events/s, (" << Zweistein::PrettyBytes((size_t)(evtspersecond * sizeof(Mesy::Mpsd8Event))) << "/s)" <<" elapsed:"<< elapsed;
 					if (innerloop != 0 /*first gives wrong results*/) for (int i = 0; i < maxdots; i++) std::cout << (dots == i ? "." : " ");
 					std::cout.flush();
 				}

@@ -3,7 +3,7 @@
 #include <iostream>
 #include <boost/process.hpp>
 #include <boost/algorithm/string.hpp>
-#include "simpleLogger.h"
+#include "Zweistein.Logger.hpp"
 
 #ifndef WIN32
 #include <sched.h>
@@ -95,7 +95,7 @@ namespace Zweistein {
 			}
 			catch (boost::exception& e) {
 				boost::mutex::scoped_lock lock(coutGuard);
-				LOG_ERROR << boost::diagnostic_information(e);
+				LOG_ERROR << boost::diagnostic_information(e) << std::endl;
 			}
 			return false;
 #endif

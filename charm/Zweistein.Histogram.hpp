@@ -21,7 +21,7 @@ namespace np = boost::python::numpy;
 #include <boost/geometry/io/wkt/wkt.hpp>
 
 #include "Zweistein.Locks.hpp"
-#include "simpleLogger.h"
+#include "Zweistein.Logger.hpp"
 
 
 typedef boost::geometry::model::d2::point_xy<int> point_type;
@@ -81,19 +81,25 @@ extern boost::mutex histogramsGuard;
 
             setRoi(roi);
         }
-        void setRoi(std::string& wkt) {
+
+        
+        void setRoi(std::string wkt) {
             int width = 1;
             int height = 1; 
             bool illformedwkt = true;
             try {
-                if (!wkt.empty()) {
+                if (!wkt.empty() && wkt.length()==0) {
                     boost::geometry::read_wkt(wkt, roi);
                     illformedwkt = false;
+                    std::string reason;
+                    bool ok = boost::geometry::is_valid(roi, reason);
+                    if (!ok) illformedwkt = true;
+                    LOG_WARNING << reason << std::endl;
                 }
             }
             catch (boost::exception& e) {
                 boost::mutex::scoped_lock lock(coutGuard);
-                LOG_ERROR << boost::diagnostic_information(e);
+                LOG_ERROR << boost::diagnostic_information(e) << std::endl;
             }
 
             if (illformedwkt) {
@@ -127,8 +133,14 @@ extern boost::mutex histogramsGuard;
 
         boost::python::tuple getSize() {
            
+            
             int width = box.max_corner().get<0>() - box.min_corner().get<0>();
             int height = box.max_corner().get<1>() - box.min_corner().get<1>();
+            {
+                boost::mutex::scoped_lock lock(histogramsGuard);
+                width=histogram.cols;
+                height = histogram.rows;
+            }
             return boost::python::make_tuple(width,height);
                      
            

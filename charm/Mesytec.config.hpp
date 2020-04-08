@@ -12,7 +12,7 @@
 #include "Mesytec.enums.Generator.hpp"
 #include "Zweistein.GetLocalInterfaces.hpp"
 #include "Zweistein.HomePath.hpp"
-#include "simpleLogger.h"
+#include "Zweistein.Logger.hpp"
 
 namespace Mesytec {
 	
@@ -143,7 +143,7 @@ namespace Mesytec {
 				}
 			}
 			catch (boost::exception& e) {
-				//LOG_DEBUG<< boost::diagnostic_information(e);
+				//LOG_DEBUG<< boost::diagnostic_information(e)<<std::endl;
 			}
 			return rv;
 		}

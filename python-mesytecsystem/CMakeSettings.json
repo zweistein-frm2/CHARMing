@@ -28,7 +28,7 @@
         },
         {
           "name": "pyboostcvconverter_DIR",
-          "value": "C:\\users\\alanghof\\source\\repos\\Neu2d_det\\pyboostcvconverter",
+          "value": "C:\\users\\alanghof\\source\\repos\\CHARMing\\pyboostcvconverter",
           "type": "PATH"
         }
       ]
@@ -37,7 +37,7 @@
       "name": "Taco102-Ubuntu18.04",
       "generator": "Unix Makefiles",
       "configurationType": "Release",
-      "cmakeExecutable": "/usr/bin/cmake",
+      "cmakeExecutable": "/snap/cmake/current/bin/cmake",
       "remoteCopySourcesExclusionList": [ ".vs", ".git", "out" ],
       "cmakeCommandArgs": "",
       "buildCommandArgs": "",
@@ -55,22 +55,22 @@
       "variables": [
         {
           "name": "Charm_DIR",
-          "value": "/home/alanghof/repos/Neu2d_det/charm",
+          "value": "/home/alanghof/repos/CHARMing/charm",
           "type": "PATH"
         },
         {
           "name": "ASIO_EXTENSIONS_PATH",
-          "value": "/home/alanghof/repos/Neu2d_det/asio-extensions/include",
+          "value": "/home/alanghof/repos/CHARMing/asio-extensions/include",
           "type": "PATH"
         },
         {
           "name": "PacketSender_DIR",
-          "value": "/home/alanghof/repos/Neu2d_det/PacketSender",
+          "value": "/home/alanghof/repos/CHARMing/PacketSender",
           "type": "PATH"
         },
         {
           "name": "pyboostcvconverter_DIR",
-          "value": "/home/alanghof/repos/Neu2d_det/pyboostcvconverter",
+          "value": "/home/alanghof/repos/CHARMing/pyboostcvconverter",
           "type": "PATH"
         }
       ]
@@ -79,7 +79,7 @@
       "name": "Taco07-Ubuntu20",
       "generator": "Unix Makefiles",
       "configurationType": "Release",
-      "cmakeExecutable": "/usr/bin/cmake",
+      "cmakeExecutable": "/snap/cmake/current/bin/cmake",
       "remoteCopySourcesExclusionList": [ ".vs", ".git", "out" ],
       "cmakeToolchain": "/vcpkg/scripts/buildsystems/vcpkg.cmake",
       "cmakeCommandArgs": "",
@@ -87,7 +87,7 @@
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "linux_x64" ],
       "remoteMachineName": "taco07",
-      "remoteCMakeListsRoot": "\"$HOME/.vs/${projectDirName}/${workspaceHash}/src,",
+      "remoteCMakeListsRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/src",
       "remoteBuildRoot": "$HOME/entangle/entangle/device/charm",
       "remoteInstallRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/install/${name}",
       "remoteCopySources": true,
@@ -98,22 +98,22 @@
       "variables": [
         {
           "name": "Charm_DIR",
-          "value": "/home/localadmin/repos/Neu2d_det/charm",
+          "value": "/home/localadmin/repos/CHARMing/charm",
           "type": "PATH"
         },
         {
           "name": "ASIO_EXTENSIONS_PATH",
-          "value": "/home/localadmin/repos/Neu2d_det/asio-extensions/include",
+          "value": "/home/localadmin/repos/CHARMing/asio-extensions/include",
           "type": "PATH"
         },
         {
           "name": "PacketSender_DIR",
-          "value": "/home/localadmin/repos/Neu2d_det/PacketSender",
+          "value": "/home/localadmin/repos/CHARMing/PacketSender",
           "type": "PATH"
         },
         {
           "name": "pyboostcvconverter_DIR",
-          "value": "/home/localadmin/repos/Neu2d_det/pyboostcvconverter",
+          "value": "/home/localadmin/repos/CHARMing/pyboostcvconverter",
           "type": "PATH"
         }
       ]
@@ -146,7 +146,7 @@
         },
         {
           "name": "pyboostcvconverter_DIR",
-          "value": "C:\\users\\alanghof\\source\\repos\\Neu2d_det\\pyboostcvconverter",
+          "value": "C:\\users\\alanghof\\source\\repos\\CHARMing\\pyboostcvconverter",
           "type": "PATH"
         }
       ]

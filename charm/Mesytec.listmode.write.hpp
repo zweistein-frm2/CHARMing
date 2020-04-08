@@ -17,6 +17,7 @@
 #include <boost/iostreams/code_converter.hpp>
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/atomic.hpp>
+#include "Zweistein.Logger.hpp"
 
 namespace Mesytec {
 
@@ -24,16 +25,31 @@ namespace Mesytec {
 		boost::filesystem::path tmppath = Mesytec::Config::DATAHOME;
 		return tmppath.string() + std::string("YYmmdd_H-M-S.mdat)");
 	}
-	
+	boost::atomic<bool> bListmodeWriting = false;
 	void writeListmode(boost::asio::io_service& io_service, boost::shared_ptr < Mesytec::MesytecSystem> device1) {
-
-		for (int i = 0; i < 4*5; i++) {
-			if (stopwriting) boost::this_thread::sleep_for(boost::chrono::milliseconds(250)); 
-		}
-		if (stopwriting) {
-			std::cout << "ERROR in Mesytec::writeListmode: waiting for other writelistmode thread to finish" << std::endl;
-		}
 		
+		if (bListmodeWriting) {
+			int MaxWait = 15;
+			int i = 0;
+			for (i = 0; i < MaxWait; i++) {
+				if (stopwriting)
+				{
+					if (i == 0) LOG_INFO << "Waiting " << MaxWait << " seconds for other writelistmode thread to finish" << std::endl;
+					boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
+				}
+				else break;
+			}
+			if (stopwriting) {
+				LOG_ERROR << "ERROR : other writelistmode thread not finished after " << MaxWait << " seconds" << std::endl;
+				return;
+			}
+			else if (i > 0) LOG_INFO << "other writelistmode thread finished after " << i << " seconds" << std::endl;
+		}
+		else {
+			stopwriting = false;
+		}
+
+		bListmodeWriting = true;
 		namespace bio = boost::iostreams;
 		boost::filesystem::path tmppath = Mesytec::Config::DATAHOME;
 		boost::filesystem::space_info si = boost::filesystem::space(tmppath);
@@ -85,16 +101,19 @@ namespace Mesytec {
 		}
 		catch (boost::exception& e) {
 			boost::mutex::scoped_lock lock(coutGuard);
-			std::cout << boost::diagnostic_information(e);
+			LOG_ERROR << boost::diagnostic_information(e)<<std::endl;
 
 		}
 		
 		std::filesystem::resize_file(tmppath.string(), byteswritten);
+		bListmodeWriting = false;
+		stopwriting = false; // rearm for next, but must start new thread again
+
 		{
 			boost::mutex::scoped_lock lock(coutGuard);
-			std::cout << Zweistein::PrettyBytes(byteswritten) << " written to:"<< tmppath.string() << std::endl;
+			LOG_INFO << Zweistein::PrettyBytes(byteswritten) << " written to:"<< tmppath.string() << std::endl;
 		}
-		stopwriting = false; // rearm for next, but must start new thread again
+	
 	}
 
 

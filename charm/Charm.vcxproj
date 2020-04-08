@@ -27,11 +27,14 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="coloured_console_sink.cpp" />
     <ClCompile Include="CustomOptionDescription.cpp" />
     <ClCompile Include="mesyDeviceCtrl.cpp" />
     <ClCompile Include="OptionPrinter.cpp" />
+    <ClCompile Include="simpleLogger.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Entangle.Logger.hpp" />
     <ClInclude Include="Mcpd8.CmdPacket.hpp" />
     <ClInclude Include="Mcpd8.DataPacket.hpp" />
     <ClInclude Include="Mesytec.DeviceParameter.hpp" />
@@ -45,7 +48,11 @@
     <ClInclude Include="Mesytec.config.hpp" />
     <ClInclude Include="Mesytec.Mpsd8.hpp" />
     <ClInclude Include="MesytecSystem.Data.hpp" />
+    <ClInclude Include="simpleLogger.h" />
+    <ClInclude Include="Zweistein.Binning.hpp" />
+    <ClInclude Include="Zweistein.bitreverse.hpp" />
     <ClInclude Include="Zweistein.deHumanizeNumber.hpp" />
+    <ClInclude Include="Zweistein.displayHistogram.hpp" />
     <ClInclude Include="Zweistein.Event.hpp" />
     <ClInclude Include="Zweistein.GetLocalInterfaces.hpp" />
     <ClInclude Include="Zweistein.Histogram.hpp" />
@@ -132,6 +139,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)out\build\$(Platform)-$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)out\tmp\$(Platform)-$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <LinkIncremental>true</LinkIncremental>
@@ -141,6 +150,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)out\build\$(Platform)-$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)out\tmp\$(Platform)-$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
     <LinkIncremental>false</LinkIncremental>
@@ -165,9 +176,9 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_WIN32_WINNT=0x0601;ASIOEXT_USE_BOOST_ASIO;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>SIMPLE_LOGGER;WIN32_PRE10OLDSTYLE;_WIN32_WINNT=0x0601;ASIOEXT_USE_BOOST_ASIO;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\sigslot\include;..\asio-extensions\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\sigslot\include;..\asio-extensions\include;..\PacketSender;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
@@ -223,9 +234,9 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_WIN32_WINNT=0x0601;ASIOEXT_USE_BOOST_ASIO;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>SIMPLE_LOGGER;WIN32_PRE10OLDSTYLE;_WIN32_WINNT=0x0601;ASIOEXT_USE_BOOST_ASIO;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\sigslot\include;..\asio-extensions\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\sigslot\include;..\asio-extensions\include;..\PacketSender;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>

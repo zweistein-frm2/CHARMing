@@ -42,9 +42,10 @@ void GetLocalInterfaces(std::list<std::string>& localinterfaces) {
 		Zweistein::GetLocalInterfaces(localinterfaces);
 		auto _a = std::find(localinterfaces.begin(), localinterfaces.end(), proposed);
 		if (_a == localinterfaces.end()) {
-			LOG_ERROR << "interfaces on this machine are:";
+			LOG_ERROR << "interfaces on this machine are:"<<std::endl;
 			int i = 0;
-			BOOST_FOREACH(std::string str, localinterfaces) { LOG_ERROR << str << "(" << i++ << ")  "; }
+			BOOST_FOREACH(std::string str, localinterfaces) { LOG_ERROR << str << "(" << i++ << ")  "<<std::endl; }
+			//LOG_ERROR << std::endl;
 			return false;
 		}
 		return true;
@@ -56,10 +57,10 @@ void GetLocalInterfaces(std::list<std::string>& localinterfaces) {
 	    Zweistein::GetLocalInterfaces(localinterfaces);
 		auto _a = std::find(localinterfaces.begin(), localinterfaces.end(), proposed);
 		if (_a == localinterfaces.end()) {
-			std::cout << "interfaces on this machine are:";
+			LOG_INFO << "interfaces on this machine are:"<<std::endl;
 			int i = 0;
-			BOOST_FOREACH(std::string str, localinterfaces) { std::cout << str << "(" << i++ << ")  "; }
-			std::cout << std::endl << "Choose interface to use: (0),... ";
+			BOOST_FOREACH(std::string str, localinterfaces) { std::cout << str << "(" << i++ << ")  "<<std::endl; }
+			LOG_INFO << "Choose interface to use: (0),... "<<std::endl;
 			int choice = 2;
 			std::cin >> choice;
 			i = 0;

@@ -24,6 +24,12 @@
     <ClCompile Include="OptionPrinter.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
+    <ClCompile Include="coloured_console_sink.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="simpleLogger.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Mesytec.hpp">
@@ -89,8 +95,23 @@
     <ClInclude Include="Zweistein.populateHistograms.hpp">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="Zweistein.ThreadPriority.hpp">
+    <ClInclude Include="Entangle.Logger.hpp">
+      <Filter>Quelldateien</Filter>
+    </ClInclude>
+    <ClInclude Include="simpleLogger.h">
       <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="Zweistein.displayHistogram.hpp">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="Zweistein.Binning.hpp">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="Zweistein.bitreverse.hpp">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="Zweistein.ThreadPriority.hpp">
+      <Filter>Quelldateien</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -4,14 +4,21 @@
  *   it under the terms of the GNU General Public License as published by  *
  *   the Free Software Foundation;                                         *
  ***************************************************************************/
-
 #pragma once
 #include "stdafx.h"
 #include <iostream>
 #include <bitset>
-#include <boost/chrono.hpp>
 #include <string_view>
 #include <magic_enum.hpp>
+
+#define Mpsd8_sizeSLOTS 8
+#define Mpsd8_sizeMODID  8
+#define Mpsd8_sizeY  1024
+
+#define Mdll_sizeX  960
+#define Mdll_sizeY  960
+
+#define Mcpd8_sizeMCPDID 2
 
 namespace Mesy {
 	enum BufferType {
@@ -33,34 +40,32 @@ namespace Mesy {
 		MPSD8P=105,
 		MWPCHR=110
 	};
-
 	enum TimePoint {
 		ZERO =0
 	};
-	
 	class alignas(2) Mpsd8Event {
 		unsigned short data[3];
 	public:
 	//MSB Version
-		unsigned char ID() const {
+		inline unsigned char ID() const {
 			return (data[2] & 0x8000) >> 15;
 		}
-		unsigned char MODID() const {
+		inline unsigned char MODID() const {
 			return (data[2]>>12)  & 0b111;
 		}
-		unsigned short SLOTID() const {
+		inline unsigned short SLOTID() const {
 			return ((data[2] >>7) & 0b11111)&0b111; // Mpsd8 uses only 3 bit others up to 5 bit
 		}
-		unsigned short AMPLITUDE() const {
+		inline unsigned short AMPLITUDE() const {
 			unsigned short rv = (data[2] & 0b1111111) << 3;
 			rv +=( data[1] >> 13)&0b111;
 			return rv;
 		}
-		unsigned short POSITION() const {
+		inline unsigned short POSITION() const {
 			unsigned short rv = (data[1] >>3) &0b1111111111;
 			return rv;
 		}
-		boost::chrono::nanoseconds TIMESTAMP() const {
+		inline boost::chrono::nanoseconds TIMESTAMP() const {
 			unsigned long long rv = (unsigned long long)(data[1] & 0b111) << 16;
 			rv += data[0];
 			boost::chrono::nanoseconds ns(rv * 100);
@@ -80,25 +85,21 @@ namespace Mesy {
 			os << std::bitset<16>(data[0]) << " " << std::bitset<16>(data[1]) << " " << std::bitset<16>(data[2]) << std::endl;
 			os << "ID:" << eventtype << " MODID:" << (short)MODID() << " SLOTID:" << SLOTID() << " AMPLITUDE:" << AMPLITUDE() << " POSITION:" << POSITION() << " TIMESTAMP:" << TIMESTAMP()<<std::endl;
 		}
-		static const unsigned int sizeSLOTS;
-		static const unsigned int sizeMODID;
-		static const unsigned int sizeY;
+		
 	};
-	const unsigned int  Mpsd8Event::sizeSLOTS = 8;
-	const unsigned int  Mpsd8Event::sizeMODID = 8;
-	const unsigned int  Mpsd8Event::sizeY = 1024;
 
-	class alignas(2) CharmEvent {
+	
+
+ 	class alignas(2) CharmEvent {
 		unsigned short buf[3];
 	};
-
 	class alignas(2) MdllEvent {
 		unsigned short data[3];
 	public:
-		unsigned char ID() const {
+		inline unsigned char ID() const {
 			return (data[2] & 0x8000) >> 15;
 		}
-		unsigned short AMPLITUDE() const {
+		inline unsigned short AMPLITUDE() const {
 			return data[2] & 0x7F80 >> 7;
 			/* // code from Qmesydaq measurement.cpp line 1212 ff
 			unsigned short slotid = (data[2] >> 7) & 0x1f;
@@ -107,22 +108,22 @@ namespace Mesy {
 			return chan;
 			*/
 		}
-		unsigned short YPOSITION() const {
-			unsigned short rv = (data[2] & 0x7f) << 3;
-			rv += (data[1] >> 13) & 0x7;
+		inline unsigned short YPOSITION() const {
+			unsigned short rv = (data[2] & 0b1111111) << 3;
+			rv += (data[1] >> 13) & 0b111;
 			return rv;
 		}
-		unsigned short XPOSITION() const {
-			unsigned short rv = (data[1] >> 3) & 0x3ff;
+		inline unsigned short XPOSITION() const {
+			unsigned short rv = (data[1] >> 3) & 0b1111111111;
 			return rv;
 		}
-		boost::chrono::nanoseconds TIMESTAMP() const {
-			unsigned long long rv = (unsigned long long)(data[1] & 0x7) << 16;
+		inline boost::chrono::nanoseconds TIMESTAMP() const {
+			unsigned long long rv = (unsigned long long)(data[1] & 0b111) << 16;
 			rv += data[0];
 			boost::chrono::nanoseconds ns(rv * 100);
 			return ns;
 		}
-		static MdllEvent* fromMpsd8(Mpsd8Event * mpsd8) {
+		inline static MdllEvent* fromMpsd8(Mpsd8Event * mpsd8) {
 			return reinterpret_cast<MdllEvent *>(mpsd8);
 		}
 		void print(std::ostream& os) const {
@@ -131,13 +132,7 @@ namespace Mesy {
 			os << std::bitset<16>(data[0]) << " " << std::bitset<16>(data[1]) << " " << std::bitset<16>(data[2]) << std::endl;
 			os << "ID:" << eventtype << ", AMPLITUDE:" << (short)AMPLITUDE() << ", YPOSITION:" << YPOSITION() << ",XPOSITION:" << XPOSITION() << ", TIMESTAMP:" << TIMESTAMP() << std::endl;
 		}
-
-		static const unsigned int sizeX;
-		static const unsigned int sizeY;
 	};
-	const unsigned int  MdllEvent::sizeX = 960;
-	const unsigned int  MdllEvent::sizeY = 960;
 }
-namespace Mcpd8 {
-	const unsigned short sizeMCPDID = 2;
-}
+
+

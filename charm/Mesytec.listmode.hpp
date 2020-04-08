@@ -34,8 +34,8 @@ namespace Mesytec {
 					switch (datapacket.GetBuffertype()) {
 					case Mesy::BufferType::DATA:
 						data.Format = Mcpd8::EventDataFormat::Mpsd8;
-						data.widthY = Mesy::Mpsd8Event::sizeY;
-						data.widthX = Mesy::Mpsd8Event::sizeMODID * Mesy::Mpsd8Event::sizeSLOTS;
+						data.widthY = Mpsd8_sizeY;
+						data.widthX = Mpsd8_sizeMODID * Mpsd8_sizeSLOTS;
 
 						// one device has maximum 64 (8 mpsd8 with 8 channels each)
 						// problem, we don't know how many devices were used in the measurement.
@@ -44,8 +44,8 @@ namespace Mesytec {
 						break;
 					case Mesy::BufferType::MDLL:
 						data.Format = Mcpd8::EventDataFormat::Mdll;
-						data.widthX = Mesy::MdllEvent::sizeX;
-						data.widthY = Mesy::MdllEvent::sizeY;
+						data.widthX = Mdll_sizeX;
+						data.widthY = Mdll_sizeY;
 
 						break;
 					}

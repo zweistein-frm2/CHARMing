@@ -69,7 +69,7 @@
       "configurationType": "Release",
       "buildRoot": "${projectDir}/out/build/${name}",
       "installRoot": "${projectDir}/out/install/${name}",
-      "cmakeExecutable": "/usr/bin/cmake",
+      "cmakeExecutable": "/snap/cmake/current/bin/cmake",
       "cmakeToolchain": "/vcpkg/scripts/buildsystems/vcpkg.cmake",
       "cmakeCommandArgs": "",
       "buildCommandArgs": "",
@@ -87,17 +87,17 @@
       "variables": [
         {
           "name": "ASIO_EXTENSIONS_PATH",
-          "value": "/home/alanghof/repos/Neu2d_det/asio-extensions/include",
+          "value": "/home/alanghof/repos/CHARMing/asio-extensions/include",
           "type": "PATH"
         },
         {
           "name": "PacketSender_DIR",
-          "value": "/home/alanghof/repos/Neu2d_det/PacketSender",
+          "value": "/home/alanghof/repos/CHARMing/PacketSender",
           "type": "PATH"
         },
         {
           "name": "SIGSLOT_PATH",
-          "value": "/home/alanghof/repos/Neu2d_det/sigslot/include",
+          "value": "/home/alanghof/repos/CHARMing/sigslot/include",
           "type": "PATH"
         },
         {
@@ -111,7 +111,7 @@
       "name": "Taco07-Ubuntu20",
       "generator": "Unix Makefiles",
       "configurationType": "RelWithDebInfo",
-      "cmakeExecutable": "/usr/bin/cmake",
+      "cmakeExecutable": "/snap/cmake/current/bin/cmake",
       "remoteCopySourcesExclusionList": [ ".vs", ".git", "out" ],
       "cmakeToolchain": "/vcpkg/scripts/buildsystems/vcpkg.cmake",
       "cmakeCommandArgs": "",
@@ -130,17 +130,17 @@
       "variables": [
         {
           "name": "ASIO_EXTENSIONS_PATH",
-          "value": "/home/localadmin/repos/Neu2d_det/asio-extensions/include",
+          "value": "/home/localadmin/repos/CHARMing/asio-extensions/include",
           "type": "PATH"
         },
         {
           "name": "PacketSender_DIR",
-          "value": "/home/localadmin/repos/Neu2d_det/PacketSender",
+          "value": "/home/localadmin/repos/CHARMing/PacketSender",
           "type": "PATH"
         },
         {
           "name": "SIGSLOT_PATH",
-          "value": "/home/localadmin/repos/Neu2d_det/sigslot/include",
+          "value": "/home/localadmin/repos/CHARMing/sigslot/include",
           "type": "PATH"
         },
         {

@@ -18,7 +18,7 @@ namespace Zweistein {
 				use_etcdir = boost::filesystem::create_directory(r, ec);
 			}
 
-			if (ec) std::cout << ec.message() << ":" << r.string() << std::endl;
+			if (ec) LOG_WARNING << ec.message() << ": " << r.string() << std::endl;
 			else {
 
 				r /= PROJECT_NAME;// +"-frm2";
@@ -26,7 +26,7 @@ namespace Zweistein {
 				if (!boost::filesystem::exists(r)) {
 					use_etcdir = boost::filesystem::create_directory(r, ec);
 				}
-				if (ec) std::cout << ec.message() << r.string();
+				if (ec) LOG_WARNING << ec.message() << ": " << r.string()<<std::endl;
 			}
 			if (ec) use_etcdir = false;
 

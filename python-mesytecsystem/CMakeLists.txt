@@ -3,13 +3,13 @@
 #
 cmake_minimum_required (VERSION 3.14)
 project(mesytecsystem)
-
+add_compile_definitions(ENTANGLE_LOGGER)
 if(MSVC)
     add_compile_definitions(_WIN32_WINNT=0x0601)
 else()
 message("on linux boost must be installed :  sudo apt-get install libboost-python-dev")
-set(BOOST_ROOT /usr )
-set(Boost_INCLUDE_DIR ${BOOST_ROOT}/include)
+#set(BOOST_ROOT /usr )
+#set(Boost_INCLUDE_DIR ${BOOST_ROOT}/include)
 endif()
   
 add_compile_definitions(ASIOEXT_USE_BOOST_ASIO)
@@ -19,7 +19,7 @@ find_package (Python COMPONENTS Interpreter Development NumPy)
 
 find_package(magic_enum CONFIG REQUIRED )
 
-find_package(Boost 1.65 REQUIRED COMPONENTS python${Python_VERSION_MAJOR}${Python_VERSION_MINOR} numpy${Python_VERSION_MAJOR}${Python_VERSION_MINOR} filesystem chrono thread iostreams log log_setup) # header only libraries must not be added here
+find_package(Boost 1.71 REQUIRED COMPONENTS python${Python_VERSION_MAJOR}${Python_VERSION_MINOR} numpy${Python_VERSION_MAJOR}${Python_VERSION_MINOR} filesystem chrono thread iostreams) # header only libraries must not be added here
 find_path(Boost_INCLUDE_DIR boost)
 
 message(********************Using Boost :${Boost_INCLUDE_DIR}  ******************************)
@@ -34,13 +34,19 @@ include_directories(${PacketSender_DIR})
 include_directories(${pyboostcvconverter_DIR}/include)
 # Add source to this project's executable.
 include_directories(${_Python_NumPy_INCLUDE_DIR})
+set(Boost_python_library Boost_PYTHON${Python_VERSION_MAJOR}${Python_VERSION_MINOR}_LIBRARY_RELEASE )
+set(Boost_numpy_library Boost_NUMPY${Python_VERSION_MAJOR}${Python_VERSION_MINOR}_LIBRARY_RELEASE )
+message(**Boost_python_library********** ${Boost_python_library}*********************)
+message(****resolves_to***************** ${${Boost_python_library}}**************************)
+message(**Boos_numpy_library********** ${Boost_numpy_library}*********************)
+message(****resolves_to***************** ${${Boost_numpy_library}}**************************)
 
 
 add_library(${PROJECT_NAME} SHARED )
 
 
 target_link_libraries(${PROJECT_NAME} PRIVATE magic_enum::magic_enum ${Boost_LIBRARIES} ${OpenCV_LIBS}  unofficial::libuv::libuv   )
-target_link_libraries(${PROJECT_NAME} PRIVATE ${Python_LIBRARY_RELEASE} $<$<CXX_COMPILER_ID:GNU>:${Boost_PYTHON38_LIBRARY_RELEASE}> $<$<CXX_COMPILER_ID:GNU>:${Boost_NUMPY38_LIBRARY_RELEASE}>)
+target_link_libraries(${PROJECT_NAME} PRIVATE ${Python_LIBRARY_RELEASE} ${${Boost_python_library}} ${${Boost_numpy_library}})
 
 if(MSVC)
 set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".pyd")
@@ -53,8 +59,8 @@ add_custom_command(
                 ${CMAKE_SOURCE_DIR}/test.py
                 ${CMAKE_CURRENT_BINARY_DIR}/test.py
         COMMAND ${CMAKE_COMMAND} -E copy
-                ${CMAKE_SOURCE_DIR}/charm.py
-                ${CMAKE_CURRENT_BINARY_DIR}/charm.py
+                ${CMAKE_SOURCE_DIR}/charm-SANS1.py
+                ${CMAKE_CURRENT_BINARY_DIR}/charm-SANS1.py
                 
               )
 
@@ -64,6 +70,6 @@ PRIVATE
 ${pyboostcvconverter_DIR}/src/pyboost_cv2_converter.cpp
 ${pyboostcvconverter_DIR}/src/pyboost_cv3_converter.cpp
 ${pyboostcvconverter_DIR}/src/pyboost_cv4_converter.cpp
-${Charm_DIR}/simpleLogger.cpp
+
 
 )
