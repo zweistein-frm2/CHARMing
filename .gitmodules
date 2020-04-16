@@ -7,3 +7,6 @@
 [submodule "asio-extensions"]
 	path = asio-extensions
 	url = https://github.com/timniederhausen/asio-extensions.git
+[submodule "libdl"]
+	path = charm/libdl
+	url = https://github.com/GaloisInc/libdl.git
