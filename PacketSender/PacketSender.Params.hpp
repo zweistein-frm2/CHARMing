@@ -13,6 +13,7 @@ class PacketSenderParams {
 public:
     static void ReadIni(std::string appName, std::string projectname) {
         boost::filesystem::path homepath = Zweistein::GetHomePath();
+        std::cout << "HOMEPATH=" << homepath << std::endl;
         boost::filesystem::path inidirectory = homepath;
         inidirectory /= "." + projectname;
         if (!boost::filesystem::exists(inidirectory)) {

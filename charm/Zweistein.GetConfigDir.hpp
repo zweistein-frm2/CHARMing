@@ -1,11 +1,14 @@
 #pragma once
-
+#include <boost/atomic.hpp>
+#include <boost/filesystem.hpp>
+#include <list>
+#include <string>
 extern std::string PROJECT_NAME;
 namespace Zweistein {
 
 	
 	namespace Config {
-
+		boost::filesystem::path inipath;
 		boost::filesystem::path GetConfigDirectory() {
 			
 			boost::filesystem::path  r(boost::filesystem::current_path());

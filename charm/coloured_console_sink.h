@@ -14,7 +14,9 @@ public:
 };
 
 #include <iostream>
+#ifndef NOMINMAX
 #define NOMINMAX
+#endif
 #include <windows.h>
 #ifdef ERROR 
 #undef ERROR

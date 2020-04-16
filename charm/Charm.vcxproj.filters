@@ -95,9 +95,6 @@
     <ClInclude Include="Zweistein.populateHistograms.hpp">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="Entangle.Logger.hpp">
-      <Filter>Quelldateien</Filter>
-    </ClInclude>
     <ClInclude Include="simpleLogger.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
@@ -111,7 +108,13 @@
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="Zweistein.ThreadPriority.hpp">
-      <Filter>Quelldateien</Filter>
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="Entangle.Logger.hpp">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="Zweistein.Binning.ApplyOcc.hpp">
+      <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

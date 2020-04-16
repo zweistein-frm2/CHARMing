@@ -77,7 +77,7 @@ namespace Mesytec {
 			auto now = boost::chrono::system_clock::now();
 			started = now;
 			stopped = now;
-			simulatordatarate = 1850000;
+			simulatordatarate = 51;
 			connected = false;
 			daq_running = false;
 			write2disk = false;

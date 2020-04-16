@@ -13,16 +13,17 @@
 #include "Zweistein.GetLocalInterfaces.hpp"
 #include "Zweistein.HomePath.hpp"
 #include "Zweistein.Logger.hpp"
-
+#include "Zweistein.GetConfigDir.hpp"
 namespace Mesytec {
 	
 	 namespace Config { 
 		
 		boost::filesystem::path DATAHOME;
 		boost::filesystem::path BINNINGFILE;
-		bool get(boost::property_tree::ptree& root, std::list<Mcpd8::Parameters>& _devlist, boost::filesystem::path inidirectory) {
+		boost::property_tree::ptree root;
+		bool get(std::list<Mcpd8::Parameters>& _devlist, boost::filesystem::path inidirectory) {
 			bool rv = true;
-
+			
 			try {
 				std::string oursystem = "MsmtSystem";
 				std::string mesytecdevice = "MesytecDevice";
@@ -33,6 +34,7 @@ namespace Mesytec {
 				std::string binningfile = "BinningFile";
 				const int MaxDevices = 4;
 
+				
 
 				DATAHOME = root.get<std::string>(oursystem + punkt + datahome, Zweistein::GetHomePath().string());
 				root.put<std::string>(oursystem + punkt + datahome, DATAHOME.string());
@@ -146,6 +148,51 @@ namespace Mesytec {
 				//LOG_DEBUG<< boost::diagnostic_information(e)<<std::endl;
 			}
 			return rv;
+		}
+		static bool AddRoi(std::string roi, std::string key) {
+
+
+			try {
+				for (boost::property_tree::ptree::value_type& row : root.get_child(key))
+				{
+					if (row.second.data() == roi) return false;
+				}
+			}
+			catch (std::exception& e) {}
+
+
+			boost::property_tree::ptree cell;
+			cell.put_value(roi);
+
+
+			try {
+				boost::property_tree::ptree node_rois = root.get_child(key);
+				boost::property_tree::ptree::value_type row = std::make_pair("", cell);
+				node_rois.push_back(row);
+				root.erase(key);
+				root.add_child(key, node_rois);
+
+			}
+			catch (std::exception& e) {
+				boost::property_tree::ptree node_rois;
+				node_rois.push_back(std::make_pair("", cell));
+				root.add_child(key, node_rois);
+			}
+
+
+
+			try {
+				boost::property_tree::write_json(Zweistein::Config::inipath.string(), root);
+				std::stringstream ss_1;
+				boost::property_tree::write_json(ss_1, root);
+				std::cout << ss_1.str() << std::endl;
+			}
+			catch (std::exception& e) { // exception expected, //std::cout << boost::diagnostic_information(e); 
+				std::cout << e.what() << " for writing." << std::endl;
+			}
+			return true;
+
+
 		}
 	}
 	

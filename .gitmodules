@@ -1,1 +1,9 @@
-
+[submodule "sigslot"]
+	path = sigslot
+	url = https://github.com/palacaze/sigslot.git
+[submodule "pyboostcvconverter"]
+	path = pyboostcvconverter
+	url = https://github.com/Algomorph/pyboostcvconverter.git
+[submodule "asio-extensions"]
+	path = asio-extensions
+	url = https://github.com/timniederhausen/asio-extensions.git

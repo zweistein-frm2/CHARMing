@@ -49,6 +49,7 @@
     <ClInclude Include="Mesytec.Mpsd8.hpp" />
     <ClInclude Include="MesytecSystem.Data.hpp" />
     <ClInclude Include="simpleLogger.h" />
+    <ClInclude Include="Zweistein.Binning.ApplyOcc.hpp" />
     <ClInclude Include="Zweistein.Binning.hpp" />
     <ClInclude Include="Zweistein.bitreverse.hpp" />
     <ClInclude Include="Zweistein.deHumanizeNumber.hpp" />

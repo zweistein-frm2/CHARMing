@@ -75,6 +75,8 @@ unsigned short param[4][3];
 unsigned short auxtimer[4];
 
 
+boost::atomic<bool> retry = true;
+
 void setRate(long requested) {
 	boost::mutex::scoped_lock lock(coutGuard);
 	std::string df = "MPSD8";
@@ -422,7 +424,7 @@ void handle_receive(const boost::system::error_code& error,
 			}
 		
 	}
-start_receive();
+	if(retry==true)start_receive();
 }
 void start_receive() {
 	psocket->async_receive_from(boost::asio::buffer(cmd_recv_buf), current_remote_endpoint, boost::bind(&handle_receive,
@@ -472,7 +474,7 @@ size_t raw_sendto(boost::asio::basic_raw_socket<asio::ip::raw>& sender, const ud
 
 
 
-bool retry = true;
+
 
 void catch_ctrlc(const boost::system::error_code& error, int signal_number) {
 	{	
@@ -481,7 +483,9 @@ void catch_ctrlc(const boost::system::error_code& error, int signal_number) {
 	}
 	if (signal_number == 2) {
 		retry = false;
-		throw boost::system::system_error{ boost::system::errc::make_error_code(boost::system::errc::owner_dead) };
+	//	boost::throw_exception(std::runtime_error("aborted by user"));
+	//	throw std::runtime_error("aborted by user");
+		//throw boost::system::system_error{ boost::system::errc::make_error_code(boost::system::errc::owner_dead) };
 		
 	}
 	
@@ -490,9 +494,7 @@ void catch_ctrlc(const boost::system::error_code& error, int signal_number) {
 
 int main(int argc, char* argv[])
 {
-	char* cLocal = setlocale(LC_ALL, NULL);
-	setlocale(LC_ALL, "de-DE");
-	boost::filesystem::path::imbue(std::locale());
+	
 	std::string appName = boost::filesystem::basename(argv[0]);
 	PacketSenderParams::ReadIni(appName,"charm");
 	devid = PacketSenderParams::getDevId();
@@ -602,17 +604,19 @@ int main(int argc, char* argv[])
 			int newcounts = 0;
 			dp[0].Number = bufnum++;
 			dp[0].Length = dp[0].headerLength;
-			
-			if (iloop%DataeveryNOnly==0) {
-				
+
+			bool bfilldata = false;
+			if (DataeveryNOnly == 1) bfilldata = true;
+			else if (iloop % (DataeveryNOnly *DataeveryNOnly ) == 0) bfilldata = true;
+
+			if(bfilldata){
 				for (int i = 0; i < nevents; i++) {
 					if(dataformat==Mcpd8::EventDataFormat::Mpsd8)	Zweistein::Random::Mpsd8EventRandomData((unsigned short*)(&dp[0].events[i]), i, maxX);
 					if(dataformat==Mcpd8::EventDataFormat::Mdll) Zweistein::Random::MdllEventRandomData((unsigned short*)(&dp[0].events[i]), i);
 				}
 				newcounts = nevents;
 			}
-			else 	newcounts = 0;
-			
+						
 			dp[0].deviceStatusdeviceId = daq_status | (devid << 8); // set to running
 			dp[0].Length = newcounts * 3 + dp[0].headerLength;
 			if (dataformat == Mcpd8::EventDataFormat::Mpsd8) dp[0].Type = Mesy::BufferType::DATA;
@@ -635,21 +639,24 @@ int main(int argc, char* argv[])
 				boost::this_thread::sleep_for(boost::chrono::nanoseconds(delaynanos));
 				boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - start;
 				start = boost::chrono::system_clock::now();
-				double evtspersecond = sec.count() != 0 ? (double)(currentcount - lastcount) / sec.count() : 0;
-				if (evtspersecond != 0) {
-					long nanos = 1000000000L * (currentcount - lastcount) / evtspersecond;
-					long wanted = 1000000000L * (currentcount - lastcount) / requestedEventspersecond;
+				long countsadded = currentcount - lastcount;
+				double evtspersecond = sec.count() != 0 ? (double)(countsadded) / sec.count() : 0;
+				if (evtspersecond > 0.0 && countsadded>0) {
+					long nanos = 1000000000L * (double)countsadded / evtspersecond;
+					long wanted = 1000000000L * (double) countsadded /(double) requestedEventspersecond;
+					//std::cout<<std::endl << "nanos=" << nanos << ", wanted=" << wanted << std::endl<<std::endl;
 					delaynanos += wanted - nanos;
 					if (delaynanos <= 0) delaynanos = 0;
 				}
 				else delaynanos = 1000L * 1000L * 1000L; // 1 second
+				
 				lastcount = currentcount;
 				int dots = innerloop % maxdots;
 				{
 					boost::mutex::scoped_lock lock(coutGuard);
 					boost::chrono::duration<double> elapsed(ns - zeropoint);
-					
-					std::cout << "\r" << std::setprecision(0) << std::fixed << evtspersecond << " Events/s, (" << Zweistein::PrettyBytes((size_t)(evtspersecond * sizeof(Mesy::Mpsd8Event))) << "/s)" <<" elapsed:"<< elapsed;
+					if (retry == false) break;
+					std::cout << "\r" << std::setprecision(1) << std::fixed << evtspersecond << " Events/s, (" << Zweistein::PrettyBytes((size_t)(evtspersecond * sizeof(Mesy::Mpsd8Event))) << "/s)" <<" elapsed:"<< elapsed;
 					if (innerloop != 0 /*first gives wrong results*/) for (int i = 0; i < maxdots; i++) std::cout << (dots == i ? "." : " ");
 					std::cout.flush();
 				}
@@ -663,24 +670,21 @@ int main(int argc, char* argv[])
 	}
 
 		catch (boost::system::system_error const& e) {
-		std::cout << e.what() << ": " << e.code() << " - " << e.code().message() << "\n";
-		auto a = e.code();
-		int err = a.value();
-		if (err == 10013) {
 			boost::mutex::scoped_lock lock(coutGuard);
-			std::cout << "You must run program with administrator rights" << std::endl;
+			std::cout << e.what() << ": " << e.code() << " - " << e.code().message() << "\n";
+			auto a = e.code();
+			int err = a.value();
+			if (err == 10013) std::cout << "You must run program with administrator rights" << std::endl;
 		}
-	}
 		catch (boost::exception & e) {
-		boost::mutex::scoped_lock lock(coutGuard);
-		std::cout << boost::diagnostic_information(e);
-
-	}
+			boost::mutex::scoped_lock lock(coutGuard);
+			std::cout << boost::diagnostic_information(e);
+		}
 
 		// if source is a Ctrl-C then exit here
 		if (retry == false) {
 			boost::mutex::scoped_lock lock(coutGuard);
-			std::cout <<std::endl<< "Ctrl-C handled=>exit" << std::endl;
+			std::cout << "Ctrl-C handled => exit" << std::endl;
 			break;
 		}
 		

@@ -57,17 +57,17 @@ void coloring_formatter(
         switch (severity.get())
         {
         case logging::BOOST_LOG_VERSION_NAMESPACE::trivial::debug:
-            strm << "\033[01;33m";
-            break;
-        case logging::BOOST_LOG_VERSION_NAMESPACE::trivial::info:
             strm << "\033[32m";
             break;
+        case logging::BOOST_LOG_VERSION_NAMESPACE::trivial::info:
+            strm << "\033[01;36m";
+            break;
         case logging::BOOST_LOG_VERSION_NAMESPACE::trivial::warning:
-            strm << "\033[33m";
+            strm << "\033[01;35m";
             break;
         case logging::BOOST_LOG_VERSION_NAMESPACE::trivial::error:
         case logging::BOOST_LOG_VERSION_NAMESPACE::trivial::fatal:
-            strm << "\033[31m";
+            strm << "\033[01;31m";
             break;
         default:
             break;

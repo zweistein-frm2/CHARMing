@@ -52,7 +52,7 @@
       "name": "Taco102-Ubuntu18.04",
       "generator": "Unix Makefiles",
       "configurationType": "Release",
-      "cmakeExecutable": "/usr/bin/cmake",
+      "cmakeExecutable": "/snap/cmake/current/bin/cmake",
       "cmakeToolchain": "/vcpkg/scripts/buildsystems/vcpkg.cmake",
       "remoteCopySourcesExclusionList": [ ".vs", ".git", "out" ],
       "cmakeCommandArgs": "",
@@ -84,7 +84,7 @@
     {
       "name": "Raspberrypi4",
       "generator": "Ninja",
-      "configurationType": "Debug",
+      "configurationType": "Release",
       "cmakeExecutable": "/opt/cmake-3.14.7/bin/cmake",
       "cmakeToolchain": "/vcpkg/scripts/buildsystems/vcpkg.cmake",
       "remoteCopySourcesExclusionList": [ ".vs", ".git", "out" ],

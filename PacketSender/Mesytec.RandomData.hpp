@@ -19,6 +19,15 @@
 //#include <opencv2/core/mat.hpp>
 //#include <opencv2/imgcodecs.hpp>
 //#include <vector>
+#define FORBINNING
+
+#ifdef FORBINNING
+int binfactor = 8;
+#else
+int binfactor = 1;
+#endif
+
+
 
 namespace Zweistein {
 	namespace Font {
@@ -54,8 +63,11 @@ namespace Zweistein {
 			x = y; y = z; z = w;
 			return w = w ^ (w >> 19) ^ (t ^ (t >> 8));
 		}
-
+#ifdef FORBINNING
+		std::string message("\x03 Gr\x81\xe1\x65");
+#else
 		std::string message("\x03 Gr\x81\xe1\x65 von Zweistein \x0e \x0e");
+#endif
 		int counter = 0;
 		long ncalls = 0;
 		namespace ourfont = Zweistein::Font::_8x14_horizontal_LSB_1;
@@ -64,7 +76,7 @@ namespace Zweistein {
 		//static cv::Mat image = cv::Mat::zeros(ourfont::width * message.length(), ourfont::height, CV_8U);
 		//bool imgwritten = false;
 		int xoffset = 25;
-		int yoffset = 200;
+		int yoffset = 50;
 
 		auto start = boost::chrono::high_resolution_clock::now();
 		auto lastposchange= boost::chrono::system_clock::now();
@@ -72,7 +84,7 @@ namespace Zweistein {
 		unsigned long RandomData(unsigned short& x_pos,unsigned short& position_y, int i,int sizeY, int maxX = 8) {
 			unsigned long l = Zweistein::Random::xor128();
 			//int ratio = 4 +(unsigned short)(l >> 27);
-			int ratio = 50;
+			int ratio = 5;
 			if (Zweistein::Random::ncalls++ % ratio != 0) {
 
 				position_y = ((unsigned short)(l >> 10)) % sizeY;
@@ -101,7 +113,7 @@ namespace Zweistein {
 
 
 				x_pos = (((ourfont::height - 1) - pixy) + xoffset) % maxX;
-				position_y = (unsigned int) (sizeY-(cpos * ourfont::width + pixx + yoffset)-1) % sizeY;
+				position_y = (unsigned int) binfactor*(sizeY-(cpos * ourfont::width + pixx + yoffset)-1) % sizeY;
 			}
 			return l;
 

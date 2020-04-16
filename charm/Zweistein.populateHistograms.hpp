@@ -1,5 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2019 by Andreas Langhoff <andreas.langhoff@frm2.tum.de> *
+ *   Copyright (C) 2019-2020  by Andreas Langhoff						   *
+ *   <andreas.langhoff@frm2.tum.de>									       *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
  *   the Free Software Foundation;                                         *
@@ -29,12 +30,15 @@
 #include <boost/filesystem.hpp>
 #include <cctype>
 #include <sstream>
+#include "Zweistein.GetConfigDir.hpp"
 
 namespace Zweistein {
-	void populateHistograms(boost::asio::io_service & io_service, boost::shared_ptr < Mesytec::MesytecSystem> pmsmtsystem1,std::string binningfile1,std::string wktroi1) {
+	void populateHistograms(boost::asio::io_service & io_service, boost::shared_ptr < Mesytec::MesytecSystem> pmsmtsystem1,std::string binningfile1) {
 	
 		unsigned short maxX = pmsmtsystem1->data.widthX;
 		unsigned short maxY = pmsmtsystem1->data.widthY;
+		unsigned short binningMaxY = maxY;
+		bool bbinning = false;
 		//LOG_DEBUG << "pmsmtsystem1->data.widthX=" << maxX << ", pmsmtsystem1->data.widthY=" << maxY << std::endl;
 		int left = 0;
 		int bottom = 0;
@@ -65,21 +69,24 @@ namespace Zweistein {
 				if (s[0] > maxX) {
 					LOG_ERROR << "BINNING.shape()[0]=" << s[0] << " greater than detector sizeX(" << maxX << ")" << std::endl;
 					io_service.stop();
-					return;
+					
 				}
 
 				if (s[1] > maxY) {
 					LOG_ERROR << "BINNING.shape()[1]=" << s[1] << " greater than detector sizeY(" << maxY << ")" << std::endl;
 					io_service.stop();
-					return;
+					
 				}
 
-				if (s[1] < maxY) LOG_WARNING << "BINNING.shape()[1]=" << s[1] << " smaller than detector sizeY(" << maxY << "), detector partially unused." << std::endl;
+				if (s[1] < maxY) {
+					binningMaxY = s[1];
+					LOG_WARNING << "BINNING.shape()[1]=" << s[1] << " smaller than detector sizeY(" << maxY << "), detector partially unused." << std::endl;
+				}
 
 			}
 			catch (std::exception& e) {
 				LOG_WARNING << e.what() << " for reading." << std::endl;
-				int newy = maxY / 4;
+				int newy = maxY / 8;
 				Zweistein::Binning::GenerateSimple(newy, maxY, maxX);
 				std::stringstream ss;
 				ss << std::endl << "Zweistein::Binning::GenerateSimple(" << newy << "," << maxY << "," << maxX << ") ";
@@ -117,28 +124,15 @@ namespace Zweistein {
 			{
 				boost::mutex::scoped_lock lock(histogramsGuard);
 				histograms[1].resize(power, maxX);
-				histograms[1].setRoi(wktroi1);
+				histograms[1].setRoi("",0);
+				LOG_INFO << "histograms[1] :rows=" << histograms[1].histogram.rows << ", cols=" << histograms[1].histogram.cols << std::endl;
 				LOG_INFO << "Zweistein::Binning::BINNING.shape(" << s[0] << "," << s[1] <<")"<< std::endl;
-				/*
-				for (int r = 0; r < s[1]; r++) {
-					for (int c = 0; c < s[0]; c++) {
-
-						short occ = Zweistein::Binning::OCC[c][r];
-						if (occ <= 0) continue;
-						if (occ == Zweistein::Binning::occmultiplier) continue; //  occ == 1
-						if (occ < Zweistein::Binning::occmultiplier) {
-							LOG_DEBUG << "occ=" << occ << " row=" << r << ", col=" << c << std::endl;
-						}
-
-					}
-				}
-				*/
-				}
+			}
 
 			Zweistein::Binning::loaded = true;
+			bbinning = Zweistein::Binning::loaded;
 			LOG_DEBUG << "Zweistein::Binning::loaded" << std::endl;
 		}
-
 		boost::chrono::system_clock::time_point start = boost::chrono::system_clock::now();
 		try {
 			Zweistein::Event ev;
@@ -149,9 +143,7 @@ namespace Zweistein {
 			boost::chrono::nanoseconds elapsed;
 			
 			do {
-									
 				boost::mutex::scoped_lock lock(histogramsGuard);
-				bool bbinning = Zweistein::Binning::loaded;
 				long evntspopped = 0;
 				while (pmsmtsystem1->data.evntqueue.pop(ev)) {
 					evntspopped++;
@@ -163,7 +155,7 @@ namespace Zweistein {
 					}
 					if (ev.type == Zweistein::Event::EventTypeOther::RESET) {
 						for (auto& h : histograms) {
-							h.count = 0;
+							for (auto& r : h.roidata) 	r.count = 0;
 							h.resize(h.histogram.size[0], h.histogram.size[1]);
 						}
 						continue;
@@ -183,35 +175,32 @@ namespace Zweistein {
 					point_type p(ev.X, ev.Y);
 					histograms[0].histogram.at<int32_t>(p.y(), p.x()) += 1;
 
-					if (boost::geometry::covered_by(p, histograms[0].roi)) {
+					if (boost::geometry::covered_by(p, histograms[0].roidata[0].roi)) {
 							auto size=histograms[0].histogram.size;
-							histograms[0].count += 1;
+							histograms[0].roidata[0].count += 1;
 					}
 					if (bbinning) {
 						// this is our binned histograms[1]
+						if (ev.Y >= binningMaxY) continue; // skip it
 						short binnedY = Zweistein::Binning::BINNING[ev.X][ev.Y];
 
-						if (binnedY < 0) {
-							// normally -1 for not consider
+						if (binnedY < 0) continue; // skip also
 
-						}
-						else {
-							point_type pb(ev.X, binnedY);
-
+						point_type pb(ev.X, binnedY);
+						for(auto &r:histograms[1].roidata){
 							histograms[1].histogram.at<int32_t>(pb.y(), pb.x()) += 1;
-							if (boost::geometry::covered_by(pb, histograms[1].roi)) {
-								histograms[1].count += 1;
+							if (boost::geometry::covered_by(pb, r.roi)) {
+								r.count += 1;
 							}
 						}
+						
 					}
 				}
 				nloop++;
 			} while (!io_service.stopped());
 		}
 		catch (boost::exception & e) {
-			boost::mutex::scoped_lock lock(coutGuard);
-			LOG_ERROR<<boost::diagnostic_information(e ) << std::endl;
-			
+				LOG_ERROR<<boost::diagnostic_information(e ) << std::endl;
 		}
 		LOG_DEBUG << "populateHistograms() exiting..." << std::endl;
 	}

@@ -10,7 +10,8 @@ namespace np = boost::python::numpy;
 #endif
 
 #include <iostream>
-#include "Mesytec.RandomData.hpp"
+#include <list>
+#include <vector>
 #include <opencv2/core.hpp>
 #include <opencv2/core/mat.hpp>
 
@@ -19,55 +20,61 @@ namespace np = boost::python::numpy;
 #include <boost/geometry/geometries/polygon.hpp>
 
 #include <boost/geometry/io/wkt/wkt.hpp>
-
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string.hpp>
 #include "Zweistein.Locks.hpp"
 #include "Zweistein.Logger.hpp"
+#include "Zweistein.Binning.hpp"
 
 
 typedef boost::geometry::model::d2::point_xy<int> point_type;
 typedef boost::geometry::model::polygon<point_type> polygon_type;
 
+
 extern boost::mutex histogramsGuard;
 
-    void GetHistogramOpenCV(cv::Mat& histogram) {
+#ifdef BOOST_PYTHON_MODULE
+#include "Zweistein.Binning.ApplyOcc.hpp"
+#endif
 
-
-        unsigned  short x_pos;
-        unsigned short position_y;
-        long imax = 10 * histogram.cols * histogram.rows;
-        for (int i = 0; i < imax; i++) {
-            unsigned long l = Zweistein::Random::RandomData(x_pos, position_y, i, histogram.rows, histogram.cols);
-            histogram.at<int32_t>(histogram.rows - position_y - 1, x_pos) += 1;
-        }
-
-
-
-
-    }
-
+    struct RoiData {
+        polygon_type roi;
+        long count;
+        boost::geometry::model::box<point_type> box;
+    };
+     
     //https://www.boost.org/doc/libs/1_72_0/libs/geometry/doc/html/geometry/reference/algorithms/within/within_2.html
     // boost::geometry::within(p, poly)
     //https://www.boost.org/doc/libs/1_72_0/libs/geometry/doc/html/geometry/reference/algorithms/envelope/envelope_2.html
     struct Histogram {
-       
-        polygon_type roi;
-        boost::geometry::model::box<point_type> box;
-        long count;
+        std::vector<RoiData> roidata;
         cv::Mat histogram;
-            Histogram():count(0) {
+        Histogram():roidata(std::vector<RoiData>()) {
+                RoiData rd;
+                roidata.push_back(rd);
                 resize(1, 1);
                 setRoiRect(0,0,1,1);
         }
-  
         void resize(int rows, int cols) {
 
             histogram = cv::Mat_<int32_t>::zeros(rows,cols);
            
         }
-        std::string getRoi() {
+
+        void delRoi(std::string roi) {
+            // we never delete first roi
+            for (int i = 0;i< roidata.size();i++){
+                if (roi == getRoi(i)) {
+                    roidata.erase(roidata.begin()+i);
+                    break;
+                }
+            }
+            if (!roidata.size()) setRoi("", 0);
+        }
+        std::string getRoi(int index) {
 
             std::stringstream ss_wkt;
-            ss_wkt << boost::geometry::wkt(roi);
+            ss_wkt << boost::geometry::wkt(roidata[index].roi);
             return ss_wkt.str();
         }
         void setRoiRect(int left, int bottom, int maxX, int maxY) {
@@ -79,63 +86,90 @@ extern boost::mutex histogramsGuard;
             ssroi << left << " " << bottom << "),())";
             std::string roi = ssroi.str();
 
-            setRoi(roi);
+            setRoi(roi,0);
         }
-
-        
-        void setRoi(std::string wkt) {
+        void setRoi(std::string wkt,int index) {
             int width = 1;
             int height = 1; 
-            bool illformedwkt = true;
+            while (roidata.size() <= index) {
+                RoiData rd;
+                roidata.push_back(rd);
+             }
+            //LOG_INFO << std::endl << "setRoi(" << wkt << ")" << std::endl;
+            boost::algorithm::replace_last(wkt,",())",")");
+            std::string reason;
+            boost::geometry::validity_failure_type failure= boost::geometry::no_failure;
             try {
-                if (!wkt.empty() && wkt.length()==0) {
-                    boost::geometry::read_wkt(wkt, roi);
-                    illformedwkt = false;
-                    std::string reason;
-                    bool ok = boost::geometry::is_valid(roi, reason);
-                    if (!ok) illformedwkt = true;
-                    LOG_WARNING << reason << std::endl;
+                if (!wkt.empty()) {
+                    boost::geometry::read_wkt(wkt, roidata[index].roi);
+                    boost::geometry::validity_failure_type failure;
+                    bool valid = boost::geometry::is_valid(roidata[index].roi, failure);
+                    bool could_be_fixed = (failure == boost::geometry::failure_not_closed
+                        || boost::geometry::failure_wrong_orientation);
+                    if(could_be_fixed)boost::geometry::correct(roidata[index].roi);
+                    valid = boost::geometry::is_valid(roidata[index].roi, reason);
+                   
+                
                 }
             }
-            catch (boost::exception& e) {
-                boost::mutex::scoped_lock lock(coutGuard);
-                LOG_ERROR << boost::diagnostic_information(e) << std::endl;
+            catch (std::exception& e) {
+                LOG_ERROR << e.what() << std::endl;
+                wkt = "";
             }
 
-            if (illformedwkt) {
+            
+            if (failure!= boost::geometry::no_failure || wkt.empty()) {
+                
+                if (failure != boost::geometry::no_failure) {
+                       LOG_ERROR << "boost::geometry::validity_failure_type=" << failure << " : "<< reason<< std::endl;
+                }
+               
+                
                 height =histogram.size[0];
                 width=histogram.size[1];
 
                 std::vector<point_type> coor = { {0, 0}, {0,height}, {width, height}, {width,0},{0,0} };
-                roi.outer().clear();
-                for (auto& p : coor) roi.outer().push_back(p);
+                roidata[index].roi.outer().clear();
+                roidata[index].roi.inners().clear();
+                for (auto& p : coor) roidata[index].roi.outer().push_back(p);
             }
+           // LOG_INFO << "new Roi : " << getRoi() << std::endl;
 
-            boost::geometry::envelope(roi, box);
-            int roiwidth = box.max_corner().get<0>() - box.min_corner().get<0>();
-            int roiheight = box.max_corner().get<1>() - box.min_corner().get<1>();
+            boost::geometry::envelope(roidata[index].roi,roidata[index].box);
+            int roiwidth = roidata[index].box.max_corner().get<0>() - roidata[index].box.min_corner().get<0>();
+            int roiheight = roidata[index].box.max_corner().get<1>() - roidata[index].box.min_corner().get<1>();
 
+           // Zweistein::Config::AddRoi(getRoi());
            
            
 
         }
 #ifdef BOOST_PYTHON_MODULE
         boost::python::tuple update(cv::Mat mat) {
-            {
-                boost::mutex::scoped_lock lock(histogramsGuard);
-                 
-                // resize(128, 1024);
-               //  GetHistogramOpenCV(histogram);
-                 histogram.copyTo(mat);
-            }
-            return boost::python::make_tuple(count, mat);
+           
+            boost::mutex::scoped_lock lock(histogramsGuard);
+            histogram.copyTo(mat);
+           if (Zweistein::Binning::loaded) {
+           //  Zweistein::Binning::Apply_OCC_Correction(mat,roi,count);
+            //    LOG_INFO << "update:applyocc_correction" << std::endl;
+           }
+           
+           boost::python::list l;
+
+           for (auto r : roidata) {
+               std::stringstream ss_wkt;
+               ss_wkt << boost::geometry::wkt(r.roi);
+               auto t=boost::python::make_tuple(ss_wkt.str(),r.count);
+               l.append(t);
+           }
+            return boost::python::make_tuple(l, mat);
         }
 
         boost::python::tuple getSize() {
            
             
-            int width = box.max_corner().get<0>() - box.min_corner().get<0>();
-            int height = box.max_corner().get<1>() - box.min_corner().get<1>();
+            int width = roidata[0].box.max_corner().get<0>() - roidata[0].box.min_corner().get<0>();
+            int height = roidata[0].box.max_corner().get<1>() - roidata[0].box.min_corner().get<1>();
             {
                 boost::mutex::scoped_lock lock(histogramsGuard);
                 width=histogram.cols;
@@ -147,5 +181,4 @@ extern boost::mutex histogramsGuard;
         }
 #endif
     };
-   
-    extern std::vector<Histogram> histograms;
+        extern std::vector<Histogram> histograms;

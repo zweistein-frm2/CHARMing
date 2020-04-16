@@ -67,15 +67,13 @@ struct StartMsmtParameters {
 
 void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, boost::shared_ptr <StartMsmtParameters> ptrStartParameters ) {
         boost::filesystem::path inidirectory = Zweistein::Config::GetConfigDirectory();
-        boost::filesystem::path inipath = inidirectory;
-        inipath.append(PROJECT_NAME + ".json");
-        LOG_INFO << "Using config file:" << inipath << " " << std::endl;
+        Zweistein::Config::inipath = inidirectory;
+        Zweistein::Config::inipath.append(PROJECT_NAME + ".json");
+        LOG_INFO << "Using config file:" << Zweistein::Config::inipath << " " << std::endl;
         boost::asio::signal_set signals(io_service, SIGINT, SIGTERM);
         signals.async_wait(boost::bind(&boost::asio::io_service::stop, &io_service));
 
-        boost::property_tree::ptree root;
-
-        try { boost::property_tree::read_json(inipath.string(), root); }
+        try { boost::property_tree::read_json(Zweistein::Config::inipath.string(),Mesytec::Config::root); }
         catch (std::exception& e) {
             LOG_ERROR << e.what() << " for reading."<<std::endl;
         }
@@ -83,12 +81,16 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
 
         ptrmsmtsystem1->data.Format = Mcpd8::EventDataFormat::Mpsd8;
 
+        bool configok = Mesytec::Config::get(_devlist, inidirectory.string());
 
-        bool configok = Mesytec::Config::get(root, _devlist, inidirectory.string());
+        try { boost::property_tree::read_json(Zweistein::Config::inipath.string(), Mesytec::Config::root); }
+        catch (std::exception& e) {
+            LOG_ERROR << e.what() << " for reading."<<std::endl;
+        }
 
 
         std::stringstream ss_1;
-        boost::property_tree::write_json(ss_1, root);
+        boost::property_tree::write_json(ss_1, Mesytec::Config::root);
         LOG_INFO << ss_1.str()<<std::endl;
 
         if (!configok) {
@@ -96,7 +98,7 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
         }
 
         try {
-            boost::property_tree::write_json(inipath.string(), root);
+            boost::property_tree::write_json(Zweistein::Config::inipath.string(), Mesytec::Config::root);
         }
         catch (std::exception& e) { // exception expected, //std::cout << boost::diagnostic_information(e); 
             LOG_ERROR << e.what() << " for writing."<<std::endl;
@@ -135,8 +137,16 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
         worker_threads.add_thread(pt);
         boost::this_thread::sleep_for(boost::chrono::milliseconds(3000));// so msmtsystem1 should be connected
        
-        worker_threads.create_thread([&ptrmsmtsystem1] {Zweistein::populateHistograms(io_service, ptrmsmtsystem1, Mesytec::Config::BINNINGFILE.string(), ""); });
         
+        for (int i = 0; i < 10; i++) {
+            if (ptrmsmtsystem1->connected) {
+                worker_threads.create_thread([&ptrmsmtsystem1] {Zweistein::populateHistograms(io_service, ptrmsmtsystem1, Mesytec::Config::BINNINGFILE.string()); });
+                boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
+                break;
+            }
+            boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
+        }
+
         boost::chrono::system_clock::time_point lastsec = boost::chrono::system_clock::now();
         long long lastcount = 0;
         while (!io_service.stopped()) {
@@ -205,7 +215,7 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
             //	delete ptrmsmtsystem1;
             //	ptrmsmtsystem1 = nullptr;
         }
-        boost::this_thread::sleep_for(boost::chrono::milliseconds(500));
+        boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
         LOG_DEBUG << "startMonitor() exiting..." << std::endl;
 
     }
@@ -387,7 +397,7 @@ BOOST_PYTHON_MODULE(mesytecsystem)
         class_<Histogram, boost::noncopyable>("Histogram", boost::python::no_init)
             .def("update", &Histogram::update)
             .def("setRoi", &Histogram::setRoi)
-            .add_property("Roi", &Histogram::getRoi)
+            .def("getRoi", &Histogram::getRoi)
             .add_property("Size", &Histogram::getSize)
             ;
         class_< NeutronMeasurement>("NeutronMeasurement",init<long>())

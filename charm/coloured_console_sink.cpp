@@ -38,12 +38,12 @@ WORD get_colour(boost::log::trivial::severity_level level)
 {
     switch (level)
     {
-    case boost::log::trivial::trace: return 0x08;
-    case boost::log::trivial::debug: return 0x07;
-    case boost::log::trivial::info: return 0x0F;
-    case boost::log::trivial::warning: return 0x0D;
-    case boost::log::trivial::error: return 0x04;
-    case boost::log::trivial::fatal: return 0x04&0x08;
+    case boost::log::trivial::trace: return FOREGROUND_INTENSITY;
+    case boost::log::trivial::debug: return FOREGROUND_GREEN;
+    case boost::log::trivial::info: return FOREGROUND_GREEN| FOREGROUND_BLUE | FOREGROUND_INTENSITY;
+    case boost::log::trivial::warning: return FOREGROUND_BLUE | FOREGROUND_RED| FOREGROUND_INTENSITY;
+    case boost::log::trivial::error: return FOREGROUND_RED  | FOREGROUND_INTENSITY;
+    case boost::log::trivial::fatal: return FOREGROUND_RED  | FOREGROUND_INTENSITY;
     default: return 0x0F;
     }
 }

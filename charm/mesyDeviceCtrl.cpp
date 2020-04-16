@@ -15,6 +15,9 @@
 #include <vector>
 #include <boost/locale.hpp>
 #include <boost/exception/all.hpp>
+#include <boost/system/error_code.hpp>
+#include <boost/exception/error_info.hpp>
+#include <errno.h>
 #include <boost/function.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/asio.hpp>
@@ -28,6 +31,7 @@
 #include <boost/foreach.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
+#include <boost/throw_exception.hpp>
 #include "Mesytec.Mcpd8.hpp"
 #include "Zweistein.PrettyBytes.hpp"
 #include "Zweistein.HomePath.hpp"
@@ -40,7 +44,6 @@
 #include "Zweistein.displayHistogram.hpp"
 #include <opencv2/highgui.hpp>
 #include "Zweistein.ThreadPriority.hpp"
-#include "Zweistein.GetConfigDir.hpp"
 #include "Zweistein.Logger.hpp"
 
 #ifdef _DEBUG
@@ -87,16 +90,15 @@ int main(int argc, char* argv[])
 		}
 
 		boost::filesystem::path inidirectory = Zweistein::Config::GetConfigDirectory();
-
-		
-		
-		boost::filesystem::path inipath = inidirectory;
+		Zweistein::Config::inipath = inidirectory;
 		const char* HELP="help";
 		const char* LISTMODE_FILE="listmodefile(s)";
-		const char *CONFIG="config";
+		const char *CONFIG="config-file";
 		const char *WRITE2DISK="writelistmode";
+		const char* SETUP = "setup";
 		bool inputfromlistfile = false;
 		bool write2disk = false;
+		bool setupafterconnect = false;
 		po::options_description desc("command line options");
 		int maxNlistmode = 16;// maximal 16 listmode files
 		desc.add_options()
@@ -104,6 +106,7 @@ int main(int argc, char* argv[])
 			(LISTMODE_FILE, po::value< std::vector<std::string> >(),(std::string("file1 [file2] ... [file")+std::to_string(maxNlistmode)+std::string("N]")).c_str())
 			(CONFIG, po::value< std::string>(), (std::string("alternative config file[.json], must be in ")+ inidirectory.string()).c_str())
 			(WRITE2DISK, (std::string("write DataPackets to ")+ Mesytec::writelistmodeFileNameInfo()).c_str())
+			(SETUP, (std::string("config mesytec device(s): ")+ std::string("set module IP addr")).c_str())
 			;
 		po::positional_options_description positionalOptions;
 		positionalOptions.add(LISTMODE_FILE, maxNlistmode); 
@@ -118,19 +121,23 @@ int main(int argc, char* argv[])
 				&positionalOptions);
 			return 0;
 		}
+
 		conflicting_options(vm, LISTMODE_FILE, WRITE2DISK);
+		conflicting_options(vm, LISTMODE_FILE, SETUP);
+		conflicting_options(vm, WRITE2DISK, SETUP);
 		po::notify(vm);
 		if (vm.count(WRITE2DISK)) write2disk = true;
+		if (vm.count(SETUP)) setupafterconnect = true;
 		if (vm.count(CONFIG)) {
 			std::string a=vm[CONFIG].as<std::string>();
 			boost::filesystem::path p(a);
 			if(!p.has_extension()) p.replace_extension(".json");
-			inipath.append(p.string());
+			Zweistein::Config::inipath.append(p.string());
 		}
 		else {
-			inipath.append(appName + ".json");
+			Zweistein::Config::inipath.append(appName + ".json");
 		}
-		LOG_INFO << "Using config file:" << inipath << " " <<std::endl ;
+		LOG_INFO << "Using config file:" << Zweistein::Config::inipath << " " <<std::endl ;
 		std::vector<std::string> listmodeinputfiles = std::vector<std::string>();
 		
 		if (vm.count(LISTMODE_FILE))
@@ -151,8 +158,8 @@ int main(int argc, char* argv[])
 		
 		boost::asio::signal_set signals(io_service, SIGINT, SIGTERM);
 		signals.async_wait(boost::bind(&boost::asio::io_service::stop, &io_service));
-		boost::property_tree::ptree root;
-		try {boost::property_tree::read_json(inipath.string(), root);}
+		
+		try {boost::property_tree::read_json(Zweistein::Config::inipath.string(), Mesytec::Config::root);}
 		catch (std::exception& e) {
 			LOG_ERROR << e.what() << " for reading." << std::endl;
 		}
@@ -180,17 +187,17 @@ int main(int argc, char* argv[])
 
 		}
 		else  {
-			bool configok = Mesytec::Config::get(root, _devlist, inidirectory.string());
+			bool configok = Mesytec::Config::get(_devlist, inidirectory.string());
 			
 			
 			std::stringstream ss_1;
-			boost::property_tree::write_json(ss_1, root);
+			boost::property_tree::write_json(ss_1, Mesytec::Config::root);
 			LOG_INFO << ss_1.str() << std::endl;
 
 			if (!configok) return -1;
 			Zweistein::Logger::Add_File_Sink(Mesytec::Config::DATAHOME.string()+appName+".log");
 			try {
-				boost::property_tree::write_json(inipath.string(), root);
+				boost::property_tree::write_json(Zweistein::Config::inipath.string(), Mesytec::Config::root);
 			}
 			catch(std::exception& e) { // exception expected, //std::cout << boost::diagnostic_information(e); 
 				LOG_ERROR << e.what()<<" for writing." << std::endl;
@@ -232,7 +239,6 @@ int main(int argc, char* argv[])
 		worker_threads.add_thread(pt);
 		boost::this_thread::sleep_for(boost::chrono::milliseconds(2500));// so msmtsystem1 should be connected
 		
-		worker_threads.create_thread([&ptrmsmtsystem1] {Zweistein::populateHistograms(io_service, ptrmsmtsystem1,Mesytec::Config::BINNINGFILE.string(),""); });
 					
 		boost::chrono::system_clock::time_point start = boost::chrono::system_clock::now();
 		int i = 0;
@@ -244,6 +250,7 @@ int main(int argc, char* argv[])
 		
 
 		if (inputfromlistfile) {
+			worker_threads.create_thread([&ptrmsmtsystem1] {Zweistein::populateHistograms(io_service, ptrmsmtsystem1, Mesytec::Config::BINNINGFILE.string()); });
 			worker_threads.create_thread([&ptrmsmtsystem1] {Zweistein::displayHistogram(io_service, ptrmsmtsystem1); });
 			// nothing to do really,
 			while (!io_service.stopped()) {
@@ -256,70 +263,216 @@ int main(int argc, char* argv[])
 
 			for (int i = 0; i < 10; i++) {
 				if (ptrmsmtsystem1->connected) {
-					worker_threads.create_thread([ &ptrmsmtsystem1] {Zweistein::displayHistogram(io_service,ptrmsmtsystem1); });
-					boost::function<void()> sendstartcmd = [ &ptrmsmtsystem1, &_devlist, &write2disk]() {
-						unsigned long rate = 5100;
-						try {
-							if (write2disk) worker_threads.create_thread([&ptrmsmtsystem1] {Mesytec::writeListmode(io_service, ptrmsmtsystem1); });
-							ptrmsmtsystem1->SendAll(Mcpd8::Cmd::START);
-							for (auto& kvp : ptrmsmtsystem1->deviceparam) {
-								if (kvp.second.datagenerator == Mesytec::DataGenerator::NucleoSimulator) {
-									ptrmsmtsystem1->Send(kvp, Mcpd8::Internal_Cmd::SETNUCLEORATEEVENTSPERSECOND, rate);//1650000 is maximum
-								}
-								if (kvp.second.datagenerator == Mesytec::DataGenerator::CharmSimulator) {
-									ptrmsmtsystem1->Send(kvp, Mcpd8::Internal_Cmd::CHARMSETEVENTRATE, rate); // oder was du willst
-									ptrmsmtsystem1->Send(kvp, Mcpd8::Internal_Cmd::CHARMPATTERNGENERATOR, 1); // oder was du willst
+					if (setupafterconnect) {
+						boost::function<void()> setipaddrcmd = [&ptrmsmtsystem1, &_devlist]() {
+							try {
+								for (auto& kvp : ptrmsmtsystem1->deviceparam) {
+
+									Mcpd8::CmdPacket  cmdpacket;
+									memset(cmdpacket.data, 0, sizeof(unsigned short) * 14);
+									std::cout << "MCPD8 : "<< kvp.second.mcpd_endpoint << std::endl;
+									
+									while (true) {
+										std::cout << "enter new mcpd ip addr (0 for no change):";
+										std::string ip_str;
+										std::cin >> ip_str;
+										std::cout << std::endl;
+										if (ip_str == "0") break;
+										try {
+											boost::asio::ip::address_v4 ipaddr = boost::asio::ip::make_address_v4(ip_str);
+											ipaddr.to_bytes();
+											cmdpacket.data[0] = ipaddr.to_bytes()[0];
+											cmdpacket.data[1] = ipaddr.to_bytes()[1];
+											cmdpacket.data[2] = ipaddr.to_bytes()[2];
+											cmdpacket.data[3] = ipaddr.to_bytes()[3];
+											std::cout << "new ip addr: " << ipaddr << std::endl;
+											break;
+										}
+										catch (boost::system::system_error const& e) {
+											if (ip_str.empty()) boost::throw_exception(std::runtime_error("aborted by user"));
+											
+											std::cout << e.what() << ": " << e.code() << " - " << e.code().message() << "\n";
+										}
+										
+									}
+
+									while (true) {
+										std::cout << "enter new data sink ip addr (0 for no change, 0.0.0.0 for same as sending pc):";
+										std::string ip_str;
+										std::cin >> ip_str;
+										if (ip_str == "0") break;
+										try {
+											boost::asio::ip::address_v4 ipaddr = boost::asio::ip::make_address_v4(ip_str);
+											ipaddr.to_bytes();
+											cmdpacket.data[4] = ipaddr.to_bytes()[0];
+											cmdpacket.data[5] = ipaddr.to_bytes()[1];
+											cmdpacket.data[6] = ipaddr.to_bytes()[2];
+											cmdpacket.data[7] = ipaddr.to_bytes()[3];
+											std::cout << "new data sink ip addr: " << ipaddr << std::endl;
+											break;
+										}
+										catch (boost::system::system_error const& e) {
+											if (ip_str.empty()) boost::throw_exception(std::runtime_error("aborted by user"));
+											std::cout << e.what() << ": " << e.code() << " - " << e.code().message() << "\n";
+										}
+									}
+
+									while (true) {
+										std::cout << "enter new Cmd UDP port (0 for no change)):";
+										unsigned short udpport = -1;
+										std::cin >> udpport;
+										if (udpport == 0) break;
+										try{
+											cmdpacket.data[8] = udpport;
+											std::cout << "new cmd udp port: " << udpport << std::endl;
+											break;
+										}
+										catch (boost::system::system_error const& e) {
+											if (udpport == -1) boost::throw_exception(std::runtime_error("aborted by user"));
+											std::cout << e.what() << ": " << e.code() << " - " << e.code().message() << "\n";
+										}
+										
+									}
+
+									while (true) {
+										std::cout << "enter new Data UDP port (0 for no change)):";
+										unsigned short udpport = -1;
+										std::cin >> udpport;
+										if (udpport == 0) break;
+										try {
+											cmdpacket.data[9] = udpport;
+											std::cout << "new data udp port: " << udpport << std::endl;
+											break;
+										}
+										catch (boost::system::system_error const& e) {
+											if (udpport == -1) boost::throw_exception(std::runtime_error("aborted by user"));
+											std::cout << e.what() << ": " << e.code() << " - " << e.code().message() << "\n";
+										}
+										
+									}
+
+									while (true) {
+										std::cout << "enter new cmd pc ip addr (0 for no change, 0.0.0.0 for same as sending pc):";
+										std::string ip_str;
+										std::cin >> ip_str;
+										if (ip_str == "0") break;
+										try {
+											boost::asio::ip::address_v4 ipaddr = boost::asio::ip::make_address_v4(ip_str);
+											ipaddr.to_bytes();
+											cmdpacket.data[10] = ipaddr.to_bytes()[0];
+											cmdpacket.data[11] = ipaddr.to_bytes()[1];
+											cmdpacket.data[12] = ipaddr.to_bytes()[2];
+											cmdpacket.data[13] = ipaddr.to_bytes()[3];
+											std::cout << "new data sink ip addr: " << ipaddr << std::endl;
+											break;
+										}
+										catch (boost::system::system_error const& e) {
+											if (ip_str.empty()) boost::throw_exception(std::runtime_error("aborted by user"));
+											std::cout << e.what() << ": " << e.code() << " - " << e.code().message() << "\n";
+										}
+										
+									}
+									
+									cmdpacket.cmd = Mcpd8::Cmd::SETPROTOCOL;
+									cmdpacket.Length = Mcpd8::CmdPacket::defaultLength + 14;
+									Mcpd8::CmdPacket::Send(kvp.second.socket,cmdpacket,kvp.second.mcpd_endpoint);
+
+									std::cout << "OK => parameters written correctly." << std::endl;
+	
 								}
 							}
-						}
-						catch (Mesytec::cmd_error& x) {
-							boost::mutex::scoped_lock lock(coutGuard);
-							if (int const* mi = boost::get_error_info<Mesytec::my_info>(x)) {
-								auto  my_code = magic_enum::enum_cast<Mesytec::cmd_errorcode>(*mi);
-								if (my_code.has_value()) {
-									auto c1_name = magic_enum::enum_name(my_code.value());
-									LOG_ERROR << c1_name << std::endl;
+							catch (Mesytec::cmd_error& x) {
+								
+								if (int const* mi = boost::get_error_info<Mesytec::my_info>(x)) {
+									auto  my_code = magic_enum::enum_cast<Mesytec::cmd_errorcode>(*mi);
+									if (my_code.has_value()) {
+										auto c1_name = magic_enum::enum_name(my_code.value());
+										LOG_ERROR << c1_name << std::endl;
+									}
+
 								}
 
 							}
 
-						}
-						
-						catch (boost::exception& e) {
-							boost::mutex::scoped_lock lock(coutGuard);
-							LOG_ERROR << boost::diagnostic_information(e) << std::endl;
-							
-						}
-					};
-					worker_threads.create_thread(boost::bind(sendstartcmd));
-					boost::this_thread::sleep_for(boost::chrono::milliseconds(500));
-					break;
+							catch (boost::exception& e) {
+									LOG_ERROR << boost::diagnostic_information(e) << std::endl;
 
+							}
+							io_service.stop();
+						};
+						worker_threads.create_thread(boost::bind(setipaddrcmd));
+						boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
+						break;
+					}
+
+					else {
+						worker_threads.create_thread([&ptrmsmtsystem1] {Zweistein::populateHistograms(io_service, ptrmsmtsystem1, Mesytec::Config::BINNINGFILE.string()); });
+						worker_threads.create_thread([&ptrmsmtsystem1] {Zweistein::displayHistogram(io_service, ptrmsmtsystem1); });
+						boost::function<void()> sendstartcmd = [&ptrmsmtsystem1, &_devlist, &write2disk]() {
+							unsigned long rate = 1850;
+							try {
+								if (write2disk) worker_threads.create_thread([&ptrmsmtsystem1] {Mesytec::writeListmode(io_service, ptrmsmtsystem1); });
+								ptrmsmtsystem1->SendAll(Mcpd8::Cmd::START);
+								for (auto& kvp : ptrmsmtsystem1->deviceparam) {
+									if (kvp.second.datagenerator == Mesytec::DataGenerator::NucleoSimulator) {
+										ptrmsmtsystem1->Send(kvp, Mcpd8::Internal_Cmd::SETNUCLEORATEEVENTSPERSECOND, rate);//1650000 is maximum
+									}
+									if (kvp.second.datagenerator == Mesytec::DataGenerator::CharmSimulator) {
+										ptrmsmtsystem1->Send(kvp, Mcpd8::Internal_Cmd::CHARMSETEVENTRATE, rate); // oder was du willst
+										ptrmsmtsystem1->Send(kvp, Mcpd8::Internal_Cmd::CHARMPATTERNGENERATOR, 1); // oder was du willst
+									}
+								}
+							}
+							catch (Mesytec::cmd_error& x) {
+								boost::mutex::scoped_lock lock(coutGuard);
+								if (int const* mi = boost::get_error_info<Mesytec::my_info>(x)) {
+									auto  my_code = magic_enum::enum_cast<Mesytec::cmd_errorcode>(*mi);
+									if (my_code.has_value()) {
+										auto c1_name = magic_enum::enum_name(my_code.value());
+										LOG_ERROR << c1_name << std::endl;
+									}
+
+								}
+
+							}
+
+							catch (boost::exception& e) {
+								boost::mutex::scoped_lock lock(coutGuard);
+								LOG_ERROR << boost::diagnostic_information(e) << std::endl;
+
+							}
+						};
+						worker_threads.create_thread(boost::bind(sendstartcmd));
+						boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
+						break;
+
+					}
 				}
-				boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
-			
+					boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
+				}
+
+				while (!io_service.stopped()) {
+					boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
+					if (setupafterconnect) continue;
+					boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - start;
+					start = boost::chrono::system_clock::now();
+					long long currentcount = ptrmsmtsystem1->data.evntcount;
+					double evtspersecond = sec.count() != 0 ? (double)(currentcount - lastcount) / sec.count() : 0;
+					{
+						boost::mutex::scoped_lock lock(coutGuard);
+						boost::chrono::system_clock::time_point tps(ptrmsmtsystem1->started);
+						boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - tps;
+						std::cout << "\r" << std::setprecision(0) << std::fixed << evtspersecond << " Events/s, (" << Zweistein::PrettyBytes((size_t)(evtspersecond * sizeof(Mesy::Mpsd8Event))) << "/s)\t" << Mcpd8::DataPacket::deviceStatus(ptrmsmtsystem1->data.last_deviceStatusdeviceId) << " elapsed:" << sec << " ";// << std::endl;
+						lastcount = currentcount;
+#ifndef _WIN32
+						std::cout << std::flush;
+#endif
+					}
+					io_service.run_one();
+				};
 			}
 
-			while (!io_service.stopped()) {
-				boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
-			
-				boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - start;
-				start = boost::chrono::system_clock::now();
-				long long currentcount = ptrmsmtsystem1->data.evntcount;
-				double evtspersecond = sec.count() != 0 ? (double)(currentcount - lastcount) / sec.count() : 0;
-				{
-					boost::mutex::scoped_lock lock(coutGuard);
-					boost::chrono::system_clock::time_point tps(ptrmsmtsystem1->started);
-					boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - tps;
-					std::cout << "\r" <<std::setprecision(0) <<std::fixed<< evtspersecond << " Events/s, (" << Zweistein::PrettyBytes((size_t)(evtspersecond * sizeof(Mesy::Mpsd8Event))) << "/s)\t" << Mcpd8::DataPacket::deviceStatus(ptrmsmtsystem1->data.last_deviceStatusdeviceId)<<" elapsed:"<<sec <<" " ;// << std::endl;
-					lastcount = currentcount;
-#ifndef _WIN32
-					std::cout << std::flush;
-#endif
-				}
-				io_service.run_one();
-			};
-		}
+		
 	}
 	catch (boost::exception & e) {
 		boost::mutex::scoped_lock lock(coutGuard);

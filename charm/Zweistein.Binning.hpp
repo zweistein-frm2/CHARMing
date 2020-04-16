@@ -12,6 +12,8 @@
 #include <boost/atomic.hpp>
 #include "Zweistein.Logger.hpp"
 #include <boost/atomic.hpp>
+
+
 namespace Zweistein {
 
 	namespace Binning {
@@ -39,7 +41,8 @@ namespace Zweistein {
 				}
 			}
 		}
-
+       
+   
         void ReadTxt(std::string txtpath) {
                 LOG_INFO << "Zweistein::Binning::ReadTxt:" << txtpath << std::endl;
                 std::string firstline = "mesydaq Position Calibration File";
@@ -53,6 +56,7 @@ namespace Zweistein {
                     std::string line;
 
                     std::getline(infile, line);
+                    boost::algorithm::trim_right_if(line,boost::algorithm::is_any_of("\r "));
                     if (line != firstline) {
                         LOG_ERROR << "firstline!=" << firstline << std::endl;
                         return;
@@ -81,22 +85,19 @@ namespace Zweistein {
                         LOG_DEBUG <<"ReadTxt: "<< txtpath << " BINNING, OCC: cols=" << cols << ", rows=" << rows + 2 * strideY << std::endl;
                         int l = 0;
                         while (getline(infile, line)) {
-                            Tokens tokens;
-                            boost::split(tokens, line, boost::is_any_of("\t "));
+                            Tokens tokens1;
+                            boost::split(tokens1, line, boost::is_any_of("\t "));
 
-                            int bin = std::stoi(tokens[0]);
-                            tokens.erase(tokens.begin());
+                            int bin = std::stoi(tokens1[0]);
+                            tokens1.erase(tokens1.begin());
 
-                            for (int c = 0; c < cols; c += 2) {
-                                BINNING[c/2][l+strideY] = std::stoi(tokens[c]);
-                                float f = std::stof(tokens[c+1])* (float)Zweistein::Binning::occmultiplier;
+                            for (int c = 0; c < cols*2; c += 2) {
+                                BINNING[c/2][l+strideY] = std::stoi(tokens1[c]);
+                                float f = std::stof(tokens1[c+1])* (float)Zweistein::Binning::occmultiplier;
                                 short occ =(short)((long) f);
-                                if (occ <= 0) {
-                                    int dummy = 1; // needed (?) to avoid compiler optimization problem
-                                    continue;
-                                }
+                                if (occ <= 0)     continue;
                                 if ( occ< Zweistein::Binning::occmultiplier) {
-                                    LOG_DEBUG << "f[" << c/2 << "," << l + strideY << "]=" << occ <<"("<<tokens[c+1]<<")" << std::endl;
+                                 //   LOG_DEBUG << "f[" << c/2 << "," << l + strideY << "]=" << occ <<"("<<tokens[c+1]<<")" << std::endl;
                                 }
                                 OCC[c / 2][l + strideY] = occ;
                             }
