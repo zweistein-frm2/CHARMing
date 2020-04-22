@@ -38,7 +38,7 @@ set(Boost_python_library Boost_PYTHON${Python_VERSION_MAJOR}${Python_VERSION_MIN
 set(Boost_numpy_library Boost_NUMPY${Python_VERSION_MAJOR}${Python_VERSION_MINOR}_LIBRARY_RELEASE )
 message(**Boost_python_library********** ${Boost_python_library}*********************)
 message(****resolves_to***************** ${${Boost_python_library}}**************************)
-message(**Boos_numpy_library********** ${Boost_numpy_library}*********************)
+message(**Boost_numpy_library********** ${Boost_numpy_library}*********************)
 message(****resolves_to***************** ${${Boost_numpy_library}}**************************)
 
 

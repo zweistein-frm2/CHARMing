@@ -79,7 +79,7 @@ namespace Zweistein {
 				}
 
 				if (s[1] < maxY) {
-					binningMaxY = s[1];
+					binningMaxY = (unsigned short) s[1];
 					LOG_WARNING << "BINNING.shape()[1]=" << s[1] << " smaller than detector sizeY(" << maxY << "), detector partially unused." << std::endl;
 				}
 

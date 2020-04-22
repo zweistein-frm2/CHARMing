@@ -22,6 +22,8 @@ namespace Mcpd8 {
 		unsigned short mcpd_port;
 		unsigned short charm_port;
 		unsigned char mcpd_id;
+		std::string counterADC[8];
+		std::string moduleparam[8];
 		Mesytec::DataGenerator datagenerator;
 		void print(std::ostream& os) const {
 			using namespace magic_enum::ostream_operators;

@@ -23,43 +23,39 @@ namespace Mesytec {
 			Mcpd8::Data& data;
 			std::map<const unsigned char, Mesytec::DeviceParameter>& deviceparam;
 			bool listmoderead_first ;
+			boost::chrono::system_clock::time_point tp_start;
+			boost::chrono::nanoseconds start;
 			boost::function<void(Mcpd8::DataPacket &)> ab;
 			void listmoderead_analyzebuffer(const boost::system::error_code& error,
 				std::size_t bytes_transferred, Mcpd8::DataPacket& datapacket) {
 				if (listmoderead_first) {
 					listmoderead_first = false;
+					start = Mcpd8::DataPacket::timeStamp(datapacket.time);
+					tp_start = boost::chrono::system_clock::now();
 					Mesytec::DeviceParameter mp;
 					mp.lastbufnum = datapacket.Number - 1;
-
-					switch (datapacket.GetBuffertype()) {
-					case Mesy::BufferType::DATA:
-						data.Format = Mcpd8::EventDataFormat::Mpsd8;
-						data.widthY = Mpsd8_sizeY;
-						data.widthX = Mpsd8_sizeMODID * Mpsd8_sizeSLOTS;
-
-						// one device has maximum 64 (8 mpsd8 with 8 channels each)
-						// problem, we don't know how many devices were used in the measurement.
-						//  2 solutions: A: use a msmt.json reflecting the real measurement.
-						//               B: scan the file for all possible mcpd8 Id[s]. Each Id can handle 64 channels
-						break;
-					case Mesy::BufferType::MDLL:
-						data.Format = Mcpd8::EventDataFormat::Mdll;
-						data.widthX = Mdll_sizeX;
-						data.widthY = Mdll_sizeY;
-
-						break;
-					}
-					deviceparam.insert(std::pair<unsigned char, Mesytec::DeviceParameter>(Mcpd8::DataPacket::getId(datapacket.deviceStatusdeviceId), mp));
-					boost::this_thread::sleep_for(boost::chrono::milliseconds(500));
 				}
 				ab(datapacket);
+
+				boost::chrono::milliseconds elapsed = boost::chrono::duration_cast<boost::chrono::milliseconds>(Mcpd8::DataPacket::timeStamp(datapacket.time) - start);
+				if (elapsed.count() > 300) {
+					int replayspeedmultiplier = 2;
+					start = Mcpd8::DataPacket::timeStamp(datapacket.time);
+					boost::chrono::milliseconds ms = boost::chrono::duration_cast<boost::chrono::milliseconds>(boost::chrono::system_clock::now() - tp_start);
+					boost::chrono::milliseconds towait = elapsed/ replayspeedmultiplier - ms;
+					if (towait.count()>0) boost::this_thread::sleep_for(boost::chrono::milliseconds(towait));
+					tp_start = boost::chrono::system_clock::now();
+
+				}
+				
+				
 			}
 
 		public:
-			void files(std::vector<std::string>& filenames,boost::asio::io_service& io_service) {
-				for (std::string fname : filenames) {
+			void file(std::string fname,boost::asio::io_service& io_service) {
+				
 					asioext::file source(io_service, fname, asioext::open_flags::access_read | asioext::open_flags::open_existing);
-					char buffer[0x5ef]; // 0x5ef  is naughty boundary
+					char buffer[0x5ef]; // 0x5ef  is naughty boundary, used for debugging, can use any size really
 					boost::system::error_code ec;
 					boost::system::error_code error;
 					size_t bufnum = 0;
@@ -77,7 +73,7 @@ namespace Mesytec {
 
 						{
 							boost::mutex::scoped_lock lock(coutGuard);
-							std::cout << "\r" << filenames[0] << ": " << total_bytes_processed << " bytes processed \t";
+							std::cout << "\r" << fname << ": " << total_bytes_processed << " bytes processed \t";
 						}
 						size_t from = 0;
 						size_t to = bytes_read;
@@ -206,14 +202,14 @@ namespace Mesytec {
 					} while (!ec);
 					{
 						boost::mutex::scoped_lock lock(coutGuard);
-						std::cout << "\r" << filenames[0] << ": " << total_bytes_processed << " bytes processed ,data_packets_found=" << data_packets_found << " " << std::endl;
+						std::cout << "\r" << fname << ": " << total_bytes_processed << " bytes processed ,data_packets_found=" << data_packets_found << " " << std::endl;
 						if (!headerfound) std::cout << "headerfound=" << std::boolalpha << headerfound << " " << std::endl;
 						if (!closing_sigfound) std::cout << "closing_sigfound=" << std::boolalpha << closing_sigfound << " " << std::endl;
 
 					}
 
 				}
-			}
+			
 
 			
 		};

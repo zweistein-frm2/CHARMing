@@ -72,7 +72,7 @@ namespace Zweistein {
 
                     if (n == 0) {
                         tokens.erase(tokens.begin());
-                        cols = tokens.size() / 2;
+                        cols =(int) tokens.size() / 2;
                         int l = 0;
                         while (getline(infile, line)) rows++;
                     }
@@ -145,8 +145,8 @@ namespace Zweistein {
         }
 		void Write(std::string jsonpath) {
             auto s = BINNING.shape();
-            int cols = s[0];
-			int rows=s[1];
+            int cols = (int) s[0];
+			int rows = (int) s[1];
       
            
             

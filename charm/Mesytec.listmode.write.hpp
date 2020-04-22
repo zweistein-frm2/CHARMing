@@ -98,6 +98,7 @@ namespace Mesytec {
 			f.write(Mesytec::listmode::closing_signature, sizeof(Mesytec::listmode::closing_signature));
 			byteswritten =f.tellp();
 			f.close();
+			
 		}
 		catch (boost::exception& e) {
 			boost::mutex::scoped_lock lock(coutGuard);
@@ -106,6 +107,16 @@ namespace Mesytec {
 		}
 		
 		std::filesystem::resize_file(tmppath.string(), byteswritten);
+		boost::filesystem::path jsonpath = tmppath;
+		jsonpath.append(".json");
+
+		try {
+			boost::property_tree::write_json(jsonpath.string(), Mesytec::Config::root);
+		}
+		catch (std::exception& e) { // exception expected, //std::cout << boost::diagnostic_information(e); 
+			LOG_ERROR << e.what() << " for writing." << std::endl;
+		}
+
 		bListmodeWriting = false;
 		stopwriting = false; // rearm for next, but must start new thread again
 

@@ -158,28 +158,53 @@ int main(int argc, char* argv[])
 		
 		boost::asio::signal_set signals(io_service, SIGINT, SIGTERM);
 		signals.async_wait(boost::bind(&boost::asio::io_service::stop, &io_service));
-		
-		try {boost::property_tree::read_json(Zweistein::Config::inipath.string(), Mesytec::Config::root);}
-		catch (std::exception& e) {
-			LOG_ERROR << e.what() << " for reading." << std::endl;
-		}
-		
+			
 		std::list<Mcpd8::Parameters> _devlist = std::list<Mcpd8::Parameters>();
-		
-		ptrmsmtsystem1->data.Format = Mcpd8::EventDataFormat::Mpsd8;
+
 		boost::function<void()> t;
 		if (inputfromlistfile) {
+			ptrmsmtsystem1->data.Format = Mcpd8::EventDataFormat::Mpsd8;
 			ptrmsmtsystem1->inputFromListmodeFile = true;
-			t = [ &ptrmsmtsystem1, &listmodeinputfiles]() {
+			t = [ &ptrmsmtsystem1, &_devlist, &listmodeinputfiles]() {
 				try {
-					auto abfunc=boost::bind(&Mesytec::MesytecSystem::analyzebuffer, ptrmsmtsystem1,_1);
-					auto read=Mesytec::listmode::Read(abfunc,ptrmsmtsystem1->data, ptrmsmtsystem1->deviceparam);
-					ptrmsmtsystem1->connected = true;
-					read.files(listmodeinputfiles, io_service);
+
+					for (std::string& fname : listmodeinputfiles) {
+						try { boost::property_tree::read_json(fname+".json", Mesytec::Config::root); }
+						catch (std::exception& e) {
+							LOG_ERROR << e.what() << " for reading." << std::endl;
+							continue;
+						}
+
+						bool configok = Mesytec::Config::get(_devlist, "");
+						std::stringstream ss_1;
+						boost::property_tree::write_json(ss_1, Mesytec::Config::root);
+						LOG_INFO << ss_1.str() << std::endl;
+
+						if (!configok)	return -1;
+
+						ptrmsmtsystem1->listmode_connect(_devlist, io_service);
+						// find the .json file for the listmode file
+						// check if Binning file not empty, if not empty wait for
+						int waitmax = 8;
+						
+						for (int i = 0; i < waitmax; i++) {
+							boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
+							if (Zweistein::Binning::loaded == true) break;
+						}
+						if (Zweistein::Binning::loaded == false) {
+							LOG_ERROR << waitmax << " seconds passed, YET NOT LOADED: " << Mesytec::Config::BINNINGFILE.string() << std::endl;
+							continue;
+						}
+						
+						auto abfunc = boost::bind(&Mesytec::MesytecSystem::analyzebuffer, ptrmsmtsystem1, _1);
+						auto read = Mesytec::listmode::Read(abfunc, ptrmsmtsystem1->data, ptrmsmtsystem1->deviceparam);
+						
+
+						read.file(fname, io_service);
+					}
 					
 				}
 				catch (boost::exception & e) {
-					boost::mutex::scoped_lock lock(coutGuard);
 					LOG_ERROR << boost::diagnostic_information(e) << std::endl;
 				}
 
@@ -187,22 +212,28 @@ int main(int argc, char* argv[])
 
 		}
 		else  {
+			try { boost::property_tree::read_json(Zweistein::Config::inipath.string(), Mesytec::Config::root); }
+			catch (std::exception& e) {
+				LOG_ERROR << e.what() << " for reading." << std::endl;
+			}
+
 			bool configok = Mesytec::Config::get(_devlist, inidirectory.string());
-			
-			
 			std::stringstream ss_1;
 			boost::property_tree::write_json(ss_1, Mesytec::Config::root);
 			LOG_INFO << ss_1.str() << std::endl;
 
-			if (!configok) return -1;
-			Zweistein::Logger::Add_File_Sink(Mesytec::Config::DATAHOME.string()+appName+".log");
+			if (!configok)	return -1;
+			
+			Zweistein::Logger::Add_File_Sink(Mesytec::Config::DATAHOME.string() + appName + ".log");
 			try {
 				boost::property_tree::write_json(Zweistein::Config::inipath.string(), Mesytec::Config::root);
 			}
-			catch(std::exception& e) { // exception expected, //std::cout << boost::diagnostic_information(e); 
-				LOG_ERROR << e.what()<<" for writing." << std::endl;
+			catch (std::exception& e) { // exception expected, //std::cout << boost::diagnostic_information(e); 
+				LOG_ERROR << e.what() << " for writing." << std::endl;
 			}
-		
+
+			
+
 			t = [ &ptrmsmtsystem1, &_devlist,&write2disk]() {
 				try {
 					ptrmsmtsystem1->write2disk=write2disk;
@@ -222,11 +253,12 @@ int main(int argc, char* argv[])
 					
 				}
 				catch (boost::exception & e) {
-					boost::mutex::scoped_lock lock(coutGuard);
 					LOG_ERROR << boost::diagnostic_information(e) << std::endl;
 					
 				}
+				
 				io_service.stop();
+				
 
 			};
 		}

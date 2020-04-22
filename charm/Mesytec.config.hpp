@@ -32,6 +32,10 @@ namespace Mesytec {
 				std::string mcpd_ip = "mcpd_ip";
 				std::string datahome = "DataHome";
 				std::string binningfile = "BinningFile";
+				std::string counteradc="CounterADC";
+				std::string modulethresgains = "Threshold_and_Gains";
+				const int maxModule = 8;
+				const int maxCounter = 8;
 				const int MaxDevices = 4;
 
 				
@@ -39,7 +43,7 @@ namespace Mesytec {
 				DATAHOME = root.get<std::string>(oursystem + punkt + datahome, Zweistein::GetHomePath().string());
 				root.put<std::string>(oursystem + punkt + datahome, DATAHOME.string());
 
-				BINNINGFILE = root.get<std::string>(oursystem + punkt + binningfile, (inidirectory /= "binning.json").string());
+				if(!inidirectory.empty()) BINNINGFILE = root.get<std::string>(oursystem + punkt + binningfile, (inidirectory /= "binning.json").string());
 				root.put<std::string>(oursystem + punkt + binningfile, BINNINGFILE.string());
 
 				for (int n = 0; n < MaxDevices; n++) {
@@ -112,6 +116,21 @@ namespace Mesytec {
 					std::string m6 = std::string(a6.data(), a6.size());
 					root.put<std::string>(s2 + "datagenerator", m6);
 
+					for (int c = 0; c < maxCounter; c++) {
+						std::string countercell = s2+ counteradc + std::to_string(c);
+						std::string r=root.get<std::string>(countercell, "");
+						root.put<std::string>(countercell, r);
+						p1.counterADC[c] = r;
+					}
+
+					for (int m = 0; m < maxModule; m++) {
+						std::string currmodule = s2 + modulethresgains + std::to_string(m);
+						std::string r = root.get<std::string>(currmodule, "");
+						root.put<std::string>(currmodule, r);
+						p1.moduleparam[m] = r;
+					}
+					
+
 
 					std::stringstream ss2;
 					ss2 << oursystem << punkt << charmdevice << n << punkt;
@@ -144,7 +163,7 @@ namespace Mesytec {
 
 				}
 			}
-			catch (boost::exception& e) {
+			catch (boost::exception& ) {
 				//LOG_DEBUG<< boost::diagnostic_information(e)<<std::endl;
 			}
 			return rv;
@@ -158,7 +177,7 @@ namespace Mesytec {
 					if (row.second.data() == roi) return false;
 				}
 			}
-			catch (std::exception& e) {}
+			catch (std::exception& ) {}
 
 
 			boost::property_tree::ptree cell;
@@ -173,7 +192,7 @@ namespace Mesytec {
 				root.add_child(key, node_rois);
 
 			}
-			catch (std::exception& e) {
+			catch (std::exception& ) {
 				boost::property_tree::ptree node_rois;
 				node_rois.push_back(std::make_pair("", cell));
 				root.add_child(key, node_rois);

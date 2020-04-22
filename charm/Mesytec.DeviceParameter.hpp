@@ -21,6 +21,8 @@ namespace  Mesytec {
 		unsigned short firmware_major;
 		unsigned short firmware_minor;
 		int offset;
+		std::string counterADC[8];
+		std::string moduleparam[8];
 		Mesytec::Mpsd8::Module module[Mpsd8_sizeSLOTS];
 		Mesy::ModuleId module_id[Mpsd8_sizeSLOTS];
 		DeviceParameter():offset(0),bNewSocket(false), lastmissed_count(0), lastmissed_time(boost::chrono::system_clock::now()) {
