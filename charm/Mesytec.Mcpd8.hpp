@@ -891,7 +891,7 @@ namespace Mesytec {
 								// push reset_event?
 							}
 							if (response.cmd == Mcpd8::Cmd::RESET || response.cmd == Mcpd8::Cmd::STOP) {
-								Mesytec::stopwriting = true;
+								Mesytec::listmode::stopwriting = true;
 							}
 
 							return response;

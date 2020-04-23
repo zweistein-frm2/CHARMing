@@ -161,14 +161,15 @@ namespace Zweistein {
 						continue;
 					}
 					if (ev.X < 0 || ev.X >= maxX) {
-						boost::mutex::scoped_lock lock(coutGuard);
 						LOG_ERROR << "0 < Event.X="<<ev.X<<  " < " << maxX <<" Event.X ouside bounds" << std::endl;
-						continue;
+						io_service.stop();
+						break;
 					}
 					if (ev.Y < 0 || ev.Y >= maxY) {
-						boost::mutex::scoped_lock lock(coutGuard);
 						LOG_ERROR << "0< Event.Y=" << ev.Y << " < " << maxY << " Event.Y ouside bounds" << std::endl;
-						continue;
+						io_service.stop();
+						break;
+						
 					}
 
 					// this is our raw histograms[0]

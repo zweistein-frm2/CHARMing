@@ -43,7 +43,7 @@ namespace Mesytec {
 				DATAHOME = root.get<std::string>(oursystem + punkt + datahome, Zweistein::GetHomePath().string());
 				root.put<std::string>(oursystem + punkt + datahome, DATAHOME.string());
 
-				if(!inidirectory.empty()) BINNINGFILE = root.get<std::string>(oursystem + punkt + binningfile, (inidirectory /= "binning.json").string());
+				BINNINGFILE = root.get<std::string>(oursystem + punkt + binningfile, inidirectory.empty()?"": (inidirectory /= "binning.json").string());
 				root.put<std::string>(oursystem + punkt + binningfile, BINNINGFILE.string());
 
 				for (int n = 0; n < MaxDevices; n++) {

@@ -32,21 +32,21 @@ namespace Mesytec {
 			int MaxWait = 15;
 			int i = 0;
 			for (i = 0; i < MaxWait; i++) {
-				if (stopwriting)
+				if (listmode::stopwriting)
 				{
 					if (i == 0) LOG_INFO << "Waiting " << MaxWait << " seconds for other writelistmode thread to finish" << std::endl;
 					boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
 				}
 				else break;
 			}
-			if (stopwriting) {
+			if (listmode::stopwriting) {
 				LOG_ERROR << "ERROR : other writelistmode thread not finished after " << MaxWait << " seconds" << std::endl;
 				return;
 			}
 			else if (i > 0) LOG_INFO << "other writelistmode thread finished after " << i << " seconds" << std::endl;
 		}
 		else {
-			stopwriting = false;
+			listmode::stopwriting = false;
 		}
 
 		bListmodeWriting = true;
@@ -93,7 +93,7 @@ namespace Mesytec {
 					f.write(reinterpret_cast<char*>(&dp), len);
 					f.write(Mesytec::listmode::datablock_separator, sizeof(Mesytec::listmode::datablock_separator));
 				}
-				if (stopwriting) break;
+				if (listmode::stopwriting) break;
 			} while (!io_service.stopped());
 			f.write(Mesytec::listmode::closing_signature, sizeof(Mesytec::listmode::closing_signature));
 			byteswritten =f.tellp();
@@ -118,7 +118,7 @@ namespace Mesytec {
 		}
 
 		bListmodeWriting = false;
-		stopwriting = false; // rearm for next, but must start new thread again
+		listmode::stopwriting = false; // rearm for next, but must start new thread again
 
 		{
 			boost::mutex::scoped_lock lock(coutGuard);

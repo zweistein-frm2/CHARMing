@@ -137,7 +137,7 @@ int main(int argc, char* argv[])
 		else {
 			Zweistein::Config::inipath.append(appName + ".json");
 		}
-		LOG_INFO << "Using config file:" << Zweistein::Config::inipath << " " <<std::endl ;
+		if (!vm.count(LISTMODE_FILE)) LOG_INFO << "Using config file:" << Zweistein::Config::inipath << " " <<std::endl ;
 		std::vector<std::string> listmodeinputfiles = std::vector<std::string>();
 		
 		if (vm.count(LISTMODE_FILE))
@@ -163,18 +163,18 @@ int main(int argc, char* argv[])
 
 		boost::function<void()> t;
 		if (inputfromlistfile) {
-			ptrmsmtsystem1->data.Format = Mcpd8::EventDataFormat::Mpsd8;
 			ptrmsmtsystem1->inputFromListmodeFile = true;
+			Mesytec::listmode::waitreading = false; // start immediately
 			t = [ &ptrmsmtsystem1, &_devlist, &listmodeinputfiles]() {
 				try {
 
 					for (std::string& fname : listmodeinputfiles) {
-						try { boost::property_tree::read_json(fname+".json", Mesytec::Config::root); }
+						try { boost::property_tree::read_json(fname + ".json", Mesytec::Config::root); }
 						catch (std::exception& e) {
 							LOG_ERROR << e.what() << " for reading." << std::endl;
 							continue;
 						}
-
+						LOG_INFO << "Config file : " << fname + ".json" << std::endl;
 						bool configok = Mesytec::Config::get(_devlist, "");
 						std::stringstream ss_1;
 						boost::property_tree::write_json(ss_1, Mesytec::Config::root);
@@ -186,16 +186,17 @@ int main(int argc, char* argv[])
 						// find the .json file for the listmode file
 						// check if Binning file not empty, if not empty wait for
 						int waitmax = 8;
-						
-						for (int i = 0; i < waitmax; i++) {
-							boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
-							if (Zweistein::Binning::loaded == true) break;
+
+						if (!(Mesytec::Config::BINNINGFILE.string()).empty()) {
+							for (int i = 0; i < waitmax; i++) {
+								boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
+								if (Zweistein::Binning::loaded == true) break;
+							}
+							if (Zweistein::Binning::loaded == false) {
+								LOG_ERROR << waitmax << " seconds passed, YET NOT LOADED: " << Mesytec::Config::BINNINGFILE.string() << std::endl;
+								continue;
+							}
 						}
-						if (Zweistein::Binning::loaded == false) {
-							LOG_ERROR << waitmax << " seconds passed, YET NOT LOADED: " << Mesytec::Config::BINNINGFILE.string() << std::endl;
-							continue;
-						}
-						
 						auto abfunc = boost::bind(&Mesytec::MesytecSystem::analyzebuffer, ptrmsmtsystem1, _1);
 						auto read = Mesytec::listmode::Read(abfunc, ptrmsmtsystem1->data, ptrmsmtsystem1->deviceparam);
 						
@@ -436,7 +437,6 @@ int main(int argc, char* argv[])
 						boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
 						break;
 					}
-
 					else {
 						worker_threads.create_thread([&ptrmsmtsystem1] {Zweistein::populateHistograms(io_service, ptrmsmtsystem1, Mesytec::Config::BINNINGFILE.string()); });
 						worker_threads.create_thread([&ptrmsmtsystem1] {Zweistein::displayHistogram(io_service, ptrmsmtsystem1); });

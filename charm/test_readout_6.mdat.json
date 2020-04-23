@@ -1,0 +1,16 @@
+{
+    "MsmtSystem": {
+        "MesytecDevice0": {
+            "mcpd_ip": "172.25.2.102",
+            "mcpd_port": "54321",
+			"mcpd_id": "0",
+            "networkcard": "172.25.2.24",
+            "eventdataformat": "Mdll",
+            "datagenerator": "NucleoSimulator",
+            "data_host": "0.0.0.0"
+        },
+        "CharmDevice0": {
+            "charm_port": "54340"
+        }
+    }
+}

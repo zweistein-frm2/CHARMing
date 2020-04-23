@@ -194,7 +194,7 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
                 std::streampos len = ss1.tellg();
                 ss1.seekg(oldpos,std::ios::beg);
                 int maxlen = 75;
-                int n_ws = maxlen - len;
+                int n_ws =int( maxlen - len);
                 for (; n_ws > 0; n_ws--) ss1 << " ";
                 
                 std::cout << ss1.str();
@@ -355,7 +355,7 @@ void release_guard()
         io_service.stop();
         boost::this_thread::sleep_for(boost::chrono::milliseconds(250));
     }
-    catch(std::exception  &e){}
+    catch(std::exception  &){}
     legacy_api_guard_.reset();
 }
 

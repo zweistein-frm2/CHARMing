@@ -5,12 +5,16 @@
  *   the Free Software Foundation;                                         *
  ***************************************************************************/
 #pragma once
+#include <bitset>
 #include "MesytecSystem.Data.hpp"
 #include "Mesytec.DeviceParameter.hpp"
 
 namespace Mesytec {
-	boost::atomic<bool> stopwriting = false;
+	
+	
 	namespace listmode {
+		boost::atomic<bool> stopwriting = false;
+		boost::atomic<bool> waitreading = true;
 		const  char header_separator[] =	{ '\x00','\x00','\x55','\x55','\xAA','\xAA','\xFF','\xFF' };
 		const  char datablock_separator[] = { '\x00','\x00','\xFF','\xFF','\x55','\x55','\xAA','\xAA' };
 		const  char closing_signature[] =	{ '\xFF','\xFF','\xAA','\xAA','\x55','\x55','\x00','\x00' };
@@ -18,32 +22,53 @@ namespace Mesytec {
 		class Read {
 			boost::array< Mcpd8::DataPacket, 1> recv_buf;
 		public:
-			Read(boost::function<void(Mcpd8::DataPacket &)> abfunc,Mcpd8::Data &_Data, std::map<const unsigned char, Mesytec::DeviceParameter> &_deviceparam):deviceparam(_deviceparam),data(_Data),ab(abfunc),listmoderead_first(true){}
+			Read(boost::function<void(Mcpd8::DataPacket &)> abfunc,Mcpd8::Data &_Data, std::map<const unsigned char, Mesytec::DeviceParameter> &_deviceparam):deviceparam(_deviceparam),
+				data(_Data),ab(abfunc){
+				int n=(int)deviceparam.size();
+				for (int i = 0; i < n; i++) listmoderead_first.set(i);
+			}
 		private:
 			Mcpd8::Data& data;
 			std::map<const unsigned char, Mesytec::DeviceParameter>& deviceparam;
-			bool listmoderead_first ;
+			std::bitset<8> listmoderead_first;
+			
 			boost::chrono::system_clock::time_point tp_start;
 			boost::chrono::nanoseconds start;
 			boost::function<void(Mcpd8::DataPacket &)> ab;
+
+			static int CheckAction() {
+				int r = waitreading;
+				return r;
+			}
 			void listmoderead_analyzebuffer(const boost::system::error_code& error,
 				std::size_t bytes_transferred, Mcpd8::DataPacket& datapacket) {
-				if (listmoderead_first) {
-					listmoderead_first = false;
+				if (listmoderead_first!=0) {
+					
 					start = Mcpd8::DataPacket::timeStamp(datapacket.time);
 					tp_start = boost::chrono::system_clock::now();
-					Mesytec::DeviceParameter mp;
-					mp.lastbufnum = datapacket.Number - 1;
+					unsigned char id = Mcpd8::DataPacket::getId(datapacket.deviceStatusdeviceId);
+					auto& params = deviceparam[id];
+					params.lastbufnum = datapacket.Number - 1;
+
+					int i = 0;
+					for (std::map<const unsigned char, Mesytec::DeviceParameter>::iterator it = deviceparam.begin(); it != deviceparam.end(); ++it) {
+						if ((*it).first == id) listmoderead_first.reset(i);
+						i++;
+					}
+					
+					
 				}
 				ab(datapacket);
 
 				boost::chrono::milliseconds elapsed = boost::chrono::duration_cast<boost::chrono::milliseconds>(Mcpd8::DataPacket::timeStamp(datapacket.time) - start);
 				if (elapsed.count() > 300) {
-					int replayspeedmultiplier = 2;
+					int replayspeedmultiplier = 1;
 					start = Mcpd8::DataPacket::timeStamp(datapacket.time);
 					boost::chrono::milliseconds ms = boost::chrono::duration_cast<boost::chrono::milliseconds>(boost::chrono::system_clock::now() - tp_start);
 					boost::chrono::milliseconds towait = elapsed/ replayspeedmultiplier - ms;
-					if (towait.count()>0) boost::this_thread::sleep_for(boost::chrono::milliseconds(towait));
+					if (towait.count() > 0) {
+						boost::this_thread::sleep_for(boost::chrono::milliseconds(towait));
+					}
 					tp_start = boost::chrono::system_clock::now();
 
 				}
@@ -67,7 +92,10 @@ namespace Mesytec {
 					size_t total_bytes_processed = 0;
 					size_t transferred = 0;
 					size_t data_packets_found = 0;
-					listmoderead_first = true;
+
+					int n = (int)deviceparam.size();
+					for (int i = 0; i < n; i++) listmoderead_first.set(i);
+					
 					do {
 						const std::size_t bytes_read = source.read_some(boost::asio::buffer(buffer), ec);
 
@@ -186,6 +214,12 @@ namespace Mesytec {
 							}
 							if (from == bytes_read) break;
 							if (closing_sigfound) break;
+
+							while(int  lec=CheckAction()) {
+								if (lec == 2) return;
+								boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
+							}
+
 							if (ec) {
 								if (ec == boost::asio::error::eof || ec == boost::asio::error::broken_pipe) {
 									from = std::string::npos;

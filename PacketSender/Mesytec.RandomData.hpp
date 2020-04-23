@@ -71,7 +71,7 @@ namespace Zweistein {
 		int counter = 0;
 		long ncalls = 0;
 		namespace ourfont = Zweistein::Font::_8x14_horizontal_LSB_1;
-		int txt_y = ourfont::width * message.length();
+		int txt_y = (int) (ourfont::width * message.length());
 		int txt_x = ourfont::height;
 		//static cv::Mat image = cv::Mat::zeros(ourfont::width * message.length(), ourfont::height, CV_8U);
 		//bool imgwritten = false;
@@ -97,7 +97,7 @@ namespace Zweistein {
 				int bytepos = 0;
 				int pixx = 0;
 				int pixy = 0;
-				int le = message.length();
+				int le = (int) message.length();
 				do {
 					cpos = ((counter / (ourfont::height * ourfont::width)) % message.length());
 					int curpix = counter % (ourfont::height * ourfont::width);
