@@ -1,5 +1,9 @@
-// NumpyCpp.cpp : Diese Datei enthält die Funktion "main". Hier beginnt und endet die Ausführung des Programms.
-//
+/***************************************************************************
+ *   Copyright (C) 2019 by Andreas Langhoff <andreas.langhoff@frm2.tum.de> *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation;                                         *
+ ***************************************************************************/
 #define PY_ARRAY_UNIQUE_SYMBOL pbcvt_ARRAY_API
 #include <boost/python.hpp>
 #include <boost/python/tuple.hpp>
@@ -398,6 +402,7 @@ BOOST_PYTHON_MODULE(mesytecsystem)
             .def("update", &Histogram::update)
             .def("setRoi", &Histogram::setRoi)
             .def("getRoi", &Histogram::getRoi)
+            .def("delRoi", &Histogram::delRoi)
             .add_property("Size", &Histogram::getSize)
             ;
         class_< NeutronMeasurement>("NeutronMeasurement",init<long>())

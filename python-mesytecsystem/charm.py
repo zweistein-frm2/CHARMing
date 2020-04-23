@@ -165,13 +165,15 @@ class Histogram(base.ImageChannel):
         
     }
     attributes = {
-        'CountsInRoi': Attr(uint64, 'counts in Roi',dims=0,writable=False,memorized=False,unit=None),
+         'CountsInRoi': Attr(uint64, 'counts in Roi',dims=0,writable=False,memorized=False,unit=None),
+         'selectedRoi': Attr(uint16, 'selected Roi',dims=0,writable=True,memorized=False,unit=None),
          'RoiWKT':   Attr(str,'Well known text (WKT) representation of the region of interest.'),
     }
 
 
     def init(self):
         self.count = 0;
+        self.self.selectedRoi=0
         self.mat = np.zeros((1,1,1),dtype="int32")
         self.histogram = None
          
@@ -192,14 +194,21 @@ class Histogram(base.ImageChannel):
     def read_detectorSize(self):
         return self.Histogram().Size
     def read_RoiWKT(self):
-        return self.Histogram().getRoi(0)
-    def setRoiWKT(self,value):
-        self.Histogram().setRoi(value,0)
+        return self.Histogram().getRoi(n)
+    def setRoiWKT(self,value,n=0):
+        self.Histogram().setRoi(value)
     def get_RoiWKT_unit(self):
+        return ''
+    def read_selectedRoi(self):
+        return self.selectedRoi
+    def write_selectedRoi(self,value):
+        self.selectedRoi=value
+    def get_selectedRoi_unit(self):
         return ''
     def read_value(self):
         t=self.Histogram().update(self.mat)
         self.mat=t[1]
         self.count=t[0];
+        # self.count will be list of all rois!
         return self.mat.flatten()
 
