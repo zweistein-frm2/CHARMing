@@ -1,0 +1,11 @@
+["test/@ID@-replay/DeviceConnection"]
+type = "charm.charm-replay.DeviceConnection"
+["test/@ID@-replay/MeasureCounts"]
+type = "charm.charm-replay.MeasureCounts"
+["test/@ID@-replay/MeasureTime"]
+type = "charm.charm-replay.MeasureTime"
+["test/@ID@-replay/PlayList"]
+type = "charm.charm-replay.PlayList"
+["test/@ID@-replay/Histogram"]
+type = "charm.charm-replay.Histogram"
+

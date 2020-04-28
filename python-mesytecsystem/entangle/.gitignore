@@ -1,0 +1,8 @@
+out/
+x64/
+CMakeFiles/
+CMakeCache.txt
+*.vcxproj
+*.vcxproj.filters
+*.sln
+cmake_install.cmake

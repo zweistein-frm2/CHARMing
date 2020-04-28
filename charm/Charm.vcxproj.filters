@@ -30,6 +30,9 @@
     <ClCompile Include="simpleLogger.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
+    <ClCompile Include="Zweistein.ping.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Mesytec.hpp">
@@ -114,6 +117,9 @@
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="Zweistein.Binning.ApplyOcc.hpp">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="Zweistein.ping.hpp">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>

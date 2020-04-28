@@ -236,7 +236,7 @@ struct NeutronMeasurement {
             Entangle::Init(loghandle);
             ptrmsmtsystem1->initatomicortime_point();
             worker_threads.create_thread([this] {startMonitor(ptrmsmtsystem1, ptrStartParameters); });
-            LOG_DEBUG << "NeutronMeasurement(" << loghandle << ")" << std::endl<<std::fflush;
+            LOG_INFO << "NeutronMeasurement(" << loghandle << ")" << std::endl<<std::fflush;
         }
         ~NeutronMeasurement() {
             LOG_DEBUG << "~NeutronMeasurement()" << std::endl;
@@ -279,7 +279,7 @@ struct NeutronMeasurement {
             unsigned short tmp = ptrmsmtsystem1->data.last_deviceStatusdeviceId;
             unsigned char devstatus = Mcpd8::DataPacket::getStatus(tmp);
             std::string msg = Mcpd8::DataPacket::deviceStatus(devstatus);
-           // LOG_INFO << "started:"<<tps<<", now="<< boost::chrono::system_clock::now()<< ":"<<secs<<std::endl;
+            //LOG_INFO << "started:"<<tps<<", now="<< boost::chrono::system_clock::now()<< ":"<<secs<<std::endl;
            // LOG_INFO <<"count="<<count<<", elapsed="<<secs << ",devstatus=" << (int)devstatus << ", " << msg<<std::endl;
             return boost::python::make_tuple(count, secs.count(), devstatus,msg);
 
@@ -402,7 +402,6 @@ BOOST_PYTHON_MODULE(mesytecsystem)
             .def("update", &Histogram::update)
             .def("setRoi", &Histogram::setRoi)
             .def("getRoi", &Histogram::getRoi)
-            .def("delRoi", &Histogram::delRoi)
             .add_property("Size", &Histogram::getSize)
             ;
         class_< NeutronMeasurement>("NeutronMeasurement",init<long>())

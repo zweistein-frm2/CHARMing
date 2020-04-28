@@ -45,8 +45,9 @@ extern boost::mutex histogramsGuard;
 
     struct RoiData {
         polygon_type roi;
-        long count;
+        unsigned long count;
         boost::geometry::model::box<point_type> box;
+        RoiData():count(0){}
     };
      
     //https://www.boost.org/doc/libs/1_72_0/libs/geometry/doc/html/geometry/reference/algorithms/within/within_2.html
@@ -59,7 +60,8 @@ extern boost::mutex histogramsGuard;
                 RoiData rd;
                 roidata.push_back(rd);
                 resize(1, 1);
-                setRoiRect(0,0,1,1);
+                std::string wkt=WKTRoiRect(0,0,1,1);
+                _setRoi(wkt, 0);
         }
         void resize(int rows, int cols) {
 
@@ -67,23 +69,51 @@ extern boost::mutex histogramsGuard;
            
         }
 
-        void delRoi(std::string roi) {
-            // we never delete first roi
+        
+        void _delRoi(std::string roi) {
+            LOG_INFO << "_delRoi(" << roi<<")" << std::endl;
             for (int i = 0;i< roidata.size();i++){
-                if (roi == getRoi(i)) {
+                if (roi == _getRoi(i)) {
                     roidata.erase(roidata.begin()+i);
                     break;
                 }
             }
+            // we never delete first roi
             if (!roidata.size()) setRoi("", 0);
         }
         std::string getRoi(int index) {
-
-            std::stringstream ss_wkt;
-            ss_wkt << boost::geometry::wkt(roidata[index].roi);
-            return ss_wkt.str();
+            boost::mutex::scoped_lock lock(histogramsGuard);
+            LOG_INFO << "getRoi(" << index << ")" << std::endl;
+          
+            if (roidata.size() == index) {
+                LOG_DEBUG << "roidata.size()="<<roidata.size() <<", index does not exist, create new : "  << std::endl;
+                LOG_DEBUG << "roidata.push_back(rd), old size:" << roidata.size() << std::endl;
+                RoiData rd;
+                roidata.push_back(rd);
+                std::string wkt = WKTRoiRect(0, 0, histogram.size[1], histogram.size[0]);
+                _setRoi(wkt, index);
+                return wkt;
+                
+              
+            }
+            if (roidata.size() - 1 < index) return "";
+            return _getRoi(index);
+           
         }
-        void setRoiRect(int left, int bottom, int maxX, int maxY) {
+
+        std::string _getRoi(int index) {
+            try {
+                std::stringstream ss_wkt;
+                ss_wkt << boost::geometry::wkt(roidata[index].roi);
+                return ss_wkt.str();
+            }
+            catch (std::exception& e) {
+                LOG_ERROR << e.what() << std::endl;
+                return "";
+            }
+    }
+       
+    std::string WKTRoiRect(int left, int bottom, int maxX, int maxY) {
             std::stringstream ssroi;
             ssroi << ("POLYGON((") << left << " " << bottom << ",";
             ssroi << left << " " << maxY << ",";
@@ -91,27 +121,43 @@ extern boost::mutex histogramsGuard;
             ssroi << maxX << " " << bottom << ",";
             ssroi << left << " " << bottom << "),())";
             std::string roi = ssroi.str();
-
-            setRoi(roi,0);
+            return roi;
+           
         }
-        void setRoi(std::string wkt,int index) {
+
+        void setRoi(std::string wkt, int index) {
+            boost::mutex::scoped_lock lock(histogramsGuard);
+            LOG_INFO << "setRoi(" << wkt << ", " << index << ")" << std::endl;
+            if (roidata.size() - 1 < index) {
+                LOG_ERROR << "index out of range, max=" << roidata.size() - 1 << std::endl;
+                return;
+            }
+           
+            if (wkt.empty() && index!=0){
+                     std::string currwkt = _getRoi(index);
+                    _delRoi(currwkt);
+                    return;
+            }
+            _setRoi(wkt,index);
+        }
+
+        void _setRoi(std::string wkt,int index) {
+          
+            LOG_INFO << std::endl << "_setRoi(" << wkt <<", "<<index <<")" << std::endl;
             int width = 1;
             int height = 1; 
-            while (roidata.size() <= index) {
-                RoiData rd;
-                roidata.push_back(rd);
-             }
-            //LOG_INFO << std::endl << "setRoi(" << wkt << ")" << std::endl;
+                                 
             boost::algorithm::replace_last(wkt,",())",")");
             std::string reason;
             boost::geometry::validity_failure_type failure= boost::geometry::no_failure;
+            bool valid = false;
             try {
                 if (!wkt.empty()) {
                     boost::geometry::read_wkt(wkt, roidata[index].roi);
-                    boost::geometry::validity_failure_type failure;
-                    bool valid = boost::geometry::is_valid(roidata[index].roi, failure);
+                    valid = boost::geometry::is_valid(roidata[index].roi, failure);
                     bool could_be_fixed = (failure == boost::geometry::failure_not_closed
-                        || boost::geometry::failure_wrong_orientation);
+                        || failure == boost::geometry::failure_wrong_orientation);
+                    
                     if(could_be_fixed)boost::geometry::correct(roidata[index].roi);
                     valid = boost::geometry::is_valid(roidata[index].roi, reason);
                    
@@ -122,9 +168,7 @@ extern boost::mutex histogramsGuard;
                 LOG_ERROR << e.what() << std::endl;
                 wkt = "";
             }
-
-            
-            if (failure!= boost::geometry::no_failure || wkt.empty()) {
+            if (!valid || wkt.empty()) {
                 
                 if (failure != boost::geometry::no_failure) {
                        LOG_ERROR << "boost::geometry::validity_failure_type=" << failure << " : "<< reason<< std::endl;
@@ -139,13 +183,11 @@ extern boost::mutex histogramsGuard;
                 roidata[index].roi.inners().clear();
                 for (auto& p : coor) roidata[index].roi.outer().push_back(p);
             }
-           // LOG_INFO << "new Roi : " << getRoi() << std::endl;
-
             boost::geometry::envelope(roidata[index].roi,roidata[index].box);
-            int roiwidth = roidata[index].box.max_corner().get<0>() - roidata[index].box.min_corner().get<0>();
-            int roiheight = roidata[index].box.max_corner().get<1>() - roidata[index].box.min_corner().get<1>();
+            int roiboxwidth = roidata[index].box.max_corner().get<0>() - roidata[index].box.min_corner().get<0>();
+            int roiboxheight = roidata[index].box.max_corner().get<1>() - roidata[index].box.min_corner().get<1>();
 
-           // Zweistein::Config::AddRoi(getRoi());
+           // Zweistein::Config::AddRoi(_getRoi());
            
            
 
@@ -161,8 +203,8 @@ extern boost::mutex histogramsGuard;
            }
            
            boost::python::list l;
-
-           for (auto r : roidata) {
+           
+           for (auto & r : roidata) {
                std::stringstream ss_wkt;
                ss_wkt << boost::geometry::wkt(r.roi);
                auto t=boost::python::make_tuple(ss_wkt.str(),r.count);

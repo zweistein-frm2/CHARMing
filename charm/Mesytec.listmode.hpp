@@ -13,12 +13,25 @@ namespace Mesytec {
 	
 	
 	namespace listmode {
+		typedef enum _action {
+			continue_reading=0,
+			wait_reading=1,
+			start_reading=2
+		} action;
 		boost::atomic<bool> stopwriting = false;
-		boost::atomic<bool> waitreading = true;
+		boost::atomic<action> whatnext = action::wait_reading;
 		const  char header_separator[] =	{ '\x00','\x00','\x55','\x55','\xAA','\xAA','\xFF','\xFF' };
 		const  char datablock_separator[] = { '\x00','\x00','\xFF','\xFF','\x55','\x55','\xAA','\xAA' };
 		const  char closing_signature[] =	{ '\xFF','\xFF','\xAA','\xAA','\x55','\x55','\x00','\x00' };
 		
+
+		listmode::action CheckAction() {
+
+			action r = whatnext;
+			return  r;
+		
+		}
+
 		class Read {
 			boost::array< Mcpd8::DataPacket, 1> recv_buf;
 		public:
@@ -36,10 +49,7 @@ namespace Mesytec {
 			boost::chrono::nanoseconds start;
 			boost::function<void(Mcpd8::DataPacket &)> ab;
 
-			static int CheckAction() {
-				int r = waitreading;
-				return r;
-			}
+			
 			void listmoderead_analyzebuffer(const boost::system::error_code& error,
 				std::size_t bytes_transferred, Mcpd8::DataPacket& datapacket) {
 				if (listmoderead_first!=0) {
@@ -215,9 +225,9 @@ namespace Mesytec {
 							if (from == bytes_read) break;
 							if (closing_sigfound) break;
 
-							while(int  lec=CheckAction()) {
-								if (lec == 2) return;
-								boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
+							while(action lec=CheckAction()) {
+								if (lec == action::start_reading) return;
+								if (lec == action::wait_reading) boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
 							}
 
 							if (ec) {

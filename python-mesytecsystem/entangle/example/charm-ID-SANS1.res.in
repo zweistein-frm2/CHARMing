@@ -1,0 +1,12 @@
+["test/@ID@-SANS1/DeviceConnection"]
+type = "charm.charm.DeviceConnection"
+["test/@ID@-SANS1/MeasureCounts"]
+type = "charm.charm.MeasureCounts"
+["test/@ID@-SANS1/MeasureTime"]
+type = "charm.charm.MeasureTime"
+["test/@ID@-SANS1/Settings"]
+type = "charm.charm.Settings"
+["test/@ID@-SANS1/Histogram"]
+type = "charm.charm.Histogram"
+["test/@ID@-SANS1/Simulator"]
+type = "charm.charm.Simulator"

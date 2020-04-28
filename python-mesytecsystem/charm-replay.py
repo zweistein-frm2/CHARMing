@@ -9,66 +9,51 @@ import signal, os
 import numpy as np
 import cv2 as cv
 
-from entangle.device.charm import mesytecsystem
+from entangle.device.charm import listmodereplay
 
 charmsystem = None
 
 class DeviceConnection(FdLogMixin,base.MLZDevice):
     def init(self):
-        self.init_fd_log('Charm')
+        self.init_fd_log('Replay')
         fd = self.get_log_fd()
-        print("charm.py:DeviceConnection.init("+str(fd)+")")
+        print("charm-replay.py:DeviceConnection.init("+str(fd)+")")
         global charmsystem
         if charmsystem is None:
-                charmsystem=mesytecsystem.NeutronMeasurement(fd)
+                charmsystem=listmodereplay.ReplayList(fd)
        
     def __del__(self):
-        print("charm.py: DeviceConnection.__del__")
+        print("charm-replay.py: DeviceConnection.__del__")
 
 
-class Simulator(base.MLZDevice):
 
-
-    attributes = {
-        'NucleoRate':   
-            Attr(int32,'simulator data rate',
-                 writable=True,memorized=False,  disallowed_read=(states.INIT, states.UNKNOWN,),
-                 disallowed_write=( states.OFF, states.INIT, states.UNKNOWN,)),
+class PlayList(base.MLZDevice):
+    commands = {
+         'RemoveFile':
+            Cmd('remove file from playlist.', listof(str), str, '', ''),
+          'AddFile':
+            Cmd('add file to playlist.', listof(str), str, '', ''),
+          'FilesInDirectory':
+            Cmd('return directory list of .mdat files.', listof(str), str, '', ''),
     }
+    
 
-    def read_NucleoRate(self):
+    def RemoveFile(self,file):
         global charmsystem
         if charmsystem:
-            return charmsystem.simulatorRate
-    def write_NucleoRate(self,value):
+            return charmsystem.removefile(file)
+        return False
+    def AddFile(self,file):
         global charmsystem
         if charmsystem:
-            charmsystem.simulatorRate=value
+            return charmsystem.addfile(file)
+        return False
 
-    def get_NucleoRate_unit(self):
-        return 'Events/second'
-
-
-
-class Settings(base.MLZDevice):
-    attributes = {
-        'writelistmode':   
-            Attr(boolean,'write mesytec listmode to file',
-                 writable=True,memorized=False,  disallowed_read=(states.INIT, states.UNKNOWN,),
-                 disallowed_write=( states.OFF, states.INIT, states.UNKNOWN,)),
-    }
-
-    def read_writelistmode(self):
+    def FilesInDirectory(self,directory):
         global charmsystem
         if charmsystem:
-            return charmsystem.writelistmode
-    def write_writelistmode(self,value):
-        global charmsystem
-        if charmsystem:
-            charmsystem.writelistmode=value
-
-    def get_writelistmode_unit(self):
-        return ''
+            return charmsystem.files(directory)
+    
 
 
 

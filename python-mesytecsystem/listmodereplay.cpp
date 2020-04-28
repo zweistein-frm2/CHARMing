@@ -14,6 +14,7 @@
 #include <list>
 #include <filesystem>
 #include <string>
+#include <boost/filesystem.hpp>
 #include "Zweistein.PrettyBytes.hpp"
 #include "Mesytec.RandomData.hpp"
 #include <opencv2/core.hpp>
@@ -46,6 +47,8 @@ using boost::asio::ip::udp;
 
 EXTERN_FUNCDECLTYPE boost::mutex coutGuard;
 EXTERN_FUNCDECLTYPE boost::thread_group worker_threads;
+
+
 boost::mutex histogramsGuard;
 std::vector<Histogram> histograms = std::vector<Histogram>(2);
 
@@ -65,12 +68,12 @@ void shutdown() {
 
 
 struct StartMsmtParameters {
-    StartMsmtParameters() :MaxCount(0), DurationSeconds(0), writelistmode(false),playlist(std::list<std::string>()) {}
+    StartMsmtParameters() :MaxCount(0), DurationSeconds(0), playlist(std::list<std::string>()) {}
     boost::atomic<long long> MaxCount;
     boost::atomic<double> DurationSeconds;
     boost::atomic<int> speedmultiplier;
     std::list<std::string> playlist;
-
+    boost::mutex playlistGuard;
 };
 
 void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, boost::shared_ptr <StartMsmtParameters> ptrStartParameters ) {
@@ -84,9 +87,23 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
         boost::function<void()> t;
      
             ptrmsmtsystem1->inputFromListmodeFile = true;
-            t = [&ptrmsmtsystem1, &_devlist, &listmodeinputfiles]() {
+            t = [&ptrmsmtsystem1,&ptrStartParameters, &_devlist]() {
                 try {
+                    std::list<std::string> listmodeinputfiles = std::list<std::string>();
+                    while (Mesytec::listmode::action  lec = Mesytec::listmode::CheckAction()) {
+                        if (lec == Mesytec::listmode::start_reading) {
+                            listmodeinputfiles.clear();
+                            boost::mutex::scoped_lock lock(ptrStartParameters->playlistGuard);
+                             for (auto& s : ptrStartParameters->playlist) listmodeinputfiles.push_back(s);
 
+                             Mesytec::listmode::whatnext = Mesytec::listmode::continue_reading;
+
+                        }
+                        else boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
+                    }
+
+
+                    
                     for (std::string& fname : listmodeinputfiles) {
                         try { boost::property_tree::read_json(fname + ".json", Mesytec::Config::root); }
                         catch (std::exception& e) {
@@ -99,7 +116,7 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
                         boost::property_tree::write_json(ss_1, Mesytec::Config::root);
                         LOG_INFO << ss_1.str() << std::endl;
 
-                        if (!configok)	return -1;
+                        if (!configok)	return ;
 
                         ptrmsmtsystem1->listmode_connect(_devlist, io_service);
                         // find the .json file for the listmode file
@@ -122,6 +139,9 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
 
                         read.file(fname, io_service);
                     }
+                    // alldone, so 
+                    Mesytec::listmode::whatnext = Mesytec::listmode::wait_reading;
+
 
                 }
                 catch (boost::exception& e) {
@@ -136,12 +156,16 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
         worker_threads.add_thread(pt);
         
         worker_threads.create_thread([&ptrmsmtsystem1] {Zweistein::populateHistograms(io_service, ptrmsmtsystem1, Mesytec::Config::BINNINGFILE.string()); });
-        worker_threads.create_thread([&ptrmsmtsystem1] {Zweistein::displayHistogram(io_service, ptrmsmtsystem1); });
+       
         // nothing to do really,
         while (!io_service.stopped()) {
 
             long long currcount = ptrmsmtsystem1->data.evntcount;
             long long maxcount = ptrStartParameters->MaxCount;
+            boost::chrono::system_clock::time_point tps = ptrmsmtsystem1->started;
+            boost::chrono::duration<double> secs = boost::chrono::system_clock::now() - tps;
+            boost::chrono::duration<double> Maxsecs(ptrStartParameters->DurationSeconds);
+
             bool sendstop = false;
             if (maxcount != 0 && currcount > maxcount) {
                 LOG_INFO << "stopped by counter maxval:" << currcount << ">max:" << maxcount << std::endl;
@@ -162,22 +186,22 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
 
     }
 
-struct ReplayListmode {
+struct ReplayList {
      public:
        
         boost::shared_ptr<StartMsmtParameters> ptrStartParameters;
         boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1;
-        ReplayListmode(long loghandle):ptrStartParameters(boost::shared_ptr < StartMsmtParameters>(new StartMsmtParameters())),
+        ReplayList(long loghandle):ptrStartParameters(boost::shared_ptr < StartMsmtParameters>(new StartMsmtParameters())),
             ptrmsmtsystem1(boost::shared_ptr < Mesytec::MesytecSystem>(new Mesytec::MesytecSystem()))
         {
 
             Entangle::Init(loghandle);
             ptrmsmtsystem1->initatomicortime_point();
             worker_threads.create_thread([this] {startMonitor(ptrmsmtsystem1, ptrStartParameters); });
-            LOG_DEBUG << "ReplayListmode(" << loghandle << ")" << std::endl<<std::fflush;
+            LOG_DEBUG << "ReplayList(" << loghandle << ")" << std::endl<<std::fflush;
         }
-        ~ReplayMeasurement() {
-            LOG_DEBUG << "~ReplayListmode()" << std::endl;
+        ~ReplayList() {
+            LOG_DEBUG << "~ReplayList()" << std::endl;
         
         }
 
@@ -207,43 +231,84 @@ struct ReplayListmode {
             return boost::python::make_tuple(count, secs.count(), devstatus,msg);
 
         }
-
-
-        void add2replaylist(std::string file) {
-
-            unsigned short tmp = ptrmsmtsystem1->data.last_deviceStatusdeviceId;
-            auto status = Mcpd8::DataPacket::getStatus(tmp);
-            if (status & Mcpd8::Status::DAQ_Running) {
-              //  LOG_WARNING << "skipped ," << status << std::endl;
-              //  return;
+        std::string LISTMODEEXTENSION = ".mdat";
+        boost::python::list files(std::string directory) {
+            boost::python::list l;
+            //
+            try {
+                boost::filesystem::path mdat_path(directory);
+                boost::filesystem::recursive_directory_iterator end;
+                for (boost::filesystem::recursive_directory_iterator i(mdat_path); i != end; ++i)
+                {
+                    const boost::filesystem::path cp = (*i);
+                    if(cp.extension()== LISTMODEEXTENSION) l.append(cp.string());
+                }
+            }
+            catch (boost::exception& e) {
+                boost::mutex::scoped_lock lock(coutGuard);
+                LOG_ERROR << boost::diagnostic_information(e) << std::endl;
 
             }
             
+            return l;
+        }
+
+      
+
+        boost::python::list addfile(std::string file) {
+            
+            boost::mutex::scoped_lock lock(ptrStartParameters->playlistGuard);
+            boost::python::list l;
             try {
-                if (ptrStartParameters->writelistmode) {
-                        ptrmsmtsystem1->write2disk = true;
-                        worker_threads.create_thread([this] {Mesytec::writeListmode(io_service, ptrmsmtsystem1); });
-            }
-                ptrmsmtsystem1->SendAll(Mcpd8::Cmd::START);
-                set_simulatorRate(get_simulatorRate());
+                if (boost::filesystem::exists(file)) {
+                    boost::filesystem::path p(file);
+                    if (p.extension() != LISTMODEEXTENSION) {
+                        LOG_WARNING << "File not added to playlist (wrong extension !="<< LISTMODEEXTENSION<<") : " << file << std::endl;
+                    }
+                    else ptrStartParameters->playlist.push_back(file);
+                }
+                else LOG_WARNING << "File not added to playlist (not found) : " << file << std::endl;
+                
+                
+               
             }
             catch (boost::exception& e) {
                 boost::mutex::scoped_lock lock(coutGuard);
                 LOG_ERROR << boost::diagnostic_information(e)<<std::endl;
 
             }
+            for (auto& s : ptrStartParameters->playlist) l.append(s);
+            return l;
+            
+        }
+
+        boost::python::list removefile(std::string file) {
+
+            boost::mutex::scoped_lock lock(ptrStartParameters->playlistGuard);
+            boost::python::list l;
+            try {
+                ptrStartParameters->playlist.remove(file);
+
+            }
+            catch (boost::exception& e) {
+                boost::mutex::scoped_lock lock(coutGuard);
+                LOG_ERROR << boost::diagnostic_information(e) << std::endl;
+
+            }
+            for (auto& s : ptrStartParameters->playlist) l.append(s);
+            return l;
 
         }
 
         void start() {
             // we have to start from beginning of playlist
-            Mesytec::listmode::waitreading = false;
+            Mesytec::listmode::whatnext = Mesytec::listmode::start_reading;
         }
         void stop() {
-            Mesytec::listmode::waitreading = true;
+            Mesytec::listmode::whatnext = Mesytec::listmode::wait_reading;
         }
         void resume() {
-            Mesytec::listmode::waitreading = false;
+            Mesytec::listmode::whatnext = Mesytec::listmode::continue_reading;
         }
 
         Histogram* getHistogram() {
@@ -324,15 +389,16 @@ BOOST_PYTHON_MODULE(mesytecsystem)
             .def("getRoi", &Histogram::getRoi)
             .add_property("Size", &Histogram::getSize)
             ;
-        class_< ReplayListmode>("ReplayListmode",init<long>())
-            .add_property("speedmultiplier", &ReplayMeasurement::get_speedmultiplier, &ReplayMeasurement::set_speedmultiplier)
-            .def("add2replaylist", &ReplayListmode:add2replaylist)
-            .def("availablefiles", &ReplayListmode::availablefiles)
-            .def("stopafter", &ReplayListmode::stopafter)
-            .def("start", &ReplayListmode::start)
-            .def("resume", &ReplayListmode::resume)
-            .def("status", &ReplayListmode::status)
-            .def("stop", &ReplayListmode::stop)
+        class_< ReplayList>("ReplayList",init<long>())
+            .add_property("speedmultiplier", &ReplayList::get_speedmultiplier, &ReplayList::set_speedmultiplier)
+            .def("addfile", &ReplayList::addfile)
+            .def("removefile", &ReplayList::removefile)
+            .def("files", &ReplayList::files)
+            .def("stopafter", &ReplayList::stopafter)
+            .def("start", &ReplayList::start)
+            .def("resume", &ReplayList::resume)
+            .def("status", &ReplayList::status)
+            .def("stop", &ReplayList::stop)
             .def("getHistogram", &ReplayList::getHistogram, return_internal_reference<1, with_custodian_and_ward_postcall<1, 0>>())
             ;
       

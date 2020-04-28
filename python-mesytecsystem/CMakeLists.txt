@@ -2,12 +2,21 @@
 # project specific logic here.
 #
 cmake_minimum_required (VERSION 3.14)
-project(mesytecsystem)
+
+set(PROJECT1 mesytecsystem)
+set(PROJECT2 listmodereplay)
+
+foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2)
+    message(STATUS "PROJECT_NAME=${PROJECT_NAME}")
+
+
+
+project(${PROJECT_NAME})
 add_compile_definitions(ENTANGLE_LOGGER)
 if(MSVC)
     add_compile_definitions(_WIN32_WINNT=0x0601)
 else()
-message("on linux boost must be installed :  sudo apt-get install libboost-python-dev")
+message("on linux boost >= 1.71 must be installed :  sudo apt-get install libboost-python-dev")
 #set(BOOST_ROOT /usr )
 #set(Boost_INCLUDE_DIR ${BOOST_ROOT}/include)
 endif()
@@ -53,11 +62,15 @@ set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".pyd")
 else()
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "")
 endif()
+
+
+
+
 add_custom_command(
         TARGET ${PROJECT_NAME} POST_BUILD
-     #   COMMAND ${CMAKE_COMMAND} -E copy
-     #         ${CMAKE_SOURCE_DIR}/test.py
-     #         ${CMAKE_CURRENT_BINARY_DIR}/test.py
+        COMMAND ${CMAKE_COMMAND} -E copy
+              ${CMAKE_SOURCE_DIR}/charm-replay.py
+              ${CMAKE_CURRENT_BINARY_DIR}/charm-replay.py
         COMMAND ${CMAKE_COMMAND} -E copy
                 ${CMAKE_SOURCE_DIR}/charm.py
                 ${CMAKE_CURRENT_BINARY_DIR}/charm.py
@@ -66,10 +79,12 @@ add_custom_command(
 
 target_sources(${PROJECT_NAME}
 PRIVATE
-"mesytecsystem.cpp"
+${PROJECT_NAME}.cpp
 ${pyboostcvconverter_DIR}/src/pyboost_cv2_converter.cpp
 ${pyboostcvconverter_DIR}/src/pyboost_cv3_converter.cpp
 ${pyboostcvconverter_DIR}/src/pyboost_cv4_converter.cpp
 
 
 )
+
+endforeach()

@@ -45,7 +45,8 @@ namespace Zweistein {
 		{
 			boost::mutex::scoped_lock lock(histogramsGuard); 
 			histograms[0].resize(maxY, maxX);
-			histograms[0].setRoiRect(left, bottom, maxX, maxY);
+			std::string wkt=histograms[0].WKTRoiRect(left, bottom, maxX, maxY);
+			histograms[0]._setRoi(wkt, 0);
 		}
 		
 		if (!binningfile1.empty() || binningfile1.length() != 0) {
@@ -124,7 +125,8 @@ namespace Zweistein {
 			{
 				boost::mutex::scoped_lock lock(histogramsGuard);
 				histograms[1].resize(power, maxX);
-				histograms[1].setRoi("",0);
+				std::string wkt = histograms[1].WKTRoiRect(0, 0,maxX, power);
+				histograms[1]._setRoi(wkt,0);
 				LOG_INFO << "histograms[1] :rows=" << histograms[1].histogram.rows << ", cols=" << histograms[1].histogram.cols << std::endl;
 				LOG_INFO << "Zweistein::Binning::BINNING.shape(" << s[0] << "," << s[1] <<")"<< std::endl;
 			}
@@ -139,20 +141,33 @@ namespace Zweistein {
 			int i = 0;
 			
 			long long nloop = 0;
-			boost::chrono::system_clock::time_point current = boost::chrono::system_clock::now();
-			boost::chrono::nanoseconds elapsed;
 			
 			do {
-				boost::mutex::scoped_lock lock(histogramsGuard);
-				long evntspopped = 0;
-				while (pmsmtsystem1->data.evntqueue.pop(ev)) {
+				boost::chrono::system_clock::time_point current = boost::chrono::system_clock::now();
+				{
+					boost::mutex::scoped_lock lock(histogramsGuard);
+					long evntspopped = 0;
+					while (pmsmtsystem1->data.evntqueue.pop(ev)) {
 					evntspopped++;
-					if (evntspopped > 2*Mcpd8::Data::EVENTQUEUESIZE/3) {
+					if (evntspopped > 2 * Mcpd8::Data::EVENTQUEUESIZE / 3) {
 						evntspopped = 0;
 						boost::mutex::scoped_lock lock(coutGuard);
-						LOG_WARNING << "evntspopped > "<< 2*Mcpd8::Data::EVENTQUEUESIZE / 3 << std::endl;
+						LOG_WARNING << "evntspopped > " << 2 * Mcpd8::Data::EVENTQUEUESIZE / 3 << std::endl;
 						break;
 					}
+
+					if (evntspopped > 100) { // to save cpu time in this critical loop
+						// we have to give free histogramsGuard once a while (at least every 200 milliseconds)
+						// so that other code can change Roi data.
+						auto  elapsed = boost::chrono::duration_cast<boost::chrono::milliseconds>(boost::chrono::system_clock::now() - current);
+						if (elapsed.count() > 200) {
+							current = boost::chrono::system_clock::now();
+							break;
+						}
+					}
+
+
+
 					if (ev.type == Zweistein::Event::EventTypeOther::RESET) {
 						for (auto& h : histograms) {
 							for (auto& r : h.roidata) 	r.count = 0;
@@ -161,7 +176,7 @@ namespace Zweistein {
 						continue;
 					}
 					if (ev.X < 0 || ev.X >= maxX) {
-						LOG_ERROR << "0 < Event.X="<<ev.X<<  " < " << maxX <<" Event.X ouside bounds" << std::endl;
+						LOG_ERROR << "0 < Event.X=" << ev.X << " < " << maxX << " Event.X ouside bounds" << std::endl;
 						io_service.stop();
 						break;
 					}
@@ -169,7 +184,7 @@ namespace Zweistein {
 						LOG_ERROR << "0< Event.Y=" << ev.Y << " < " << maxY << " Event.Y ouside bounds" << std::endl;
 						io_service.stop();
 						break;
-						
+
 					}
 
 					// this is our raw histograms[0]
@@ -177,8 +192,8 @@ namespace Zweistein {
 					histograms[0].histogram.at<int32_t>(p.y(), p.x()) += 1;
 
 					if (boost::geometry::covered_by(p, histograms[0].roidata[0].roi)) {
-							auto size=histograms[0].histogram.size;
-							histograms[0].roidata[0].count += 1;
+						auto size = histograms[0].histogram.size;
+						histograms[0].roidata[0].count += 1;
 					}
 					if (bbinning) {
 						// this is our binned histograms[1]
@@ -188,16 +203,17 @@ namespace Zweistein {
 						if (binnedY < 0) continue; // skip also
 
 						point_type pb(ev.X, binnedY);
-						for(auto &r:histograms[1].roidata){
+						for (auto& r : histograms[1].roidata) {
 							histograms[1].histogram.at<int32_t>(pb.y(), pb.x()) += 1;
 							if (boost::geometry::covered_by(pb, r.roi)) {
 								r.count += 1;
 							}
 						}
-						
+
 					}
 				}
-				nloop++;
+					nloop++;
+				}
 			} while (!io_service.stopped());
 		}
 		catch (boost::exception & e) {

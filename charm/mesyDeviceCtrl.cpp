@@ -164,7 +164,7 @@ int main(int argc, char* argv[])
 		boost::function<void()> t;
 		if (inputfromlistfile) {
 			ptrmsmtsystem1->inputFromListmodeFile = true;
-			Mesytec::listmode::waitreading = false; // start immediately
+			Mesytec::listmode::whatnext = Mesytec::listmode::continue_reading; // start immediately
 			t = [ &ptrmsmtsystem1, &_devlist, &listmodeinputfiles]() {
 				try {
 

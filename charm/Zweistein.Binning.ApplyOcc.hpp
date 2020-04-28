@@ -11,7 +11,7 @@
 
 namespace Zweistein {
     namespace Binning{
-    void Apply_OCC_Correction(cv::Mat mat, polygon_type& roi,long &count) {
+    void Apply_OCC_Correction(cv::Mat mat, polygon_type& roi,unsigned long &count) {
         auto s = Zweistein::Binning::OCC.shape();
         for (int r = 0; r < s[1]; r++) {
             for (int c = 0; c < s[0]; c++) {

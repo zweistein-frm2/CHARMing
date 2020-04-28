@@ -32,6 +32,7 @@
     <ClCompile Include="mesyDeviceCtrl.cpp" />
     <ClCompile Include="OptionPrinter.cpp" />
     <ClCompile Include="simpleLogger.cpp" />
+    <ClCompile Include="Zweistein.ping.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Entangle.Logger.hpp" />
@@ -59,6 +60,7 @@
     <ClInclude Include="Zweistein.Histogram.hpp" />
     <ClInclude Include="Zweistein.HomePath.hpp" />
     <ClInclude Include="Zweistein.Locks.hpp" />
+    <ClInclude Include="Zweistein.ping.hpp" />
     <ClInclude Include="Zweistein.populateHistograms.hpp" />
     <ClInclude Include="Zweistein.PrettyBytes.hpp" />
     <ClInclude Include="Zweistein.ThreadPriority.hpp" />
@@ -182,6 +184,8 @@
       <AdditionalIncludeDirectories>..\sigslot\include;..\asio-extensions\include;..\PacketSender;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+      <AdditionalOptions>
+      </AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
