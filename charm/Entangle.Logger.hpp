@@ -73,21 +73,13 @@ namespace Entangle{
 
 	};
 
-	boost::shared_ptr <Entangle::Logger> ptrlogger=nullptr;
-	void Init(int fd) {
-		try {
-			ptrlogger = boost::shared_ptr < Entangle::Logger>(new Logger(fd));
-			
-		}
-		catch (boost::exception &e) {
-			std::cerr << boost::diagnostic_information(e) << std::endl;
-		}
-	}
+	extern boost::shared_ptr <Entangle::Logger> ptrlogger;
+	void Init(int fd); 
 	extern severity_level SEVERITY_THRESHOLD;
 
 }
 
-boost::iostreams::stream< boost::iostreams::null_sink > nullOstream((boost::iostreams::null_sink()));
+extern boost::iostreams::stream< boost::iostreams::null_sink > nullOstream; 
 
 // all this works properly only when we use std::endl to terminate a log message ?
 

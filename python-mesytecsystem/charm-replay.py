@@ -1,6 +1,6 @@
 from entangle import base
 from entangle.core import states, Prop, uint16, Attr,Cmd
-from entangle.core.defs import uint64, int32, boolean
+from entangle.core.defs import uint64, int32, boolean, listof
 from entangle.core.states import BUSY, UNKNOWN,FAULT
 from entangle.core.errors import InvalidValue, InvalidOperation, \
     ConfigurationError
@@ -34,7 +34,7 @@ class PlayList(base.MLZDevice):
           'AddFile':
             Cmd('add file to playlist.', listof(str), str, '', ''),
           'FilesInDirectory':
-            Cmd('return directory list of .mdat files.', listof(str), str, '', ''),
+            Cmd('return directory list of .mdat files.', str, listof(str), '', ''),
     }
     
 
@@ -50,6 +50,8 @@ class PlayList(base.MLZDevice):
         return False
 
     def FilesInDirectory(self,directory):
+        print('FilesInDirectory('+str(directory)+')')
+
         global charmsystem
         if charmsystem:
             return charmsystem.files(directory)

@@ -1,0 +1,92 @@
+name: frm2-charm # you probably want to 'snapcraft register <name>'
+version: git # just for humans, typically '1.2+git' or '1.3.2'
+summary: Mesytec detector software # 79 char long summary
+description: |
+  supports Mesytec neutron detector hardware as well as the new charm project detector. 
+  
+base: core18
+grade: devel # must be 'stable' to release into candidate/stable channels
+confinement: devmode # use 'strict' once you have the right plugs and slots
+
+
+build-packages:
+    - build-essential
+    - automake
+    - libtool
+    - libssl-dev
+    - zlib1g-dev
+    - libc6-dbg
+    - ccache
+    - gcc
+    - g++
+    - python3
+    - software-properties-common
+    - curl
+    - unzip
+    - tar
+     
+parts:
+ ppa:
+    plugin: nil
+    override-pull: |
+      add-apt-repository -yu ppa:ubuntu-toolchain-r/test
+      apt install -y gcc-9 g++-9
+      update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 900 --slave /usr/bin/g++ g++ /usr/bin/g++-9
+      update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 700 --slave /usr/bin/g++ g++ /usr/bin/g++-7
+
+ cmake:
+   source: https://github.com/Kitware/CMake
+   source-type: git
+   source-depth: 1
+   plugin: cmake
+   after: [ppa]
+        
+   override-build: |
+     
+     mkdir -p build
+     cd build
+     cmake \
+       -DCMAKE_INSTALL_PREFIX=$SNAPCRAFT_STAGE/cmake \
+       $SNAPCRAFT_PART_SRC
+     make -j 4
+     make install
+
+ boost:
+    source: https://github.com/boostorg/boost.git
+    source-type: git
+    source-depth: 1
+    plugin: nil
+    override-build: |
+      ./bootstrap.sh --with-libraries=thread,system,filesystem,log,program_options
+      ./b2 headers
+      ./b2 cxxflags="-std=c++17" install
+
+ vcpkg:
+    source: https://github.com/microsoft/vcpkg.git
+    source-type: git
+    plugin: nil
+    override-build: |
+      ./bootstrap-vcpkg.sh
+      ./vcpkg integrate install
+      ./vcpkg install libuv
+      ./vcpkg install magic-enum
+      ./vcpkg install opencv
+
+ frm2-charm:
+    after: 
+     - cmake
+     - boost
+     - vcpkg
+    plugin: cmake
+    source: .
+    configflags: [-DCMAKE_TOOLCHAIN_FILE=/root/parts/vcpkg/scripts/buildsystems/vcpkg.cmake  -DSIGSLOT_PATH=../sigslot/include, -DASIO_EXTENSIONS_PATH=../asio-extensions/nclude, -DPacketSender_DIR=../PacketSender ]
+    override-build: |
+     
+      $SNAPCRAFT_STAGE/cmake/bin/cmake \
+        -DCMAKE_INSTALL_PREFIX=$SNAPCRAFT_PART_INSTALL/usr/local \
+        -DCMAKE_BUILD_TYPE=Release \
+        $SNAPCRAFT_PART_SRC
+      make -j 4
+      make install
+
+ 

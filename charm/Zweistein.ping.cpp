@@ -1,11 +1,13 @@
-#pragma once
 #include <iostream>
 #include <vector>
 #include <string>
 #include <boost/filesystem.hpp>
 #include <boost/process.hpp>
 #include <boost/exception/all.hpp>
+#include "Zweistein.Logger.hpp"
 #include "Zweistein.ping.hpp"
+
+
 namespace Zweistein {
 	
 	bool ping(std::string ipaddress) {
@@ -39,7 +41,7 @@ namespace Zweistein {
             desired = "Reply from";
 #endif
             if (line.find(undesired) != std::string::npos) {
-                std::cout << cmdline<<" : "<< line << std::endl;
+                LOG_WARNING << cmdline<<" : "<< line << std::endl;
                 return false;
             }
             if (line.find(desired) != std::string::npos) {
@@ -48,18 +50,17 @@ namespace Zweistein {
         }
 
         if (data.size()) {
-            for (auto& s : data)  std::cout << s << std::endl;
+            for (auto& s : data)  LOG_INFO << s << std::endl;
+            return true;
         }
         else {
             while (std::getline(ierr, line) && !line.empty()) {
-                std::cout << line << std::endl;
+                LOG_ERROR << line << std::endl;
             }
         }
-
-        return true;
     }
     catch (boost::exception& e) {
-        std::cout << boost::diagnostic_information(e) << std::endl;
+        LOG_ERROR << boost::diagnostic_information(e) << std::endl;
     }
     return false;
 }

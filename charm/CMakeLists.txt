@@ -25,7 +25,12 @@ include_directories(./)
 include_directories(${SIGSLOT_PATH})
 #include_directories(${_Python_INCLUDE_DIR})
 # Add source to this project's executable.
-add_executable (${PROJECT_NAME} "mesyDeviceCtrl.cpp"  "OptionPrinter.cpp" "CustomOptionDescription.cpp" "simpleLogger.cpp" "coloured_console_sink.cpp")
+add_executable (${PROJECT_NAME} "mesyDeviceCtrl.cpp"  "OptionPrinter.cpp" "CustomOptionDescription.cpp" "simpleLogger.cpp" "coloured_console_sink.cpp" "Zweistein.ping.cpp")
 
 target_link_libraries(${PROJECT_NAME} PRIVATE magic_enum::magic_enum ${Boost_LIBRARIES} ${OpenCV_LIBS} unofficial::libuv::libuv )
 target_link_options(${PROJECT_NAME} PRIVATE $<$<CXX_COMPILER_ID:GNU>:$<$<CONFIG:RELEASE>:-static-libstdc++> $<$<CONFIG:DEBUG>:-static-libstdc++> > PRIVATE $<$<CXX_COMPILER_ID:GNU>:-static-libgcc>  )
+
+install(
+    TARGETS ${PROJECT_NAME}
+       
+)

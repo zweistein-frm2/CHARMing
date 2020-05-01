@@ -26,7 +26,7 @@ namespace Zweistein {
         namespace pt = boost::property_tree;
         typedef boost::multi_array<short, 2> array_type;
         typedef array_type::index index;
-        boost::atomic<bool> loaded=false;
+       
         array_type BINNING;
         array_type OCC;
         short occmultiplier = 10000;

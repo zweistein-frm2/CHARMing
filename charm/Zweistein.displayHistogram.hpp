@@ -45,13 +45,14 @@ namespace Zweistein {
 			static cv::Mat binned_occ_corrected;
 			
 			HISTYPE htype = HISTYPE::RAW|HISTYPE::BINNED;
-			boost::mutex::scoped_lock lock(histogramsGuard);
-			
-			
-			if ((bool)(htype & HISTYPE::BINNED) && Zweistein::Binning::loaded==true) {
-				histograms[1].histogram.copyTo(binned_occ_corrected);
-				Zweistein::Binning::Apply_OCC_Correction(binned_occ_corrected,histograms[1].roidata[0].roi,histograms[1].roidata[0].count);
-
+					
+			histogram_setup_status hss = Zweistein::setup_status;
+			if ((bool)(htype & HISTYPE::BINNED) && magic_enum::enum_integer(hss & histogram_setup_status::has_binning)) {
+				{
+					Zweistein::ReadLock r_lock(histogramsLock);
+					histograms[1].histogram.copyTo(binned_occ_corrected);
+					Zweistein::Binning::Apply_OCC_Correction(binned_occ_corrected, histograms[1].roidata[0].roi, histograms[1].roidata[0].count);
+				}
 				double minVal, maxVal;
 				cv::Point minLoc, maxLoc;
 				cv::minMaxLoc(binned_occ_corrected, &minVal, &maxVal, &minLoc, &maxLoc);
@@ -59,6 +60,7 @@ namespace Zweistein {
 			}
 			
 			if ((bool)(htype & HISTYPE::RAW)) {
+				Zweistein::ReadLock r_lock(histogramsLock);
 				double minVal, maxVal;
 				cv::Point minLoc, maxLoc;
 				cv::minMaxLoc(histograms[0].histogram, &minVal, &maxVal, &minLoc, &maxLoc);
@@ -76,8 +78,10 @@ namespace Zweistein {
 #endif
 			bool bbinningwindow = false;
 			if (bshow) {
+				using namespace magic_enum::bitwise_operators; // out-of-the-box bitwise operators for enums.
 				cv::namedWindow("histogram_raw");
-				if (Zweistein::Binning::loaded==true) {
+				histogram_setup_status hss = Zweistein::setup_status;
+				if (magic_enum::enum_integer(hss & histogram_setup_status::has_binning)) {
 					cv::namedWindow("histogram_binned");
 					bbinningwindow = true;
 				}

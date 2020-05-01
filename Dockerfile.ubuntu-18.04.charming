@@ -23,11 +23,13 @@ RUN apt-get install -y gcc g++
 RUN apt-get install -y cmake
 RUN mv /usr/bin/cmake /usr/bin/cmake.3.10.2
 RUN apt-get install -y libssl-dev
-RUN cd /opt && wget https://github.com/Kitware/CMake/releases/download/v3.17.1/cmake-3.17.1.tar.gz && tar -zxvf ./cmake-3.17.1.tar.gz
-RUN cd /opt && rm ./cmake-3.17.1.tar.gz
-RUN cd /opt/cmake-3.17.1  && ./bootstrap
-RUN cd /opt/cmake-3.17.1  && make
-RUN cd /opt/cmake-3.17.1  && make install
+ARG cmake_ver=3.17.1
+${cmake_ver}
+RUN cd /opt && wget https://github.com/Kitware/CMake/releases/download/v${cmake_ver}/cmake-${cmake_ver}.tar.gz && tar -zxvf ./cmake-${cmake_ver}.tar.gz
+RUN cd /opt && rm ./cmake-${cmake_ver}.tar.gz
+RUN cd /opt/cmake-${cmake_ver}  && ./bootstrap
+RUN cd /opt/cmake-${cmake_ver}  && make
+RUN cd /opt/cmake-${cmake_ver}  && make install
 
 RUN git clone https://github.com/microsoft/vcpkg.git
 RUN cd /vcpkg && ./bootstrap-vcpkg.sh
@@ -35,11 +37,13 @@ RUN cd /vcpkg && ./vcpkg integrate install
 RUN cd /vcpkg && ./vcpkg install magic-enum
 RUN cd /vcpkg && ./vcpkg install libuv
 
-RUN cd /opt && wget https://dl.bintray.com/boostorg/release/1.72.0/source/boost_1_72_0.tar.bz2 && tar --bzip2 -xf ./boost_1_72_0.tar.bz2
-RUN cd /opt && rm ./boost_1_72_0.tar.bz2
-RUN cd /opt/boost_1_72_0 && ./bootstrap.sh --prefix=/usr/
-RUN cd /opt/boost_1_72_0 && ./b2
-RUN cd /opt/boost_1_72_0 && ./b2 install
+ARG boost_ver=1_73_0
+
+RUN cd /opt && wget https://dl.bintray.com/boostorg/release/${sed s/_/g. | ${boost_ver}}/source/boost_${boost_ver}.tar.bz2 && tar --bzip2 -xf ./boost_${boost_ver}.tar.bz2
+RUN cd /opt && rm ./boost_${boost_ver}.bz2
+RUN cd /opt/boost_${boost_ver} && ./bootstrap.sh --prefix=/usr/
+RUN cd /opt/boost_${boost_ver} && ./b2
+RUN cd /opt/boost_${boost_ver} && ./b2 install
 
 
 

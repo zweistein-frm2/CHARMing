@@ -158,7 +158,8 @@ namespace Mesytec {
 
 
 			}
-
+			if (data.widthX == 0) data.widthX = 1;
+			if (data.widthY == 0) data.widthY = 1;
 			connected = true;
 			boost::chrono::system_clock::time_point tpstarted = started;
 			boost::chrono::milliseconds ms = boost::chrono::duration_cast<boost::chrono::milliseconds> (boost::chrono::system_clock::now() - tpstarted);
@@ -829,11 +830,8 @@ namespace Mesytec {
 			static Mcpd8::CmdPacket response;	//static is needed on Linux 
 			auto start=boost::chrono::system_clock::now();
 			{
-				boost::mutex::scoped_lock lock(coutGuard);
 					ss_log <<  " SEND(" << ss_cmd.str() << ") to " << kvp.second.mcpd_endpoint << ":";
-
 				//LOG_DEBUG<< cmdpacket << std::endl;
-
 			}
 			boost::function<void()> send = [this,&kvp, &cmdpacket]() {
 				auto start = boost::chrono::system_clock::now();
@@ -852,7 +850,6 @@ namespace Mesytec {
 			else Mcpd8::CmdPacket::Send(kvp.second.socket, cmdpacket, kvp.second.mcpd_endpoint); 
 			
 			if (!waitresponse) {
-				boost::mutex::scoped_lock lock(coutGuard);
 				ss_log << " =>RESPONSE UNKNOWN (not checked)" ;
 				LOG_DEBUG << ss_log.str() << std::endl;
 				return response;

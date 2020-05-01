@@ -1,0 +1,42 @@
+name: frm2-charm
+version: git
+summary: Mesytec detector software
+description:  |
+	supports Mesytec neutron detector hardware as well as the new charm project detector. 
+
+base: core18
+grade: develop
+confinement: devmode
+
+build-packages:
+  - build-essential
+  - automake
+  - libtool
+  - libssl-dev
+  - zlib1g-dev
+  - ccache
+  - gcc
+  - g++
+  
+  parts:
+  charm-frm2:
+    source: .
+    plugin: cmake
+    install: mv bin $SNAPCRAFT_PART_INSTALL/
+    after:
+      - cmake
+      - boost
+      
+  cmake:
+    source: https://gitlab.kitware.com/cmake/cmake.git
+    source-commit: c09efe074d793203ab846e97bde8d03e4714dc2a
+    plugin: make
+    prepare: ./bootstrap --enable-ccache
+  boost:
+    source: https://github.com/boostorg/boost.git
+    source-commit: 90a01d83a1ec071e3dc543f0156b5ad413ccc68a
+    plugin: nil
+    build: |
+      ./bootstrap.sh --with-libraries=thread,system,filesystem,log,log_setup
+      ./b2 headers
+      ./b2 cxxflags="-std=c++17" install

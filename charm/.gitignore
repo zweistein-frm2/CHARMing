@@ -1,6 +1,9 @@
 *
 !*/
 !*.*
+parts/
+prime/
+stage/
 out/
 .vs/
 x64/

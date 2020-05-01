@@ -8,6 +8,7 @@
 #include <bitset>
 #include "MesytecSystem.Data.hpp"
 #include "Mesytec.DeviceParameter.hpp"
+#include "Zweistein.Logger.hpp"
 
 namespace Mesytec {
 	
@@ -88,7 +89,7 @@ namespace Mesytec {
 
 		public:
 			void file(std::string fname,boost::asio::io_service& io_service) {
-				
+					LOG_DEBUG << __FILE__ << " : " << __LINE__ << " " << fname << std::endl;
 					asioext::file source(io_service, fname, asioext::open_flags::access_read | asioext::open_flags::open_existing);
 					char buffer[0x5ef]; // 0x5ef  is naughty boundary, used for debugging, can use any size really
 					boost::system::error_code ec;
@@ -108,11 +109,8 @@ namespace Mesytec {
 					
 					do {
 						const std::size_t bytes_read = source.read_some(boost::asio::buffer(buffer), ec);
-
-						{
-							boost::mutex::scoped_lock lock(coutGuard);
-							std::cout << "\r" << fname << ": " << total_bytes_processed << " bytes processed \t";
-						}
+						//std::cout << "\r" << fname << " : " << total_bytes_processed << " bytes processed \t";
+						
 						size_t from = 0;
 						size_t to = bytes_read;
 						std::string nhneedle(Mesytec::listmode::header_separator, Mesytec::listmode::header_separator + sizeof(Mesytec::listmode::header_separator));
@@ -125,12 +123,12 @@ namespace Mesytec {
 							size_t nc = haystack.find(ncneedle);
 							if (nh != std::string::npos) {
 								nh += from;
-								if (headerfound) std::cout << "Multiple header_separator found at pos:" << total_bytes_processed + nh << std::endl;
+								if (headerfound) LOG_ERROR << "Multiple header_separator found at pos:" << total_bytes_processed + nh << std::endl;
 							}
 							if (n != std::string::npos) n += from;
 							if (nc != std::string::npos) {
 								nc += from;
-								if (closing_sigfound) std::cout << "Multiple closing_sigfound found at pos:" << total_bytes_processed + nc << std::endl;
+								if (closing_sigfound) LOG_ERROR << "Multiple closing_sigfound found at pos:" << total_bytes_processed + nc << std::endl;
 
 							}
 
@@ -245,10 +243,9 @@ namespace Mesytec {
 						total_bytes_processed += bytes_read;
 					} while (!ec);
 					{
-						boost::mutex::scoped_lock lock(coutGuard);
-						std::cout << "\r" << fname << ": " << total_bytes_processed << " bytes processed ,data_packets_found=" << data_packets_found << " " << std::endl;
-						if (!headerfound) std::cout << "headerfound=" << std::boolalpha << headerfound << " " << std::endl;
-						if (!closing_sigfound) std::cout << "closing_sigfound=" << std::boolalpha << closing_sigfound << " " << std::endl;
+						LOG_INFO << fname << ": " << total_bytes_processed << " bytes processed ,data_packets_found=" << data_packets_found << " " << std::endl;
+						if (!headerfound) LOG_ERROR << "headerfound=" << std::boolalpha << headerfound << " " << std::endl;
+						if (!closing_sigfound) LOG_ERROR << "closing_sigfound=" << std::boolalpha << closing_sigfound << " " << std::endl;
 
 					}
 

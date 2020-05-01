@@ -1,0 +1,4 @@
+/users/alanghof/source/repos/entangle/example/charm-ID-SANS1.res.in
+/users/alanghof/source/repos/entangle/example/charm-taco24-SANS1.res
+/users/alanghof/source/repos/entangle/example/charm-ID-replay.res.in
+/users/alanghof/source/repos/entangle/example/charm-taco24-replay.res

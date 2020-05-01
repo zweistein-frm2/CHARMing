@@ -43,7 +43,7 @@ using boost::asio::ip::udp;
 
 EXTERN_FUNCDECLTYPE boost::mutex coutGuard;
 EXTERN_FUNCDECLTYPE boost::thread_group worker_threads;
-boost::mutex histogramsGuard;
+Zweistein::Lock histogramsLock;
 std::vector<Histogram> histograms = std::vector<Histogram>(2);
 
 boost::asio::io_service io_service;
@@ -53,10 +53,11 @@ boost::asio::io_service io_service;
 
 void initialize() { LOG_DEBUG << "initialize()" << std::endl;  }
 void shutdown() {
+    LOG_DEBUG << "shutdown()" << std::endl;
        io_service.stop();
-       boost::this_thread::sleep_for(boost::chrono::milliseconds(50));
-       worker_threads.join_all();
-       LOG_DEBUG << "shutdown()" << std::endl;
+       boost::this_thread::sleep_for(boost::chrono::milliseconds(450));
+       //worker_threads.join_all();
+  
     }
 
 
@@ -144,7 +145,8 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
         
         for (int i = 0; i < 10; i++) {
             if (ptrmsmtsystem1->connected) {
-                worker_threads.create_thread([&ptrmsmtsystem1] {Zweistein::populateHistograms(io_service, ptrmsmtsystem1, Mesytec::Config::BINNINGFILE.string()); });
+                Zweistein::setupHistograms(io_service, ptrmsmtsystem1, Mesytec::Config::BINNINGFILE.string());
+                worker_threads.create_thread([&ptrmsmtsystem1] {Zweistein::populateHistograms(io_service, ptrmsmtsystem1); });
                 boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
                 break;
             }
@@ -236,7 +238,7 @@ struct NeutronMeasurement {
             Entangle::Init(loghandle);
             ptrmsmtsystem1->initatomicortime_point();
             worker_threads.create_thread([this] {startMonitor(ptrmsmtsystem1, ptrStartParameters); });
-            LOG_INFO << "NeutronMeasurement(" << loghandle << ")" << std::endl<<std::fflush;
+            LOG_INFO << "NeutronMeasurement(" << loghandle << ")" << std::endl;
         }
         ~NeutronMeasurement() {
             LOG_DEBUG << "~NeutronMeasurement()" << std::endl;
@@ -327,8 +329,13 @@ struct NeutronMeasurement {
         }
 
         Histogram* getHistogram() {
+            using namespace magic_enum::bitwise_operators; // out-of-the-box bitwise operators for enums.
             LOG_DEBUG << "getHistogram()" << std::endl;
-            return &histograms[1];
+            Zweistein::histogram_setup_status hss = Zweistein::setup_status;
+            if (magic_enum::enum_integer(hss & Zweistein::histogram_setup_status::has_binning)) {
+                return &histograms[1];
+            }
+            return &histograms[0];
         }
 
     };
@@ -355,10 +362,8 @@ boost::shared_ptr<legacy_api_guard> get_api_guard()
 void release_guard()
 {
     try {
-        LOG_DEBUG << "release_guard()"<<std::endl<<std::flush;
-        io_service.stop();
-        boost::this_thread::sleep_for(boost::chrono::milliseconds(250));
-    }
+        LOG_DEBUG << "release_guard()"<<std::endl;
+     }
     catch(std::exception  &){}
     legacy_api_guard_.reset();
 }

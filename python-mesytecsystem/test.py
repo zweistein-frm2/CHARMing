@@ -1,7 +1,7 @@
 import mesytecsystem
 import numpy as np
 import cv2 as cv
-
+import sys
 
 def makeRoiWkt( parameter):
 
@@ -14,23 +14,19 @@ def makeRoiWkt( parameter):
     wkt=wkt[:-1]
     wkt+="),())"
 
-o = mesytecsystem.NeutronMeasurement()
+o = mesytecsystem.NeutronMeasurement(sys.stdout.fileno())
 h = o.getHistogram()
 mat = np.zeros((1,1,1),dtype="int32")
 t= h.update(mat)
-print(h.Roi)
+print("h.Size="+str(h.Size))
+print("h.getRoi(0)="+str(h.getRoi(0)))
 detsize=[0,0],[64,1024]
 e=makeRoiWkt(detsize)
 
 
-print("count="+str(t[0]))
+print(t[0])
 histogram = t[1]
-print(histogram)
-#with np.printoptions(threshold=np.inf):
-#   print(histogram)
-#minVal, maxVal, minLoc, maxLoc=cv.minMaxLoc(histogram)
-#print(minVal,maxVal,minLoc,maxLoc)
-#img= (histogram*(255.0/maxVal)).astype(np.uint8)
+#print(histogram)
 img = cv.normalize(histogram, None, 0,255, norm_type=cv.NORM_MINMAX, dtype=cv.CV_8U)
 img=cv.applyColorMap(img,cv.COLORMAP_JET)
 cv.imshow("Window", img)

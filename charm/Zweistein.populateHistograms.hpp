@@ -31,26 +31,40 @@
 #include <cctype>
 #include <sstream>
 #include "Zweistein.GetConfigDir.hpp"
+#include <magic_enum.hpp>
 
 namespace Zweistein {
-	void populateHistograms(boost::asio::io_service & io_service, boost::shared_ptr < Mesytec::MesytecSystem> pmsmtsystem1,std::string binningfile1) {
 	
+	
+
+	void setupHistograms(boost::asio::io_service& io_service, boost::shared_ptr < Mesytec::MesytecSystem> pmsmtsystem1, std::string binningfile1) {
+		using namespace magic_enum::bitwise_operators; // out-of-the-box bitwise operators for enums.
+
+		setup_status = histogram_setup_status::not_done;
+
 		unsigned short maxX = pmsmtsystem1->data.widthX;
 		unsigned short maxY = pmsmtsystem1->data.widthY;
-		unsigned short binningMaxY = maxY;
-		bool bbinning = false;
+
+		if (maxX == 0 || maxY == 0) {
+			LOG_ERROR << __FILE__ << " : " << __LINE__ << " maxX=" << maxX << ", maxY=" << maxY << std::endl;
+			return;
+		}
+	
 		//LOG_DEBUG << "pmsmtsystem1->data.widthX=" << maxX << ", pmsmtsystem1->data.widthY=" << maxY << std::endl;
 		int left = 0;
 		int bottom = 0;
 		{
-			boost::mutex::scoped_lock lock(histogramsGuard); 
+			Zweistein::WriteLock w_lock(histogramsLock);
 			histograms[0].resize(maxY, maxX);
-			std::string wkt=histograms[0].WKTRoiRect(left, bottom, maxX, maxY);
+			std::string wkt = histograms[0].WKTRoiRect(left, bottom, maxX, maxY);
 			histograms[0]._setRoi(wkt, 0);
 		}
-		
+		histogram_setup_status hss = setup_status;
+		setup_status = hss | histogram_setup_status::histogram0_resized;
+
 		if (!binningfile1.empty() || binningfile1.length() != 0) {
 			try {
+				
 				boost::filesystem::path p(binningfile1);
 				std::string ext = boost::algorithm::to_lower_copy(p.extension().string());
 				if (ext == ".txt") {
@@ -70,20 +84,20 @@ namespace Zweistein {
 				if (s[0] > maxX) {
 					LOG_ERROR << "BINNING.shape()[0]=" << s[0] << " greater than detector sizeX(" << maxX << ")" << std::endl;
 					io_service.stop();
-					
+
 				}
 
 				if (s[1] > maxY) {
 					LOG_ERROR << "BINNING.shape()[1]=" << s[1] << " greater than detector sizeY(" << maxY << ")" << std::endl;
 					io_service.stop();
-					
+
 				}
 
 				if (s[1] < maxY) {
-					binningMaxY = (unsigned short) s[1];
 					LOG_WARNING << "BINNING.shape()[1]=" << s[1] << " smaller than detector sizeY(" << maxY << "), detector partially unused." << std::endl;
 				}
-
+				hss = setup_status;
+				setup_status = hss | histogram_setup_status::has_binning;
 			}
 			catch (std::exception& e) {
 				LOG_WARNING << e.what() << " for reading." << std::endl;
@@ -100,6 +114,8 @@ namespace Zweistein {
 					Zweistein::Binning::Write(file);
 					ss << "=> " << file << " " << std::endl;
 					LOG_WARNING << ss.str();
+					histogram_setup_status hss = setup_status;
+					setup_status = hss | histogram_setup_status::has_binning;
 
 				}
 				catch (std::exception& e) {
@@ -109,8 +125,8 @@ namespace Zweistein {
 				}
 
 			}
+			
 			auto s = Zweistein::Binning::BINNING.shape();
-
 
 			Zweistein::Binning::array_type::element* itr = Zweistein::Binning::BINNING.data();
 
@@ -123,29 +139,52 @@ namespace Zweistein {
 			while (power < max_value) power *= 2;
 
 			{
-				boost::mutex::scoped_lock lock(histogramsGuard);
+				
+				Zweistein::WriteLock w_lock(histogramsLock);
 				histograms[1].resize(power, maxX);
-				std::string wkt = histograms[1].WKTRoiRect(0, 0,maxX, power);
-				histograms[1]._setRoi(wkt,0);
+				std::string wkt = histograms[1].WKTRoiRect(0, 0, maxX, power);
+				histograms[1]._setRoi(wkt, 0);
 				LOG_INFO << "histograms[1] :rows=" << histograms[1].histogram.rows << ", cols=" << histograms[1].histogram.cols << std::endl;
-				LOG_INFO << "Zweistein::Binning::BINNING.shape(" << s[0] << "," << s[1] <<")"<< std::endl;
+				LOG_INFO << "Zweistein::Binning::BINNING.shape(" << s[0] << "," << s[1] << ")" << std::endl;
 			}
 
-			Zweistein::Binning::loaded = true;
-			bbinning = Zweistein::Binning::loaded;
-			LOG_DEBUG << "Zweistein::Binning::loaded" << std::endl;
+			hss = setup_status;
+			setup_status = hss | histogram_setup_status::histogram1_resized ;
+			
+			
 		}
+
+		hss = setup_status;
+		setup_status = hss | histogram_setup_status::done;
+	}
+
+
+	void populateHistograms(boost::asio::io_service & io_service, boost::shared_ptr < Mesytec::MesytecSystem> pmsmtsystem1) {
+		
+		using namespace magic_enum::bitwise_operators; // out-of-the-box bitwise operators for enums.
 		boost::chrono::system_clock::time_point start = boost::chrono::system_clock::now();
 		try {
 			Zweistein::Event ev;
 			int i = 0;
-			
 			long long nloop = 0;
-			
 			do {
 				boost::chrono::system_clock::time_point current = boost::chrono::system_clock::now();
+				histogram_setup_status hss = setup_status;
+				if (!magic_enum::enum_integer(hss & histogram_setup_status::done)) {
+					boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
+					continue;
+				}
+				unsigned short maxX = pmsmtsystem1->data.widthX;
+				unsigned short maxY = pmsmtsystem1->data.widthY;
+
+				unsigned short binningMaxY = 0;
+				if (magic_enum::enum_integer(hss & histogram_setup_status::has_binning)) {
+					binningMaxY = (unsigned short) Zweistein::Binning::BINNING.shape()[1];
+				}
+				
 				{
-					boost::mutex::scoped_lock lock(histogramsGuard);
+					
+					Zweistein::WriteLock w_lock(histogramsLock);
 					long evntspopped = 0;
 					while (pmsmtsystem1->data.evntqueue.pop(ev)) {
 					evntspopped++;
@@ -156,7 +195,7 @@ namespace Zweistein {
 						break;
 					}
 
-					if (evntspopped > 100) { // to save cpu time in this critical loop
+					if (evntspopped > 1000) { // to save cpu time in this critical loop
 						// we have to give free histogramsGuard once a while (at least every 200 milliseconds)
 						// so that other code can change Roi data.
 						auto  elapsed = boost::chrono::duration_cast<boost::chrono::milliseconds>(boost::chrono::system_clock::now() - current);
@@ -195,7 +234,7 @@ namespace Zweistein {
 						auto size = histograms[0].histogram.size;
 						histograms[0].roidata[0].count += 1;
 					}
-					if (bbinning) {
+					if (magic_enum::enum_integer(hss & histogram_setup_status::has_binning)) {
 						// this is our binned histograms[1]
 						if (ev.Y >= binningMaxY) continue; // skip it
 						short binnedY = Zweistein::Binning::BINNING[ev.X][ev.Y];

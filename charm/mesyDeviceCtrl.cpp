@@ -57,7 +57,8 @@ using boost::asio::ip::udp;
 
 EXTERN_FUNCDECLTYPE boost::mutex coutGuard;
 EXTERN_FUNCDECLTYPE boost::thread_group worker_threads;
-boost::mutex histogramsGuard;
+
+Zweistein::Lock histogramsLock;
 std::vector<Histogram> histograms = std::vector<Histogram>(2);
 
 namespace po = boost::program_options;
@@ -175,33 +176,28 @@ int main(int argc, char* argv[])
 							continue;
 						}
 						LOG_INFO << "Config file : " << fname + ".json" << std::endl;
+						_devlist.clear();
 						bool configok = Mesytec::Config::get(_devlist, "");
 						std::stringstream ss_1;
 						boost::property_tree::write_json(ss_1, Mesytec::Config::root);
 						LOG_INFO << ss_1.str() << std::endl;
 
-						if (!configok)	return -1;
+						if (!configok)	return ;
 
 						ptrmsmtsystem1->listmode_connect(_devlist, io_service);
 						// find the .json file for the listmode file
 						// check if Binning file not empty, if not empty wait for
-						int waitmax = 8;
+						
+						Zweistein::setupHistograms(io_service,ptrmsmtsystem1,Mesytec::Config::BINNINGFILE.string());
 
-						if (!(Mesytec::Config::BINNINGFILE.string()).empty()) {
-							for (int i = 0; i < waitmax; i++) {
-								boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
-								if (Zweistein::Binning::loaded == true) break;
-							}
-							if (Zweistein::Binning::loaded == false) {
-								LOG_ERROR << waitmax << " seconds passed, YET NOT LOADED: " << Mesytec::Config::BINNINGFILE.string() << std::endl;
-								continue;
-							}
-						}
+					
 						auto abfunc = boost::bind(&Mesytec::MesytecSystem::analyzebuffer, ptrmsmtsystem1, _1);
 						auto read = Mesytec::listmode::Read(abfunc, ptrmsmtsystem1->data, ptrmsmtsystem1->deviceparam);
 						
 
 						read.file(fname, io_service);
+
+						Zweistein::setup_status = Zweistein::histogram_setup_status::not_done; // next file is all new life 
 					}
 					
 				}
@@ -283,7 +279,8 @@ int main(int argc, char* argv[])
 		
 
 		if (inputfromlistfile) {
-			worker_threads.create_thread([&ptrmsmtsystem1] {Zweistein::populateHistograms(io_service, ptrmsmtsystem1, Mesytec::Config::BINNINGFILE.string()); });
+			
+			worker_threads.create_thread([&ptrmsmtsystem1] {Zweistein::populateHistograms(io_service, ptrmsmtsystem1); });
 			worker_threads.create_thread([&ptrmsmtsystem1] {Zweistein::displayHistogram(io_service, ptrmsmtsystem1); });
 			// nothing to do really,
 			while (!io_service.stopped()) {
@@ -293,7 +290,7 @@ int main(int argc, char* argv[])
 		}
 		else {
 			// data acquisition monitoring loop
-
+			Zweistein::setupHistograms(io_service,ptrmsmtsystem1, Mesytec::Config::BINNINGFILE.string());
 			for (int i = 0; i < 10; i++) {
 				if (ptrmsmtsystem1->connected) {
 					if (setupafterconnect) {
@@ -438,7 +435,7 @@ int main(int argc, char* argv[])
 						break;
 					}
 					else {
-						worker_threads.create_thread([&ptrmsmtsystem1] {Zweistein::populateHistograms(io_service, ptrmsmtsystem1, Mesytec::Config::BINNINGFILE.string()); });
+						worker_threads.create_thread([&ptrmsmtsystem1] {Zweistein::populateHistograms(io_service, ptrmsmtsystem1); });
 						worker_threads.create_thread([&ptrmsmtsystem1] {Zweistein::displayHistogram(io_service, ptrmsmtsystem1); });
 						boost::function<void()> sendstartcmd = [&ptrmsmtsystem1, &_devlist, &write2disk]() {
 							unsigned long rate = 1850;

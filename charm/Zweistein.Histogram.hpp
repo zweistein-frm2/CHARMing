@@ -37,11 +37,25 @@ typedef boost::geometry::model::d2::point_xy<int> point_type;
 typedef boost::geometry::model::polygon<point_type> polygon_type;
 
 
-extern boost::mutex histogramsGuard;
+extern Zweistein::Lock histogramsLock;
 
 #ifdef BOOST_PYTHON_MODULE
 #include "Zweistein.Binning.ApplyOcc.hpp"
 #endif
+
+namespace Zweistein {
+
+    enum class histogram_setup_status {
+        not_done = 0x0,
+        done = 0x1,
+        histogram0_resized = 0x2,
+        histogram1_resized = 0x4,
+        has_binning = 0x8
+    };
+
+    boost::atomic<histogram_setup_status> setup_status = histogram_setup_status::not_done;
+
+}
 
     struct RoiData {
         polygon_type roi;
@@ -82,22 +96,33 @@ extern boost::mutex histogramsGuard;
             if (!roidata.size()) setRoi("", 0);
         }
         std::string getRoi(int index) {
-            boost::mutex::scoped_lock lock(histogramsGuard);
+            int rsize = 0;
+            {
+                Zweistein::ReadLock r_lock(histogramsLock);
+                rsize = roidata.size();
+            }
+
             LOG_INFO << "getRoi(" << index << ")" << std::endl;
           
-            if (roidata.size() == index) {
-                LOG_DEBUG << "roidata.size()="<<roidata.size() <<", index does not exist, create new : "  << std::endl;
-                LOG_DEBUG << "roidata.push_back(rd), old size:" << roidata.size() << std::endl;
-                RoiData rd;
-                roidata.push_back(rd);
-                std::string wkt = WKTRoiRect(0, 0, histogram.size[1], histogram.size[0]);
-                _setRoi(wkt, index);
-                return wkt;
+            if (rsize == index) {
+                LOG_DEBUG << "roidata.size()="<<rsize <<", index does not exist, create new : "  << std::endl;
+                LOG_DEBUG << "roidata.push_back(rd), old size:" << rsize << std::endl;
+                {
+                    Zweistein::WriteLock w_lock(histogramsLock);
+                    RoiData rd;
+                    roidata.push_back(rd);
+                    std::string wkt = WKTRoiRect(0, 0, histogram.size[1], histogram.size[0]);
+                    _setRoi(wkt, index);
+                    return wkt;
+                }
                 
               
             }
-            if (roidata.size() - 1 < index) return "";
-            return _getRoi(index);
+            if (rsize - 1 < index) return "";
+            {
+                Zweistein::ReadLock r_lock(histogramsLock);
+                return _getRoi(index);
+            }
            
         }
 
@@ -126,7 +151,8 @@ extern boost::mutex histogramsGuard;
         }
 
         void setRoi(std::string wkt, int index) {
-            boost::mutex::scoped_lock lock(histogramsGuard);
+           
+            Zweistein::WriteLock w_lock(histogramsLock);
             LOG_INFO << "setRoi(" << wkt << ", " << index << ")" << std::endl;
             if (roidata.size() - 1 < index) {
                 LOG_ERROR << "index out of range, max=" << roidata.size() - 1 << std::endl;
@@ -142,8 +168,8 @@ extern boost::mutex histogramsGuard;
         }
 
         void _setRoi(std::string wkt,int index) {
-          
-            LOG_INFO << std::endl << "_setRoi(" << wkt <<", "<<index <<")" << std::endl;
+            
+            LOG_INFO << "_setRoi(" << wkt <<", "<<index <<")" << std::endl;
             int width = 1;
             int height = 1; 
                                  
@@ -194,10 +220,15 @@ extern boost::mutex histogramsGuard;
         }
 #ifdef BOOST_PYTHON_MODULE
         boost::python::tuple update(cv::Mat mat) {
+            using namespace magic_enum::bitwise_operators; // out-of-the-box bitwise operators for enums.
+            
+            {
+                Zweistein::ReadLock r_lock(histogramsLock);
+                histogram.copyTo(mat);
+            }
            
-            boost::mutex::scoped_lock lock(histogramsGuard);
-            histogram.copyTo(mat);
-           if (Zweistein::Binning::loaded) {
+            Zweistein::histogram_setup_status hss = Zweistein::setup_status;
+           if (magic_enum::enum_integer(hss & Zweistein::histogram_setup_status::has_binning)) {
            //  Zweistein::Binning::Apply_OCC_Correction(mat,roi,count);
             //    LOG_INFO << "update:applyocc_correction" << std::endl;
            }
@@ -219,7 +250,8 @@ extern boost::mutex histogramsGuard;
             int width = roidata[0].box.max_corner().get<0>() - roidata[0].box.min_corner().get<0>();
             int height = roidata[0].box.max_corner().get<1>() - roidata[0].box.min_corner().get<1>();
             {
-                boost::mutex::scoped_lock lock(histogramsGuard);
+               
+                Zweistein::ReadLock r_lock(histogramsLock);
                 width=histogram.cols;
                 height = histogram.rows;
             }
