@@ -16,6 +16,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 find_package(Boost 1.71 REQUIRED COMPONENTS filesystem chrono thread program_options iostreams log log_setup) # header only libraries must not be added here
 #find_path(Boost_INCLUDE_DIR boost)
+set (OpenCV_DIR ${_VCPKG_ROOT_DIR}/installed/${VCPKG_TARGET_TRIPLET}/share/opencv)
 find_package(OpenCV REQUIRED)
 find_package(unofficial-libuv CONFIG REQUIRED)
 
