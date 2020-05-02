@@ -23,7 +23,7 @@ namespace Mesytec {
 
 	std::string writelistmodeFileNameInfo() {
 		boost::filesystem::path tmppath = Mesytec::Config::DATAHOME;
-		return tmppath.string() + std::string("YYmmdd_H-M-S.mdat)");
+		return tmppath.string() + std::string("YYmmdd_H-M-S.mdat");
 	}
 	boost::atomic<bool> bListmodeWriting = false;
 	void writeListmode(boost::asio::io_service& io_service, boost::shared_ptr < Mesytec::MesytecSystem> device1) {

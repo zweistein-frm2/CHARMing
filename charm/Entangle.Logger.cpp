@@ -5,7 +5,6 @@
  *   the Free Software Foundation;                                         *
  ***************************************************************************/
 
-#pragma once
 #include "Entangle.Logger.hpp"
 
 boost::iostreams::stream< boost::iostreams::null_sink > nullOstream((boost::iostreams::null_sink()));

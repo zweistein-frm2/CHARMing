@@ -46,6 +46,7 @@
 #include "Zweistein.ThreadPriority.hpp"
 #include "Zweistein.Logger.hpp"
 
+
 #ifdef _DEBUG
 boost::log::trivial::severity_level SEVERITY_THRESHOLD = boost::log::trivial::trace;
 #else
@@ -103,7 +104,7 @@ int main(int argc, char* argv[])
 		po::options_description desc("command line options");
 		int maxNlistmode = 16;// maximal 16 listmode files
 		desc.add_options()
-			(HELP, "produce help message")
+			(HELP, "produces this help message" )
 			(LISTMODE_FILE, po::value< std::vector<std::string> >(),(std::string("file1 [file2] ... [file")+std::to_string(maxNlistmode)+std::string("N]")).c_str())
 			(CONFIG, po::value< std::string>(), (std::string("alternative config file[.json], must be in ")+ inidirectory.string()).c_str())
 			(WRITE2DISK, (std::string("write DataPackets to ")+ Mesytec::writelistmodeFileNameInfo()).c_str())
@@ -115,7 +116,16 @@ int main(int argc, char* argv[])
 		po::store(po::command_line_parser(argc, argv).
 			options(desc).positional(positionalOptions).run(), vm);
 		if (vm.count(HELP)) {
-			std::cout << "Options for Charm or Mesytec Detector systems instrument control" << std::endl << std::endl;
+			std::cout << "Options for Charm or Mesytec Detector systems instrument control" << std::endl;
+			std::cout<<"connects to mesytec/charm hardware (or simulator=>PacketSender) and starts data acquisition"<< std::endl;
+		    boost::filesystem::path preferred=Zweistein::Config::PreferredDirectory();
+			preferred /= PROJECT_NAME;
+			preferred.append(PROJECT_NAME + ".json");
+			std::cout << "according to [preferred settings] in "<<preferred.string() << std::endl;
+			boost::filesystem::path current = inidirectory;
+			current/= PROJECT_NAME;
+			current.append(PROJECT_NAME + ".json");
+			std::cout << "[current settings] : " << current.string() << std::endl;
 			rad::OptionPrinter::printStandardAppDesc(appName,
 				std::cout,
 				desc,
@@ -288,7 +298,7 @@ int main(int argc, char* argv[])
 		}
 		else {
 			// data acquisition monitoring loop
-			Zweistein::setupHistograms(io_service,ptrmsmtsystem1, Mesytec::Config::BINNINGFILE.string());
+			
 			for (int i = 0; i < 10; i++) {
 				if (ptrmsmtsystem1->connected) {
 					if (setupafterconnect) {
@@ -433,6 +443,7 @@ int main(int argc, char* argv[])
 						break;
 					}
 					else {
+						Zweistein::setupHistograms(io_service, ptrmsmtsystem1, Mesytec::Config::BINNINGFILE.string());
 						worker_threads.create_thread([&ptrmsmtsystem1] {Zweistein::populateHistograms(io_service, ptrmsmtsystem1); });
 						worker_threads.create_thread([&ptrmsmtsystem1] {Zweistein::displayHistogram(io_service, ptrmsmtsystem1); });
 						boost::function<void()> sendstartcmd = [&ptrmsmtsystem1, &_devlist, &write2disk]() {

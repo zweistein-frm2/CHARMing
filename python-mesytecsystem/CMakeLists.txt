@@ -103,7 +103,8 @@ ${Charm_DIR}/Zweistein.ping.cpp
 if(MSVC)
 set(Entangle_Dir /users/alanghof/source/repos/entangle/entangle)
 else()
-set(Entangle_Dir /usr/lib/python3/dist-packages/entangle)
+#set(Entangle_Dir /usr/lib/python3/dist-packages/entangle)
+set(Entangle_Dir ~/entangle/entangle)
 endif()
 
 

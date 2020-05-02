@@ -88,7 +88,7 @@
       "inheritEnvironments": [ "linux_x64" ],
       "remoteMachineName": "taco07",
       "remoteCMakeListsRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/src",
-      "remoteBuildRoot": "$HOME/entangle/entangle/device/charm",
+      "remoteBuildRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/build/${name}",
       "remoteInstallRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/install/${name}",
       "remoteCopySources": true,
       "rsyncCommandArgs": "-t --delete --delete-excluded",
@@ -146,7 +146,7 @@
         },
         {
           "name": "pyboostcvconverter_DIR",
-          "value": "C:\\users\\alanghof\\source\\repos\\CHARMing\\pyboostcvconverter",
+          "value": "${projectDir}\\..\\pyboostcvconverter",
           "type": "PATH"
         }
       ]

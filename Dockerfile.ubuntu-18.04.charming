@@ -37,13 +37,13 @@ RUN cd /vcpkg && ./vcpkg integrate install
 RUN cd /vcpkg && ./vcpkg install magic-enum
 RUN cd /vcpkg && ./vcpkg install libuv
 
-ARG boost_ver=1_73_0
+ARG boostversion=1_73_0
 
-RUN cd /opt && wget https://dl.bintray.com/boostorg/release/${sed s/_/g. | ${boost_ver}}/source/boost_${boost_ver}.tar.bz2 && tar --bzip2 -xf ./boost_${boost_ver}.tar.bz2
-RUN cd /opt && rm ./boost_${boost_ver}.bz2
-RUN cd /opt/boost_${boost_ver} && ./bootstrap.sh --prefix=/usr/
-RUN cd /opt/boost_${boost_ver} && ./b2
-RUN cd /opt/boost_${boost_ver} && ./b2 install
+RUN cd /opt && wget https://dl.bintray.com/boostorg/release/${echo ${boostversion} | sed 's/_/./g'}/source/boost_${boostversion}.tar.bz2 && tar --bzip2 -xf ./boost_${boostversion}.tar.bz2
+RUN cd /opt && rm ./boost_${boostversion}.bz2
+RUN cd /opt/boost_${boostversion} && ./bootstrap.sh --prefix=/usr/
+RUN cd /opt/boost_${boostversion} && ./b2
+RUN cd /opt/boost_${boostversion} && ./b2 install
 
 
 

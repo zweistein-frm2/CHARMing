@@ -1,5 +1,5 @@
 name: frm2-charm # you probably want to 'snapcraft register <name>'
-version: git # just for humans, typically '1.2+git' or '1.3.2'
+version: '1.0' # just for humans, typically '1.2+git' or '1.3.2'
 summary: Mesytec detector software # 79 char long summary
 description: |
   supports Mesytec neutron detector hardware as well as the new charm project detector. 
@@ -13,7 +13,6 @@ build-packages:
     - build-essential
     - automake
     - libtool
-    - libpthread-stubs0-dev
     - libssl-dev
     - zlib1g-dev
     - libc6-dbg
@@ -25,6 +24,7 @@ build-packages:
     - curl
     - unzip
     - tar
+    - nano
      
 parts:
  ppa:
@@ -41,15 +41,13 @@ parts:
    source-depth: 1
    plugin: cmake
    after: [ppa]
-        
    override-build: |
-     
      mkdir -p build
      cd build
      cmake \
        -DCMAKE_INSTALL_PREFIX=$SNAPCRAFT_STAGE/cmake \
        $SNAPCRAFT_PART_SRC
-     make -j 4
+     make -j 3
      make install
 
  boost:
@@ -72,21 +70,41 @@ parts:
       ./vcpkg install magic-enum
       ./vcpkg install opencv
       ./vcpkg integrate install
-
+ asio-extensions:
+    source: https://github.com/timniederhausen/asio-extensions.git
+    source-type: git
+    plugin: nil
+ sigslot:
+    source: https://github.com/palacaze/sigslot.git
+    source-type: git
+    plugin: nil
  frm2-charm:
     after: 
      - cmake
      - boost
      - vcpkg
+     - asio-extensions
+     - sigslot
     plugin: cmake
-    source: https://github.com/zweistein-frm2/CHARMing.git
-    source-type: git
-    configflags: [-DCMAKE_TOOLCHAIN_FILE=$SNAPCRAFT_PART_INSTALL/root/parts/vcpkg/scripts/buildsystems/vcpkg.cmake  -DSIGSLOT_PATH=../sigslot/include, -DASIO_EXTENSIONS_PATH=../asio-extensions/nclude, -DPacketSender_DIR=../PacketSender ]
+    source: .
+    configflags: []
     override-build: |
-     cd charm
+     
       $SNAPCRAFT_STAGE/cmake/bin/cmake \
         -DCMAKE_INSTALL_PREFIX=$SNAPCRAFT_PART_INSTALL/usr/local \
         -DCMAKE_BUILD_TYPE=Release \
+        -DVCPKG_TARGET_TRIPLET=x64-linux \
+        -D_VCPKG_ROOT_DIR=/root/parts/vcpkg/build \
+        -DCMAKE_TOOLCHAIN_FILE=/root/parts/vcpkg/build/scripts/buildsystems/vcpkg.cmake \
+        -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
+        -DBOOST_BIND_GLOBAL_PLACEHOLDERS=1 \
+        -DOpenCV_DIR=/root/parts/vcpkg/build/installed/x64-linux/share/opencv \
+        -DProtobuf_DIR=/root/parts/vcpkg/build/installed/x64-linux/share/protobuf \
+        -DProtobuf_INCLUDE_DIRS=/root/parts/vcpkg/build/installed/x64-linux/include  \
+        -Dunofficial-libuv_DIR=/root/parts/vcpkg/build/installed/x64-linux/share/unofficial-libuv \
+        -Dmagic_enum_DIR=/root/parts/vcpkg/build/installed/x64-linux/share/magic_enum \
+        -DASIO_EXTENSIONS_PATH=/root/parts/asio-extensions/build/include \
+        -DSIGSLOT_PATH=/root/parts/sigslot/build/include  \
         $SNAPCRAFT_PART_SRC
       make -j 4
       make install

@@ -23,11 +23,6 @@
           "type": "PATH"
         },
         {
-          "name": "PacketSender_DIR",
-          "value": "${projectDir}\\..\\PacketSender",
-          "type": "PATH"
-        },
-        {
           "name": "NETWORKCARDINTERFACE",
           "value": "192.168.168.100",
           "type": "STRING"
@@ -55,11 +50,6 @@
           "name": "ASIO_EXTENSIONS_PATH",
           "value": "${projectDir}\\..\\asio-extensions\\include",
           "type": "PATH"
-        },
-        {
-          "name": "PacketSender_DIR",
-          "value": "${projectDir}\\..\\PacketSender",
-          "type": "PATH"
         }
       ]
     },
@@ -80,6 +70,7 @@
       "remoteBuildRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/build/${name}",
       "remoteInstallRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/install/${name}",
       "remoteCopySources": true,
+	  "remoteCopySourcesExclusionList": [ ".vs", ".git", "out" ,"prime","snap","parts","stage"],
       "rsyncCommandArgs": "-t --delete --delete-excluded",
       "remoteCopyBuildOutput": false,
       "remoteCopySourcesMethod": "rsync",
@@ -88,11 +79,6 @@
         {
           "name": "ASIO_EXTENSIONS_PATH",
           "value": "/home/alanghof/repos/CHARMing/asio-extensions/include",
-          "type": "PATH"
-        },
-        {
-          "name": "PacketSender_DIR",
-          "value": "/home/alanghof/repos/CHARMing/PacketSender",
           "type": "PATH"
         },
         {
@@ -112,7 +98,7 @@
       "generator": "Unix Makefiles",
       "configurationType": "RelWithDebInfo",
       "cmakeExecutable": "/snap/cmake/current/bin/cmake",
-      "remoteCopySourcesExclusionList": [ ".vs", ".git", "out" ],
+      "remoteCopySourcesExclusionList": [ ".vs", ".git", "out" ,"prime","snap","parts","stage"],
       "cmakeToolchain": "/vcpkg/scripts/buildsystems/vcpkg.cmake",
       "cmakeCommandArgs": "",
       "buildCommandArgs": "",
@@ -131,11 +117,6 @@
         {
           "name": "ASIO_EXTENSIONS_PATH",
           "value": "/home/localadmin/repos/CHARMing/asio-extensions/include",
-          "type": "PATH"
-        },
-        {
-          "name": "PacketSender_DIR",
-          "value": "/home/localadmin/repos/CHARMing/PacketSender",
           "type": "PATH"
         },
         {
