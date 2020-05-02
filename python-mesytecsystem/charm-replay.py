@@ -165,11 +165,13 @@ class Histogram(base.ImageChannel):
         self.histogram = None
          
     def Histogram(self):
-        if self.histogram is None:
-             if charmsystem:
-                  self.histogram = charmsystem.getHistogram()
-             else:
-                 return None
+        #replay is different than acquire, because in replay multiple files can have diffferent binning properties (some files binned, others not)
+        # so we should eval getHistogram() with every update.
+        #all this is a very unlikely case that multiple list mode files refer to different measurement setups..
+        if charmsystem:
+            self.histogram = charmsystem.getHistogram()
+        else:
+            return None
         return self.histogram
 
     def read_CountsInRoi(self):

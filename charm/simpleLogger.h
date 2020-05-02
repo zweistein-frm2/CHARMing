@@ -39,11 +39,26 @@
 #endif
 #ifdef __cpp_lib_string_view
 #include <magic_enum.hpp>
+
+
+template<typename E,magic_enum::Enum<E>>
+inline boost::log::BOOST_LOG_VERSION_NAMESPACE::basic_record_ostream<char>& operator<<(boost::log::BOOST_LOG_VERSION_NAMESPACE::basic_record_ostream<char>& p, E& e) {
+    std::stringstream ss;
+    e.print(ss);
+    p << ss.str();
+    return p;
+}
+
+
+
 namespace magic_enum {
+
+    
+
     namespace ostream_operators {
 
-        template <typename Char, typename Traits, typename E>
-        inline auto operator<<(boost::log::formatting_ostream& os, E value) -> detail::enable_if_enum_t<E, boost::log::formatting_ostream&> {
+        template <typename E>
+        inline boost::log::formatting_ostream&  operator<<(boost::log::formatting_ostream& os, E value)  {
             if (auto name = enum_name(value); !name.empty()) {
                 for (auto c : name) {
                     os.put(c);
@@ -56,8 +71,8 @@ namespace magic_enum {
             return os;
         }
 
-        template <typename Char, typename Traits, typename E>
-        inline auto operator<<(boost::log::formatting_ostream& os, std::optional<E> value) -> detail::enable_if_enum_t<E, boost::log::formatting_ostream&> {
+        template  <typename E>
+        inline boost::log::formatting_ostream&  operator<<(boost::log::formatting_ostream& os, std::optional<E> value) {
             if (value.has_value()) {
                 os << value.value();
             }

@@ -115,22 +115,15 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
                 io_service.run();
             }
             catch (Mesytec::cmd_error& x) {
-                boost::mutex::scoped_lock lock(coutGuard);
                 if (int const* mi = boost::get_error_info<Mesytec::my_info>(x)) {
                     auto  my_code = magic_enum::enum_cast<Mesytec::cmd_errorcode>(*mi);
                     if (my_code.has_value()) {
                         auto c1_name = magic_enum::enum_name(my_code.value());
                         LOG_ERROR << c1_name << std::endl;
                     }
-
                 }
-
             }
-            catch (boost::exception& e) {
-                boost::mutex::scoped_lock lock(coutGuard);
-                LOG_ERROR << boost::diagnostic_information(e) << std::endl;
-
-            }
+            catch (boost::exception& e) {LOG_ERROR << boost::diagnostic_information(e) << std::endl;}
             io_service.stop();
 
         };
@@ -142,8 +135,8 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
         worker_threads.add_thread(pt);
         boost::this_thread::sleep_for(boost::chrono::milliseconds(3000));// so msmtsystem1 should be connected
        
-        
         for (int i = 0; i < 10; i++) {
+            // we try to connect for 10 seconds
             if (ptrmsmtsystem1->connected) {
                 Zweistein::setupHistograms(io_service, ptrmsmtsystem1, Mesytec::Config::BINNINGFILE.string());
                 worker_threads.create_thread([&ptrmsmtsystem1] {Zweistein::populateHistograms(io_service, ptrmsmtsystem1); });
@@ -189,7 +182,7 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
             long long currentcount = ptrmsmtsystem1->data.evntcount; 
             double evtspersecond = sec.count() != 0 ? (double)(currentcount - lastcount) / sec.count() : 0;
             {
-                boost::mutex::scoped_lock lock(coutGuard);
+              
                 std::stringstream ss1;
 
                 unsigned short tmp = ptrmsmtsystem1->data.last_deviceStatusdeviceId;
@@ -202,8 +195,10 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
                 int maxlen = 75;
                 int n_ws =int( maxlen - len);
                 for (; n_ws > 0; n_ws--) ss1 << " ";
-                
-                std::cout << ss1.str();
+                {
+                    boost::mutex::scoped_lock lock(coutGuard);
+                    std::cout << ss1.str();
+                }
                 lastcount = currentcount;
 #ifndef _WIN32
                 std::cout << std::flush;
@@ -214,10 +209,7 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
         };
         if (ptrmsmtsystem1) {
             try { ptrmsmtsystem1->SendAll(Mcpd8::Cmd::STOP_UNCHECKED); }
-            catch (boost::exception& e) {
-                boost::mutex::scoped_lock lock(coutGuard);
-                LOG_ERROR << boost::diagnostic_information(e) << std::endl;
-            }
+            catch (boost::exception& e) {LOG_ERROR << boost::diagnostic_information(e) << std::endl;}
             //	delete ptrmsmtsystem1;
             //	ptrmsmtsystem1 = nullptr;
         }
@@ -305,27 +297,16 @@ struct NeutronMeasurement {
                 ptrmsmtsystem1->SendAll(Mcpd8::Cmd::START);
                 set_simulatorRate(get_simulatorRate());
             }
-            catch (boost::exception& e) {
-                boost::mutex::scoped_lock lock(coutGuard);
-                LOG_ERROR << boost::diagnostic_information(e)<<std::endl;
-
-            }
+            catch (boost::exception& e) { LOG_ERROR << boost::diagnostic_information(e)<<std::endl;}
 
         }
         void stop() {
             try { ptrmsmtsystem1->SendAll(Mcpd8::Cmd::STOP); }
-            catch (boost::exception& e) {
-                boost::mutex::scoped_lock lock(coutGuard);
-                LOG_ERROR << boost::diagnostic_information(e) << std::endl;
-            }
+            catch (boost::exception& e) { LOG_ERROR << boost::diagnostic_information(e) << std::endl;}
         }
         void resume() {
             try { ptrmsmtsystem1->SendAll(Mcpd8::Cmd::CONTINUE); }
-            catch (boost::exception& e) {
-                boost::mutex::scoped_lock lock(coutGuard);
-                LOG_ERROR << boost::diagnostic_information(e) << std::endl;
-            }
-        
+            catch (boost::exception& e) { LOG_ERROR << boost::diagnostic_information(e) << std::endl;}
         }
 
         Histogram* getHistogram() {

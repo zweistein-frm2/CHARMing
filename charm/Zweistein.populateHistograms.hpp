@@ -190,7 +190,6 @@ namespace Zweistein {
 					evntspopped++;
 					if (evntspopped > 2 * Mcpd8::Data::EVENTQUEUESIZE / 3) {
 						evntspopped = 0;
-						boost::mutex::scoped_lock lock(coutGuard);
 						LOG_WARNING << "evntspopped > " << 2 * Mcpd8::Data::EVENTQUEUESIZE / 3 << std::endl;
 						break;
 					}

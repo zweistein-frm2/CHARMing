@@ -13,6 +13,7 @@ build-packages:
     - build-essential
     - automake
     - libtool
+    - libpthread-stubs0-dev
     - libssl-dev
     - zlib1g-dev
     - libc6-dbg
@@ -57,7 +58,7 @@ parts:
     source-depth: 1
     plugin: nil
     override-build: |
-      ./bootstrap.sh --with-libraries=thread,system,filesystem,log,program_options
+      ./bootstrap.sh 
       ./b2 headers
       ./b2 cxxflags="-std=c++17" install
 
@@ -67,10 +68,10 @@ parts:
     plugin: nil
     override-build: |
       ./bootstrap-vcpkg.sh
-      ./vcpkg integrate install
       ./vcpkg install libuv
       ./vcpkg install magic-enum
       ./vcpkg install opencv
+      ./vcpkg integrate install
 
  frm2-charm:
     after: 
@@ -78,10 +79,11 @@ parts:
      - boost
      - vcpkg
     plugin: cmake
-    source: .
-    configflags: [-DCMAKE_TOOLCHAIN_FILE=/root/parts/vcpkg/scripts/buildsystems/vcpkg.cmake  -DSIGSLOT_PATH=../sigslot/include, -DASIO_EXTENSIONS_PATH=../asio-extensions/nclude, -DPacketSender_DIR=../PacketSender ]
+    source: https://github.com/zweistein-frm2/CHARMing.git
+    source-type: git
+    configflags: [-DCMAKE_TOOLCHAIN_FILE=$SNAPCRAFT_PART_INSTALL/root/parts/vcpkg/scripts/buildsystems/vcpkg.cmake  -DSIGSLOT_PATH=../sigslot/include, -DASIO_EXTENSIONS_PATH=../asio-extensions/nclude, -DPacketSender_DIR=../PacketSender ]
     override-build: |
-     
+     cd charm
       $SNAPCRAFT_STAGE/cmake/bin/cmake \
         -DCMAKE_INSTALL_PREFIX=$SNAPCRAFT_PART_INSTALL/usr/local \
         -DCMAKE_BUILD_TYPE=Release \

@@ -74,19 +74,12 @@ namespace Mesytec {
 			f.write(header.c_str(), header.length());
 			f.write(Mesytec::listmode::header_separator, sizeof(Mesytec::listmode::header_separator));
 			{
-				boost::mutex::scoped_lock lock(coutGuard);
-				std::cout << "Writing to:" << tmppath << std::endl;
+				LOG_INFO << "Writing to:" << tmppath << std::endl;
 			}
 			Mcpd8::DataPacket dp;
-			int i = 0;
+			
 			do {
 				while (device1->data.listmodequeue.pop(dp)) {
-					/*
-					i++;
-					{
-						boost::mutex::scoped_lock lock(coutGuard);
-						std::cout << ev;
-					}*/
 					short* sp = (short*)&dp;
 					int len = dp.BytesUsed();
 					for (int i = 0; i <len/sizeof(short); i++) 	boost::endian::endian_reverse_inplace(sp[i]);
@@ -101,9 +94,7 @@ namespace Mesytec {
 			
 		}
 		catch (boost::exception& e) {
-			boost::mutex::scoped_lock lock(coutGuard);
 			LOG_ERROR << boost::diagnostic_information(e)<<std::endl;
-
 		}
 		
 		std::filesystem::resize_file(tmppath.string(), byteswritten);
@@ -121,7 +112,6 @@ namespace Mesytec {
 		listmode::stopwriting = false; // rearm for next, but must start new thread again
 
 		{
-			boost::mutex::scoped_lock lock(coutGuard);
 			LOG_INFO << Zweistein::PrettyBytes(byteswritten) << " written to:"<< tmppath.string() << std::endl;
 		}
 	

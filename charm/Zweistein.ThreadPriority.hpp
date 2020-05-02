@@ -77,8 +77,7 @@ namespace Zweistein {
 				long buffersize = std::atol(data[0].substr(t + 1).c_str());
 
 				if (buffersize < 26214400L) {
-					boost::mutex::scoped_lock lock(coutGuard);
-					
+						
 					bp::ipstream is2;
 					bp::ipstream ierr2;
 					std::string cmdline = p.string() + " -w net.core.rmem_max=26214400";
@@ -100,7 +99,7 @@ namespace Zweistein {
 				return true;
 			}
 			catch (boost::exception& e) {
-				boost::mutex::scoped_lock lock(coutGuard);
+				
 				LOG_ERROR << boost::diagnostic_information(e) << std::endl;
 			}
 			return false;

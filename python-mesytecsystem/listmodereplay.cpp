@@ -278,15 +278,9 @@ struct ReplayList {
                     else ptrStartParameters->playlist.push_back(file);
                 }
                 else LOG_WARNING << "File not added to playlist (not found) : " << file << std::endl;
-                
-                
-               
+            
             }
-            catch (boost::exception& e) {
-                boost::mutex::scoped_lock lock(coutGuard);
-                LOG_ERROR << boost::diagnostic_information(e)<<std::endl;
-
-            }
+            catch (boost::exception& e) {LOG_ERROR << boost::diagnostic_information(e)<<std::endl;}
             for (auto& s : ptrStartParameters->playlist) l.append(s);
             return l;
             
@@ -298,13 +292,8 @@ struct ReplayList {
             boost::python::list l;
             try {
                 ptrStartParameters->playlist.remove(file);
-
             }
-            catch (boost::exception& e) {
-                boost::mutex::scoped_lock lock(coutGuard);
-                LOG_ERROR << boost::diagnostic_information(e) << std::endl;
-
-            }
+            catch (boost::exception& e) {LOG_ERROR << boost::diagnostic_information(e) << std::endl;}
             for (auto& s : ptrStartParameters->playlist) l.append(s);
             return l;
 
@@ -325,10 +314,15 @@ struct ReplayList {
         }
 
         Histogram* getHistogram() {
+            using namespace magic_enum::bitwise_operators; // out-of-the-box bitwise operators for enums.
             LOG_DEBUG << "getHistogram()" << std::endl;
-            return &histograms[1];
+            Zweistein::histogram_setup_status hss = Zweistein::setup_status;
+            if (magic_enum::enum_integer(hss & Zweistein::histogram_setup_status::has_binning)) {
+                return &histograms[1];
+            }
+            return &histograms[0];
         }
-
+        
     };
 
 namespace {

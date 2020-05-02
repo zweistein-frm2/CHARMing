@@ -128,7 +128,6 @@ namespace Mesytec {
 				else {
 					if (p.eventdataformat != eventdataformat) {
 						using namespace magic_enum::ostream_operators;
-						boost::mutex::scoped_lock lock(coutGuard);
 						LOG_ERROR << "ERROR: " << p.eventdataformat << "different to " << eventdataformat << std::endl;
 						LOG_ERROR << "skipping " << mp.datagenerator << " " << mp.mcpd_endpoint.address().to_string() << std::endl;
 						skip = true;
@@ -164,7 +163,6 @@ namespace Mesytec {
 			boost::chrono::system_clock::time_point tpstarted = started;
 			boost::chrono::milliseconds ms = boost::chrono::duration_cast<boost::chrono::milliseconds> (boost::chrono::system_clock::now() - tpstarted);
 			{
-				boost::mutex::scoped_lock lock(coutGuard);
 				LOG_INFO << "MESYTECHSYSTEM LISTMODEREAD READY: +" << ms << std::endl;
 			}
 			return connected;
@@ -190,7 +188,6 @@ namespace Mesytec {
 				local_endpoint = udp::endpoint(boost::asio::ip::address::from_string(p.networkcard), p.mcpd_port);
 				mp.mcpd_endpoint = udp::endpoint(boost::asio::ip::address::from_string(p.mcpd_ip),p.mcpd_port);
 				{
-					boost::mutex::scoped_lock lock(coutGuard);
 					LOG_DEBUG << "Local bind " << local_endpoint << " to " << mp.mcpd_endpoint << std::endl;
 				}
 				bool local_endpoint_is_bound = false;
@@ -222,7 +219,6 @@ namespace Mesytec {
 				else {
 					if (p.eventdataformat != eventdataformat) {
 						using namespace magic_enum::ostream_operators;
-						boost::mutex::scoped_lock lock(coutGuard);
 						LOG_ERROR << "ERROR: " << p.eventdataformat << "different to " << eventdataformat << std::endl;
 						LOG_ERROR << "skipping " << mp.datagenerator << " " << mp.mcpd_endpoint.address().to_string() << std::endl;
 						skip = true;
@@ -273,16 +269,9 @@ namespace Mesytec {
 			for (auto& onid : oldidnewid) {
 				auto it= deviceparam.find(onid.second);
 				if (it != deviceparam.end()) {
-					boost::mutex::scoped_lock lock(coutGuard);
-					//it->second.socket->cancel();
-					//start_receive(it->second, onid.second); // now we expect new id!
-					//deviceparam.insert(std::pair<const unsigned char, Mesytec::DeviceParameter>(onid.second, it->second));
-					//deviceparam.erase(it);
 					LOG_INFO << (it->second.mcpd_endpoint.address()).to_string() << " SETID: NEW ID=" << (int)onid.second << " (OLD ID=" <<(int)onid.first << ")"<< std::endl;
-
 				}
 				else {
-					boost::mutex::scoped_lock lock(coutGuard);
 					LOG_ERROR << __FILE__ <<":"<<__LINE__ << std::endl;
 				}
 				
@@ -401,7 +390,6 @@ namespace Mesytec {
 			boost::chrono::system_clock::time_point tpstarted = started;
 			boost::chrono::milliseconds ms = boost::chrono::duration_cast<boost::chrono::milliseconds> (boost::chrono::system_clock::now() - tpstarted);
 			{
-				boost::mutex::scoped_lock lock(coutGuard);
 				LOG_INFO << "MESYTECHSYSTEM CONNECTED: +" << ms << std::endl;
 			}
 			return connected;
@@ -419,22 +407,18 @@ namespace Mesytec {
 
 				if (cmd_2.has_value()) {
 					if (cmd_2 == Mcpd8::Internal_Cmd::CHARMPATTERNGENERATOR || cmd_2 == Mcpd8::Internal_Cmd::CHARMSETEVENTRATE) {
-						boost::mutex::scoped_lock lock(coutGuard);
-						using namespace magic_enum::ostream_operators;
-				//	TODO	LOG_ERROR << mp.datagenerator << " not supported:" << cmd_2 << std::endl;
+							using namespace magic_enum::ostream_operators;
+							//LOG_ERROR << mp.datagenerator << " not supported:" << cmd_2 << std::endl; // TODO string conversion?
 						rv = false;
 					}
 				}
-
 			}
-
 			if (mp.datagenerator == Mesytec::DataGenerator::Mcpd8) {
 				if (cmd_2.has_value()) {
 					if (cmd_2 == Mcpd8::Internal_Cmd::SETNUCLEORATEEVENTSPERSECOND
 						|| cmd_2 == Mcpd8::Internal_Cmd::CHARMPATTERNGENERATOR || cmd_2 == Mcpd8::Internal_Cmd::CHARMSETEVENTRATE) {
-						boost::mutex::scoped_lock lock(coutGuard);
 						using namespace magic_enum::ostream_operators;
-			//	TODO		LOG_ERROR << mp.datagenerator << " not supported:" << cmd_2 << std::endl;
+						//LOG_ERROR << mp.datagenerator << " not supported:" << cmd_2 << std::endl; // TODO string conversion?
 						rv = false;
 					}
 				}
@@ -461,7 +445,6 @@ namespace Mesytec {
 				unsigned short data = (unsigned short)(50 * 1000000 / (param));
 
 				if (data <= 2) {
-					boost::mutex::scoped_lock lock(coutGuard);
 					using namespace magic_enum::ostream_operators;
 					auto cmd_2 = magic_enum::enum_cast<Mcpd8::Internal_Cmd>(cmdpacket.cmd);
 					std::stringstream ss1;
@@ -486,7 +469,6 @@ namespace Mesytec {
 				
 			}
 			catch (Mesytec::cmd_error& x) {
-				boost::mutex::scoped_lock lock(coutGuard);
 				// SETNUCLEORATEEVENTSPERSECOND has 0x8000 bit always set, so it is falsely as CMD not understood 
 				if (int const* mi = boost::get_error_info<Mesytec::my_info>(x)) {
 					auto  my_code = magic_enum::enum_cast<Mesytec::cmd_errorcode>(*mi);
@@ -508,7 +490,6 @@ namespace Mesytec {
 				}
 
 				{
-					boost::mutex::scoped_lock lock(coutGuard);
 					LOG_DEBUG << "CPU " << response.data[0] << "." << response.data[1] << ", FPGA " << ((response.data[2] >> 8) & 0xff) << "." << (response.data[2] & 0xff) << std::endl;
 				}
 				kvp.second.firmware_major = response.data[0];
@@ -629,7 +610,6 @@ namespace Mesytec {
 						break;
 					}
 					catch (Mesytec::cmd_error& x) {
-						boost::mutex::scoped_lock lock(coutGuard);
 						if (int const* mi = boost::get_error_info<Mesytec::my_info>(x)) {
 							auto  my_code = magic_enum::enum_cast<Mesytec::cmd_errorcode>(*mi);
 							if (my_code != Mesytec::cmd_errorcode::CMD_NOT_UNDERSTOOD) {
@@ -690,7 +670,6 @@ namespace Mesytec {
 				response=Send(kvp,cmdpacket);
 				if (response.data[0] != param)
 				{
-					boost::mutex::scoped_lock lock(coutGuard);
 					using namespace magic_enum::ostream_operators;
 					LOG_ERROR<< (kvp.second.mcpd_endpoint.address()).to_string()<<" " << cmd << " requested=0x" <<std::hex << param << " returned=0x" << response.data[0] <<std::dec << std::endl;
 				}
@@ -716,13 +695,11 @@ namespace Mesytec {
 				cmdpacket.Length = Mcpd8::CmdPacket::defaultLength + 1;
 				response = Send(kvp, cmdpacket);
 				if (response.data[0] >= 8) {
-					boost::mutex::scoped_lock lock(coutGuard);
 					using namespace magic_enum::ostream_operators;
 					LOG_ERROR << cmd << "RESPONSE OUTSIDE RANGE: data[0]=0x" <<std::hex<< response.data[0] <<std::dec<< std::endl;
 
 				}
 				else {
-					boost::mutex::scoped_lock lock(coutGuard);
 					using namespace magic_enum::ostream_operators;
 					using namespace magic_enum::bitwise_operators;
 					std::stringstream ss;
@@ -751,7 +728,6 @@ namespace Mesytec {
 		void SendAll(Mcpd8::Cmd cmd) {
 			//if (internalerror != Mesytec::cmd_errorcode::OK) return;
 			{
-				boost::mutex::scoped_lock lock(coutGuard);
 				using namespace magic_enum::ostream_operators;
 				std::stringstream ss;
 				ss << cmd;
@@ -817,7 +793,6 @@ namespace Mesytec {
 				}
 			}
 			if (inputFromListmodeFile) {
-				boost::mutex::scoped_lock lock(coutGuard);
 				LOG_WARNING << "Cannot Send "<< ss_cmd.str()  <<" because inputFromListmodeFile==true" << std::endl;
 				return cmdpacket;
 			}
@@ -865,7 +840,6 @@ namespace Mesytec {
 							if (response.cmd == cmdpacket.cmd || (response.cmd == (cmdpacket.cmd | 0x8000))) {
 								wait_response = false;
 							if (response.cmd & 0x8000) {
-								boost::mutex::scoped_lock lock(coutGuard);
 								boost::chrono::milliseconds ms = boost::chrono::duration_cast<boost::chrono::milliseconds> (boost::chrono::system_clock::now() - start);
 								ss_log <<  " NOT UNDERSTOOD! +"<<ms ;
 								ss_log << std::endl<< "RESPONSE: " << response << std::endl;
@@ -874,7 +848,7 @@ namespace Mesytec {
 								throw cmd_error() << my_info(internalerror);
 							}
 							else {
-								boost::mutex::scoped_lock lock(coutGuard);
+								
 								boost::chrono::milliseconds ms = boost::chrono::duration_cast<boost::chrono::milliseconds> (boost::chrono::system_clock::now() - start);
 								ss_log << " RESPONSE OK(" << response.Length - response.headerLength << " items) +"<<ms ;
 								ss_log << "RESPONSE: " <<  response;
@@ -921,17 +895,13 @@ namespace Mesytec {
 
 		void handle__charm_receive(const boost::system::error_code& error,
 			std::size_t bytes_transferred) {
-
-			if (true) {
-				boost::mutex::scoped_lock lock(coutGuard);
 				LOG_DEBUG << "handle__charm_receive(" << error.message() << " ,bytes_transferred=" << bytes_transferred << std::endl;
 				for (int i = 0; i < bytes_transferred; i++) {
 					LOG_DEBUG << std::hex << charm_buf[i] << " ";
 					if (i % 8 == 0) LOG_DEBUG << std::endl;
 				}
 				LOG_DEBUG <<std::dec<< std::endl;
-			}
-			start_receive_charm();
+				start_receive_charm();
 		}
 		void start_receive(const Mesytec::DeviceParameter &mp,unsigned char devid) {
 			
@@ -951,14 +921,9 @@ namespace Mesytec {
 				} while (!pio_service->stopped());
 
 			}
-			catch (boost::exception & e) { 
-				boost::mutex::scoped_lock lock(coutGuard);
-				LOG_ERROR << boost::diagnostic_information(e) << std::endl;
-			}
-			{
-				boost::mutex::scoped_lock lock(coutGuard);
-				LOG_DEBUG << "watch_incoming_packets() exiting..." << std::endl;
-			}
+			catch (boost::exception & e) {	LOG_ERROR << boost::diagnostic_information(e) << std::endl;	}
+			LOG_DEBUG << "watch_incoming_packets() exiting..." << std::endl;
+			
 		}
 		
 		bool firstneutrondiscarded = false;
@@ -967,7 +932,6 @@ namespace Mesytec {
 			Mcpd8::DataPacket& dp = recv_buf[0];
 			data.last_deviceStatusdeviceId = dp.deviceStatusdeviceId;
 			if (error) {
-				boost::mutex::scoped_lock lock(coutGuard);
 				LOG_ERROR  << " handle_receive(" << error.message() << " ,bytes_transferred=" << bytes_transferred << ", DataPacket=" << dp << std::endl;
 				LOG_ERROR << "PACKET BUFNUM: " << (unsigned short)(dp.Number) << std::endl;
 				//memset(&recv_buf[0], 0, sizeof(Mcpd8::DataPacket));
@@ -999,7 +963,6 @@ namespace Mesytec {
 						boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - lastpacketqueuefull;
 						lastpacketqueuefull_missedcount += 1;
 						if (sec.count() > 1) {
-							boost::mutex::scoped_lock lock(coutGuard);
 							LOG_ERROR << ": PACKETQUEUE FULL , SKIPPED " << lastpacketqueuefull_missedcount << " Event(s)" << std::endl;
 
 							//			LOG_ERROR << std::endl << boost::chrono::time_fmt(boost::chrono::timezone::local) << boost::chrono::system_clock::now() << ": PACKETQUEUE FULL , SKIPPED " << lastpacketqueuefull_missedcount << " Event(s)" << std::endl;
@@ -1014,7 +977,7 @@ namespace Mesytec {
 							boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - lastlistmodequeuefull;
 							lastlistmodequeuefull_missedcount += 1;
 							if (sec.count() > 1) {
-								boost::mutex::scoped_lock lock(coutGuard);
+								
 								//LOG_ERROR << std::endl << boost::chrono::time_fmt(boost::chrono::timezone::local) << boost::chrono::system_clock::now() << ": LISTMODEWRITEQUEUE FULL , SKIPPED " << lastlistmodequeuefull_missedcount << " Event(s)" << std::endl;
 								LOG_ERROR << ": LISTMODEWRITEQUEUE FULL , SKIPPED " << lastlistmodequeuefull_missedcount << " Event(s)" << std::endl;
 
@@ -1037,10 +1000,7 @@ namespace Mesytec {
 					boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - lasteventqueuefull;
 					lasteventqueuefull_missedcount += 1;
 					if (sec.count() > 1) {
-						boost::mutex::scoped_lock lock(coutGuard);
-						//LOG_ERROR << std::endl << boost::chrono::time_fmt(boost::chrono::timezone::local) << boost::chrono::system_clock::now() << ": EVENTQUEUE FULL , SKIPPED " << lasteventqueuefull_missedcount << " Event(s)" << std::endl;
 						LOG_ERROR  << ": EVENTQUEUE FULL , SKIPPED " << lasteventqueuefull_missedcount << " Event(s)" << std::endl;
-
 						lasteventqueuefull = boost::chrono::system_clock::now();
 						lasteventqueuefull_missedcount = 0;
 					}

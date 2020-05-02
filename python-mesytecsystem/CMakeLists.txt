@@ -29,7 +29,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 find_package (Python COMPONENTS Interpreter Development NumPy)
 
-find_package(magic_enum CONFIG REQUIRED )
+
 #set(Boost_USE_STATIC_LIBS,ON)
 #set(Boost_USE_STATIC_RUNTIME,ON)
 find_package(Boost 1.71 REQUIRED COMPONENTS python${Python_VERSION_MAJOR}${Python_VERSION_MINOR} numpy${Python_VERSION_MAJOR}${Python_VERSION_MINOR} filesystem chrono thread iostreams) # header only libraries must not be added here
@@ -38,6 +38,11 @@ find_path(Boost_INCLUDE_DIR boost)
 message(********************Using Boost :${Boost_INCLUDE_DIR}  ******************************)
 find_package(OpenCV REQUIRED)
 find_package(unofficial-libuv CONFIG REQUIRED)
+
+set (magic_enum_DIR ${_VCPKG_ROOT_DIR}/installed/${VCPKG_TARGET_TRIPLET}/share/magic_enum)
+message(******************** ${magic_enum_DIR}   ************)
+find_package(magic_enum CONFIG REQUIRED )
+
 include_directories(${Boost_INCLUDE_DIR})
 include_directories(${ASIO_EXTENSIONS_PATH})
 include_directories(${SIGSLOT_PATH})

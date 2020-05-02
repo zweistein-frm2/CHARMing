@@ -68,7 +68,6 @@ namespace Mcpd8
 			auto bt = magic_enum::enum_cast<Mesy::BufferType>(Type);
 			if (bt.has_value()) return bt.value();
 			else {
-				boost::mutex::scoped_lock lock(coutGuard);
 				LOG_WARNING  << " BufferType undefined("<< std::bitset<16>(Type)<<")" << std::endl;
 				return Mesy::BufferType::COMMAND;
 			}

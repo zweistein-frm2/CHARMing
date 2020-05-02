@@ -44,7 +44,6 @@ namespace Mcpd8 {
 			headerchksum = p.param[0][0];
 			unsigned short items = (Length - headerLength)+1; // we want trailing 0xffff also 
 			if (items > 750) {
-				boost::mutex::scoped_lock lock(coutGuard);
 				LOG_ERROR << "ERROR in CmdPacket, " << items << " > 750" << std::endl;
 				items = 750;
 			}

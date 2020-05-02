@@ -238,7 +238,6 @@ int main(int argc, char* argv[])
 					io_service.run();
 				}
 				catch (Mesytec::cmd_error& x) {
-					boost::mutex::scoped_lock lock(coutGuard);
 					if (int const* mi = boost::get_error_info<Mesytec::my_info>(x)) {
 						auto  my_code = magic_enum::enum_cast<Mesytec::cmd_errorcode>(*mi);
 						if (my_code.has_value()) {
@@ -273,7 +272,6 @@ int main(int argc, char* argv[])
 		int i = 0;
 		long long lastcount = 0;
 		{
-			boost::mutex::scoped_lock lock(coutGuard);
 			std::cout << std::endl << "Ctrl-C to stop" << std::endl;
 		}
 		
@@ -453,8 +451,7 @@ int main(int argc, char* argv[])
 								}
 							}
 							catch (Mesytec::cmd_error& x) {
-								boost::mutex::scoped_lock lock(coutGuard);
-								if (int const* mi = boost::get_error_info<Mesytec::my_info>(x)) {
+									if (int const* mi = boost::get_error_info<Mesytec::my_info>(x)) {
 									auto  my_code = magic_enum::enum_cast<Mesytec::cmd_errorcode>(*mi);
 									if (my_code.has_value()) {
 										auto c1_name = magic_enum::enum_name(my_code.value());
@@ -504,7 +501,6 @@ int main(int argc, char* argv[])
 		
 	}
 	catch (boost::exception & e) {
-		boost::mutex::scoped_lock lock(coutGuard);
 		LOG_ERROR<< boost::diagnostic_information(e) << std::endl;
 	}
 	
@@ -512,7 +508,6 @@ int main(int argc, char* argv[])
 	if (ptrmsmtsystem1) {
 		try {ptrmsmtsystem1->SendAll(Mcpd8::Cmd::STOP_UNCHECKED);}
 		catch (boost::exception& e) {
-			boost::mutex::scoped_lock lock(coutGuard);
 			LOG_ERROR << boost::diagnostic_information(e) << std::endl;
 		}
 	//	delete ptrmsmtsystem1;

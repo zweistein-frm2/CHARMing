@@ -13,11 +13,17 @@ endif()
 add_compile_definitions(ASIOEXT_USE_BOOST_ASIO)
 set(CMAKE_CXX_STANDARD 17) 
 #find_package (Python COMPONENTS Interpreter Development NumPy)
-find_package(magic_enum CONFIG REQUIRED )
+
 find_package(Boost 1.71 REQUIRED COMPONENTS filesystem chrono thread program_options iostreams log log_setup) # header only libraries must not be added here
 #find_path(Boost_INCLUDE_DIR boost)
 find_package(OpenCV REQUIRED)
 find_package(unofficial-libuv CONFIG REQUIRED)
+
+set (magic_enum_DIR ${_VCPKG_ROOT_DIR}/installed/${VCPKG_TARGET_TRIPLET}/share/magic_enum)
+message(******************** ${magic_enum_DIR}   ************)
+find_package(magic_enum CONFIG REQUIRED )
+
+
 include_directories(${Boost_INCLUDE_DIR} ${OpenCV_INCLUDE_DIRS})
 include_directories(${ASIO_EXTENSIONS_PATH})
 include_directories(${PacketSender_DIR})
@@ -30,7 +36,16 @@ add_executable (${PROJECT_NAME} "mesyDeviceCtrl.cpp"  "OptionPrinter.cpp" "Custo
 target_link_libraries(${PROJECT_NAME} PRIVATE magic_enum::magic_enum ${Boost_LIBRARIES} ${OpenCV_LIBS} unofficial::libuv::libuv )
 target_link_options(${PROJECT_NAME} PRIVATE $<$<CXX_COMPILER_ID:GNU>:$<$<CONFIG:RELEASE>:-static-libstdc++> $<$<CONFIG:DEBUG>:-static-libstdc++> > PRIVATE $<$<CXX_COMPILER_ID:GNU>:-static-libgcc>  )
 
-install(
+if(WIN32)
+ install(
     TARGETS ${PROJECT_NAME}
-       
-)
+        RUNTIME  DESTINATION $ENV{USERPROFILE}
+  )
+ else()
+ install(
+    TARGETS ${PROJECT_NAME}
+        RUNTIME  DESTINATION ~/
+  )
+ endif()
+
+

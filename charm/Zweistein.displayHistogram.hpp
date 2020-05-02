@@ -116,7 +116,6 @@ namespace Zweistein {
 
 			} while (!io_service.stopped());
 			{
-				boost::mutex::scoped_lock lock(coutGuard);
 				LOG_DEBUG << "display histogram exiting..." << std::endl;
 			}
 
