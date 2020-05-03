@@ -13,8 +13,11 @@ endif()
 add_compile_definitions(ASIOEXT_USE_BOOST_ASIO)
 set(CMAKE_CXX_STANDARD 17) 
 #find_package (Python COMPONENTS Interpreter Development NumPy)
+<<<<<<< HEAD
 set(Boost_USE_STATIC_LIBS,ON)
 set(Boost_USE_STATIC_RUNTIME,ON)
+=======
+>>>>>>> ea9506c... snapcraft integration progress 0
 
 find_package(Boost 1.71 REQUIRED COMPONENTS filesystem chrono thread program_options iostreams log log_setup) # header only libraries must not be added here
 #find_path(Boost_INCLUDE_DIR boost)
@@ -33,7 +36,11 @@ message(************  ${OpenCV_DIR}  *************)
 find_package(OpenCV  REQUIRED)
 find_package(unofficial-libuv CONFIG REQUIRED)
 
+<<<<<<< HEAD
 #set (magic_enum_DIR ${_VCPKG_ROOT_DIR}/installed/${VCPKG_TARGET_TRIPLET}/share/magic_enum)
+=======
+set (magic_enum_DIR ${_VCPKG_ROOT_DIR}/installed/${VCPKG_TARGET_TRIPLET}/share/magic_enum)
+>>>>>>> ea9506c... snapcraft integration progress 0
 message(******************** ${magic_enum_DIR}   ************)
 find_package(magic_enum CONFIG REQUIRED )
 
@@ -51,6 +58,7 @@ target_link_options(${PROJECT_NAME} PRIVATE $<$<CXX_COMPILER_ID:GNU>:$<$<CONFIG:
 
 if(WIN32)
  install(
+<<<<<<< HEAD
     TARGETS ${PROJECT_NAME}
         RUNTIME  DESTINATION $ENV{USERPROFILE}
   )
@@ -85,6 +93,14 @@ if(WIN32)
  else()
  install(
     TARGETS ${PROJECT_NAME}
+=======
+    TARGETS ${PROJECT_NAME}
+        RUNTIME  DESTINATION $ENV{USERPROFILE}
+  )
+ else()
+ install(
+    TARGETS ${PROJECT_NAME}
+>>>>>>> ea9506c... snapcraft integration progress 0
         RUNTIME  DESTINATION ~/
   )
  endif()
