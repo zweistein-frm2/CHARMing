@@ -14,28 +14,39 @@ add_compile_definitions(ENTANGLE_LOGGER)
 if(MSVC)
     add_compile_definitions(_WIN32_WINNT=0x0601)
 else()
-message("on linux boost >= 1.71 must be installed :on ubuntu >=20.04:  sudo apt-get install libboost-python-dev")
+message("on linux boost >= 1.71 must be installed on ubuntu 18.04 install from sources,   :on ubuntu >=20.04:  sudo apt-get install libboost-python-dev")
 
 #set(BOOST_ROOT /usr )
 #set(Boost_INCLUDE_DIR ${BOOST_ROOT}/include)
 endif()
   
 add_compile_definitions(ASIOEXT_USE_BOOST_ASIO)
+add_compile_definitions(BOOST_CHRONO_VERSION=2)
 set(CMAKE_CXX_STANDARD 17) 
 
 find_package (Python COMPONENTS Interpreter Development NumPy)
 
 if(NOT ENTANGLE_ROOT)
-if(WIN32)
-message(**   "python lib is here :"  ${Python_SITELIB})
+    if(WIN32)
+      message(**   "python lib is here :"  ${Python_SITELIB})
+    else()
+      execute_process(COMMAND  find /usr/local/lib/python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}/dist-packages/ -type d -name "entangle-*.egg"  OUTPUT_VARIABLE ENTANGLE_ROOT ERROR_QUIET) 
+      if(ENTANGLE_ROOT)
+        set(ENTANGLE_RES /etc/entangle)  # if standard install .re should go there (or one could parse /etc/entangle/entangle.conf.dist to know better)
+      endif()
+    endif()
+
 else()
-execute_process(COMMAND  find /usr/local/lib/python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}/dist-packages/ -type d -name "entangle-*.egg"  OUTPUT_VARIABLE ENTANGLE_ROOT ERROR_QUIET) 
+ if(NOT ENTANGLE_RES)
+    set(ENTANGLE_RES ${ENTANGLE_ROOT}/example)
+ endif()
 endif()
-endif()
-message(ENTANGLE_ROOT=${ENTANGLE_ROOT} )
+message("ENTANGLE_ROOT=" ${ENTANGLE_ROOT} )
+message("ENTANGLE_RES=" ${ENTANGLE_RES} )
 
 #set(Boost_USE_STATIC_LIBS,ON)
 #set(Boost_USE_STATIC_RUNTIME,ON)
+
 find_package(Boost 1.71 REQUIRED COMPONENTS python${Python_VERSION_MAJOR}${Python_VERSION_MINOR} numpy${Python_VERSION_MAJOR}${Python_VERSION_MINOR} filesystem chrono thread iostreams) # header only libraries must not be added here
 find_path(Boost_INCLUDE_DIR boost)
 
@@ -80,7 +91,7 @@ ADD_CUSTOM_COMMAND(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/version.cpp
            ${CMAKE_CURRENT_BINARY_DIR}/_version.cpp
     COMMAND ${CMAKE_COMMAND} -P
-            ${Charm_DIR}/version.cmake)
+            ${ASIO_EXTENSIONS_PATH}/../../charm}/version.cmake)
 
 add_custom_command(
         TARGET ${PROJECT_NAME} POST_BUILD

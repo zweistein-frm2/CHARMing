@@ -245,7 +245,8 @@ struct NeutronMeasurement {
             Entangle::Init(loghandle);
             ptrmsmtsystem1->initatomicortime_point();
             worker_threads.create_thread([this] {startMonitor(ptrmsmtsystem1, ptrStartParameters); });
-            LOG_INFO << "NeutronMeasurement(" << loghandle << ")" << std::endl;
+            LOG_DEBUG << "NeutronMeasurement(" << loghandle << ")" << std::endl;
+            LOG_INFO << get_version() << std::endl;
         }
         ~NeutronMeasurement() {
             LOG_DEBUG << "~NeutronMeasurement()" << std::endl;

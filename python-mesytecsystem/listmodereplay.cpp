@@ -196,6 +196,7 @@ struct ReplayList {
             ptrmsmtsystem1->initatomicortime_point();
             worker_threads.create_thread([this] {startMonitor(ptrmsmtsystem1, ptrStartParameters); });
             LOG_DEBUG << "ReplayList(" << loghandle << ")" << std::endl;
+            LOG_INFO << get_version() << std::endl;
         }
         ~ReplayList() {
             LOG_DEBUG << "~ReplayList()" << std::endl;
