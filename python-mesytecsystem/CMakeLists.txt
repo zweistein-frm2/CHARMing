@@ -14,7 +14,7 @@ add_compile_definitions(ENTANGLE_LOGGER)
 if(MSVC)
     add_compile_definitions(_WIN32_WINNT=0x0601)
 else()
-message("on linux boost >= 1.71 must be installed :  sudo apt-get install libboost-python-dev")
+message("on linux boost >= 1.71 must be installed :on ubuntu >=20.04:  sudo apt-get install libboost-python-dev")
 
 #set(BOOST_ROOT /usr )
 #set(Boost_INCLUDE_DIR ${BOOST_ROOT}/include)
@@ -44,7 +44,7 @@ find_package(OpenCV REQUIRED)
 find_package(unofficial-libuv CONFIG REQUIRED)
 
 #set (magic_enum_DIR ${_VCPKG_ROOT_DIR}/installed/${VCPKG_TARGET_TRIPLET}/share/magic_enum)
-message(******************** ${magic_enum_DIR}   ************)
+#message("**magic_enum_DIR=" ${magic_enum_DIR}   ************)
 find_package(magic_enum CONFIG REQUIRED )
 
 include_directories(${Boost_INCLUDE_DIR})

@@ -28,6 +28,7 @@ namespace np = boost::python::numpy;
 #include <boost/geometry/io/wkt/wkt.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string.hpp>
+#include <magic_enum.hpp>
 #include "Zweistein.Locks.hpp"
 #include "Zweistein.Logger.hpp"
 #include "Zweistein.Binning.hpp"
