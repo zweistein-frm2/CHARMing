@@ -31,14 +31,16 @@ namespace Zweistein {
 #endif
         std::string cmdline = p.string() + " " + cc + " " + ipaddress;
         bp::child c(cmdline, bp::std_out > is, bp::std_err > ierr);
-        c.wait_for(std::chrono::seconds(5), ec);
+        c.wait_for(std::chrono::seconds(1), ec);
         if (c.running()) c.terminate();
         while (std::getline(is, line) && !line.empty()) {
             std::string desired = "64 bytes from";
+            std::string desired1 = "1 received";
             std::string undesired = "100 % packet loss";
 #ifdef WIN32
             undesired = "Request timed out";
             desired = "Reply from";
+            desired1= "Reply from";
 #endif
             if (line.find(undesired) != std::string::npos) {
                 LOG_WARNING << cmdline<<" : "<< line << std::endl;
@@ -47,10 +49,13 @@ namespace Zweistein {
             if (line.find(desired) != std::string::npos) {
                        data.push_back(line);
             }
+            else  if (line.find(desired1) != std::string::npos) {
+                data.push_back(line);
+            }
         }
 
         if (data.size()) {
-            for (auto& s : data)  LOG_INFO << s << std::endl;
+            for (auto& s : data)  LOG_INFO <<"ping: "<< s << std::endl;
             return true;
         }
         else {

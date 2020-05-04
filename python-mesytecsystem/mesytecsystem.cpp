@@ -43,6 +43,12 @@ using boost::asio::ip::udp;
 
 EXTERN_FUNCDECLTYPE boost::mutex coutGuard;
 EXTERN_FUNCDECLTYPE boost::thread_group worker_threads;
+
+extern const char* GIT_REV;
+extern const char* GIT_TAG;
+extern const char* GIT_BRANCH;
+extern const char* GIT_DATE;
+
 Zweistein::Lock histogramsLock;
 std::vector<Histogram> histograms = std::vector<Histogram>(2);
 
@@ -103,11 +109,21 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
         }
 
         try {
-            boost::property_tree::write_json(Zweistein::Config::inipath.string(), Mesytec::Config::root);
+            std::string fp = Zweistein::Config::inipath.string();
+            std::ofstream outfile;
+            outfile.open(fp, std::ios::out | std::ios::trunc);
+            outfile << ss_1.str();
+            outfile.close();
+           // boost::property_tree::write_json(Zweistein::Config::inipath.string(), Mesytec::Config::root);
         }
         catch (std::exception& e) { // exception expected, //std::cout << boost::diagnostic_information(e); 
             LOG_ERROR << e.what() << " for writing."<<std::endl;
         }
+
+        for (Mcpd8::Parameters& p : _devlist) {
+                Zweistein::ping(p.mcpd_ip); // sometime 
+        }
+        
         boost::function<void()> t;
         t = [&ptrmsmtsystem1, &_devlist]() {
             try {
@@ -279,6 +295,11 @@ struct NeutronMeasurement {
 
         }
 
+        std::string get_version() {
+            std::stringstream ss;
+            ss << "BRANCH: " << GIT_BRANCH << " TAG:" << GIT_TAG << " REV: " << GIT_REV << " " << GIT_DATE;
+            return ss.str();
+        }
 
         void start() {
             unsigned short tmp = ptrmsmtsystem1->data.last_deviceStatusdeviceId;
@@ -393,6 +414,7 @@ BOOST_PYTHON_MODULE(mesytecsystem)
         class_< NeutronMeasurement>("NeutronMeasurement",init<long>())
             .add_property("writelistmode", &NeutronMeasurement::get_writelistmode, &NeutronMeasurement::set_writelistmode)
             .add_property("simulatorRate", &NeutronMeasurement::get_simulatorRate, &NeutronMeasurement::set_simulatorRate)
+            .add_property("version", &NeutronMeasurement::get_version)
             .def("start", &NeutronMeasurement::start)
             .def("stopafter", &NeutronMeasurement::stopafter)
             .def("resume", &NeutronMeasurement::resume)

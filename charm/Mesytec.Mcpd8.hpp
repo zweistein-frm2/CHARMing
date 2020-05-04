@@ -183,7 +183,7 @@ namespace Mesytec {
 				for(int c=0;c<8;c++){ mp.counterADC[c]=p.counterADC[c];	}
 				for (int m = 0; m < 8; m++) { mp.moduleparam[m] = p.moduleparam[m]; }
 
-				Zweistein::ping(p.mcpd_ip); // sometime a ping is needed to wake up Mesytec
+	//			Zweistein::ping(p.mcpd_ip); // sometime a ping is needed to wake up Mesytec
 
 				local_endpoint = udp::endpoint(boost::asio::ip::address::from_string(p.networkcard), p.mcpd_port);
 				mp.mcpd_endpoint = udp::endpoint(boost::asio::ip::address::from_string(p.mcpd_ip),p.mcpd_port);

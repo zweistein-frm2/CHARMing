@@ -2,16 +2,12 @@
 # project specific logic here.
 #
 cmake_minimum_required (VERSION 3.14)
-add_subdirectory (entangle)
+
 set(PROJECT1 mesytecsystem)
 set(PROJECT2 listmodereplay)
 
-
-
 foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2)
     message(STATUS "PROJECT_NAME=${PROJECT_NAME}")
-
-
 
 project(${PROJECT_NAME})
 add_compile_definitions(ENTANGLE_LOGGER)
@@ -29,6 +25,14 @@ set(CMAKE_CXX_STANDARD 17)
 
 find_package (Python COMPONENTS Interpreter Development NumPy)
 
+if(NOT ENTANGLE_ROOT)
+if(WIN32)
+message(**   "python lib is here :"  ${Python_SITELIB})
+else()
+execute_process(COMMAND  find /usr/local/lib/python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}/dist-packages/ -type d -name "entangle-*.egg"  OUTPUT_VARIABLE ENTANGLE_ROOT ERROR_QUIET) 
+endif()
+endif()
+message(ENTANGLE_ROOT=${ENTANGLE_ROOT} )
 
 #set(Boost_USE_STATIC_LIBS,ON)
 #set(Boost_USE_STATIC_RUNTIME,ON)
@@ -39,7 +43,7 @@ message(********************Using Boost :${Boost_INCLUDE_DIR}  *****************
 find_package(OpenCV REQUIRED)
 find_package(unofficial-libuv CONFIG REQUIRED)
 
-set (magic_enum_DIR ${_VCPKG_ROOT_DIR}/installed/${VCPKG_TARGET_TRIPLET}/share/magic_enum)
+#set (magic_enum_DIR ${_VCPKG_ROOT_DIR}/installed/${VCPKG_TARGET_TRIPLET}/share/magic_enum)
 message(******************** ${magic_enum_DIR}   ************)
 find_package(magic_enum CONFIG REQUIRED )
 
@@ -72,6 +76,11 @@ else()
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "")
 endif()
 
+ADD_CUSTOM_COMMAND(
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/version.cpp
+           ${CMAKE_CURRENT_BINARY_DIR}/_version.cpp
+    COMMAND ${CMAKE_COMMAND} -P
+            ${Charm_DIR}/version.cmake)
 
 add_custom_command(
         TARGET ${PROJECT_NAME} POST_BUILD
@@ -98,32 +107,51 @@ ${pyboostcvconverter_DIR}/src/pyboost_cv3_converter.cpp
 ${pyboostcvconverter_DIR}/src/pyboost_cv4_converter.cpp
 ${Charm_DIR}/Entangle.Logger.cpp
 ${Charm_DIR}/Zweistein.ping.cpp
-
+${CMAKE_CURRENT_BINARY_DIR}/version.cpp
 )
-if(MSVC)
-set(Entangle_Dir /users/alanghof/source/repos/entangle/entangle)
-else()
-#set(Entangle_Dir /usr/lib/python3/dist-packages/entangle)
-set(Entangle_Dir ~/entangle/entangle)
+
+
+if(ENTANGLE_ROOT )
+ install(
+    TARGETS ${PROJECT_NAME}
+      RUNTIME DESTINATION ${ENTANGLE_ROOT}/entangle/device/charm
+      LIBRARY DESTINATION ${ENTANGLE_ROOT}/entangle/device/charm
+ )
 endif()
 
 
-install(
-    TARGETS ${PROJECT_NAME}
-      RUNTIME DESTINATION ${Entangle_Dir}/device/charm
-      LIBRARY DESTINATION ${Entangle_Dir}/device/charm
-   
-       
-)
 
 endforeach()
 
-install(
-FILES
-${CMAKE_SOURCE_DIR}/charm-replay.py
-${CMAKE_SOURCE_DIR}/test-replay.py
-${CMAKE_SOURCE_DIR}/charm.py
-${CMAKE_SOURCE_DIR}/test.py
-  DESTINATION ${Entangle_Dir}/device/charm
+if(ENTANGLE_ROOT )
+ install(
+  FILES
+   ${CMAKE_SOURCE_DIR}/charm-replay.py
+   ${CMAKE_SOURCE_DIR}/test-replay.py
+   ${CMAKE_SOURCE_DIR}/charm.py
+   ${CMAKE_SOURCE_DIR}/test.py
+   DESTINATION ${ENTANGLE_ROOT}/entangle/device/charm
+ )
 
-)
+ if(WIN32)
+  install(
+  FILES
+   "${CMAKE_CURRENT_BINARY_DIR}/boost_filesystem-vc${MSVC_TOOLSET_VERSION}-mt-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
+    "${CMAKE_CURRENT_BINARY_DIR}/boost_thread-vc${MSVC_TOOLSET_VERSION}-mt-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll" 
+    "${CMAKE_CURRENT_BINARY_DIR}/boost_chrono-vc${MSVC_TOOLSET_VERSION}-mt-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll" 
+    "${CMAKE_CURRENT_BINARY_DIR}/boost_iostreams-vc${MSVC_TOOLSET_VERSION}-mt-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
+    "${CMAKE_CURRENT_BINARY_DIR}/boost_date_time-vc${MSVC_TOOLSET_VERSION}-mt-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
+    "${CMAKE_CURRENT_BINARY_DIR}/boost_numpy${Python_VERSION_MAJOR}${Python_VERSION_MINOR}-vc${MSVC_TOOLSET_VERSION}-mt-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
+    "${CMAKE_CURRENT_BINARY_DIR}/boost_python${Python_VERSION_MAJOR}${Python_VERSION_MINOR}-vc${MSVC_TOOLSET_VERSION}-mt-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
+    "${CMAKE_CURRENT_BINARY_DIR}/opencv_core.dll"
+    "${CMAKE_CURRENT_BINARY_DIR}/libuv.dll"
+    "${CMAKE_CURRENT_BINARY_DIR}/bz2.dll"
+    "${CMAKE_CURRENT_BINARY_DIR}/lzma.dll"
+    "${CMAKE_CURRENT_BINARY_DIR}/zlib1.dll"
+    "${CMAKE_CURRENT_BINARY_DIR}/zstd.dll"
+  DESTINATION ${ENTANGLE_ROOT}/entangle/device/charm
+  )
+  endif()
+endif()
+
+add_subdirectory (entangle)

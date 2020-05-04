@@ -17,18 +17,18 @@
           "type": "PATH"
         },
         {
+          "name": "ENTANGLE_ROOT",
+          "value": "C:\\Users\\alanghof\\source\\repos\\entangle",
+          "type": "PATH"
+        },
+        {
           "name": "ASIO_EXTENSIONS_PATH",
           "value": "${projectDir}\\..\\asio-extensions\\include",
           "type": "PATH"
         },
         {
-          "name": "PacketSender_DIR",
-          "value": "${projectDir}\\..\\PacketSender",
-          "type": "PATH"
-        },
-        {
           "name": "pyboostcvconverter_DIR",
-          "value": "C:\\users\\alanghof\\source\\repos\\CHARMing\\pyboostcvconverter",
+          "value": "C:\\Users\\alanghof\\source\\repos\\CHARMing\\pyboostcvconverter",
           "type": "PATH"
         }
       ]
@@ -61,11 +61,6 @@
         {
           "name": "ASIO_EXTENSIONS_PATH",
           "value": "/home/alanghof/repos/CHARMing/asio-extensions/include",
-          "type": "PATH"
-        },
-        {
-          "name": "PacketSender_DIR",
-          "value": "/home/alanghof/repos/CHARMing/PacketSender",
           "type": "PATH"
         },
         {
@@ -107,8 +102,8 @@
           "type": "PATH"
         },
         {
-          "name": "PacketSender_DIR",
-          "value": "/home/localadmin/repos/CHARMing/PacketSender",
+          "name": "ENTANGLE_ROOT",
+          "value": "/home/localadmin/entangle",
           "type": "PATH"
         },
         {
@@ -135,13 +130,13 @@
           "type": "PATH"
         },
         {
-          "name": "ASIO_EXTENSIONS_PATH",
-          "value": "${projectDir}\\..\\asio-extensions\\include",
+          "name": "ENTANGLE_ROOT",
+          "value": "C:\\Users\\alanghof\\source\\repos\\entangle",
           "type": "PATH"
         },
         {
-          "name": "PacketSender_DIR",
-          "value": "${projectDir}\\..\\PacketSender",
+          "name": "ASIO_EXTENSIONS_PATH",
+          "value": "${projectDir}\\..\\asio-extensions\\include",
           "type": "PATH"
         },
         {

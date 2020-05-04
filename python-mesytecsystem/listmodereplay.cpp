@@ -48,6 +48,11 @@ using boost::asio::ip::udp;
 EXTERN_FUNCDECLTYPE boost::mutex coutGuard;
 EXTERN_FUNCDECLTYPE boost::thread_group worker_threads;
 
+extern const char* GIT_REV;
+extern const char* GIT_TAG;
+extern const char* GIT_BRANCH;
+extern const char* GIT_DATE;
+
 Zweistein::Lock histogramsLock;
 std::vector<Histogram> histograms = std::vector<Histogram>(2);
 
@@ -299,6 +304,11 @@ struct ReplayList {
 
         }
 
+        std::string get_version() {
+            std::stringstream ss;
+            ss << "BRANCH: " << GIT_BRANCH << " TAG:" << GIT_TAG << " REV: " << GIT_REV << " " << GIT_DATE;
+            return ss.str();
+        }
         void start() {
             // we have to start from beginning of playlist
             LOG_INFO << "ReplayList::start()" << std::endl;
@@ -396,6 +406,7 @@ BOOST_PYTHON_MODULE(listmodereplay)
             ;
         class_< ReplayList>("ReplayList",init<long>())
             .add_property("speedmultiplier", &ReplayList::get_speedmultiplier, &ReplayList::set_speedmultiplier)
+            .add_property("version", &ReplayList::get_version)
             .def("addfile", &ReplayList::addfile)
             .def("removefile", &ReplayList::removefile)
             .def("files", &ReplayList::files)

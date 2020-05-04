@@ -59,6 +59,11 @@ using boost::asio::ip::udp;
 EXTERN_FUNCDECLTYPE boost::mutex coutGuard;
 EXTERN_FUNCDECLTYPE boost::thread_group worker_threads;
 
+extern const char* GIT_REV;
+extern const char* GIT_TAG ;
+extern const char* GIT_BRANCH;
+extern const char* GIT_DATE;
+
 Zweistein::Lock histogramsLock;
 std::vector<Histogram> histograms = std::vector<Histogram>(2);
 
@@ -87,6 +92,7 @@ int main(int argc, char* argv[])
 	
 	try
 	{
+		std::cout << "BRANCH: " << GIT_BRANCH << " TAG:" << GIT_TAG << " REV: " << GIT_REV <<" "<<GIT_DATE<< std::endl;
 		if (argc == 1) {
 			std::cout << "--help for usage info" << std::endl;
 		}
@@ -228,18 +234,28 @@ int main(int argc, char* argv[])
 			std::stringstream ss_1;
 			boost::property_tree::write_json(ss_1, Mesytec::Config::root);
 			LOG_INFO << ss_1.str() << std::endl;
-
-			if (!configok)	return -1;
 			
+			if (!configok)	return -1;
+
+						
 			Zweistein::Logger::Add_File_Sink(Mesytec::Config::DATAHOME.string() + appName + ".log");
 			try {
-				boost::property_tree::write_json(Zweistein::Config::inipath.string(), Mesytec::Config::root);
+				//we can write as text file:
+				std::string fp = Zweistein::Config::inipath.string();
+				std::ofstream outfile;
+				outfile.open(fp, std::ios::out | std::ios::trunc);
+				outfile << ss_1.str();
+				outfile.close();
+				
 			}
 			catch (std::exception& e) { // exception expected, //std::cout << boost::diagnostic_information(e); 
 				LOG_ERROR << e.what() << " for writing." << std::endl;
 			}
-
-			
+			if (!inputfromlistfile) {
+				for (Mcpd8::Parameters& p : _devlist) {
+					Zweistein::ping(p.mcpd_ip); // sometime 
+				}
+			}
 
 			t = [ &ptrmsmtsystem1, &_devlist,&write2disk]() {
 				try {
@@ -298,8 +314,8 @@ int main(int argc, char* argv[])
 		}
 		else {
 			// data acquisition monitoring loop
-			
-			for (int i = 0; i < 10; i++) {
+			int k = 0;
+			for ( k = 0; k < 10; k++) {
 				if (ptrmsmtsystem1->connected) {
 					if (setupafterconnect) {
 						boost::function<void()> setipaddrcmd = [&ptrmsmtsystem1, &_devlist]() {
@@ -487,8 +503,10 @@ int main(int argc, char* argv[])
 				}
 					boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
 				}
-
-				while (!io_service.stopped()) {
+				if (k == 10) {
+					LOG_ERROR << " NOT CONNECTED (tried " << k << " seconds)" << std::endl;
+				}
+			while (!io_service.stopped()) {
 					boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
 					if (setupafterconnect) continue;
 					boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - start;

@@ -14,14 +14,12 @@ add_compile_definitions(ASIOEXT_USE_BOOST_ASIO)
 set(CMAKE_CXX_STANDARD 17) 
 #find_package (Python COMPONENTS Interpreter Development NumPy)
 
-set(Boost_USE_STATIC_LIBS,ON)
-set(Boost_USE_STATIC_RUNTIME,ON)
+#set(Boost_USE_STATIC_LIBS,ON)
+#set(Boost_USE_STATIC_RUNTIME,ON)
 
 find_package(Boost 1.71 REQUIRED COMPONENTS filesystem chrono thread program_options iostreams log log_setup) # header only libraries must not be added here
 #find_path(Boost_INCLUDE_DIR boost)
 
-message(********boost version=  ${Boost_VERSION_MACRO}    ***${Boost_VERSION_MAJOR} *****    ${Boost_VERSION_MINOR}             ***********)
-message(****   ${MSVC_TOOLSET_VERSION}   *******)
 message(********cmake_toolchain=  ${CMAKE_TOOLCHAIN_FILE}             ***********)
 #message(*** is debug==  ${$<$<CONFIG:DEBUG>:-gd>>} ****************)
 if(DEFINED Protobuf_DIR )
@@ -34,8 +32,7 @@ message(************  ${OpenCV_DIR}  *************)
 find_package(OpenCV  REQUIRED)
 find_package(unofficial-libuv CONFIG REQUIRED)
 
-
-set (magic_enum_DIR ${_VCPKG_ROOT_DIR}/installed/${VCPKG_TARGET_TRIPLET}/share/magic_enum)
+#set (magic_enum_DIR ${_VCPKG_ROOT_DIR}/installed/${VCPKG_TARGET_TRIPLET}/share/magic_enum)
 
 message(******************** ${magic_enum_DIR}   ************)
 find_package(magic_enum CONFIG REQUIRED )
@@ -47,10 +44,18 @@ include_directories(./)
 include_directories(${SIGSLOT_PATH})
 #include_directories(${_Python_INCLUDE_DIR})
 # Add source to this project's executable.
-add_executable (${PROJECT_NAME} "mesyDeviceCtrl.cpp"  "OptionPrinter.cpp" "CustomOptionDescription.cpp" "simpleLogger.cpp" "coloured_console_sink.cpp" "Zweistein.ping.cpp")
+add_executable (${PROJECT_NAME} "mesyDeviceCtrl.cpp"  "OptionPrinter.cpp" "CustomOptionDescription.cpp" "simpleLogger.cpp" "coloured_console_sink.cpp" "Zweistein.ping.cpp" ${CMAKE_CURRENT_BINARY_DIR}/version.cpp)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE magic_enum::magic_enum ${Boost_LIBRARIES} ${OpenCV_LIBS} unofficial::libuv::libuv )
 target_link_options(${PROJECT_NAME} PRIVATE $<$<CXX_COMPILER_ID:GNU>:$<$<CONFIG:RELEASE>:-static-libstdc++> $<$<CONFIG:DEBUG>:-static-libstdc++> > PRIVATE $<$<CXX_COMPILER_ID:GNU>:-static-libgcc>  )
+
+
+ADD_CUSTOM_COMMAND(
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/version.cpp
+           ${CMAKE_CURRENT_BINARY_DIR}/_version.cpp
+    COMMAND ${CMAKE_COMMAND} -P
+            ${CMAKE_CURRENT_SOURCE_DIR}/version.cmake)
+
 
 if(WIN32)
   install(TARGETS ${PROJECT_NAME}

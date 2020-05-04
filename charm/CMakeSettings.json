@@ -21,11 +21,6 @@
           "name": "ASIO_EXTENSIONS_PATH",
           "value": "${projectDir}\\..\\asio-extensions\\include",
           "type": "PATH"
-        },
-        {
-          "name": "NETWORKCARDINTERFACE",
-          "value": "192.168.168.100",
-          "type": "STRING"
         }
       ]
     },
@@ -85,18 +80,13 @@
           "name": "SIGSLOT_PATH",
           "value": "/home/alanghof/repos/CHARMing/sigslot/include",
           "type": "PATH"
-        },
-        {
-          "name": "NETWORKCARDINTERFACE",
-          "value": "172.25.2.102",
-          "type": "STRING"
         }
       ]
     },
     {
       "name": "Taco07-Ubuntu20",
       "generator": "Unix Makefiles",
-      "configurationType": "RelWithDebInfo",
+      "configurationType": "Release",
       "cmakeExecutable": "/snap/cmake/current/bin/cmake",
       "remoteCopySourcesExclusionList": [ ".vs", ".git", "out" ,"prime","snap","parts","stage"],
       "cmakeToolchain": "/vcpkg/scripts/buildsystems/vcpkg.cmake",
@@ -123,11 +113,6 @@
           "name": "SIGSLOT_PATH",
           "value": "/home/localadmin/repos/CHARMing/sigslot/include",
           "type": "PATH"
-        },
-        {
-          "name": "NETWORKCARDINTERFACE",
-          "value": "172.25.2.7",
-          "type": "STRING"
         }
       ]
     }
