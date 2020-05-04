@@ -109,4 +109,9 @@ parts:
       make -j 4
       make install
 
+
+apps:
+ frm2-charm:
+  command: charm
+
  

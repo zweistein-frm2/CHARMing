@@ -55,7 +55,7 @@ ADD_CUSTOM_COMMAND(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/version.cpp
            ${CMAKE_CURRENT_BINARY_DIR}/_version.cpp
     COMMAND ${CMAKE_COMMAND} -P
-            ${ASIO_EXTENSIONS_PATH}/../../charm/version.cmake)
+            ${CMAKE_CURRENT_BINARY_DIR}/version.cmake)
 
 
 if(WIN32)

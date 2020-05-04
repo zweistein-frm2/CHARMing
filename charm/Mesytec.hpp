@@ -90,9 +90,9 @@ namespace Mesy {
 
 	
 
- 	class alignas(2) CharmEvent {
-		unsigned short buf[3];
-	};
+ 	
+
+
 	class alignas(2) MdllEvent {
 		unsigned short data[3];
 	public:
