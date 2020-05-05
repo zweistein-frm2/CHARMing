@@ -91,7 +91,7 @@ ADD_CUSTOM_COMMAND(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/version.cpp
            ${CMAKE_CURRENT_BINARY_DIR}/_version.cpp
     COMMAND ${CMAKE_COMMAND} -P
-            ${ASIO_EXTENSIONS_PATH}/../../charm}/version.cmake)
+            ${Charm_DIR}/version.cmake)
 
 add_custom_command(
         TARGET ${PROJECT_NAME} POST_BUILD
@@ -118,6 +118,15 @@ ${pyboostcvconverter_DIR}/src/pyboost_cv3_converter.cpp
 ${pyboostcvconverter_DIR}/src/pyboost_cv4_converter.cpp
 ${Charm_DIR}/Entangle.Logger.cpp
 ${Charm_DIR}/Zweistein.ping.cpp
+${Charm_DIR}/Mesytec.Mcpd8.cpp
+${Charm_DIR}/Mcpd8.Parameters.cpp
+${Charm_DIR}/Mcpd8.CmdPacket.cpp
+${Charm_DIR}/Mesyec.Mpsd8.cpp
+${Charm_DIR}/Mesytec.listmode.write.cpp
+${Charm_DIR}/Mesytec.listmode.cpp
+${Charm_DIR}/MesytecSystem.Data.cpp
+${Charm_DIR}/Zweistein.GetConfigDir.cpp
+${Charm_DIR}/Mesytec.config.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/version.cpp
 )
 

@@ -6,8 +6,6 @@
  ***************************************************************************/
 
 #pragma once
-#include <asioext/detail/posix_file_ops.hpp>
-
 #include <boost/function.hpp>
 #include <filesystem>
 #include "Mesytec.Mcpd8.hpp"

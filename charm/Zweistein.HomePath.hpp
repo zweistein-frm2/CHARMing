@@ -11,6 +11,8 @@
 #include <boost/filesystem.hpp>
 #include <boost/exception/all.hpp>
 
+#pragma warning(disable : 4996)
+
 namespace Zweistein {
 	inline boost::filesystem::path GetHomePath() {
 		std::string home;

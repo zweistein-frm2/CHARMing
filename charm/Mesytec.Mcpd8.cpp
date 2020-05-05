@@ -20,6 +20,7 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/dll/runtime_symbol_info.hpp>
 #include <boost/endian/conversion.hpp>
+#include <boost/tokenizer.hpp>
 #include "Mcpd8.enums.hpp"
 #include <csignal>
 #include <asioext/file.hpp>

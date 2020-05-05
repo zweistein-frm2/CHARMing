@@ -9,9 +9,11 @@
 #include <boost/endian/conversion.hpp>
 #include <bitset>
 #include <boost/atomic.hpp>
+#include <boost/array.hpp>
 #include "MesytecSystem.Data.hpp"
 #include "Mesytec.DeviceParameter.hpp"
 #include "Zweistein.Logger.hpp"
+#include "Mcpd8.DataPacket.hpp"
 
 namespace Mesytec {
 	namespace listmode {
