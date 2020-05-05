@@ -7,12 +7,13 @@
 #pragma once
 #include <string>
 #include <boost/asio.hpp>
+#include <boost/foreach.hpp>
 #include <uv.h>
-
+#include "Zweistein.Logger.hpp"
 
 namespace Zweistein {
 
-void GetLocalInterfaces(std::list<std::string>& localinterfaces) {
+inline void GetLocalInterfaces(std::list<std::string>& localinterfaces) {
 	char buf[512];
 	uv_interface_address_t* info;
 	int count, i;
@@ -36,7 +37,7 @@ void GetLocalInterfaces(std::list<std::string>& localinterfaces) {
 	
 
 }
-	bool InterfaceExists(std::string proposed) {
+	inline bool  InterfaceExists(std::string proposed) {
 
 		std::list<std::string> localinterfaces = std::list<std::string>();
 		Zweistein::GetLocalInterfaces(localinterfaces);
@@ -51,7 +52,7 @@ void GetLocalInterfaces(std::list<std::string>& localinterfaces) {
 		return true;
 	}
 
-	std::string askforInterfaceIfUnknown(std::string proposed) {
+	inline std::string askforInterfaceIfUnknown(std::string proposed) {
 
 		std::list<std::string> localinterfaces = std::list<std::string>();
 	    Zweistein::GetLocalInterfaces(localinterfaces);

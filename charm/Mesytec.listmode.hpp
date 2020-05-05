@@ -5,32 +5,30 @@
  *   the Free Software Foundation;                                         *
  ***************************************************************************/
 #pragma once
+#include <asioext/file.hpp>
+#include <boost/endian/conversion.hpp>
 #include <bitset>
+#include <boost/atomic.hpp>
 #include "MesytecSystem.Data.hpp"
 #include "Mesytec.DeviceParameter.hpp"
 #include "Zweistein.Logger.hpp"
 
 namespace Mesytec {
-	
-	
 	namespace listmode {
 		typedef enum _action {
 			continue_reading=0,
 			wait_reading=1,
 			start_reading=2
 		} action;
-		boost::atomic<bool> stopwriting = false;
-		boost::atomic<action> whatnext = action::wait_reading;
+		extern boost::atomic<bool> stopwriting;
+		extern boost::atomic<action> whatnext ;
 		const  char header_separator[] =	{ '\x00','\x00','\x55','\x55','\xAA','\xAA','\xFF','\xFF' };
 		const  char datablock_separator[] = { '\x00','\x00','\xFF','\xFF','\x55','\x55','\xAA','\xAA' };
 		const  char closing_signature[] =	{ '\xFF','\xFF','\xAA','\xAA','\x55','\x55','\x00','\x00' };
 		
-
-		listmode::action CheckAction() {
-
+		inline listmode::action CheckAction() {
 			action r = whatnext;
 			return  r;
-		
 		}
 
 		class Read {

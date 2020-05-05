@@ -10,6 +10,7 @@
 #include <bitset>
 #include <string_view>
 #include <magic_enum.hpp>
+#include "Mesytec.hpp"
 
 
 #define Charm_sizeX  960
@@ -47,7 +48,7 @@ namespace Charm {
 			boost::chrono::nanoseconds ns(rv * 100);
 			return ns;
 		}
-		inline static CharmEvent* fromMpsd8(Mpsd8Event* mpsd8) {
+		inline static CharmEvent* fromMpsd8(Mesy::Mpsd8Event* mpsd8) {
 			return reinterpret_cast<CharmEvent*>(mpsd8);
 		}
 		void print(std::ostream& os) const {

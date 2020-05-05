@@ -6,6 +6,7 @@
  ***************************************************************************/
 
 #pragma once
+#include "Mcpd8.enums.hpp"
 namespace Mesytec {
 	namespace Mpsd8 {
 		enum PulserPosition {
@@ -37,7 +38,7 @@ namespace Mesytec {
 				tx_caps(Mcpd8::TX_CAP::P | Mcpd8::TX_CAP::TP | Mcpd8::TX_CAP::TPA),
 				tx_cap_setting(tx_cap_default),mode(Mode::Position){}
 		};
-		Mcpd8::TX_CAP Module::tx_cap_default = Mcpd8::TX_CAP::TPA;
+	
 		
 	}
 

@@ -13,7 +13,7 @@
 #include "Zweistein.Logger.hpp"
 
 namespace Mcpd8 {
-	static unsigned short sendcounter = 0;
+	extern  unsigned short sendcounter;
 	struct alignas(2) CmdPacket
 	{
 		unsigned short Length;	//!< length of the buffer
@@ -126,7 +126,7 @@ namespace Mcpd8 {
 
 	};
 	
-	const int CmdPacket::defaultLength = 10;
+	
 }
 
 inline std::ostream& operator<<(std::ostream& p, Mcpd8::CmdPacket& cp) {

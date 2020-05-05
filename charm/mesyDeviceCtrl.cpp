@@ -19,7 +19,6 @@
 #include <boost/exception/error_info.hpp>
 #include <errno.h>
 #include <boost/function.hpp>
-#include <boost/filesystem.hpp>
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
 #include <boost/bind.hpp>
@@ -29,17 +28,10 @@
 #include "CustomOptionDescription.hpp"
 #include <boost/program_options.hpp>
 #include <boost/foreach.hpp>
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
 #include <boost/throw_exception.hpp>
-#include "Mesytec.Mcpd8.hpp"
 #include "Zweistein.PrettyBytes.hpp"
-#include "Zweistein.HomePath.hpp"
-#include "Zweistein.GetLocalInterfaces.hpp"
 #include "Mesytec.listmode.write.hpp"
-#include "Mcpd8.Parameters.hpp"
 #include "Mesytec.config.hpp"
-#include "Mesytec.enums.Generator.hpp"
 #include "Zweistein.populateHistograms.hpp"
 #include "Zweistein.displayHistogram.hpp"
 #include <opencv2/highgui.hpp>

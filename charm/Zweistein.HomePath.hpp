@@ -12,7 +12,7 @@
 #include <boost/exception/all.hpp>
 
 namespace Zweistein {
-	boost::filesystem::path GetHomePath() {
+	inline boost::filesystem::path GetHomePath() {
 		std::string home;
 		char* p = std::getenv("HOME");
 		if (p == NULL) {

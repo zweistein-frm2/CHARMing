@@ -6,6 +6,7 @@
  ***************************************************************************/
 #pragma once
 #include <string>
+#include <iostream>
 #include "Mcpd8.enums.hpp"
 #include "Mesytec.enums.Generator.hpp"
 
@@ -30,14 +31,13 @@ namespace Mcpd8 {
 			os << "mcpd_ip:" << mcpd_ip << " networkcard:" << networkcard << " data_host:" << data_host << " mcpd_port:" << mcpd_port << " eventdataformat:" << eventdataformat << " datagenerator:" << " mcpd_id:" << mcpd_id << std::endl;
 		}
 	};
-	const std::string Parameters::defaultIpAddress = "192.168.168.121";
-	const unsigned short Parameters::defaultUdpPort = 54321;
-	const unsigned char Parameters::defaultmcpd_id = 0;
+	
 }
 
 namespace Charm {
 	struct Parameters {
 		static const unsigned short defaultUdpPort;
 	};
-	const unsigned short Parameters::defaultUdpPort = 54340;
+
+
 }

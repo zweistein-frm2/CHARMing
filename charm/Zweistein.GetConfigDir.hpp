@@ -3,21 +3,24 @@
 #include <boost/filesystem.hpp>
 #include <list>
 #include <string>
+#include "Zweistein.Logger.hpp"
+#include "Zweistein.HomePath.hpp"
+
 extern std::string PROJECT_NAME;
 namespace Zweistein {
 
 	
 	namespace Config {
-		boost::filesystem::path inipath;
+		extern boost::filesystem::path inipath;
 
-		boost::filesystem::path PreferredDirectory() {
+		inline boost::filesystem::path PreferredDirectory() {
 			boost::filesystem::path  r(boost::filesystem::current_path());
 
 			r = r.root_path();
 			r /= "etc";
 			return r;
 		}
-		boost::filesystem::path GetConfigDirectory() {
+		inline boost::filesystem::path GetConfigDirectory() {
 			
 			boost::filesystem::path  r=PreferredDirectory();
 		

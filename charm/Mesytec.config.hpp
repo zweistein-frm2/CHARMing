@@ -18,10 +18,10 @@ namespace Mesytec {
 	
 	 namespace Config { 
 		
-		boost::filesystem::path DATAHOME;
-		boost::filesystem::path BINNINGFILE;
-		boost::property_tree::ptree root;
-		bool get(std::list<Mcpd8::Parameters>& _devlist, boost::filesystem::path inidirectory) {
+		extern boost::filesystem::path DATAHOME;
+		extern boost::filesystem::path BINNINGFILE;
+		extern boost::property_tree::ptree root;
+		inline bool get(std::list<Mcpd8::Parameters>& _devlist, boost::filesystem::path inidirectory) {
 			bool rv = true;
 			
 			try {

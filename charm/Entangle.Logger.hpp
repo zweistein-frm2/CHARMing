@@ -81,8 +81,6 @@ namespace Entangle{
 
 extern boost::iostreams::stream< boost::iostreams::null_sink > nullOstream; 
 
-// all this works properly only when we use std::endl to terminate a log message ?
-
 
 #define LOG_DEBUG ((Entangle::SEVERITY_THRESHOLD<=Entangle::debug)? ((Entangle::ptrlogger?	Entangle::ptrlogger->setPrefix(" : DEBUG : "):	std::cout<<"DEBUG:")): nullOstream)
 #define LOG_INFO  ((Entangle::SEVERITY_THRESHOLD<=Entangle::info)? ((Entangle::ptrlogger?		Entangle::ptrlogger->setPrefix(" : INFO : "):	std::cout<<"INFO:")): nullOstream)
