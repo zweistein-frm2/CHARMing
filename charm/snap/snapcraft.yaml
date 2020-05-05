@@ -104,6 +104,7 @@ parts:
         -Dunofficial-libuv_DIR=/root/parts/vcpkg/build/installed/x64-linux/share/unofficial-libuv \
         -Dmagic_enum_DIR=/root/parts/vcpkg/build/installed/x64-linux/share/magic_enum \
         -DASIO_EXTENSIONS_PATH=/root/parts/asio-extensions/build/include \
+        -DCharm_DIR=/root/parts/frm2-charm/src
         -DSIGSLOT_PATH=/root/parts/sigslot/build/include  \
         $SNAPCRAFT_PART_SRC
       make -j 4
