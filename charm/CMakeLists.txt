@@ -3,6 +3,13 @@
 #
 cmake_minimum_required (VERSION 3.16)
 project(charm)
+set(CMAKE_VERBOSE_MAKEFILE ON)
+if(NOT Charm_DIR)
+set(Charm_DIR ${PROJECT_SOURCE_DIR})
+endif()
+set(repository ${Charm_DIR})
+message(****"repository=" ${repository})
+
 
  add_compile_definitions(SIMPLE_LOGGER)
 if(MSVC)
@@ -13,6 +20,9 @@ endif()
 add_compile_definitions(ASIOEXT_USE_BOOST_ASIO)
 add_compile_definitions(BOOST_CHRONO_VERSION=2)
 set(CMAKE_CXX_STANDARD 17) 
+
+
+
 #find_package (Python COMPONENTS Interpreter Development NumPy)
 
 #set(Boost_USE_STATIC_LIBS,ON)
@@ -28,16 +38,18 @@ if(DEFINED Protobuf_DIR )
 find_package(Protobuf REQUIRED PATHS ${Protobuf_DIR})
 endif()
 #set ("OpenCV_DIR" "${_VCPKG_ROOT_DIR}/installed/${VCPKG_TARGET_TRIPLET}/share/opencv")
-message(************  ${OpenCV_DIR}  *************)
+message(******OpenCV_Dir=   ${OpenCV_DIR}  *************)
 #find_package(OpenCV  REQUIRED PATHS  ${_VCPKG_ROOT_DIR}/installed/${VCPKG_TARGET_TRIPLET}/share/opencv)
 find_package(OpenCV  REQUIRED)
 find_package(unofficial-libuv CONFIG REQUIRED)
 
 #set (magic_enum_DIR ${_VCPKG_ROOT_DIR}/installed/${VCPKG_TARGET_TRIPLET}/share/magic_enum)
 
-message(******************** ${magic_enum_DIR}   ************)
+message(******magic_enum_DIR= ${magic_enum_DIR}   ************)
 find_package(magic_enum CONFIG REQUIRED )
 
+message(**CMAKE_CURRENT_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR})
+message(**CMAKE_SOURCE_DIR=${CMAKE_SOURCE_DIR})
 
 include_directories(${Boost_INCLUDE_DIR} ${OpenCV_INCLUDE_DIRS})
 include_directories(${ASIO_EXTENSIONS_PATH})
@@ -45,20 +57,21 @@ include_directories(./)
 include_directories(${SIGSLOT_PATH})
 #include_directories(${_Python_INCLUDE_DIR})
 # Add source to this project's executable.
-add_executable (${PROJECT_NAME} "mesyDeviceCtrl.cpp" "Mesytec.Mcpd8.cpp" "Mcpd8.Parameters.cpp" "OptionPrinter.cpp" "CustomOptionDescription.cpp" "simpleLogger.cpp" "coloured_console_sink.cpp" "Zweistein.ping.cpp" ${CMAKE_CURRENT_BINARY_DIR}/version.cpp "Mcpd8.CmdPacket.cpp" "Mesyec.Mpsd8.cpp" "Mesytec.listmode.write.cpp" "Mesytec.listmode.cpp" "MesytecSystem.Data.cpp" "Zweistein.GetConfigDir.cpp" "Mesytec.config.cpp")
+add_executable (${PROJECT_NAME} "mesyDeviceCtrl.cpp" "Mesytec.Mcpd8.cpp" "Mcpd8.Parameters.cpp" "OptionPrinter.cpp" "CustomOptionDescription.cpp" "simpleLogger.cpp" "coloured_console_sink.cpp" "Zweistein.ping.cpp" ${repository}/version.cpp "Mcpd8.CmdPacket.cpp" "Mesyec.Mpsd8.cpp" "Mesytec.listmode.write.cpp" "Mesytec.listmode.cpp" "MesytecSystem.Data.cpp" "Zweistein.GetConfigDir.cpp" "Mesytec.config.cpp")
 
 target_compile_options(${PROJECT_NAME} PRIVATE  $<$<CXX_COMPILER_ID:GNU>: -Wno-error>)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE magic_enum::magic_enum ${Boost_LIBRARIES} ${OpenCV_LIBS} unofficial::libuv::libuv )
 target_link_options(${PROJECT_NAME} PRIVATE $<$<CXX_COMPILER_ID:GNU>:$<$<CONFIG:RELEASE>:-static-libstdc++> $<$<CONFIG:DEBUG>:-static-libstdc++> > PRIVATE $<$<CXX_COMPILER_ID:GNU>:-static-libgcc>  )
 
-message("cmake path="  ${CMAKE_COMMAND})
 
-ADD_CUSTOM_COMMAND(
-    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/version.cpp
-           ${CMAKE_CURRENT_BINARY_DIR}/_version.cpp
+add_custom_command(
+    OUTPUT ${repository}/version.cpp
+           ${repository}/_version.cpp
     COMMAND ${CMAKE_COMMAND} -P
-            ${CMAKE_CURRENT_SOURCE_DIR}/version.cmake)
+            ${repository}/version.cmake
+            WORKING_DIRECTORY ${repository}
+            )
 
 
 if(WIN32)

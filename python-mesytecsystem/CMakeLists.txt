@@ -6,6 +6,8 @@ cmake_minimum_required (VERSION 3.14)
 set(PROJECT1 mesytecsystem)
 set(PROJECT2 listmodereplay)
 
+set(repository ${Charm_DIR})
+
 foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2)
     message(STATUS "PROJECT_NAME=${PROJECT_NAME}")
 
@@ -32,7 +34,7 @@ if(NOT ENTANGLE_ROOT)
     else()
       execute_process(COMMAND  find /usr/local/lib/python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}/dist-packages/ -type d -name "entangle-*.egg"  OUTPUT_VARIABLE ENTANGLE_ROOT ERROR_QUIET) 
       if(ENTANGLE_ROOT)
-        set(ENTANGLE_RES /etc/entangle)  # if standard install .re should go there (or one could parse /etc/entangle/entangle.conf.dist to know better)
+        set(ENTANGLE_RES /etc/entangle)  # if standard install .res should go there (or one could parse /etc/entangle/entangle.conf.dist to know better)
       endif()
     endif()
 
@@ -87,11 +89,14 @@ else()
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "")
 endif()
 
-ADD_CUSTOM_COMMAND(
-    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/version.cpp
-           ${CMAKE_CURRENT_BINARY_DIR}/_version.cpp
+add_custom_command(
+    OUTPUT ${repository}/version.cpp
+           ${repository}/_version.cpp
     COMMAND ${CMAKE_COMMAND} -P
-            ${Charm_DIR}/version.cmake)
+            ${repository}/version.cmake
+            WORKING_DIRECTORY ${repository}
+            )
+
 
 add_custom_command(
         TARGET ${PROJECT_NAME} POST_BUILD
@@ -127,7 +132,7 @@ ${Charm_DIR}/Mesytec.listmode.cpp
 ${Charm_DIR}/MesytecSystem.Data.cpp
 ${Charm_DIR}/Zweistein.GetConfigDir.cpp
 ${Charm_DIR}/Mesytec.config.cpp
-${CMAKE_CURRENT_BINARY_DIR}/version.cpp
+${repository}/version.cpp
 )
 
 
@@ -154,21 +159,25 @@ if(ENTANGLE_ROOT )
  )
 
  if(WIN32)
+if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+set(WIN32LIB_SUFFIX d)
+set(BOOSTLIB_DBG -gd)
+endif()
   install(
   FILES
-   "${CMAKE_CURRENT_BINARY_DIR}/boost_filesystem-vc${MSVC_TOOLSET_VERSION}-mt-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
-    "${CMAKE_CURRENT_BINARY_DIR}/boost_thread-vc${MSVC_TOOLSET_VERSION}-mt-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll" 
-    "${CMAKE_CURRENT_BINARY_DIR}/boost_chrono-vc${MSVC_TOOLSET_VERSION}-mt-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll" 
-    "${CMAKE_CURRENT_BINARY_DIR}/boost_iostreams-vc${MSVC_TOOLSET_VERSION}-mt-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
-    "${CMAKE_CURRENT_BINARY_DIR}/boost_date_time-vc${MSVC_TOOLSET_VERSION}-mt-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
+   "${CMAKE_CURRENT_BINARY_DIR}/boost_filesystem-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
+    "${CMAKE_CURRENT_BINARY_DIR}/boost_thread-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll" 
+    "${CMAKE_CURRENT_BINARY_DIR}/boost_chrono-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll" 
+    "${CMAKE_CURRENT_BINARY_DIR}/boost_iostreams-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
+    "${CMAKE_CURRENT_BINARY_DIR}/boost_date_time-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
     "${CMAKE_CURRENT_BINARY_DIR}/boost_numpy${Python_VERSION_MAJOR}${Python_VERSION_MINOR}-vc${MSVC_TOOLSET_VERSION}-mt-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
     "${CMAKE_CURRENT_BINARY_DIR}/boost_python${Python_VERSION_MAJOR}${Python_VERSION_MINOR}-vc${MSVC_TOOLSET_VERSION}-mt-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
-    "${CMAKE_CURRENT_BINARY_DIR}/opencv_core.dll"
+    "${CMAKE_CURRENT_BINARY_DIR}/opencv_core${WIN32LIB_SUFFIX}.dll"
     "${CMAKE_CURRENT_BINARY_DIR}/libuv.dll"
-    "${CMAKE_CURRENT_BINARY_DIR}/bz2.dll"
-    "${CMAKE_CURRENT_BINARY_DIR}/lzma.dll"
-    "${CMAKE_CURRENT_BINARY_DIR}/zlib1.dll"
-    "${CMAKE_CURRENT_BINARY_DIR}/zstd.dll"
+    "${CMAKE_CURRENT_BINARY_DIR}/bz2${WIN32LIB_SUFFIX}.dll"
+    "${CMAKE_CURRENT_BINARY_DIR}/lzma${WIN32LIB_SUFFIX}.dll"
+    "${CMAKE_CURRENT_BINARY_DIR}/zlib1${WIN32LIB_SUFFIX}.dll"
+    "${CMAKE_CURRENT_BINARY_DIR}/zstd${WIN32LIB_SUFFIX}.dll"
   DESTINATION ${ENTANGLE_ROOT}/entangle/device/charm
   )
   endif()

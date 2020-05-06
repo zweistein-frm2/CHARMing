@@ -24,6 +24,12 @@ class DeviceConnection(FdLogMixin,base.MLZDevice):
        
     def __del__(self):
         print("charm.py: DeviceConnection.__del__")
+    def read_version(self):
+        ver = super().read_version();
+        if not charmsystem:
+            return ver
+        return ver + " "+charmsystem.version
+    
 
 
 class Simulator(base.MLZDevice):
@@ -48,7 +54,11 @@ class Simulator(base.MLZDevice):
     def get_NucleoRate_unit(self):
         return 'Events/second'
 
-
+    def read_version(self):
+        ver = super().read_version();
+        if not charmsystem:
+            return ver
+        return ver + " "+charmsystem.version
 
 class Settings(base.MLZDevice):
     attributes = {
@@ -70,7 +80,11 @@ class Settings(base.MLZDevice):
     def get_writelistmode_unit(self):
         return ''
 
-
+    def read_version(self):
+        ver = super().read_version();
+        if not charmsystem:
+            return ver
+        return ver + " "+charmsystem.version
 
 class MeasureCounts(base.CounterChannel):
     
@@ -111,7 +125,12 @@ class MeasureCounts(base.CounterChannel):
         if charmsystem:
             t = charmsystem.status()
             charmsystem.stopafter(value,0)
-        
+    
+    def read_version(self):
+        ver = super().read_version();
+        if not charmsystem:
+            return ver
+        return ver + " "+charmsystem.version
 
 
 class MeasureTime(base.TimerChannel):
@@ -152,6 +171,12 @@ class MeasureTime(base.TimerChannel):
         if charmsystem:
              t = charmsystem.status()
              charmsystem.stopafter(0,value)
+    
+    def read_version(self):
+        ver = super().read_version();
+        if not charmsystem:
+            return ver
+        return ver + " "+charmsystem.version
 
 
 
@@ -232,4 +257,10 @@ class Histogram(base.ImageChannel):
         #print(t[0][self.selectedRoi]);  #should be pair wkt/counts
         self.count=t[0][self.selectedRoi][1]
         return self.mat.flatten()
+    def read_version(self):
+        ver = super().read_version();
+        if not charmsystem:
+            return ver
+        return ver + " "+charmsystem.version
+
 

@@ -21,11 +21,13 @@ class DeviceConnection(FdLogMixin,base.MLZDevice):
         global charmsystem
         if charmsystem is None:
                 charmsystem=listmodereplay.ReplayList(fd)
-       
     def __del__(self):
         print("charm-replay.py: DeviceConnection.__del__")
-
-
+    def read_version(self):
+        ver = super().read_version();
+        if not charmsystem:
+            return ver
+        return ver + " "+charmsystem.version
 
 class PlayList(base.MLZDevice):
     commands = {
@@ -55,6 +57,12 @@ class PlayList(base.MLZDevice):
         global charmsystem
         if charmsystem:
             return charmsystem.files(directory)
+    
+    def read_version(self):
+        ver = super().read_version();
+        if not charmsystem:
+            return ver
+        return ver + " "+charmsystem.version
     
 
 
@@ -98,7 +106,11 @@ class MeasureCounts(base.CounterChannel):
         if charmsystem:
             t = charmsystem.status()
             charmsystem.stopafter(value,0)
-        
+    def read_version(self):
+        ver = super().read_version();
+        if not charmsystem:
+            return ver
+        return ver + " "+charmsystem.version    
 
 
 class MeasureTime(base.TimerChannel):
@@ -139,7 +151,11 @@ class MeasureTime(base.TimerChannel):
         if charmsystem:
              t = charmsystem.status()
              charmsystem.stopafter(0,value)
-
+    def read_version(self):
+        ver = super().read_version();
+        if not charmsystem:
+            return ver
+        return ver + " "+charmsystem.version
 
 
 class Histogram(base.ImageChannel):
@@ -222,3 +238,8 @@ class Histogram(base.ImageChannel):
         self.count=t[0][self.selectedRoi][1]
         return self.mat.flatten()
 
+    def read_version(self):
+        ver = super().read_version();
+        if not charmsystem:
+            return ver
+        return ver + " "+charmsystem.version

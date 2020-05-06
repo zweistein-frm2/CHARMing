@@ -15,6 +15,8 @@ def makeRoiWkt( parameter):
     wkt+="),())"
 
 o = mesytecsystem.NeutronMeasurement(sys.stdout.fileno())
+v = o.version
+print(v)
 h = o.getHistogram()
 mat = np.zeros((1,1,1),dtype="int32")
 t= h.update(mat)

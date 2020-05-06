@@ -80,6 +80,11 @@
           "name": "SIGSLOT_PATH",
           "value": "/home/alanghof/repos/CHARMing/sigslot/include",
           "type": "PATH"
+        },
+        {
+          "name": "Charm_DIR",
+          "value": "/home/alanghof/repos/CHARMing/charm",
+          "type": "PATH"
         }
       ]
     },
@@ -88,9 +93,9 @@
       "generator": "Unix Makefiles",
       "configurationType": "Release",
       "cmakeExecutable": "/snap/cmake/current/bin/cmake",
-      "remoteCopySourcesExclusionList": [ ".vs", ".git", "out" ,"prime","snap","parts","stage"],
+      "remoteCopySourcesExclusionList": [ ".vs", ".git", "out", "prime", "snap", "parts", "stage" ],
       "cmakeToolchain": "/vcpkg/scripts/buildsystems/vcpkg.cmake",
-      "cmakeCommandArgs": "",
+      "cmakeCommandArgs": "-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON ",
       "buildCommandArgs": "",
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "linux_x64" ],
@@ -112,6 +117,11 @@
         {
           "name": "SIGSLOT_PATH",
           "value": "/home/localadmin/repos/CHARMing/sigslot/include",
+          "type": "PATH"
+        },
+        {
+          "name": "Charm_DIR",
+          "value": "/home/localadmin/repos/CHARMing/charm",
           "type": "PATH"
         }
       ]

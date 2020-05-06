@@ -84,7 +84,7 @@ int main(int argc, char* argv[])
 	
 	try
 	{
-		std::cout << "BRANCH: " << GIT_BRANCH << " TAG:" << GIT_TAG << " REV: " << GIT_REV <<" "<<GIT_DATE<< std::endl;
+		std::cout << PROJECT_NAME << " : BRANCH: " << GIT_BRANCH << " TAG:" << GIT_TAG << " REV: " << GIT_REV <<" "<<GIT_DATE<< std::endl;
 		if (argc == 1) {
 			std::cout << "--help for usage info" << std::endl;
 		}

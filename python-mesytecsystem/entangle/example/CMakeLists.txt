@@ -12,9 +12,10 @@ cmake_minimum_required (VERSION 3.14)
 message(***************${ID}**************)
 configure_file( charm-ID-SANS1.res.in charm-${ID}-SANS1.res )
 configure_file( charm-ID-replay.res.in charm-${ID}-replay.res )
-
+if(ENTANGLE_RES)
 install(FILES
  ${CMAKE_CURRENT_BINARY_DIR}/charm-${ID}-SANS1.res
  ${CMAKE_CURRENT_BINARY_DIR}/charm-${ID}-replay.res
 DESTINATION ${ENTANGLE_RES}
 )
+endif()
