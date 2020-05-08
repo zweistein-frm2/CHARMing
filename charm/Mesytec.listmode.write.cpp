@@ -74,9 +74,9 @@ namespace Mesytec {
 		 }
 
 		 std::filesystem::resize_file(tmppath.string(), byteswritten);
-		 boost::filesystem::path jsonpath = tmppath;
-		 jsonpath.append(".json");
 
+		 boost::filesystem::path jsonpath(tmppath.string() + ".json");
+		
 		 try {
 			 boost::property_tree::write_json(jsonpath.string(), Mesytec::Config::root);
 		 }

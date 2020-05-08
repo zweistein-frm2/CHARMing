@@ -32,9 +32,9 @@ class DeviceConnection(FdLogMixin,base.MLZDevice):
 class PlayList(base.MLZDevice):
     commands = {
          'RemoveFile':
-            Cmd('remove file from playlist.', listof(str), str, '', ''),
+            Cmd('remove file from playlist.',str, listof(str), '', ''),
           'AddFile':
-            Cmd('add file to playlist.', listof(str), str, '', ''),
+            Cmd('add file to playlist.', str, listof(str), '', ''),
           'FilesInDirectory':
             Cmd('return directory list of .mdat files.', str, listof(str), '', ''),
     }
@@ -62,7 +62,7 @@ class PlayList(base.MLZDevice):
         ver = super().read_version();
         if not charmsystem:
             return ver
-        return ver + " "+charmsystem.version
+        return ver + "\r\n"+charmsystem.version
     
 
 

@@ -7,6 +7,4 @@ namespace Mesytec {
 		 boost::atomic<action> whatnext = action::wait_reading;
 	}
 
-	
-
 }

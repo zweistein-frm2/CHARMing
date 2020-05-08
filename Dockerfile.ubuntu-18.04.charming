@@ -23,8 +23,8 @@ RUN apt-get install -y gcc g++
 RUN apt-get install -y cmake
 RUN mv /usr/bin/cmake /usr/bin/cmake.3.10.2
 RUN apt-get install -y libssl-dev
-ARG cmake_ver=3.17.1
-${cmake_ver}
+ARG cmake_ver=3.17.2
+
 RUN cd /opt && wget https://github.com/Kitware/CMake/releases/download/v${cmake_ver}/cmake-${cmake_ver}.tar.gz && tar -zxvf ./cmake-${cmake_ver}.tar.gz
 RUN cd /opt && rm ./cmake-${cmake_ver}.tar.gz
 RUN cd /opt/cmake-${cmake_ver}  && ./bootstrap
@@ -39,8 +39,8 @@ RUN cd /vcpkg && ./vcpkg install libuv
 
 ARG boostversion=1_73_0
 
-RUN cd /opt && wget https://dl.bintray.com/boostorg/release/${echo ${boostversion} | sed 's/_/./g'}/source/boost_${boostversion}.tar.bz2 && tar --bzip2 -xf ./boost_${boostversion}.tar.bz2
-RUN cd /opt && rm ./boost_${boostversion}.bz2
+RUN cd /opt && wget https://dl.bintray.com/boostorg/release/$(echo ${boostversion} | sed "s/_/./g")/source/boost_${boostversion}.tar.bz2 && tar --bzip2 -xf ./boost_${boostversion}.tar.bz2
+RUN cd /opt && rm  ./boost_${boostversion}.tar.bz2
 RUN cd /opt/boost_${boostversion} && ./bootstrap.sh --prefix=/usr/
 RUN cd /opt/boost_${boostversion} && ./b2
 RUN cd /opt/boost_${boostversion} && ./b2 install
@@ -77,16 +77,16 @@ RUN cd ${targ1} && make
 
 ARG targ2=${entangle_DIR}/device/charm
 # we need unique name so that multiple devices can coexist on same tango-server 
-RUN < /dev/urandom tr -dc A-Za-z0-9| head -c14 > NUMBER.tmp && cp /CHARMing/python-mesytecsystem/entangle/example/charm-SANS1.res /etc/entangle/charm-$(cat NUMBER.tmp)-SANS1.res
 
-RUN cd ${targ2} && cmake -DCMAKE_TOOLCHAIN_FILE=/vcpkg/scripts/buildsystems/vcpkg.cmake -DCharm_DIR=/CHARMing/charm -DPacketSender_DIR=/CHARMing/PacketSender -DSIGSLOT_PATH=/CHARMing/sigslot/include -DASIO_EXTENSIONS_PATH=/CHARMing/asio-extensions/include -Dpyboostcvconverter_DIR=/CHARMing/pyboostcvconverter -S /CHARMing/python-mesytecsystem/ -B ${targ2} 
+RUN cd ${targ2} && cmake -DENTANGLE_ROOT=${entangle_DIR} -DENTANGLE_RES="/etc/entangle/" -DCMAKE_TOOLCHAIN_FILE=/vcpkg/scripts/buildsystems/vcpkg.cmake -DCharm_DIR=/CHARMing/charm -DPacketSender_DIR=/CHARMing/PacketSender -DSIGSLOT_PATH=/CHARMing/sigslot/include -DASIO_EXTENSIONS_PATH=/CHARMing/asio-extensions/include -Dpyboostcvconverter_DIR=/CHARMing/pyboostcvconverter -S /CHARMing/python-mesytecsystem/ -B ${targ2} 
 RUN  echo "#!/bin/sh" >  replay.sh && \
 	 echo "cd /CHARMing/python-mesytecsystem/entangle/example" >> replay.sh && \
 	 echo "cmake -D$HOSTNAME">>replay.sh && \
-	 echo "cp /CHARMing/python-mesytecsystem/entangle/example/charm-$HOSTNAME-replay.res /etc/entangle/charm-$HOSTNAME-replay.res" >> replay.sh
+	 echo "cp /CHARMing/python-mesytecsystem/entangle/example/charm-$HOSTNAME-replay.res /etc/entangle/charm-$HOSTNAME-replay.res" >> replay.sh &&\
 	 echo "python bin/entangle-server charm-$HOSTNAME-replay" >> replay.sh && \
 	 chmod +x /replay.sh
-	 
+	
+RUN cat /replay.sh
 RUN echo "#!/bin/sh" >  bootstrap.sh && \
 	echo 
 CMD [${targ1}/charm]

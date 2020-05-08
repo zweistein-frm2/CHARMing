@@ -37,7 +37,7 @@
 #include <opencv2/highgui.hpp>
 #include "Zweistein.ThreadPriority.hpp"
 #include "Zweistein.Logger.hpp"
-
+#include "Zweistein.Averaging.hpp"
 
 #ifdef _DEBUG
 boost::log::trivial::severity_level SEVERITY_THRESHOLD = boost::log::trivial::trace;
@@ -47,6 +47,7 @@ boost::log::trivial::severity_level SEVERITY_THRESHOLD = boost::log::trivial::in
 std::string PROJECT_NAME("charm");
 
 using boost::asio::ip::udp;
+
 
 EXTERN_FUNCDECLTYPE boost::mutex coutGuard;
 EXTERN_FUNCDECLTYPE boost::thread_group worker_threads;
@@ -185,7 +186,7 @@ int main(int argc, char* argv[])
 						}
 						LOG_INFO << "Config file : " << fname + ".json" << std::endl;
 						_devlist.clear();
-						bool configok = Mesytec::Config::get(_devlist, "");
+						bool configok = Mesytec::Config::get(_devlist, "",false);
 						std::stringstream ss_1;
 						boost::property_tree::write_json(ss_1, Mesytec::Config::root);
 						LOG_INFO << ss_1.str() << std::endl;
@@ -199,13 +200,28 @@ int main(int argc, char* argv[])
 						Zweistein::setupHistograms(io_service,ptrmsmtsystem1,Mesytec::Config::BINNINGFILE.string());
 
 					
-						auto abfunc = boost::bind(&Mesytec::MesytecSystem::analyzebuffer, ptrmsmtsystem1, _1);
-						auto read = Mesytec::listmode::Read(abfunc, ptrmsmtsystem1->data, ptrmsmtsystem1->deviceparam);
-						
+					
+						try {
+							boost::function<void(Mcpd8::DataPacket&)> abfunc = boost::bind(&Mesytec::MesytecSystem::analyzebuffer, ref(ptrmsmtsystem1), boost::placeholders::_1);
+							boost::shared_ptr <Mesytec::listmode::Read> ptrRead = boost::shared_ptr < Mesytec::listmode::Read>(new Mesytec::listmode::Read(abfunc, ptrmsmtsystem1->data, ptrmsmtsystem1->deviceparam));
+							ptrRead->file(fname, io_service);
+							// pointer to obj needed otherwise exceptions are not propagated properly
+						}
+						catch (Mesytec::listmode::read_error& x) {
+							if (int const* mi = boost::get_error_info<Mesytec::listmode::my_info>(x)) {
+								auto  my_code = magic_enum::enum_cast<Mesytec::listmode::read_errorcode>(*mi);
+								if (my_code.has_value()) {
+									auto c1_name = magic_enum::enum_name(my_code.value());
+									LOG_ERROR << c1_name << std::endl;
+								}
+							}
+						}
+						catch (std::exception& e) {
+							LOG_ERROR << e.what() << std::endl;
+						}
 
-						read.file(fname, io_service);
-
-						Zweistein::setup_status = Zweistein::histogram_setup_status::not_done; // next file is all new life 
+						Zweistein::setup_status = Zweistein::histogram_setup_status::not_done; // next file is all new life
+						 
 					}
 					
 				}
@@ -300,7 +316,7 @@ int main(int argc, char* argv[])
 			worker_threads.create_thread([&ptrmsmtsystem1] {Zweistein::displayHistogram(io_service, ptrmsmtsystem1); });
 			// nothing to do really,
 			while (!io_service.stopped()) {
-				boost::this_thread::sleep_for(boost::chrono::milliseconds(1500));
+				boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
 				io_service.run_one();
 			}
 		}
@@ -498,6 +514,7 @@ int main(int argc, char* argv[])
 				if (k == 10) {
 					LOG_ERROR << " NOT CONNECTED (tried " << k << " seconds)" << std::endl;
 				}
+			Zweistein::Averaging<double> avg(3);
 			while (!io_service.stopped()) {
 					boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
 					if (setupafterconnect) continue;
@@ -505,11 +522,12 @@ int main(int argc, char* argv[])
 					start = boost::chrono::system_clock::now();
 					long long currentcount = ptrmsmtsystem1->data.evntcount;
 					double evtspersecond = sec.count() != 0 ? (double)(currentcount - lastcount) / sec.count() : 0;
+					avg.addValue(evtspersecond);
 					{
 						boost::mutex::scoped_lock lock(coutGuard);
 						boost::chrono::system_clock::time_point tps(ptrmsmtsystem1->started);
 						boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - tps;
-						std::cout << "\r" << std::setprecision(0) << std::fixed << evtspersecond << " Events/s, (" << Zweistein::PrettyBytes((size_t)(evtspersecond * sizeof(Mesy::Mpsd8Event))) << "/s)\t" << Mcpd8::DataPacket::deviceStatus(ptrmsmtsystem1->data.last_deviceStatusdeviceId) << " elapsed:" << sec << " ";// << std::endl;
+						std::cout << "\r" << std::setprecision(0) << std::fixed << avg.getAverage() << " Events/s, (" << Zweistein::PrettyBytes((size_t)(evtspersecond * sizeof(Mesy::Mpsd8Event))) << "/s)\t" << Mcpd8::DataPacket::deviceStatus(ptrmsmtsystem1->data.last_deviceStatusdeviceId) << " elapsed:" << sec << " ";// << std::endl;
 						lastcount = currentcount;
 #ifndef _WIN32
 						std::cout << std::flush;

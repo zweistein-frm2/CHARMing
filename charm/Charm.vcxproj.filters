@@ -60,6 +60,9 @@
     <ClCompile Include="Zweistein.GetConfigDir.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
+    <ClCompile Include="version.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Mesytec.hpp">
@@ -147,6 +150,12 @@
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="Zweistein.ping.hpp">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="Charm.hpp">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="Zweistein.Averaging.hpp">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>

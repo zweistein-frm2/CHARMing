@@ -51,7 +51,7 @@
     {
       "name": "Taco102-Ubuntu18.04",
       "generator": "Unix Makefiles",
-      "configurationType": "Release",
+      "configurationType": "Debug",
       "buildRoot": "${projectDir}/out/build/${name}",
       "installRoot": "${projectDir}/out/install/${name}",
       "cmakeExecutable": "/snap/cmake/current/bin/cmake",

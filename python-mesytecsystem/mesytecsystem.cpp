@@ -31,7 +31,7 @@
 #include "Zweistein.populateHistograms.hpp"
 #include "Mesytec.listmode.write.hpp"
 #include <stdio.h>
-
+#include "Zweistein.Averaging.hpp"
 Entangle::severity_level Entangle::SEVERITY_THRESHOLD =Entangle::severity_level::trace;
 std::string PROJECT_NAME("charm");
 
@@ -163,6 +163,7 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
 
         boost::chrono::system_clock::time_point lastsec = boost::chrono::system_clock::now();
         long long lastcount = 0;
+        Zweistein::Averaging<double> avg(3);
         while (!io_service.stopped()) {
             boost::this_thread::sleep_for(boost::chrono::milliseconds(500));
              //       if (PyErr_CheckSignals() == -1) {
@@ -196,13 +197,14 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
             lastsec = boost::chrono::system_clock::now();
             long long currentcount = ptrmsmtsystem1->data.evntcount; 
             double evtspersecond = sec.count() != 0 ? (double)(currentcount - lastcount) / sec.count() : 0;
+            avg.addValue(evtspersecond);
             {
               
                 std::stringstream ss1;
 
                 unsigned short tmp = ptrmsmtsystem1->data.last_deviceStatusdeviceId;
                 std::string tmpstr = Mcpd8::DataPacket::deviceStatus(tmp);
-                ss1 << "\r" << std::setprecision(0) << std::fixed << evtspersecond << " Events/s, (" << Zweistein::PrettyBytes((size_t)(evtspersecond * sizeof(Mesy::Mpsd8Event))) << "/s), "<< tmpstr <<" elapsed:"<<secs;// << std::endl;
+                ss1 << "\r" << std::setprecision(0) << std::fixed << avg.getValue()<< " Events/s, (" << Zweistein::PrettyBytes((size_t)(evtspersecond * sizeof(Mesy::Mpsd8Event))) << "/s), "<< tmpstr <<" elapsed:"<<secs;// << std::endl;
                 std::streampos oldpos = ss1.tellg();
                 ss1.seekg(0, std::ios::end);
                 std::streampos len = ss1.tellg();

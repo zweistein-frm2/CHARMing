@@ -13,8 +13,8 @@
 #include "Mesytec.hpp"
 
 
-#define Charm_sizeX  960
-#define Charm_sizeY  960
+#define Charm_sizeX  1024
+#define Charm_sizeY  1024
 
 namespace Charm {
 

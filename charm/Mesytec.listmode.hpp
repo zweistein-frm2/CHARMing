@@ -33,14 +33,26 @@ namespace Mesytec {
 			return  r;
 		}
 
+		typedef boost::error_info<struct tag_my_info, int> my_info;
+		struct read_error : virtual boost::exception, virtual std::exception { };
+		enum read_errorcode {
+			OK = 0,
+			MULTIPLE_HEADER_SEPARATOR = 1,
+			MULTIPLE_CLOSING_SIGNATURE = 2,
+			DATAPACKET_NOT_RECOGNIZED = 3,
+			MAX_DATAPACKET_SIZE_EXCEEDED=4,
+			INTERNAL_BUFFER_OVERFLOW=5
+		
+		};
 		class Read {
 			boost::array< Mcpd8::DataPacket, 1> recv_buf;
 		public:
-			Read(boost::function<void(Mcpd8::DataPacket &)> abfunc,Mcpd8::Data &_Data, std::map<const unsigned char, Mesytec::DeviceParameter> &_deviceparam):deviceparam(_deviceparam),
+			Read(boost::function<void(Mcpd8::DataPacket &)> &abfunc,Mcpd8::Data &_Data, std::map<const unsigned char, Mesytec::DeviceParameter> &_deviceparam):deviceparam(_deviceparam),
 				data(_Data),ab(abfunc){
 				int n=(int)deviceparam.size();
 				for (int i = 0; i < n; i++) listmoderead_first.set(i);
 			}
+			
 		private:
 			Mcpd8::Data& data;
 			std::map<const unsigned char, Mesytec::DeviceParameter>& deviceparam;
@@ -48,7 +60,7 @@ namespace Mesytec {
 			
 			boost::chrono::system_clock::time_point tp_start;
 			boost::chrono::nanoseconds start;
-			boost::function<void(Mcpd8::DataPacket &)> ab;
+			boost::function<void(Mcpd8::DataPacket &)>  ab;
 
 			
 			void listmoderead_analyzebuffer(const boost::system::error_code& error,
@@ -58,20 +70,26 @@ namespace Mesytec {
 					start = Mcpd8::DataPacket::timeStamp(datapacket.time);
 					tp_start = boost::chrono::system_clock::now();
 					unsigned char id = Mcpd8::DataPacket::getId(datapacket.deviceStatusdeviceId);
-					auto& params = deviceparam[id];
-					params.lastbufnum = datapacket.Number - 1;
-
-					int i = 0;
-					for (std::map<const unsigned char, Mesytec::DeviceParameter>::iterator it = deviceparam.begin(); it != deviceparam.end(); ++it) {
-						if ((*it).first == id) listmoderead_first.reset(i);
-						i++;
+					
+					if (listmoderead_first.test(id)) {
+						auto& params = deviceparam[id];
+						params.lastbufnum = datapacket.Number - 1;
+						int i = 0;
+						for (std::map<const unsigned char, Mesytec::DeviceParameter>::iterator it = deviceparam.begin(); it != deviceparam.end(); ++it) {
+							if ((*it).first == id) listmoderead_first.reset(i);
+							i++;
+						}
 					}
 					
 					
 				}
-				ab(datapacket);
+				
+				//unsigned char id = Mcpd8::DataPacket::getId(datapacket.deviceStatusdeviceId);
+				//LOG_DEBUG << (id==1?"                           ":"")<<"datapacket.Number=" << datapacket.Number << std::endl;
+				ab.operator()(datapacket);
+				
 
-				boost::chrono::milliseconds elapsed = boost::chrono::duration_cast<boost::chrono::milliseconds>(Mcpd8::DataPacket::timeStamp(datapacket.time) - start);
+				boost::chrono::milliseconds elapsed = boost::chrono::duration_cast<boost::chrono::milliseconds>(Mcpd8::DataPacket::timeStamp(&datapacket.time[0]) - start);
 				if (elapsed.count() > 300) {
 					int replayspeedmultiplier = 1;
 					start = Mcpd8::DataPacket::timeStamp(datapacket.time);
@@ -89,9 +107,10 @@ namespace Mesytec {
 
 		public:
 			void file(std::string fname,boost::asio::io_service& io_service) {
-					LOG_DEBUG << __FILE__ << " : " << __LINE__ << " " << fname << std::endl;
+					//LOG_DEBUG << __FILE__ << " : " << __LINE__ << " " << fname << std::endl;
 					asioext::file source(io_service, fname, asioext::open_flags::access_read | asioext::open_flags::open_existing);
-					char buffer[0x5ef]; // 0x5ef  is naughty boundary, used for debugging, can use any size really
+
+					std::array<char, 0x5ef0> buffer; // 0x5ef  is naughty boundary, used for debugging, can use any size really
 					boost::system::error_code ec;
 					boost::system::error_code error;
 					size_t bufnum = 0;
@@ -110,32 +129,36 @@ namespace Mesytec {
 					do {
 						const std::size_t bytes_read = source.read_some(boost::asio::buffer(buffer), ec);
 						//std::cout << "\r" << fname << " : " << total_bytes_processed << " bytes processed \t";
-						
 						size_t from = 0;
 						size_t to = bytes_read;
 						std::string nhneedle(Mesytec::listmode::header_separator, Mesytec::listmode::header_separator + sizeof(Mesytec::listmode::header_separator));
 						std::string nneedle(Mesytec::listmode::datablock_separator, Mesytec::listmode::datablock_separator + sizeof(Mesytec::listmode::datablock_separator));
 						std::string ncneedle(Mesytec::listmode::closing_signature, Mesytec::listmode::closing_signature + sizeof(Mesytec::listmode::closing_signature));
 						do {
-							std::string_view  haystack(buffer + from, bytes_read - from);
+							std::string_view  haystack(buffer.data() + from, bytes_read - from);
 							size_t nh = haystack.find(nhneedle);
 							size_t n = haystack.find(nneedle);
 							size_t nc = haystack.find(ncneedle);
 							if (nh != std::string::npos) {
 								nh += from;
-								if (headerfound) LOG_ERROR << "Multiple header_separator found at pos:" << total_bytes_processed + nh << std::endl;
+								if (headerfound) {
+									LOG_ERROR << "Multiple header_separator found at pos:" << total_bytes_processed + nh << std::endl;
+									throw read_error() << my_info(read_errorcode::MULTIPLE_HEADER_SEPARATOR);
+								}
 							}
 							if (n != std::string::npos) n += from;
 							if (nc != std::string::npos) {
 								nc += from;
-								if (closing_sigfound) LOG_ERROR << "Multiple closing_sigfound found at pos:" << total_bytes_processed + nc << std::endl;
-
+								if (closing_sigfound) {
+									LOG_ERROR << "Multiple closing_signature found found at pos:" << total_bytes_processed + nc << std::endl;
+									throw read_error() << my_info(read_errorcode::MULTIPLE_CLOSING_SIGNATURE);
+								}
 							}
 
 							if (possible_remaining_n != std::string::npos) {
 								size_t n_advance = 0;
 								// now find needle for size_of(datablock_separator) - possible_remaining_n
-								std::string_view  haystackEndOnly(buffer, possible_remaining_n);
+								std::string_view  haystackEndOnly(buffer.data(), possible_remaining_n);
 								std::string n_restofneedle(Mesytec::listmode::datablock_separator + (sizeof(Mesytec::listmode::datablock_separator) - possible_remaining_n)
 									, Mesytec::listmode::datablock_separator + sizeof(Mesytec::listmode::datablock_separator));
 								if (haystackEndOnly.find(n_restofneedle) != std::string::npos) {
@@ -168,7 +191,7 @@ namespace Mesytec {
 								for (int i = 1; i < sizeof(Mesytec::listmode::datablock_separator); i++) {
 									//i from 1 to 7
 									size_t sep_size = sizeof(Mesytec::listmode::datablock_separator) - i;
-									std::string_view  haystackBeginOnly(buffer + (bytes_read - sep_size), sep_size);
+									std::string_view  haystackBeginOnly(buffer.data() + (bytes_read - sep_size), sep_size);
 									std::string n_possibleneedle(Mesytec::listmode::datablock_separator, Mesytec::listmode::datablock_separator + sep_size);
 									if (haystackBeginOnly.find(n_possibleneedle) != std::string::npos) {
 										possible_remaining_n = i;
@@ -180,8 +203,10 @@ namespace Mesytec {
 							}
 							to = n;
 							if (nc != std::string::npos) {
-								closing_sigfound = true;
-								to = nc;
+							    closing_sigfound = true;
+								if (nc < to) {
+									to = nc;
+								}
 							}
 							if (headerfound && (from != std::string::npos)) {
 								char* dest = ((char*)&recv_buf[0]) + bytesWrittenbypreviousBuffer;
@@ -190,18 +215,27 @@ namespace Mesytec {
 									to = bytes_read;
 									bytesWrittenbypreviousBuffer += to - from;
 									if (to - from > sizeof(Mcpd8::DataPacket)) {
-										BOOST_THROW_EXCEPTION(std::runtime_error("DataPacket not recognized"));
+										int g = 0;
+										throw read_error() << my_info(read_errorcode::MAX_DATAPACKET_SIZE_EXCEEDED);
+									
 									}
-									memcpy(dest, buffer + from, to - from);
+									if (to > buffer.size()) {
+										throw read_error() << my_info(read_errorcode::INTERNAL_BUFFER_OVERFLOW);
+									}
+									memcpy(dest, buffer.data() + from, to - from);
 									transferred += to - from;
 									n_advance = to;
 								}
 								else {
 									// dann ist wohl recv_buf[0] gefüllt
 									if (to - from > sizeof(Mcpd8::DataPacket)) {
-										BOOST_THROW_EXCEPTION(std::runtime_error("DataPacket not recognized"));
+										int g = 0;
+											throw read_error() << my_info(read_errorcode::MAX_DATAPACKET_SIZE_EXCEEDED);
 									}
-									memcpy(dest, buffer + from, to - from);
+									if (to > buffer.size()) {
+										throw read_error() << my_info(read_errorcode::INTERNAL_BUFFER_OVERFLOW);
+									}
+									memcpy(dest, buffer.data() + from, to - from);
 									transferred += to - from;
 									short* sp = (short*)&recv_buf[0];
 									for (int i = 0; i < transferred / sizeof(short); i++) 	boost::endian::big_to_native_inplace(sp[i]);
@@ -220,8 +254,14 @@ namespace Mesytec {
 								from = n_advance;
 								to = bytes_read;
 							}
-							if (from == bytes_read) break;
-							if (closing_sigfound) break;
+							if (closing_sigfound) {
+								if (from >= nc) {
+									headerfound = false; // next round
+								}
+							}
+							if (from == bytes_read) {
+								break;
+							}
 
 							while(action lec=CheckAction()) {
 								if (lec == action::start_reading) return;

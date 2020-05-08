@@ -21,7 +21,7 @@ namespace Mesytec {
 		extern boost::filesystem::path DATAHOME;
 		extern boost::filesystem::path BINNINGFILE;
 		extern boost::property_tree::ptree root;
-		inline bool get(std::list<Mcpd8::Parameters>& _devlist, boost::filesystem::path inidirectory) {
+		inline bool get(std::list<Mcpd8::Parameters>& _devlist, boost::filesystem::path inidirectory,bool checknetwork=true) {
 			bool rv = true;
 			
 			try {
@@ -78,7 +78,7 @@ namespace Mesytec {
 					}
 					else p1.networkcard = root.get<std::string>(s2 + "networkcard");
 
-					if (!Zweistein::InterfaceExists(p1.networkcard)) {
+					if (checknetwork && !Zweistein::InterfaceExists(p1.networkcard)) {
 						LOG_ERROR << s2 + "networkcard=" << p1.networkcard << " not found." << std::endl;
 						rv = false;
 						continue;

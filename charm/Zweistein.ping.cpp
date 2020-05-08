@@ -35,7 +35,7 @@ namespace Zweistein {
         if (c.running()) c.terminate();
         while (std::getline(is, line) && !line.empty()) {
             std::string desired = "64 bytes from";
-            std::string desired1 = "1 received";
+            std::string desired1 = std::to_string(retry)+ " received";
             std::string undesired = "100 % packet loss";
 #ifdef WIN32
             undesired = "Request timed out";

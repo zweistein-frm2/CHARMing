@@ -40,10 +40,13 @@
     <ClCompile Include="MesytecSystem.Data.cpp" />
     <ClCompile Include="OptionPrinter.cpp" />
     <ClCompile Include="simpleLogger.cpp" />
+    <ClCompile Include="version.cpp" />
     <ClCompile Include="Zweistein.GetConfigDir.cpp" />
     <ClCompile Include="Zweistein.ping.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Zweistein.Averaging.hpp" />
+    <ClInclude Include="Charm.hpp" />
     <ClInclude Include="Entangle.Logger.hpp" />
     <ClInclude Include="Mcpd8.CmdPacket.hpp" />
     <ClInclude Include="Mcpd8.DataPacket.hpp" />
@@ -197,8 +200,6 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <StackReserveSize>120000000</StackReserveSize>
-      <StackCommitSize>80000000</StackCommitSize>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">

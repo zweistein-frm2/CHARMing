@@ -16,14 +16,17 @@ def makeRoiWkt( parameter):
     wkt+="),())"
 
 o = listmodereplay.ReplayList(sys.stdout.fileno())
-files = o.files("~/source/repos/CHARMing/charm")
+files = o.files('~/source/repos/CHARMing/charm')
 print("Number of files in PlayList:"+str(len(files)))
+
+
+
 #print(files)
 #for file in files:
-o.addfile(files[0])
-o.addfile(files[1])
-o.start()
-time.sleep(25)
+#o.addfile(files[0])
+#o.addfile(files[1])
+#o.start()
+#time.sleep(25)
 
 
 #h = o.getHistogram()

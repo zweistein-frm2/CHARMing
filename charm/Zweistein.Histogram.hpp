@@ -100,7 +100,7 @@ namespace Zweistein {
             int rsize = 0;
             {
                 Zweistein::ReadLock r_lock(histogramsLock);
-                rsize = roidata.size();
+                rsize = (int) roidata.size();
             }
 
             LOG_INFO << "getRoi(" << index << ")" << std::endl;
@@ -170,7 +170,7 @@ namespace Zweistein {
 
         void _setRoi(std::string wkt,int index) {
             
-            LOG_INFO << "_setRoi(" << wkt <<", "<<index <<")" << std::endl;
+            //LOG_INFO << "_setRoi(" << wkt <<", "<<index <<")" << std::endl;
             int width = 1;
             int height = 1; 
                                  
@@ -213,10 +213,6 @@ namespace Zweistein {
             boost::geometry::envelope(roidata[index].roi,roidata[index].box);
             int roiboxwidth = roidata[index].box.max_corner().get<0>() - roidata[index].box.min_corner().get<0>();
             int roiboxheight = roidata[index].box.max_corner().get<1>() - roidata[index].box.min_corner().get<1>();
-
-           // Zweistein::Config::AddRoi(_getRoi());
-           
-           
 
         }
 #ifdef BOOST_PYTHON_MODULE

@@ -65,7 +65,11 @@ namespace Zweistein {
 		}
 
 		Event(Charm::CharmEvent* charmev, const boost::chrono::nanoseconds& headertime, unsigned short offsetX, void * someparameter) {
-
+			type = charmev->ID();
+			nanoseconds = charmev->TIMESTAMP() + headertime;
+			Amplitude = charmev->AMPLITUDE();
+			Y = Mdll_sizeY - charmev->YPOSITION() - 1;
+			X = offsetX + charmev->XPOSITION();
 
 
 		}

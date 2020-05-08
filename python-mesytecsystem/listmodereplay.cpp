@@ -94,51 +94,83 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
             t = [&ptrmsmtsystem1,&ptrStartParameters, &_devlist]() {
                 try {
                     std::list<std::string> listmodeinputfiles = std::list<std::string>();
-                    while (Mesytec::listmode::action  lec = Mesytec::listmode::CheckAction()) {
-                        if (lec == Mesytec::listmode::start_reading) {
-                            listmodeinputfiles.clear();
-                            boost::mutex::scoped_lock lock(ptrStartParameters->playlistGuard);
-                             for (auto& s : ptrStartParameters->playlist) listmodeinputfiles.push_back(s);
-                             LOG_DEBUG << __FILE__ << " : " << __LINE__ << "  Mesytec::listmode::start_reading" << std::endl;
-                             Mesytec::listmode::whatnext = Mesytec::listmode::continue_reading;
+                    int l = 0;
+                    do {
+                        while (Mesytec::listmode::action  lec = Mesytec::listmode::CheckAction()) {
+                            if (lec == Mesytec::listmode::start_reading) {
+                                listmodeinputfiles.clear();
+                                boost::mutex::scoped_lock lock(ptrStartParameters->playlistGuard);
+
+                                LOG_INFO << __FILE__ << " : " << __LINE__ << " Mesytec::listmode::start_reading" << std::endl;
+                                for (auto& s : ptrStartParameters->playlist) {
+                                    LOG_INFO << s << std::endl;
+                                    listmodeinputfiles.push_back(s);
+                                }
+                                LOG_INFO << std::endl;
+                                Mesytec::listmode::whatnext = Mesytec::listmode::continue_reading;
+                                break;
+                            }
+                            else {
+                                std::stringstream ss;
+                                for (int j = 0; j < (l % 5); j++) ss << ".";
+                                l++;
+                                std::cout << "\r  waiting for action" << ss.str() << "      ";
+                                boost::this_thread::sleep_for(boost::chrono::milliseconds(300));
+                            }
+                        }
+
+                        LOG_INFO << __FILE__ << " : " << __LINE__ << " action started" << std::endl;
+
+                        for (std::string& fname : listmodeinputfiles) {
+                            LOG_INFO  << " " << fname << std::endl;
+                            try { boost::property_tree::read_json(fname + ".json", Mesytec::Config::root); }
+                            catch (std::exception& e) {
+                                LOG_ERROR << e.what() << " for reading." << std::endl;
+                                continue;
+                            }
+                            _devlist.clear();
+                            LOG_INFO << "Config file : " << fname + ".json" << std::endl;
+                            bool configok = Mesytec::Config::get(_devlist, "",false);
+                            std::stringstream ss_1;
+                            boost::property_tree::write_json(ss_1, Mesytec::Config::root);
+                            LOG_INFO << ss_1.str() << std::endl;
+
+                            if (!configok) {
+                                LOG_INFO << "Configuration error, skipped" << std::endl;
+                                continue;
+                            }
+
+                            ptrmsmtsystem1->listmode_connect(_devlist, io_service);
+                            // find the .json file for the listmode file
+                            // check if Binning file not empty, if not empty wait for
+                            try {
+                                Zweistein::setupHistograms(io_service, ptrmsmtsystem1, Mesytec::Config::BINNINGFILE.string());
+                                boost::function<void(Mcpd8::DataPacket&)> abfunc = boost::bind(&Mesytec::MesytecSystem::analyzebuffer, ptrmsmtsystem1, boost::placeholders::_1);
+                                boost::shared_ptr <Mesytec::listmode::Read> ptrRead = boost::shared_ptr < Mesytec::listmode::Read>(new Mesytec::listmode::Read(abfunc, ptrmsmtsystem1->data, ptrmsmtsystem1->deviceparam));
+                                // pointer to obj needed otherwise exceptions are not propagated properly
+                                ptrRead->file(fname, io_service);
+                           }
+                            catch (Mesytec::listmode::read_error& x) {
+                                if (int const* mi = boost::get_error_info<Mesytec::listmode::my_info>(x)) {
+                                    auto  my_code = magic_enum::enum_cast<Mesytec::listmode::read_errorcode>(*mi);
+                                    if (my_code.has_value()) {
+                                        auto c1_name = magic_enum::enum_name(my_code.value());
+                                        LOG_ERROR << c1_name << std::endl;
+                                    }
+                                }
+                            }
+                            catch (std::exception& e) {
+                                LOG_ERROR << e.what() << std::endl;
+                            }
+                            Zweistein::setup_status = Zweistein::histogram_setup_status::not_done; // next file is all new life 
+
 
                         }
-                        else boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
-                    }
-
-                    LOG_DEBUG << __FILE__ << " : " << __LINE__ << std::endl;
-                    
-                    for (std::string& fname : listmodeinputfiles) {
-                        LOG_DEBUG << __FILE__ << " : " << __LINE__ << " " << fname << std::endl;
-                        try { boost::property_tree::read_json(fname + ".json", Mesytec::Config::root); }
-                        catch (std::exception& e) {
-                            LOG_ERROR << e.what() << " for reading." << std::endl;
-                            continue;
-                        }
-                        _devlist.clear();
-                        LOG_INFO << "Config file : " << fname + ".json" << std::endl;
-                        bool configok = Mesytec::Config::get(_devlist, "");
-                        std::stringstream ss_1;
-                        boost::property_tree::write_json(ss_1, Mesytec::Config::root);
-                        LOG_INFO << ss_1.str() << std::endl;
-
-                        if (!configok)	return ;
-
-                        ptrmsmtsystem1->listmode_connect(_devlist, io_service);
-                        // find the .json file for the listmode file
-                        // check if Binning file not empty, if not empty wait for
-
-                        Zweistein::setupHistograms(io_service, ptrmsmtsystem1, Mesytec::Config::BINNINGFILE.string());
-                        
-                        auto abfunc = boost::bind(&Mesytec::MesytecSystem::analyzebuffer, ptrmsmtsystem1, _1);
-                        auto read = Mesytec::listmode::Read(abfunc, ptrmsmtsystem1->data, ptrmsmtsystem1->deviceparam);
-
-                        read.file(fname, io_service);
-                        Zweistein::setup_status = Zweistein::histogram_setup_status::not_done; // next file is all new life 
-                    }
-                    // alldone, so 
-                    Mesytec::listmode::whatnext = Mesytec::listmode::wait_reading;
-
+                        // alldone, so 
+                        LOG_INFO << __FILE__ << " : " << __LINE__ << std::endl;
+                        LOG_INFO << " all done, so:  Mesytec::listmode::wait_reading" << std::endl;
+                        Mesytec::listmode::whatnext = Mesytec::listmode::wait_reading;
+                    } while (!io_service.stopped());
 
                 }
                 catch (boost::exception& e) {
@@ -233,8 +265,9 @@ struct ReplayList {
         boost::python::list files(std::string directory) {
           
             boost::python::list l;
+            if (directory.empty()) return l;
             LOG_INFO << "files(" << directory << ")" << std::endl;
-            //
+            
             try {
                 if (directory.length() >= 1) {
                     if (directory[0] == '~') {
@@ -250,25 +283,25 @@ struct ReplayList {
 
                 LOG_INFO << "files(" << mdat_path.string() << ")" << std::endl;
 
-                boost::filesystem::recursive_directory_iterator end;
-                for (boost::filesystem::recursive_directory_iterator i(mdat_path); i != end; ++i)
-                {
-                    const boost::filesystem::path cp = (*i);
-                    if (cp.extension() == LISTMODEEXTENSION) {
-                        LOG_DEBUG <<__FILE__<<" : "<<__LINE__<< " append " << cp.string() << std::endl;
-                        l.append(cp.string());
-                    }
+                if (boost::filesystem::is_directory(mdat_path)) {
+                  
+                    for (auto& entry : boost::make_iterator_range(boost::filesystem::directory_iterator(mdat_path), {}))
+                      
+                         if (entry.path().extension() == LISTMODEEXTENSION) {
+                            LOG_DEBUG << __FILE__ << " : " << __LINE__ << " append " << entry.path().string() << std::endl;
+                            l.append(entry.path().string());
+                        }
                 }
+
+
+               
             }
             catch (boost::exception& e) {
                 LOG_ERROR << boost::diagnostic_information(e) << std::endl;
                 LOG_ERROR <<"directory["<<directory<<"] :" << std::endl;
-
             }
-            
             return l;
         }
-
       
 
         boost::python::list addfile(std::string file) {
