@@ -18,12 +18,12 @@ namespace Zweistein {
                 short occ = Zweistein::Binning::OCC[c][r];
                 if (occ <= 0) continue;
                 if (occ == Zweistein::Binning::occmultiplier) continue; //  occ == 1
-                if (occ < -Zweistein::Binning::occmultiplier || occ>Zweistein::Binning::occmultiplier) {
+                if (occ < -Zweistein::Binning::occmultiplier || occ > Zweistein::Binning::occmultiplier) {
                     LOG_ERROR << "occ=" << occ << ", " << " [" << c << "," << r << "]" << std::endl;
                     continue;
                 }
                 if (r < s[1] - 1) {
-                    // occ is stored as short, and float 0.94 is mapped to 940 (=> multiplier 1000)
+                    // occ is stored as short, and float 0.94 is mapped to 9400 (=> multiplier 10000)
                         //point_type pb0(c, r);
                         //unsigned long nextpixelcount=histograms[0].histogram.at<int32_t>(p0.y(), p0.x());
                     short binnedY = Zweistein::Binning::BINNING[c][r];
@@ -31,16 +31,17 @@ namespace Zweistein {
                     if (binnedY < 0) continue;
                     point_type pb(c, binnedY);
                     if (pb.x() >= mat.cols) {
-                        LOG_ERROR << pb.x() << " <binned_occ_corrected.cols" << std::endl;
+                        LOG_ERROR << pb.x() << " < binned_occ_corrected.cols" << std::endl;
                         continue;
                     }
                     if (pb.y() >= mat.rows) {
-                        LOG_ERROR << pb.y() << " <binned_occ_corrected.rows" << std::endl;
+                        LOG_ERROR << pb.y() << " < binned_occ_corrected.rows" << std::endl;
                         continue;
                     }
                     unsigned long nextpixelcount = mat.at<int32_t>(pb.y(), pb.x()) * (Zweistein::Binning::occmultiplier - occ) / Zweistein::Binning::occmultiplier;
                     if (nextpixelcount != 0) {
-                   //     LOG_DEBUG << "pixel corrected:" << pb.x() << ", " << pb.y() << " count -=" << nextpixelcount << std::endl;
+                        int q = 5;
+                        //     LOG_DEBUG << "pixel corrected:" << pb.x() << ", " << pb.y() << " count -=" << nextpixelcount << std::endl;
                     }
 
                     mat.at<int32_t>(pb.y(), pb.x()) -= nextpixelcount;

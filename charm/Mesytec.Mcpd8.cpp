@@ -12,7 +12,6 @@
 #include <vector>
 #include <map>
 #include <boost/asio.hpp>
-#include <boost/bind.hpp>
 #include <boost/foreach.hpp>
 #include <boost/chrono.hpp>
 #include <boost/circular_buffer.hpp>

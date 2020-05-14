@@ -111,11 +111,11 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
                                 break;
                             }
                             else {
-                                char clessidra[8] = ['|','/','-','\\','|','/', '-','\\'];
+                                char clessidra[8] = { '|', '/' , '-', '\\', '|', '/', '-', '\\' };
                                // std::stringstream ss;
                                // for (int j = 0; j < (l % 5); j++) ss << ".";
                              
-                                std::cout << "\r  waiting for action" << clessidra[l%8];// ss.str() << "      ";
+                                std::cout << "\r  waiting for action " << clessidra[l%8];// ss.str() << "      ";
                                 l++;
                                 boost::this_thread::sleep_for(boost::chrono::milliseconds(300));
                             }

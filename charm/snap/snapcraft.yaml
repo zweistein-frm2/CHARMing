@@ -10,67 +10,66 @@ confinement: devmode # use 'strict' once you have the right plugs and slots
 
 
 build-packages:
-    - build-essential
-    - automake
-    - libtool
-    - libssl-dev
-    - zlib1g-dev
-    - libc6-dbg
-    - ccache
-    - gcc
-    - g++
-    - python3
+ #   - build-essential
+ #   - automake
+ #   - libtool
+ #   - libssl-dev
+ #   - zlib1g-dev
+ #   - libc6-dbg
+ #   - ccache
+ #   - gcc
+ #   - g++
+#    - python3
     - software-properties-common
-    - curl
+#    - curl
     - unzip
-    - tar
-    - nano
-    - libpsm-infinipath1
+#    - tar
+#    - libopencv-dev
+#    - nano
+ #   - libpsm-infinipath1
      
 parts:
- ppa:
+ gcc-9:
     plugin: nil
     override-pull: |
       add-apt-repository -yu ppa:ubuntu-toolchain-r/test
       apt install -y gcc-9 g++-9
       update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 900 --slave /usr/bin/g++ g++ /usr/bin/g++-9
       update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 700 --slave /usr/bin/g++ g++ /usr/bin/g++-7
-
- cmake:
-   source: https://github.com/Kitware/CMake
-   source-type: git
-   source-depth: 1
-   plugin: make
-   after: [ppa]
-   override-build: |
-     mkdir -p build
-     cd build
-     cmake \
-       -DCMAKE_INSTALL_PREFIX=$SNAPCRAFT_STAGE/cmake \
-       $SNAPCRAFT_PART_SRC
-     make -j 3
-     make install
-
- boost:
-    source: https://github.com/boostorg/boost.git
-    source-type: git
-    source-depth: 1
-    plugin: nil
-    
-    override-build: |
-      ./bootstrap.sh --prefix=$SNAPCRAFT_STAGE/
-      ./b2 headers
-      ./b2 cxxflags="-std=c++17" install
+     # cp /usr/lib/x86_64-linux-gnu/libstdc++.so.* $SNAPCRAFT_STAGE/usr/lib/x86_64-linux-gnu/
     filesets:
-     libboost: [usr/local/lib/libboost_*]
+     stdlibs:
+      - usr/lib/x86_64-linux-gnu/libstdc++.so.6.*
     prime:
-     - lib/libboost_chrono.so.1.74.0
-     - lib/libboost_filesystem.so.1.74.0
-     - lib/libboost_iostreams.so.1.74.0
-     - lib/libboost_log.so.1.74.0
-     - lib/libboost_program_options.so.1.74.0
-     - lib/libboost_regex.so.1.74.0
-     - lib/libboost_thread.so.1.74.0
+      - $stdlibs
+ 
+ boost:
+    source:  https://github.com/boostorg/boost.git
+    source-type: git
+    source-tag: "boost-1.73.0"
+    plugin: nil
+         
+    override-build: |
+      ./bootstrap.sh --prefix=/usr/
+      ./b2 headers
+      ./b2 cxxflags="-std=c++17" install --prefix=$SNAPCRAFT_PRIME
+    filesets:
+     libboost: [lib/libboost_*.so*]
+    
+    stage:
+     - $libboost
+   # override-prime: |
+  #   snapcraftctl prime
+     
+     
+   #  - $libboost   #lib/libboost_chrono.so.*
+ #    - lib/libboost_filesystem.so.1.73.0
+ #    - lib/libboost_iostreams.so.1.73.0
+ #    - lib/libboost_log.so.1.73.0
+ #    - lib/libboost_program_options.so.1.73.0
+ #    - lib/libboost_regex.so.1.73.0
+ #    - lib/libboost_thread.so.1.73.0
+ 
  vcpkg:
     source: https://github.com/microsoft/vcpkg.git
     source-type: git
@@ -81,6 +80,19 @@ parts:
       ./vcpkg install magic-enum
       ./vcpkg install opencv
       ./vcpkg integrate install
+    filesets:
+     lib: [lib/*]
+     share: [share/*]
+     opencv-dependencies: 
+      - lib/libz.so*
+      - lib/liblzma.so.*
+      - libpcre.so.*
+     
+    stage:
+     - $lib
+     - $share
+     - $opencv-dependencies
+     
  asio-extensions:
     source: https://github.com/zweistein-frm2/asio-extensions.git
     source-type: git
@@ -90,8 +102,9 @@ parts:
     source-type: git
     plugin: nil
  frm2-charm:
+    build-snaps: [cmake]
     after: 
-     - cmake
+     - gcc-9
      - boost
      - vcpkg
      - asio-extensions
@@ -100,16 +113,15 @@ parts:
     source: .
     configflags: []
     override-build: |
-       $SNAPCRAFT_STAGE/cmake/bin/cmake \
+       cmake \
         -DCMAKE_INSTALL_PREFIX=$SNAPCRAFT_PART_INSTALL/usr/local \
         -DCMAKE_BUILD_TYPE=Release \
         -DVCPKG_TARGET_TRIPLET=x64-linux \
         -D_VCPKG_ROOT_DIR=/root/parts/vcpkg/build \
         -DCMAKE_TOOLCHAIN_FILE=/root/parts/vcpkg/build/scripts/buildsystems/vcpkg.cmake \
-        -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
-        -DBOOST_BIND_GLOBAL_PLACEHOLDERS=1 \
         -DOpenCV_DIR=/root/parts/vcpkg/build/installed/x64-linux/share/opencv \
         -DProtobuf_DIR=/root/parts/vcpkg/build/installed/x64-linux/share/protobuf \
+        -DBoost_INCLUDE_DIR=/root/prime/include  \
         -DProtobuf_INCLUDE_DIRS=/root/parts/vcpkg/build/installed/x64-linux/include  \
         -Dunofficial-libuv_DIR=/root/parts/vcpkg/build/installed/x64-linux/share/unofficial-libuv \
         -Dmagic_enum_DIR=/root/parts/vcpkg/build/installed/x64-linux/share/magic_enum \
@@ -123,7 +135,7 @@ parts:
       
     stage-packages:
      - libgtk-3-dev
-     - libopencv-dev
+     - liblzma-dev
      
 
 
@@ -133,7 +145,7 @@ apps:
  frm2-charm:
   command: bin/charm
   environment:
-   "LD_LIBRARY_PATH": "$SNAP/usr/lib/;$SNAP/usr/local/lib"
+   LD_LIBRARY_PATH: "$SNAP/usr/lib;$SNAP/usr/local/lib"
         
 
  

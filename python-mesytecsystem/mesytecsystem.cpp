@@ -204,7 +204,7 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
 
                 unsigned short tmp = ptrmsmtsystem1->data.last_deviceStatusdeviceId;
                 std::string tmpstr = Mcpd8::DataPacket::deviceStatus(tmp);
-                ss1 << "\r" << std::setprecision(0) << std::fixed << avg.getValue()<< " Events/s, (" << Zweistein::PrettyBytes((size_t)(evtspersecond * sizeof(Mesy::Mpsd8Event))) << "/s), "<< tmpstr <<" elapsed:"<<secs;// << std::endl;
+                ss1 << "\r" << std::setprecision(0) << std::fixed << avg.getAverage()<< " Events/s, (" << Zweistein::PrettyBytes((size_t)(evtspersecond * sizeof(Mesy::Mpsd8Event))) << "/s), "<< tmpstr <<" elapsed:"<<secs;// << std::endl;
                 std::streampos oldpos = ss1.tellg();
                 ss1.seekg(0, std::ios::end);
                 std::streampos len = ss1.tellg();
