@@ -25,6 +25,7 @@ build-packages:
     - unzip
     - tar
     - nano
+    - libpsm-infinipath1
      
 parts:
  ppa:
@@ -57,7 +58,7 @@ parts:
     plugin: nil
     
     override-build: |
-      ./bootstrap.sh --prefix=$SNAPCRAFT_PART_INSTALL/usr/local
+      ./bootstrap.sh --prefix=$SNAPCRAFT_STAGE/
       ./b2 headers
       ./b2 cxxflags="-std=c++17" install
     filesets:
@@ -120,8 +121,10 @@ parts:
        make -j 4
        make install
       
-#    stage-packages:
-      
+    stage-packages:
+     - libgtk-3-dev
+     - libopencv-dev
+     
 
 
 

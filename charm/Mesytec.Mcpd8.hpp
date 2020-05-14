@@ -143,6 +143,7 @@ namespace Mesytec {
 		}
 		
 		bool firstneutrondiscarded = false;
+		bool warning_notified_bufnum_8bit = false;
 		void handle_receive(const boost::system::error_code& error,
 			std::size_t bytes_transferred,unsigned char devid) {
 			Mcpd8::DataPacket& dp = recv_buf[0];

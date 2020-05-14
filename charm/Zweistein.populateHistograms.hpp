@@ -147,20 +147,15 @@ namespace Zweistein {
 				LOG_INFO << "histograms[1] :rows=" << histograms[1].histogram.rows << ", cols=" << histograms[1].histogram.cols << std::endl;
 				LOG_INFO << "Zweistein::Binning::BINNING.shape(" << s[0] << "," << s[1] << ")" << std::endl;
 			}
-
 			hss = setup_status;
 			setup_status = hss | histogram_setup_status::histogram1_resized ;
-			
-			
 		}
-
 		hss = setup_status;
 		setup_status = hss | histogram_setup_status::done;
 	}
 
 
 	void populateHistograms(boost::asio::io_service & io_service, boost::shared_ptr < Mesytec::MesytecSystem> pmsmtsystem1) {
-		
 		using namespace magic_enum::bitwise_operators; // out-of-the-box bitwise operators for enums.
 		boost::chrono::system_clock::time_point start = boost::chrono::system_clock::now();
 		try {

@@ -192,15 +192,11 @@ int main(int argc, char* argv[])
 						LOG_INFO << ss_1.str() << std::endl;
 
 						if (!configok)	return ;
-
+						
 						ptrmsmtsystem1->listmode_connect(_devlist, io_service);
 						// find the .json file for the listmode file
 						// check if Binning file not empty, if not empty wait for
-						
 						Zweistein::setupHistograms(io_service,ptrmsmtsystem1,Mesytec::Config::BINNINGFILE.string());
-
-					
-					
 						try {
 							boost::function<void(Mcpd8::DataPacket&)> abfunc = boost::bind(&Mesytec::MesytecSystem::analyzebuffer, ref(ptrmsmtsystem1), boost::placeholders::_1);
 							boost::shared_ptr <Mesytec::listmode::Read> ptrRead = boost::shared_ptr < Mesytec::listmode::Read>(new Mesytec::listmode::Read(abfunc, ptrmsmtsystem1->data, ptrmsmtsystem1->deviceparam));
@@ -219,9 +215,7 @@ int main(int argc, char* argv[])
 						catch (std::exception& e) {
 							LOG_ERROR << e.what() << std::endl;
 						}
-
 						Zweistein::setup_status = Zweistein::histogram_setup_status::not_done; // next file is all new life
-						 
 					}
 					
 				}
@@ -544,7 +538,7 @@ int main(int argc, char* argv[])
 	}
 	
 
-	if (ptrmsmtsystem1) {
+	if (ptrmsmtsystem1 ) {
 		try {ptrmsmtsystem1->SendAll(Mcpd8::Cmd::STOP_UNCHECKED);}
 		catch (boost::exception& e) {
 			LOG_ERROR << boost::diagnostic_information(e) << std::endl;

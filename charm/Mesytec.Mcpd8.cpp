@@ -873,19 +873,27 @@ namespace Mesytec {
 			switch (datapacket.GetBuffertype()) {
 			case Mesy::BufferType::DATA: 
 				
+			
 				if (datapacket.Number != (unsigned short)(params.lastbufnum + 1)) {
-					boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - params.lastmissed_time;
-					unsigned short missed = (unsigned short)(datapacket.Number - (unsigned short)(params.lastbufnum + 1));
-					params.lastmissed_count += missed;
-					if (sec.count() > 1) {
-						boost::chrono::system_clock::time_point tps(started);
-						if(boost::chrono::system_clock::now()-tps >= boost::chrono::seconds(3)){
-							LOG_ERROR << params.mcpd_endpoint << ": MISSED " << params.lastmissed_count << " BUFFER(s)" << std::endl;
+					if (datapacket.Number == (unsigned char)(params.lastbufnum + 1)) {
+						if (!warning_notified_bufnum_8bit) {
+							warning_notified_bufnum_8bit = true;
+							LOG_WARNING <<  "Buffer Number Counter 8 bit only (heuristic detection)" << std::endl;
 						}
-						params.lastmissed_time = boost::chrono::system_clock::now();
-						params.lastmissed_count = 0;
 					}
-
+					else {
+						boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - params.lastmissed_time;
+						unsigned short missed = (unsigned short)(datapacket.Number - (unsigned short)(params.lastbufnum + 1));
+						params.lastmissed_count += missed;
+						if (sec.count() > 1) {
+							boost::chrono::system_clock::time_point tps(started);
+							if (boost::chrono::system_clock::now() - tps >= boost::chrono::seconds(3)) {
+								LOG_ERROR << params.mcpd_endpoint << ": MISSED " << params.lastmissed_count << " BUFFER(s)" << std::endl;
+							}
+							params.lastmissed_time = boost::chrono::system_clock::now();
+							params.lastmissed_count = 0;
+						}
+					}
 				}
 				params.lastbufnum = datapacket.Number;
 				for (int i = 0; i < numevents; i++) {
