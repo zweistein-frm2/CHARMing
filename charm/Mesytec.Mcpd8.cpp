@@ -84,9 +84,11 @@ namespace Mesytec {
 				}
 				else {
 					if (p.eventdataformat != eventdataformat) {
+						std::stringstream ss;
 						using namespace magic_enum::ostream_operators;
-						LOG_ERROR << "ERROR: " << p.eventdataformat << "different to " << eventdataformat << std::endl;
-						LOG_ERROR << "skipping " << mp.datagenerator << " " << mp.mcpd_endpoint.address().to_string() << std::endl;
+						ss << p.eventdataformat << " different to " << eventdataformat << std::endl;
+						ss << "skipping " << mp.datagenerator << " " << p.mcpd_ip << std::endl;
+						LOG_ERROR << ss.str();
 						skip = true;
 					}
 				}

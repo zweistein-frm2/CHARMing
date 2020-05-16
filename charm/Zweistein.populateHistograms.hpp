@@ -202,6 +202,8 @@ namespace Zweistein {
 
 
 					if (ev.type == Zweistein::Event::EventTypeOther::RESET) {
+						maxX = pmsmtsystem1->data.widthX;
+						maxY = pmsmtsystem1->data.widthY;
 						for (auto& h : histograms) {
 							for (auto& r : h.roidata) 	r.count = 0;
 							h.resize(h.histogram.size[0], h.histogram.size[1]);

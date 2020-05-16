@@ -162,7 +162,9 @@ namespace Mesytec {
 								short* sp = (short*)&packet;
 								for (int i = 0; i < nvalid; i++) 	boost::endian::big_to_native_inplace(sp[i]);
 								if(packet.Length==0) throw read_error() << my_info(read_errorcode::DATAPACKET_LENGTH_ZERO);
-								if(packet.Length - packet.headerLength > 250*3*sizeof(short)) throw read_error() << my_info(read_errorcode::DATAPACKET_LENGTH_GREATER_THAN_250);
+								if (packet.Length - packet.headerLength > 250 * 3 * sizeof(short)) {
+									throw read_error() << my_info(read_errorcode::DATAPACKET_LENGTH_GREATER_THAN_250);
+								}
 								if (packet.Length > 24) { // commands return always less than 24 data
 									if (packet.Type == Mesy::BufferType::COMMAND) {
 										Mcpd8::DataPacket *pbuf = (Mcpd8::DataPacket *)(&recv_buf[0]);
@@ -214,6 +216,10 @@ namespace Mesytec {
 
 						do {
 							std::string_view  haystack(buffer.data() + from, bytes_read - from);
+							if (bufnum == 58163) {
+								int f = 0;
+
+							}
 							if (possible_nc != std::string::npos) {
 								if (from != 0) { throw read_error() << my_info(read_errorcode::PROGRAM_LOGIC_ERROR); }
 								std::string_view  haystackBeginOnly(buffer.data(), possible_nc);
@@ -253,11 +259,11 @@ namespace Mesytec {
 									// check only for closing if directly after data_signature
 									int i = (int)(bytes_read - from);
 									size_t sep_size = sizeof(Mesytec::listmode::closing_signature) - i;
-									std::string_view  haystackBeginOnly(buffer.data() + (bytes_read - sep_size), sep_size);
+									std::string_view  haystackBeginOnly(buffer.data() + (bytes_read - i), i);
 									std::string n_possibleneedle(Mesytec::listmode::closing_signature, Mesytec::listmode::closing_signature + sep_size);
 									if (haystackBeginOnly.find(n_possibleneedle) != std::string::npos) {
-										recvbuf_data.filldest(buffer.data() + from, (bytes_read - sep_size) - from); //no fill because closing_sig follows data without gap
-										possible_nc = i;
+										//recvbuf_data.filldest(buffer.data() + from, i); //no fill because closing_sig follows data without gap
+										possible_nc = sep_size;
 										from = std::string::npos;
 										break;
 									};
@@ -375,6 +381,7 @@ namespace Mesytec {
 								recvbuf_data.filldest(buffer.data() + from, to - from);
 								from = to;
 								check_closing_signature = false;
+								
 							}
 							if (from == bytes_read) break;
 							while(action lec=CheckAction()) {

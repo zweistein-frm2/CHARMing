@@ -103,9 +103,8 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
         boost::property_tree::write_json(ss_1, Mesytec::Config::root);
         LOG_INFO << ss_1.str()<<std::endl;
 
-        if (!configok) {
-                    return;
-        }
+        
+        
 
         try {
             std::string fp = Zweistein::Config::inipath.string();
@@ -118,6 +117,8 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
         catch (std::exception& e) { // exception expected, //std::cout << boost::diagnostic_information(e); 
             LOG_ERROR << e.what() << " for writing."<<std::endl;
         }
+        if (!configok)      return;
+
 
         for (Mcpd8::Parameters& p : _devlist) {
                 Zweistein::ping(p.mcpd_ip); // sometime 

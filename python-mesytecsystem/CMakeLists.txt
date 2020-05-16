@@ -135,7 +135,6 @@ ${Charm_DIR}/Mesytec.config.cpp
 ${repository}/version.cpp
 )
 
-
 if(ENTANGLE_ROOT )
  install(
     TARGETS ${PROJECT_NAME}
@@ -143,8 +142,6 @@ if(ENTANGLE_ROOT )
       LIBRARY DESTINATION ${ENTANGLE_ROOT}/entangle/device/charm
  )
 endif()
-
-
 
 endforeach()
 
@@ -159,17 +156,16 @@ if(ENTANGLE_ROOT )
  )
 
  if(WIN32)
-if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-set(WIN32LIB_SUFFIX d)
-set(BOOSTLIB_DBG -gd)
-endif()
-  install(
-  FILES
-   "${CMAKE_CURRENT_BINARY_DIR}/boost_filesystem-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
+   if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+     set(WIN32LIB_SUFFIX d)
+     set(BOOSTLIB_DBG -gd)
+   endif()
+   install(
+    FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/boost_filesystem-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
     "${CMAKE_CURRENT_BINARY_DIR}/boost_thread-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll" 
     "${CMAKE_CURRENT_BINARY_DIR}/boost_chrono-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll" 
     "${CMAKE_CURRENT_BINARY_DIR}/boost_iostreams-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
-    "${CMAKE_CURRENT_BINARY_DIR}/boost_date_time-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
     "${CMAKE_CURRENT_BINARY_DIR}/boost_numpy${Python_VERSION_MAJOR}${Python_VERSION_MINOR}-vc${MSVC_TOOLSET_VERSION}-mt-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
     "${CMAKE_CURRENT_BINARY_DIR}/boost_python${Python_VERSION_MAJOR}${Python_VERSION_MINOR}-vc${MSVC_TOOLSET_VERSION}-mt-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
     "${CMAKE_CURRENT_BINARY_DIR}/opencv_core${WIN32LIB_SUFFIX}.dll"
@@ -178,9 +174,16 @@ endif()
     "${CMAKE_CURRENT_BINARY_DIR}/lzma${WIN32LIB_SUFFIX}.dll"
     "${CMAKE_CURRENT_BINARY_DIR}/zlib1${WIN32LIB_SUFFIX}.dll"
     "${CMAKE_CURRENT_BINARY_DIR}/zstd${WIN32LIB_SUFFIX}.dll"
-  DESTINATION ${ENTANGLE_ROOT}/entangle/device/charm
-  )
-  endif()
+    DESTINATION ${ENTANGLE_ROOT}/entangle/device/charm
+   )
+   endif()
+  if(${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR} VERSION_LESS "1_73")
+   install(
+   FILES
+      "${CMAKE_CURRENT_BINARY_DIR}/boost_date_time-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
+    DESTINATION ${ENTANGLE_ROOT}/entangle/device/charm
+   )
+   endif()  
 endif()
 
 add_subdirectory (entangle)

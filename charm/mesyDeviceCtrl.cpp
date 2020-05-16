@@ -21,7 +21,6 @@
 #include <boost/function.hpp>
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
-#include <boost/bind/bind.hpp>
 #include <boost/thread.hpp>
 #include <boost/chrono.hpp>
 #include "OptionPrinter.hpp"
@@ -192,11 +191,19 @@ int main(int argc, char* argv[])
 						LOG_INFO << ss_1.str() << std::endl;
 
 						if (!configok)	return ;
+						for (Mcpd8::Parameters& p : _devlist) {
+							p.mcpd_ip = fname;
+						}
+
 						
+						
+						ptrmsmtsystem1->eventdataformat = Mcpd8::EventDataFormat::Undefined;
 						ptrmsmtsystem1->listmode_connect(_devlist, io_service);
 						// find the .json file for the listmode file
 						// check if Binning file not empty, if not empty wait for
 						Zweistein::setupHistograms(io_service,ptrmsmtsystem1,Mesytec::Config::BINNINGFILE.string());
+						bool ok = ptrmsmtsystem1->data.evntqueue.push(Zweistein::Event::Reset());
+						if (!ok) LOG_ERROR << " cannot push Zweistein::Event::Reset()" << std::endl;
 						try {
 							boost::function<void(Mcpd8::DataPacket&)> abfunc = boost::bind(&Mesytec::MesytecSystem::analyzebuffer, ref(ptrmsmtsystem1), boost::placeholders::_1);
 							boost::shared_ptr <Mesytec::listmode::Read> ptrRead = boost::shared_ptr < Mesytec::listmode::Read>(new Mesytec::listmode::Read(abfunc, ptrmsmtsystem1->data, ptrmsmtsystem1->deviceparam));
@@ -237,10 +244,10 @@ int main(int argc, char* argv[])
 			boost::property_tree::write_json(ss_1, Mesytec::Config::root);
 			LOG_INFO << ss_1.str() << std::endl;
 			
-			if (!configok)	return -1;
+			
 
 						
-			Zweistein::Logger::Add_File_Sink(Mesytec::Config::DATAHOME.string() + appName + ".log");
+			if(configok) Zweistein::Logger::Add_File_Sink(Mesytec::Config::DATAHOME.string() + appName + ".log");
 			try {
 				//we can write as text file:
 				std::string fp = Zweistein::Config::inipath.string();
@@ -253,6 +260,9 @@ int main(int argc, char* argv[])
 			catch (std::exception& e) { // exception expected, //std::cout << boost::diagnostic_information(e); 
 				LOG_ERROR << e.what() << " for writing." << std::endl;
 			}
+
+			if (!configok)	return -1;
+
 			if (!inputfromlistfile) {
 				for (Mcpd8::Parameters& p : _devlist) {
 					Zweistein::ping(p.mcpd_ip); // sometime 

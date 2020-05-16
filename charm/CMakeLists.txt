@@ -19,6 +19,7 @@ endif()
   
 add_compile_definitions(ASIOEXT_USE_BOOST_ASIO)
 add_compile_definitions(BOOST_CHRONO_VERSION=2)
+add_compile_definitions(BOOST_LOG_DYN_LINK)
 set(CMAKE_CXX_STANDARD 17) 
 
 
@@ -74,13 +75,21 @@ add_custom_command(
             )
 
 
+if(NOT INSTALL_DIR)
+if(WIN32)
+set(INSTALL_DIR $ENV{HOMEDRIVE}$ENV{HOMEPATH}) # or $ENV{USERPROFILE}
+else()
+set(INSTALL_DIR ~/)
+endif()
+endif()
+
 if(WIN32)
 if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
 set(WIN32LIB_SUFFIX d)
 set(BOOSTLIB_DBG -gd)
 endif()
   install(TARGETS ${PROJECT_NAME}
-        RUNTIME  DESTINATION $ENV{USERPROFILE}
+        RUNTIME  DESTINATION ${INSTALL_DIR}
         )
   install(FILES 
     "${CMAKE_CURRENT_BINARY_DIR}/boost_filesystem-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
@@ -90,7 +99,6 @@ endif()
     "${CMAKE_CURRENT_BINARY_DIR}/boost_iostreams-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
     "${CMAKE_CURRENT_BINARY_DIR}/boost_regex-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
     "${CMAKE_CURRENT_BINARY_DIR}/boost_log-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
-    "${CMAKE_CURRENT_BINARY_DIR}/boost_date_time-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
     "${CMAKE_CURRENT_BINARY_DIR}/opencv_highgui${WIN32LIB_SUFFIX}.dll"
     "${CMAKE_CURRENT_BINARY_DIR}/opencv_imgproc${WIN32LIB_SUFFIX}.dll"
     "${CMAKE_CURRENT_BINARY_DIR}/opencv_core${WIN32LIB_SUFFIX}.dll"
@@ -105,11 +113,19 @@ endif()
     "${CMAKE_CURRENT_BINARY_DIR}/webp${WIN32LIB_SUFFIX}.dll"
     "${CMAKE_CURRENT_BINARY_DIR}/zlib${WIN32LIB_SUFFIX}1.dll"
     "${CMAKE_CURRENT_BINARY_DIR}/zstd${WIN32LIB_SUFFIX}.dll"
-       DESTINATION $ENV{USERPROFILE}
+       DESTINATION ${INSTALL_DIR}
         )
+	if(${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR} VERSION_LESS "1_73")
+   install(
+   FILES
+      "${CMAKE_CURRENT_BINARY_DIR}/boost_date_time-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
+    DESTINATION ${INSTALL_DIR}
+   )
+   endif()  	
+		
 else()
  install(TARGETS ${PROJECT_NAME}
-        RUNTIME  DESTINATION ~/
+        RUNTIME  DESTINATION ${INSTALL_DIR}
         )
 endif()
  

@@ -31,16 +31,15 @@ namespace Zweistein {
                     if (binnedY < 0) continue;
                     point_type pb(c, binnedY);
                     if (pb.x() >= mat.cols) {
-                        LOG_ERROR << pb.x() << " < binned_occ_corrected.cols" << std::endl;
+                        LOG_ERROR << pb.x() << " >= binned_occ_corrected.cols" << std::endl;
                         continue;
                     }
                     if (pb.y() >= mat.rows) {
-                        LOG_ERROR << pb.y() << " < binned_occ_corrected.rows" << std::endl;
+                        LOG_ERROR << pb.y() << " >= binned_occ_corrected.rows" << std::endl;
                         continue;
                     }
                     unsigned long nextpixelcount = mat.at<int32_t>(pb.y(), pb.x()) * (Zweistein::Binning::occmultiplier - occ) / Zweistein::Binning::occmultiplier;
                     if (nextpixelcount != 0) {
-                        int q = 5;
                         //     LOG_DEBUG << "pixel corrected:" << pb.x() << ", " << pb.y() << " count -=" << nextpixelcount << std::endl;
                     }
 

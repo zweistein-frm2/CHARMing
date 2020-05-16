@@ -141,7 +141,7 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
                                 LOG_INFO << "Configuration error, skipped" << std::endl;
                                 continue;
                             }
-
+                            ptrmsmtsystem1->eventdataformat = Mcpd8::EventDataFormat::Undefined;
                             ptrmsmtsystem1->listmode_connect(_devlist, io_service);
                             // find the .json file for the listmode file
                             // check if Binning file not empty, if not empty wait for
@@ -311,14 +311,19 @@ struct ReplayList {
             boost::mutex::scoped_lock lock(ptrStartParameters->playlistGuard);
             boost::python::list l;
             try {
-                if (boost::filesystem::exists(file)) {
+                bool duplicate = false;
+                for (auto& s : ptrStartParameters->playlist) {
+                    if (s == file) duplicate = true;
+                    break;
+                }
+                if (!duplicate && boost::filesystem::exists(file)) {
                     boost::filesystem::path p(file);
                     if (p.extension() != LISTMODEEXTENSION) {
                         LOG_WARNING << "File not added to playlist (wrong extension !="<< LISTMODEEXTENSION<<") : " << file << std::endl;
                     }
                     else ptrStartParameters->playlist.push_back(file);
                 }
-                else LOG_WARNING << "File not added to playlist (not found) : " << file << std::endl;
+                else LOG_WARNING << "File not added to playlist"<<(duplicate?"(duplicate)": "(not found)")<<" : " << file << std::endl;
             
             }
             catch (boost::exception& e) {LOG_ERROR << boost::diagnostic_information(e)<<std::endl;}
