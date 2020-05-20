@@ -16,7 +16,6 @@
 #include <string>
 #include <boost/filesystem.hpp>
 #include "Zweistein.PrettyBytes.hpp"
-//#include "Mesytec.RandomData.hpp"
 #include <opencv2/core.hpp>
 #include <opencv2/core/mat.hpp>
 
@@ -142,15 +141,20 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
                                 continue;
                             }
                             ptrmsmtsystem1->eventdataformat = Mcpd8::EventDataFormat::Undefined;
-                            ptrmsmtsystem1->listmode_connect(_devlist, io_service);
+                            ptrmsmtsystem1->listmode_connect(_devlist, io_service); 
                             // find the .json file for the listmode file
                             // check if Binning file not empty, if not empty wait for
                             try {
                                 Zweistein::setupHistograms(io_service, ptrmsmtsystem1, Mesytec::Config::BINNINGFILE.string());
+                                bool ok = ptrmsmtsystem1->data.evntqueue.push(Zweistein::Event::Reset());
+                                if (!ok) LOG_ERROR << " cannot push Zweistein::Event::Reset()" << std::endl;
                                 boost::function<void(Mcpd8::DataPacket&)> abfunc = boost::bind(&Mesytec::MesytecSystem::analyzebuffer, ptrmsmtsystem1, boost::placeholders::_1);
                                 boost::shared_ptr <Mesytec::listmode::Read> ptrRead = boost::shared_ptr < Mesytec::listmode::Read>(new Mesytec::listmode::Read(abfunc, ptrmsmtsystem1->data, ptrmsmtsystem1->deviceparam));
                                 // pointer to obj needed otherwise exceptions are not propagated properly
                                 ptrRead->file(fname, io_service);
+                                while (ptrmsmtsystem1->data.evntqueue.read_available()); // wait unitl queue consumed
+                                
+
                            }
                             catch (Mesytec::listmode::read_error& x) {
                                 if (int const* mi = boost::get_error_info<Mesytec::listmode::my_info>(x)) {

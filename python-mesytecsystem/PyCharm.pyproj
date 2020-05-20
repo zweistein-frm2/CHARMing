@@ -5,7 +5,7 @@
     <ProjectGuid>24272b33-b678-45f2-8f45-bd57a6b61180</ProjectGuid>
     <ProjectHome>
     </ProjectHome>
-    <StartupFile>test.py</StartupFile>
+    <StartupFile>test-replay.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>../../entangle/entangle/device/charm</WorkingDirectory>
@@ -14,6 +14,8 @@
     <RootNamespace>Charm</RootNamespace>
     <IsWindowsApplication>False</IsWindowsApplication>
     <SuppressConfigureTestFrameworkPrompt>true</SuppressConfigureTestFrameworkPrompt>
+    <LaunchProvider>Standard Python launcher</LaunchProvider>
+    <EnableNativeCodeDebugging>True</EnableNativeCodeDebugging>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -25,6 +27,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Charm.py" />
+    <Compile Include="test-replay.py" />
     <Compile Include="test.py" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />

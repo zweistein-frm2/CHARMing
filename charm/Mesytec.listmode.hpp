@@ -163,6 +163,8 @@ namespace Mesytec {
 								for (int i = 0; i < nvalid; i++) 	boost::endian::big_to_native_inplace(sp[i]);
 								if(packet.Length==0) throw read_error() << my_info(read_errorcode::DATAPACKET_LENGTH_ZERO);
 								if (packet.Length - packet.headerLength > 250 * 3 * sizeof(short)) {
+									//DebugBreak();
+									LOG_ERROR << "bytesWrittenbypreviousBuffer="<< bytesWrittenbypreviousBuffer << ", len=" << len << std::endl;
 									throw read_error() << my_info(read_errorcode::DATAPACKET_LENGTH_GREATER_THAN_250);
 								}
 								if (packet.Length > 24) { // commands return always less than 24 data
@@ -243,12 +245,6 @@ namespace Mesytec {
 							}
 							if (check_closing_signature) {
 								nc = haystack.find(ncneedle);
-								if (nc != std::string::npos && nc != 0) {
-									n = haystack.find(nneedle);
-									if (n != std::string::npos && n < nc) {
-										throw read_error() << my_info(read_errorcode::CLOSING_SIGNATURE_NOT_DIRECTLY_AFTER_DATA_BLOCK_SEPARATOR);
-									}
-								}
 								if (nc == 0) {
 									closing_sigfound = true;
 									never_closing_sigfound = false;
@@ -343,7 +339,7 @@ namespace Mesytec {
 								n = haystack.find(nneedle);
 								bool breakwhile = false;
 								if (n != std::string::npos ) {
-									recvbuf_data.filldest(buffer.data() , n);
+									recvbuf_data.filldest(buffer.data()+from , n);
 									short* sp = (short*)&recv_buf[0];
 									for (int i = 0; i < recvbuf_data.transferred / sizeof(short); i++) 	boost::endian::big_to_native_inplace(sp[i]);
 									listmoderead_analyzebuffer(error, recvbuf_data.transferred, recv_buf[0]);

@@ -1,39 +1,6 @@
 ﻿{
   "configurations": [
-    {
-      "name": "x64-Debug",
-      "generator": "Ninja",
-      "configurationType": "Debug",
-      "inheritEnvironments": [ "msvc_x64_x64" ],
-      "buildRoot": "${projectDir}\\out\\build\\${name}",
-      "installRoot": "${projectDir}\\out\\install\\${name}",
-      "cmakeCommandArgs": "",
-      "buildCommandArgs": "-v",
-      "ctestCommandArgs": "",
-      "variables": [
-        {
-          "name": "Charm_DIR",
-          "value": "${projectDir}\\..\\charm",
-          "type": "PATH"
-        },
-        {
-          "name": "ENTANGLE_ROOT",
-          "value": "C:\\Users\\alanghof\\source\\repos\\entangle",
-          "type": "PATH"
-        },
-        {
-          "name": "ASIO_EXTENSIONS_PATH",
-          "value": "${projectDir}\\..\\asio-extensions\\include",
-          "type": "PATH"
-        },
-        {
-          "name": "pyboostcvconverter_DIR",
-          "value": "C:\\Users\\alanghof\\source\\repos\\CHARMing\\pyboostcvconverter",
-          "type": "PATH"
-        }
-      ]
-    },
-    {
+     {
       "name": "Taco102-Ubuntu18.04",
       "generator": "Unix Makefiles",
       "configurationType": "Release",

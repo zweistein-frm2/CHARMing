@@ -208,6 +208,7 @@ int main(int argc, char* argv[])
 							boost::function<void(Mcpd8::DataPacket&)> abfunc = boost::bind(&Mesytec::MesytecSystem::analyzebuffer, ref(ptrmsmtsystem1), boost::placeholders::_1);
 							boost::shared_ptr <Mesytec::listmode::Read> ptrRead = boost::shared_ptr < Mesytec::listmode::Read>(new Mesytec::listmode::Read(abfunc, ptrmsmtsystem1->data, ptrmsmtsystem1->deviceparam));
 							ptrRead->file(fname, io_service);
+							while (ptrmsmtsystem1->data.evntqueue.read_available()); // wait unitl queue consumed
 							// pointer to obj needed otherwise exceptions are not propagated properly
 						}
 						catch (Mesytec::listmode::read_error& x) {

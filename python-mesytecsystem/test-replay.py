@@ -16,10 +16,14 @@ def makeRoiWkt( parameter):
     wkt+="),())"
 
 o = listmodereplay.ReplayList(sys.stdout.fileno())
-files = o.files('~/source/repos/CHARMing/charm')
+files = o.files('~')
 print("Number of files in PlayList:"+str(len(files)))
 
+o.addfile(files[0])
+#input("start now")
+o.start()
 
+time.sleep(60)
 
 #print(files)
 #for file in files:
