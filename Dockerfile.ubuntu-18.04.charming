@@ -40,7 +40,7 @@ RUN cd /vcpkg && ./vcpkg install libuv
 ARG boostversion=1_73_0
 RUN cd /opt && wget https://dl.bintray.com/boostorg/release/$(echo ${boostversion} | sed "s/_/./g")/source/boost_${boostversion}.tar.bz2 && tar --bzip2 -xf ./boost_${boostversion}.tar.bz2
 RUN cd /opt && rm  ./boost_${boostversion}.tar.bz2
-RUN cd /opt/boost_${boostversion} && ./bootstrap.sh --prefix=/usr/
+RUN cd /opt/boost_${boostversion} && ./bootstrap.sh --prefix=/usr/ --with-python=python3
 RUN cd /opt/boost_${boostversion} && ./b2
 RUN cd /opt/boost_${boostversion} && ./b2 install
 

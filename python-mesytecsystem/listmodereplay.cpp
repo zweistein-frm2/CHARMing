@@ -81,7 +81,7 @@ struct StartMsmtParameters {
 
 void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, boost::shared_ptr <StartMsmtParameters> ptrStartParameters ) {
       
-
+        using namespace magic_enum::bitwise_operators; // out-of-the-box bitwise operators for enums.
         boost::asio::signal_set signals(io_service, SIGINT, SIGTERM);
         signals.async_wait(boost::bind(&boost::asio::io_service::stop, &io_service));
 
@@ -97,6 +97,11 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
                     do {
                         while (Mesytec::listmode::action  lec = Mesytec::listmode::CheckAction()) {
                             if (lec == Mesytec::listmode::start_reading) {
+                                Zweistein::histogram_setup_status hss = Zweistein::setup_status;
+                                //hss &= ~(Zweistein::histogram_setup_status::done);
+                                hss = Zweistein::histogram_setup_status::not_done;
+                                Zweistein::setup_status = hss; // next file is all new life 
+
                                 listmodeinputfiles.clear();
                                 boost::mutex::scoped_lock lock(ptrStartParameters->playlistGuard);
 
@@ -168,7 +173,7 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
                             catch (std::exception& e) {
                                 LOG_ERROR << e.what() << std::endl;
                             }
-                            Zweistein::setup_status = Zweistein::histogram_setup_status::not_done; // next file is all new life 
+                           
 
 
                         }
@@ -316,7 +321,7 @@ struct ReplayList {
             boost::python::list l;
             try {
                 bool duplicate = false;
-                for (auto& s : ptrStartParameters->playlist) {
+                for (auto s : ptrStartParameters->playlist) {
                     if (s == file) duplicate = true;
                     break;
                 }
@@ -325,7 +330,10 @@ struct ReplayList {
                     if (p.extension() != LISTMODEEXTENSION) {
                         LOG_WARNING << "File not added to playlist (wrong extension !="<< LISTMODEEXTENSION<<") : " << file << std::endl;
                     }
-                    else ptrStartParameters->playlist.push_back(file);
+                    else {
+                        ptrStartParameters->playlist.push_back(file);
+                        LOG_INFO << file << " added to playlist" << std::endl;
+                    }
                 }
                 else LOG_WARNING << "File not added to playlist"<<(duplicate?"(duplicate)": "(not found)")<<" : " << file << std::endl;
             
@@ -370,7 +378,7 @@ struct ReplayList {
 
         Histogram* getHistogram() {
             using namespace magic_enum::bitwise_operators; // out-of-the-box bitwise operators for enums.
-            LOG_DEBUG << "getHistogram()" << std::endl;
+            LOG_INFO << "getHistogram()" << std::endl;
             Zweistein::histogram_setup_status hss = Zweistein::setup_status;
             if (magic_enum::enum_integer(hss & Zweistein::histogram_setup_status::has_binning)) {
                 return &histograms[1];

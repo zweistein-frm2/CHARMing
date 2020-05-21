@@ -50,7 +50,7 @@ parts:
     plugin: nil
          
     override-build: |
-      ./bootstrap.sh --prefix=/usr/
+      ./bootstrap.sh --prefix=/usr/ --with-python=python3
       ./b2 headers
       ./b2 cxxflags="-std=c++17" install --prefix=$SNAPCRAFT_PRIME
     filesets:

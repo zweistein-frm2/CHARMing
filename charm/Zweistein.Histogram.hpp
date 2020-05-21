@@ -218,7 +218,7 @@ namespace Zweistein {
 #ifdef BOOST_PYTHON_MODULE
         boost::python::tuple update(cv::Mat mat) {
             using namespace magic_enum::bitwise_operators; // out-of-the-box bitwise operators for enums.
-            
+            LOG_INFO << __FILE__ << " : " << __LINE__ << std::endl;
             {
                 Zweistein::ReadLock r_lock(histogramsLock);
                 histogram.copyTo(mat);
