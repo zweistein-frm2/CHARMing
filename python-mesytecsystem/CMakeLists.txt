@@ -8,6 +8,9 @@ set(PROJECT2 listmodereplay)
 
 set(repository ${Charm_DIR})
 
+set(Boost_USE_STATIC_LIBS ON)
+#set(Boost_USE_STATIC_RUNTIME ON)
+
 foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2)
     message(STATUS "PROJECT_NAME=${PROJECT_NAME}")
 
@@ -46,8 +49,7 @@ endif()
 message("ENTANGLE_ROOT=" ${ENTANGLE_ROOT} )
 message("ENTANGLE_RES=" ${ENTANGLE_RES} )
 
-#set(Boost_USE_STATIC_LIBS,ON)
-#set(Boost_USE_STATIC_RUNTIME,ON)
+
 
 find_package(Boost 1.71 REQUIRED COMPONENTS python${Python_VERSION_MAJOR}${Python_VERSION_MINOR} numpy${Python_VERSION_MAJOR}${Python_VERSION_MINOR} filesystem chrono thread iostreams) # header only libraries must not be added here
 find_path(Boost_INCLUDE_DIR boost)
@@ -77,8 +79,14 @@ message(**Boost_numpy_library********** ${Boost_numpy_library}******************
 message(****resolves_to***************** ${${Boost_numpy_library}}**************************)
 
 
+
+ 
+
 add_library(${PROJECT_NAME} SHARED )
 
+target_compile_options(${PROJECT_NAME} PRIVATE
+    $<$<CXX_COMPILER_ID:GNU>:-fPIC>
+ )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE magic_enum::magic_enum ${Boost_LIBRARIES} ${OpenCV_LIBS}  unofficial::libuv::libuv   )
 target_link_libraries(${PROJECT_NAME} PRIVATE ${Python_LIBRARY_RELEASE} ${${Boost_python_library}} ${${Boost_numpy_library}})

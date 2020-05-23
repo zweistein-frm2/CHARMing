@@ -4,7 +4,7 @@
  *   it under the terms of the GNU General Public License as published by  *
  *   the Free Software Foundation;                                         *
  ***************************************************************************/
-
+#include <boost/locale.hpp>
 #include <boost/array.hpp>
 #define BOOST_CHRONO_VERSION 2
 #include <boost/chrono.hpp>
@@ -494,7 +494,11 @@ void catch_ctrlc(const boost::system::error_code& error, int signal_number) {
 
 int main(int argc, char* argv[])
 {
-	
+	boost::locale::generator gen;
+	std::locale loc = gen("de-DE");
+	std::locale::global(loc);
+	boost::filesystem::path::imbue(loc);
+
 	std::string appName = boost::filesystem::basename(argv[0]);
 	PacketSenderParams::ReadIni(appName,"charm");
 	devid = PacketSenderParams::getDevId();

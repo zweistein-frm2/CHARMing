@@ -14,7 +14,7 @@ namespace Zweistein {
 		extern boost::filesystem::path inipath;
 
 		inline boost::filesystem::path PreferredDirectory() {
-			boost::filesystem::path  r(boost::filesystem::current_path());
+			boost::filesystem::path  r(Zweistein::GetHomePath());
 
 			r = r.root_path();
 			r /= "etc";

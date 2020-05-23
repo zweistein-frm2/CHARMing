@@ -3,7 +3,6 @@
 #
 cmake_minimum_required (VERSION 3.16)
 project(charm)
-set(CMAKE_VERBOSE_MAKEFILE ON)
 if(NOT Charm_DIR)
 set(Charm_DIR ${PROJECT_SOURCE_DIR})
 endif()
@@ -26,10 +25,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 #find_package (Python COMPONENTS Interpreter Development NumPy)
 
-#set(Boost_USE_STATIC_LIBS,ON)
-#set(Boost_USE_STATIC_RUNTIME,ON)
-
-find_package(Boost 1.71 REQUIRED COMPONENTS filesystem chrono thread program_options iostreams log log_setup) # header only libraries must not be added here
+find_package(Boost 1.71 REQUIRED COMPONENTS filesystem chrono thread program_options iostreams log log_setup locale) # header only libraries must not be added here
 #find_path(Boost_INCLUDE_DIR boost)
 
 message(********cmake_toolchain=  ${CMAKE_TOOLCHAIN_FILE}             ***********)
@@ -99,6 +95,7 @@ endif()
     "${CMAKE_CURRENT_BINARY_DIR}/boost_iostreams-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
     "${CMAKE_CURRENT_BINARY_DIR}/boost_regex-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
     "${CMAKE_CURRENT_BINARY_DIR}/boost_log-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
+    "${CMAKE_CURRENT_BINARY_DIR}/boost_locale-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
     "${CMAKE_CURRENT_BINARY_DIR}/opencv_highgui${WIN32LIB_SUFFIX}.dll"
     "${CMAKE_CURRENT_BINARY_DIR}/opencv_imgproc${WIN32LIB_SUFFIX}.dll"
     "${CMAKE_CURRENT_BINARY_DIR}/opencv_core${WIN32LIB_SUFFIX}.dll"

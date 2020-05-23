@@ -6,14 +6,13 @@
  ***************************************************************************/
 
 #include "stdafx.h"
+#include <boost/locale.hpp>
 #include <iostream>
 #include <fstream>
 #include <list>
 #include <string>
 #include <filesystem>
-#include <clocale>
 #include <vector>
-#include <boost/locale.hpp>
 #include <boost/exception/all.hpp>
 #include <boost/system/error_code.hpp>
 #include <boost/exception/error_info.hpp>
@@ -73,9 +72,16 @@ boost::asio::io_service io_service;
 
 int main(int argc, char* argv[])
 {
-	char *cLocal=setlocale(LC_ALL, NULL);
-	setlocale(LC_ALL, "de-DE");
-	boost::filesystem::path::imbue(std::locale());
+
+	try {
+		boost::locale::generator gen;
+		std::locale loc = gen("de-DE");
+		std::locale::global(loc);
+		boost::filesystem::path::imbue(loc);
+	}
+	catch (std::exception &ex) {
+		LOG_ERROR << ex.what() << std::endl;
+	}
 	std::string appName = boost::filesystem::basename(argv[0]);
 	
 	boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1 = boost::shared_ptr < Mesytec::MesytecSystem>(new Mesytec::MesytecSystem());
@@ -256,6 +262,8 @@ int main(int argc, char* argv[])
 				outfile.open(fp, std::ios::out | std::ios::trunc);
 				outfile << ss_1.str();
 				outfile.close();
+
+				if (!configok) LOG_ERROR << "Please edit to fix configuration error : " << fp << std::endl;
 				
 			}
 			catch (std::exception& e) { // exception expected, //std::cout << boost::diagnostic_information(e); 

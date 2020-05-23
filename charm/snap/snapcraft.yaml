@@ -10,23 +10,12 @@ confinement: devmode # use 'strict' once you have the right plugs and slots
 
 
 build-packages:
- #   - build-essential
- #   - automake
- #   - libtool
- #   - libssl-dev
- #   - zlib1g-dev
- #   - libc6-dbg
- #   - ccache
- #   - gcc
- #   - g++
-#    - python3
+
+    - python3-dev
     - software-properties-common
-#    - curl
     - unzip
-#    - tar
-#    - libopencv-dev
-#    - nano
- #   - libpsm-infinipath1
+    
+
      
 parts:
  gcc-9:
@@ -36,13 +25,26 @@ parts:
       apt install -y gcc-9 g++-9
       update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 900 --slave /usr/bin/g++ g++ /usr/bin/g++-9
       update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 700 --slave /usr/bin/g++ g++ /usr/bin/g++-7
-     # cp /usr/lib/x86_64-linux-gnu/libstdc++.so.* $SNAPCRAFT_STAGE/usr/lib/x86_64-linux-gnu/
-    filesets:
-     stdlibs:
-      - usr/lib/x86_64-linux-gnu/libstdc++.so.6.*
-    prime:
-      - $stdlibs
- 
+    
+    #filesets:
+     #stdlibs:
+     # - usr/lib/x86_64-linux-gnu/libstdc++.so.6
+     # - usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.28
+    #stage: [usr/lib/x86_64-linux-gnu/libstdc++.so.6 usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.28]
+    override-stage: |
+      snapcraftctl stage
+      mkdir -p usr/lib/x86_64-linux-gnu
+      cp /usr/lib/x86_64-linux-gnu/libstdc++.so.6 usr/lib/x86_64-linux-gnu/libstdc++.so.6
+      cp /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.28 usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.28
+      
+    override-prime: |
+      snapcraftctl prime
+      mkdir -p usr/lib/x86_64-linux-gnu
+      cp /usr/lib/x86_64-linux-gnu/libstdc++.so.6 usr/lib/x86_64-linux-gnu/libstdc++.so.6
+      cp /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.28 usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.28
+     
+    #prime: [usr/lib/x86_64-linux-gnu/libstdc++.so.6 usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.28]
+      
  boost:
     source:  https://github.com/boostorg/boost.git
     source-type: git
@@ -52,23 +54,78 @@ parts:
     override-build: |
       ./bootstrap.sh --prefix=/usr/ --with-python=python3
       ./b2 headers
-      ./b2 cxxflags="-std=c++17" install --prefix=$SNAPCRAFT_PRIME
-    filesets:
-     libboost: [lib/libboost_*.so*]
+      ./b2 cxxflags="-std=c++17" install --prefix=/usr
     
-    stage:
-     - $libboost
-   # override-prime: |
-  #   snapcraftctl prime
+    override-stage: |
+      snapcraftctl stage
+      mkdir -p usr/lib
+      cp /usr/lib/libboost_chrono.so.1.73 usr/lib/libboost_chrono.so.1.73
+      cp /usr/lib/libboost_chrono.so.1.73.0 usr/lib/libboost_chrono.so.1.73.0 
+      cp /usr/lib/libboost_chrono.so.1 usr/lib/libboost_chrono.so.1
+      
+      cp /usr/lib/libboost_filesystem.so.1.73.0 usr/lib/libboost_filesystem.so.1.73.0 
+      cp /usr/lib/libboost_filesystem.so.1.73 usr/lib/libboost_filesystem.so.1.73
+      cp /usr/lib/libboost_filesystem.so.1 usr/lib/libboost_filesystem.so.1
+      
+      cp /usr/lib/libboost_iostreams.so.1.73.0 usr/lib/libboost_iostreams.so.1.73.0 
+      cp /usr/lib/libboost_iostreams.so.1.73 usr/lib/libboost_iostreams.so.1.73
+      cp /usr/lib/libboost_iostreams.so.1 usr/lib/libboost_iostreams.so.1
+      
+      cp /usr/lib/libboost_locale.so.1.73.0 usr/lib/libboost_locale.so.1.73.0 
+      cp /usr/lib/libboost_locale.so.1.73 usr/lib/libboost_locale.so.1.73
+      cp /usr/lib/libboost_locale.so.1 usr/lib/libboost_locale.so.1
+      
+      cp /usr/lib/libboost_log.so.1.73.0 usr/lib/libboost_log.so.1.73.0 
+      cp /usr/lib/libboost_log.so.1.73 usr/lib/libboost_log.so.1.73
+      cp /usr/lib/libboost_log.so.1 usr/lib/libboost_log.so.1
+      
+      cp /usr/lib/libboost_program_options.so.1.73.0 usr/lib/libboost_program_options.so.1.73.0 
+      cp /usr/lib/libboost_program_options.so.1.73 usr/lib/libboost_program_options.so.1.73
+      cp /usr/lib/libboost_program_options.so.1 usr/lib/libboost_program_options.so.1
+      
+      cp /usr/lib/libboost_regex.so.1.73.0 usr/lib/libboost_regex.so.1.73.0 
+      cp /usr/lib/libboost_regex.so.1.73 usr/lib/libboost_regex.so.1.73
+      cp /usr/lib/libboost_regex.so.1 usr/lib/libboost_regex.so.1
+      
+      cp /usr/lib/libboost_thread.so.1.73.0 usr/lib/libboost_thread.so.1.73.0 
+      cp /usr/lib/libboost_thread.so.1.73 usr/lib/libboost_thread.so.1.73
+      cp /usr/lib/libboost_thread.so.1 usr/lib/libboost_thread.so.1
+      
+      
+    override-prime: |
+      snapcraftctl prime
+      mkdir -p usr/lib
+      cp /usr/lib/libboost_chrono.so.1.73 usr/lib/libboost_chrono.so.1.73
+      cp /usr/lib/libboost_chrono.so.1 usr/lib/libboost_chrono.so.1
+      cp /usr/lib/libboost_chrono.so.1.73.0 usr/lib/libboost_chrono.so.1.73.0
      
-     
-   #  - $libboost   #lib/libboost_chrono.so.*
- #    - lib/libboost_filesystem.so.1.73.0
- #    - lib/libboost_iostreams.so.1.73.0
- #    - lib/libboost_log.so.1.73.0
- #    - lib/libboost_program_options.so.1.73.0
- #    - lib/libboost_regex.so.1.73.0
- #    - lib/libboost_thread.so.1.73.0
+      cp /usr/lib/libboost_filesystem.so.1.73.0 usr/lib/libboost_filesystem.so.1.73.0 
+      cp /usr/lib/libboost_filesystem.so.1.73 usr/lib/libboost_filesystem.so.1.73
+      cp /usr/lib/libboost_filesystem.so.1 usr/lib/libboost_filesystem.so.1
+ 
+      cp /usr/lib/libboost_iostreams.so.1.73.0 usr/lib/libboost_iostreams.so.1.73.0 
+      cp /usr/lib/libboost_iostreams.so.1.73 usr/lib/libboost_iostreams.so.1.73
+      cp /usr/lib/libboost_iostreams.so.1 usr/lib/libboost_iostreams.so.1
+      
+      cp /usr/lib/libboost_locale.so.1.73.0 usr/lib/libboost_locale.so.1.73.0 
+      cp /usr/lib/libboost_locale.so.1.73 usr/lib/libboost_locale.so.1.73
+      cp /usr/lib/libboost_locale.so.1 usr/lib/libboost_locale.so.1
+
+      cp /usr/lib/libboost_log.so.1.73.0 usr/lib/libboost_log.so.1.73.0 
+      cp /usr/lib/libboost_log.so.1.73 usr/lib/libboost_log.so.1.73
+      cp /usr/lib/libboost_log.so.1 usr/lib/libboost_log.so.1
+      
+      cp /usr/lib/libboost_program_options.so.1.73.0 usr/lib/libboost_program_options.so.1.73.0 
+      cp /usr/lib/libboost_program_options.so.1.73 usr/lib/libboost_program_options.so.1.73
+      cp /usr/lib/libboost_program_options.so.1 usr/lib/libboost_program_options.so.1
+      
+      cp /usr/lib/libboost_regex.so.1.73.0 usr/lib/libboost_regex.so.1.73.0 
+      cp /usr/lib/libboost_regex.so.1.73 usr/lib/libboost_regex.so.1.73
+      cp /usr/lib/libboost_regex.so.1 usr/lib/libboost_regex.so.1
+      
+      cp /usr/lib/libboost_thread.so.1.73.0 usr/lib/libboost_thread.so.1.73.0 
+      cp /usr/lib/libboost_thread.so.1.73 usr/lib/libboost_thread.so.1.73
+      cp /usr/lib/libboost_thread.so.1 usr/lib/libboost_thread.so.1
  
  vcpkg:
     source: https://github.com/microsoft/vcpkg.git
@@ -84,11 +141,15 @@ parts:
      lib: [lib/*]
      share: [share/*]
      opencv-dependencies: 
-      - lib/libz.so*
-      - lib/liblzma.so.*
-      - libpcre.so.*
+      - lib/x86_64-linux-gnu/libz.so*
+      - lib/x86_64-linux-gnu/liblzma.so.*
+      - lib/x86_64-linux-gnu/libpcre.so.*
      
     stage:
+     - $lib
+     - $share
+     - $opencv-dependencies
+    prime:
      - $lib
      - $share
      - $opencv-dependencies
@@ -101,6 +162,23 @@ parts:
     source: https://github.com/palacaze/sigslot.git
     source-type: git
     plugin: nil
+ locales-launch:
+   plugin: nil
+   stage-snaps:
+    - locales-launch
+   stage-packages:
+    # For localedef(1)
+    - libc-bin
+    # For locale data used by localedef(1)
+    - locales
+    # All pre-generated locale data
+    # DISABLED: Lots of duplicate data will be included in snap when this is staged, unless the target machine has no resource to generate them in runtime otherwise not using it
+    #
+    #   Lack of compiled locales breaks gettext based localisation - snapcraft - snapcraft.io
+    #   https://forum.snapcraft.io/t/lack-of-compiled-locales-breaks-gettext-based-localisation/3758
+    #
+    - locales-all
+ 
  frm2-charm:
     build-snaps: [cmake]
     after: 
@@ -109,11 +187,13 @@ parts:
      - vcpkg
      - asio-extensions
      - sigslot
+     - locales-launch
     plugin: cmake
     source: .
     configflags: []
     override-build: |
        cmake \
+        -DINSTALL_DIR=bin \
         -DCMAKE_INSTALL_PREFIX=$SNAPCRAFT_PART_INSTALL/usr/local \
         -DCMAKE_BUILD_TYPE=Release \
         -DVCPKG_TARGET_TRIPLET=x64-linux \
@@ -122,13 +202,13 @@ parts:
         -DOpenCV_DIR=/root/parts/vcpkg/build/installed/x64-linux/share/opencv \
         -DProtobuf_DIR=/root/parts/vcpkg/build/installed/x64-linux/share/protobuf \
         -DBoost_INCLUDE_DIR=/root/prime/include  \
+        -DBoost_LIBRARY_DIR_RELEASE=/root/prime/lib  \
         -DProtobuf_INCLUDE_DIRS=/root/parts/vcpkg/build/installed/x64-linux/include  \
         -Dunofficial-libuv_DIR=/root/parts/vcpkg/build/installed/x64-linux/share/unofficial-libuv \
         -Dmagic_enum_DIR=/root/parts/vcpkg/build/installed/x64-linux/share/magic_enum \
         -DASIO_EXTENSIONS_PATH=/root/parts/asio-extensions/build/include \
         -DCharm_DIR=/root/parts/frm2-charm/src \
         -DSIGSLOT_PATH=/root/parts/sigslot/build/include  \
-        -DSNAPCRAFT_PART_INSTALL=bin \
         $SNAPCRAFT_PART_SRC
        make -j 4
        make install
@@ -141,11 +221,33 @@ parts:
 
 
 
+plugs:
+ etc-charm:
+  interface: system-files
+  read:
+  - /etc/charm
+  write:
+  - /etc/charm
+  
+  
+ dot-charm:
+  interface: personal-files
+  read: 
+  - $HOME/.charm
+  write:
+  - $HOME/.charm
+  
 apps:
  frm2-charm:
   command: bin/charm
+  plugs: 
+  - home
+  - network
+  - network-bind
+  - etc-charm
+  - dot-charm
   environment:
-   LD_LIBRARY_PATH: "$SNAP/usr/lib;$SNAP/usr/local/lib"
+   LD_LIBRARY_PATH: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/:$LD_LIBRARY_PATH
         
 
  

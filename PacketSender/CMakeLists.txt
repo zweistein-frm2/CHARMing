@@ -3,18 +3,20 @@
 #
 cmake_minimum_required (VERSION 3.14) 
 project(PacketSender)  
+if(MSVC)
+    add_compile_definitions(_WIN32_WINNT=0x0601)
+endif()
 set(CMAKE_CXX_STANDARD 17) 
 find_package(magic_enum CONFIG REQUIRED )
-set(Boost_USE_STATIC_LIBS,ON)
-set(Boost_USE_STATIC_RUNTIME,ON)
-find_package(Boost 1.71 REQUIRED COMPONENTS  filesystem chrono thread iostreams ) # header only libraries must not be added here
+
+find_package(Boost 1.71 REQUIRED COMPONENTS  filesystem chrono thread locale) # header only libraries must not be added here
 find_package(unofficial-libuv CONFIG REQUIRED)
 include_directories(${Charm_DIR})
 
 add_compile_options($<$<CXX_COMPILER_ID:GNU>:-Wno-narrowing>)
 configure_file( cmake_variables.h.in ${CMAKE_BINARY_DIR}/generated/cmake_variables.h )
 include_directories( ${CMAKE_BINARY_DIR}/generated/ ) # Make sure it can be included...
-add_executable (${PROJECT_NAME} "PacketSender.cpp" )
+add_executable (${PROJECT_NAME} "PacketSender.cpp"  ${Charm_DIR}/Mcpd8.CmdPacket.cpp ${Charm_DIR}/Mesyec.Mpsd8.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE magic_enum::magic_enum ${Boost_LIBRARIES} unofficial::libuv::libuv ) # libstdc++.a libm.a libc.a
 target_link_options(${PROJECT_NAME} PRIVATE $<$<CXX_COMPILER_ID:GNU>:$<$<CONFIG:RELEASE>:-static-libstdc++> $<$<CONFIG:DEBUG>:-static-libstdc++> > PRIVATE $<$<CXX_COMPILER_ID:GNU>:-static-libgcc>  )
 
@@ -26,7 +28,42 @@ $<$<COMPILE_LANGUAGE:CXX>:$<$<CXX_COMPILER_ID:MSVC>:/GS>>
 $<$<COMPILE_LANGUAGE:CXX>:$<$<CXX_COMPILER_ID:MSVC>:/EHsc>>
 )
 
-install(
-    TARGETS ${PROJECT_NAME}
-            
-)
+if(NOT INSTALL_DIR)
+if(WIN32)
+set(INSTALL_DIR $ENV{HOMEDRIVE}$ENV{HOMEPATH}) # or $ENV{USERPROFILE}
+else()
+set(INSTALL_DIR ~/)
+endif()
+endif()
+
+if(WIN32)
+if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+set(WIN32LIB_SUFFIX d)
+set(BOOSTLIB_DBG -gd)
+endif()
+  install(TARGETS ${PROJECT_NAME}
+        RUNTIME  DESTINATION ${INSTALL_DIR}
+        )
+  install(FILES 
+    "${CMAKE_CURRENT_BINARY_DIR}/boost_filesystem-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
+    "${CMAKE_CURRENT_BINARY_DIR}/boost_thread-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll" 
+    "${CMAKE_CURRENT_BINARY_DIR}/boost_chrono-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll" 
+    "${CMAKE_CURRENT_BINARY_DIR}/boost_locale-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
+    "${CMAKE_CURRENT_BINARY_DIR}/libuv.dll"
+    
+       DESTINATION ${INSTALL_DIR}
+        )
+	if(${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR} VERSION_LESS "1_73")
+   install(
+   FILES
+      "${CMAKE_CURRENT_BINARY_DIR}/boost_date_time-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
+    DESTINATION ${INSTALL_DIR}
+   )
+   endif()  	
+		
+else()
+ install(TARGETS ${PROJECT_NAME}
+        RUNTIME  DESTINATION ${INSTALL_DIR}
+        )
+endif()
+ 
