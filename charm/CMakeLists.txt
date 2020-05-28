@@ -18,13 +18,12 @@ endif()
   
 add_compile_definitions(ASIOEXT_USE_BOOST_ASIO)
 add_compile_definitions(BOOST_CHRONO_VERSION=2)
-add_compile_definitions(BOOST_LOG_DYN_LINK)
+
 set(CMAKE_CXX_STANDARD 17) 
-
-
 
 #find_package (Python COMPONENTS Interpreter Development NumPy)
 
+set(Boost_USE_STATIC_LIBS ON)
 find_package(Boost 1.71 REQUIRED COMPONENTS filesystem chrono thread program_options iostreams log log_setup locale) # header only libraries must not be added here
 #find_path(Boost_INCLUDE_DIR boost)
 
@@ -35,9 +34,10 @@ if(DEFINED Protobuf_DIR )
 find_package(Protobuf REQUIRED PATHS ${Protobuf_DIR})
 endif()
 #set ("OpenCV_DIR" "${_VCPKG_ROOT_DIR}/installed/${VCPKG_TARGET_TRIPLET}/share/opencv")
-message(******OpenCV_Dir=   ${OpenCV_DIR}  *************)
-#find_package(OpenCV  REQUIRED PATHS  ${_VCPKG_ROOT_DIR}/installed/${VCPKG_TARGET_TRIPLET}/share/opencv)
+
 find_package(OpenCV  REQUIRED)
+message(******OpenCV_Dir=   ${OpenCV_DIR}  *************)
+
 find_package(unofficial-libuv CONFIG REQUIRED)
 
 #set (magic_enum_DIR ${_VCPKG_ROOT_DIR}/installed/${VCPKG_TARGET_TRIPLET}/share/magic_enum)
@@ -57,9 +57,9 @@ include_directories(${SIGSLOT_PATH})
 add_executable (${PROJECT_NAME} "mesyDeviceCtrl.cpp" "Mesytec.Mcpd8.cpp" "Mcpd8.Parameters.cpp" "OptionPrinter.cpp" "CustomOptionDescription.cpp" "simpleLogger.cpp" "coloured_console_sink.cpp" "Zweistein.ping.cpp" ${repository}/version.cpp "Mcpd8.CmdPacket.cpp" "Mesyec.Mpsd8.cpp" "Mesytec.listmode.write.cpp" "Mesytec.listmode.cpp" "MesytecSystem.Data.cpp" "Zweistein.GetConfigDir.cpp" "Mesytec.config.cpp")
 
 target_compile_options(${PROJECT_NAME} PRIVATE  $<$<CXX_COMPILER_ID:GNU>: -Wno-error>)
+target_link_options(${PROJECT_NAME}   PRIVATE $<$<CXX_COMPILER_ID:GNU>:$<$<CONFIG:RELEASE>:-static-libstdc++> $<$<CONFIG:DEBUG>:-static-libstdc++> > PRIVATE $<$<CXX_COMPILER_ID:GNU>:-static-libgcc> )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE magic_enum::magic_enum ${Boost_LIBRARIES} ${OpenCV_LIBS} unofficial::libuv::libuv )
-target_link_options(${PROJECT_NAME} PRIVATE $<$<CXX_COMPILER_ID:GNU>:$<$<CONFIG:RELEASE>:-static-libstdc++> $<$<CONFIG:DEBUG>:-static-libstdc++> > PRIVATE $<$<CXX_COMPILER_ID:GNU>:-static-libgcc>  )
+target_link_libraries(${PROJECT_NAME} PRIVATE  magic_enum::magic_enum ${Boost_LIBRARIES} ${OpenCV_LIBS}  unofficial::libuv::libuv )
 
 
 add_custom_command(
@@ -69,6 +69,14 @@ add_custom_command(
             ${repository}/version.cmake
             WORKING_DIRECTORY ${repository}
             )
+
+
+set(CPACK_GENERATOR "DEB")
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Andreas Langhoff") # required
+SET (CPACK_DEBIAN_PACKAGE_DEPENDS "libopencv") 
+include(CPack)
+
+
 
 
 if(NOT INSTALL_DIR)

@@ -494,11 +494,17 @@ void catch_ctrlc(const boost::system::error_code& error, int signal_number) {
 
 int main(int argc, char* argv[])
 {
-	boost::locale::generator gen;
-	std::locale loc = gen("de-DE");
-	std::locale::global(loc);
-	boost::filesystem::path::imbue(loc);
 
+	try {
+		boost::locale::generator gen;
+		std::locale loc = gen("de-DE");
+		std::locale::global(loc);
+		boost::filesystem::path::imbue(loc);
+	}
+	catch (std::exception& ex) {
+		LOG_ERROR << ex.what() << std::endl;
+	}
+	
 	std::string appName = boost::filesystem::basename(argv[0]);
 	PacketSenderParams::ReadIni(appName,"charm");
 	devid = PacketSenderParams::getDevId();

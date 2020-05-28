@@ -11,7 +11,7 @@
 #define LOG_DEBUG std::cout<<":DEBUG:"
 #define LOG_INFO std::cout<<":INFO:"
 #define LOG_WARNING std::cout<<":WARN:"
-#define LOG_ERROR std::cout<<":ERROR:"
+#define LOG_ERROR std::cerr<<":ERROR:"
 
 #endif
 

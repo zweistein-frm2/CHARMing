@@ -9,7 +9,6 @@ set(PROJECT2 listmodereplay)
 set(repository ${Charm_DIR})
 
 set(Boost_USE_STATIC_LIBS ON)
-#set(Boost_USE_STATIC_RUNTIME ON)
 
 foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2)
     message(STATUS "PROJECT_NAME=${PROJECT_NAME}")
@@ -19,7 +18,7 @@ add_compile_definitions(ENTANGLE_LOGGER)
 if(MSVC)
     add_compile_definitions(_WIN32_WINNT=0x0601)
 else()
-message("on linux boost >= 1.71 must be installed on ubuntu 18.04 install from sources,   :on ubuntu >=20.04:  sudo apt-get install libboost-python-dev")
+message("on linux boost >= 1.71 must be installed from source with speficic compile settings (static link, no icu")
 
 #set(BOOST_ROOT /usr )
 #set(Boost_INCLUDE_DIR ${BOOST_ROOT}/include)
@@ -84,9 +83,11 @@ message(****resolves_to***************** ${${Boost_numpy_library}}**************
 
 add_library(${PROJECT_NAME} SHARED )
 
-target_compile_options(${PROJECT_NAME} PRIVATE
-    $<$<CXX_COMPILER_ID:GNU>:-fPIC>
- )
+#target_compile_options(${PROJECT_NAME} PRIVATE
+#    $<$<CXX_COMPILER_ID:GNU>:-fPIC>
+# )
+
+ target_link_options(${PROJECT_NAME}   PRIVATE $<$<CXX_COMPILER_ID:GNU>:$<$<CONFIG:RELEASE>:-static-libstdc++> $<$<CONFIG:DEBUG>:-static-libstdc++> > PRIVATE $<$<CXX_COMPILER_ID:GNU>:-static-libgcc> )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE magic_enum::magic_enum ${Boost_LIBRARIES} ${OpenCV_LIBS}  unofficial::libuv::libuv   )
 target_link_libraries(${PROJECT_NAME} PRIVATE ${Python_LIBRARY_RELEASE} ${${Boost_python_library}} ${${Boost_numpy_library}})

@@ -11,7 +11,6 @@
 #include <fstream>
 #include <list>
 #include <string>
-#include <filesystem>
 #include <vector>
 #include <boost/exception/all.hpp>
 #include <boost/system/error_code.hpp>

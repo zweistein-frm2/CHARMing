@@ -211,14 +211,12 @@ namespace Zweistein {
 						continue;
 					}
 					if (ev.X < 0 || ev.X >= maxX) {
-						LOG_ERROR << "0 < Event.X=" << ev.X << " < " << maxX << " Event.X ouside bounds" << std::endl;
-						io_service.stop();
-						break;
+						LOG_WARNING << "0 < Event.X=" << ev.X << " < " << maxX << " Event.X ouside bounds" << std::endl;
+						continue;
 					}
 					if (ev.Y < 0 || ev.Y >= maxY) {
-						LOG_ERROR << "0< Event.Y=" << ev.Y << " < " << maxY << " Event.Y ouside bounds" << std::endl;
-						io_service.stop();
-						break;
+						LOG_WARNING << "0< Event.Y=" << ev.Y << " < " << maxY << " Event.Y ouside bounds" << std::endl;
+						continue;
 
 					}
 

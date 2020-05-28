@@ -201,7 +201,6 @@ class Histogram(base.ImageChannel):
     def read_RoiWKT(self):
         #print("read_RoiWKT("+str(self.selectedRoi)+")")
         wkt = self.Histogram().getRoi(self.selectedRoi)
-        print(wkt)
         return wkt
         
     def write_RoiWKT(self,value):

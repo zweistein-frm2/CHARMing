@@ -120,11 +120,13 @@ namespace Zweistein {
               
             }
             if (rsize - 1 < index) return "";
+            std::string tmp;
             {
                 Zweistein::ReadLock r_lock(histogramsLock);
-                return _getRoi(index);
+                tmp= _getRoi(index);
             }
-           
+            LOG_INFO << tmp << std::endl;
+            return tmp;
         }
 
         std::string _getRoi(int index) {
@@ -147,6 +149,7 @@ namespace Zweistein {
             ssroi << maxX << " " << bottom << ",";
             ssroi << left << " " << bottom << "),())";
             std::string roi = ssroi.str();
+            LOG_INFO << __FILE__ << " : " << __LINE__ << " "<<roi << std::endl;
             return roi;
            
         }
@@ -165,7 +168,7 @@ namespace Zweistein {
                     _delRoi(currwkt);
                     return;
             }
-            _setRoi(wkt,index);
+            if(index!=0) _setRoi(wkt,index); // index 0 is always full rectangle
         }
 
         void _setRoi(std::string wkt,int index) {
@@ -200,10 +203,8 @@ namespace Zweistein {
                 if (failure != boost::geometry::no_failure) {
                        LOG_ERROR << "boost::geometry::validity_failure_type=" << failure << " : "<< reason<< std::endl;
                 }
-               
-                
-                height =histogram.size[0];
-                width=histogram.size[1];
+                height = histogram.size[0];
+                width = histogram.size[1];
 
                 std::vector<point_type> coor = { {0, 0}, {0,height}, {width, height}, {width,0},{0,0} };
                 roidata[index].roi.outer().clear();
@@ -219,16 +220,17 @@ namespace Zweistein {
         boost::python::tuple update(cv::Mat mat) {
             using namespace magic_enum::bitwise_operators; // out-of-the-box bitwise operators for enums.
             LOG_INFO << __FILE__ << " : " << __LINE__ << std::endl;
+            std::vector<RoiData> rdc = std::vector<RoiData>();
             {
                 Zweistein::ReadLock r_lock(histogramsLock);
+                for (auto& a : roidata)   rdc.push_back(a);
                 histogram.copyTo(mat);
             }
-           
             Zweistein::histogram_setup_status hss = Zweistein::setup_status;
-           if (magic_enum::enum_integer(hss & Zweistein::histogram_setup_status::has_binning)) {
-           //  Zweistein::Binning::Apply_OCC_Correction(mat,roi,count);
-            //    LOG_INFO << "update:applyocc_correction" << std::endl;
-           }
+            if (magic_enum::enum_integer(hss & Zweistein::histogram_setup_status::has_binning)) {
+                Zweistein::Binning::Apply_OCC_Correction(mat, rdc[0].roi, rdc[0].count);
+            }
+           
            
            boost::python::list l;
            

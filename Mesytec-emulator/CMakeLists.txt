@@ -2,13 +2,15 @@
 # project specific logic here.
 #
 cmake_minimum_required (VERSION 3.14) 
-project(PacketSender)  
+project(Mesytec-emulator)  
 if(MSVC)
     add_compile_definitions(_WIN32_WINNT=0x0601)
 endif()
+add_compile_definitions(BOOST_CHRONO_VERSION=2)
 set(CMAKE_CXX_STANDARD 17) 
 find_package(magic_enum CONFIG REQUIRED )
 
+set(Boost_USE_STATIC_LIBS ON)
 find_package(Boost 1.71 REQUIRED COMPONENTS  filesystem chrono thread locale) # header only libraries must not be added here
 find_package(unofficial-libuv CONFIG REQUIRED)
 include_directories(${Charm_DIR})
@@ -27,6 +29,11 @@ $<$<COMPILE_LANGUAGE:CXX>:$<$<CXX_COMPILER_ID:MSVC>:/wd4996>>
 $<$<COMPILE_LANGUAGE:CXX>:$<$<CXX_COMPILER_ID:MSVC>:/GS>>
 $<$<COMPILE_LANGUAGE:CXX>:$<$<CXX_COMPILER_ID:MSVC>:/EHsc>>
 )
+
+
+set(CPACK_GENERATOR "DEB")
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Andreas Langhoff") # required
+include(CPack)
 
 if(NOT INSTALL_DIR)
 if(WIN32)

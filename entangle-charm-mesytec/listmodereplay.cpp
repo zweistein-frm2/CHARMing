@@ -12,7 +12,6 @@
 #include <boost/python/numpy.hpp>
 #include <iostream>
 #include <list>
-#include <filesystem>
 #include <string>
 #include <boost/filesystem.hpp>
 #include "Zweistein.PrettyBytes.hpp"

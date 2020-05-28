@@ -182,7 +182,6 @@ class MeasureTime(base.TimerChannel):
 
 class Histogram(base.ImageChannel):
 
-    
     attributes = {
          'CountsInRoi': Attr(uint64, 'counts in Roi',dims = 0,writable=False,memorized = False,unit=None),
          'maxindexroi': Attr(uint16, 'max index of roi (0 ..n-1)',dims = 0,writable=False,memorized = False,unit=None),
@@ -193,7 +192,8 @@ class Histogram(base.ImageChannel):
                             disallowed_write = (states.FAULT, states.OFF, states.BUSY,states.INIT, states.UNKNOWN,)),
                          
     }
-
+    
+    
 
     def init(self):
         self.count  =  0;
@@ -203,13 +203,12 @@ class Histogram(base.ImageChannel):
         self.histogram = None
          
     def Histogram(self):
-        if self.histogram is None:
-             if charmsystem:
-                  self.histogram = charmsystem.getHistogram()
-             else:
-                 return None
+        if charmsystem:
+            self.histogram = charmsystem.getHistogram()
+        else:
+            return None
         return self.histogram
-
+        
     def read_CountsInRoi(self):
         return uint64(self.count)
     def get_CountsInRoi_unit(self):
@@ -221,13 +220,13 @@ class Histogram(base.ImageChannel):
     def read_RoiWKT(self):
         #print("read_RoiWKT("+str(self.selectedRoi)+")")
         wkt = self.Histogram().getRoi(self.selectedRoi)
-        print(wkt)
         return wkt
         
     def write_RoiWKT(self,value):
         #print("write_RoiWKT = "+str(value))
         #print("selectedRoi = "+str(self.selectedRoi))
         self.Histogram().setRoi(value,self.selectedRoi)
+        
     def get_RoiWKT_unit(self):
         return ''
     

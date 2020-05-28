@@ -7,7 +7,6 @@
 
 #pragma once
 #include <boost/function.hpp>
-#include <filesystem>
 #include "Mesytec.Mcpd8.hpp"
 #include "Mesytec.listmode.hpp"
 #include "Mesytec.config.hpp"

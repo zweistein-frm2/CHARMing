@@ -17,6 +17,7 @@ def makeRoiWkt( parameter):
 o = mesytecsystem.NeutronMeasurement(sys.stdout.fileno())
 v = o.version
 print(v)
+o.start()
 h = o.getHistogram()
 mat = np.zeros((1,1,1),dtype="int32")
 t= h.update(mat)
@@ -28,7 +29,7 @@ e=makeRoiWkt(detsize)
 
 print(t[0])
 histogram = t[1]
-#print(histogram)
+print(histogram)
 img = cv.normalize(histogram, None, 0,255, norm_type=cv.NORM_MINMAX, dtype=cv.CV_8U)
 img=cv.applyColorMap(img,cv.COLORMAP_JET)
 cv.imshow("Window", img)

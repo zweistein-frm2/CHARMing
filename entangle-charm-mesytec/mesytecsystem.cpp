@@ -10,7 +10,6 @@
 #include <pyboostcvconverter/pyboostcvconverter.hpp>
 #include <boost/python/numpy.hpp>
 #include <iostream>
-#include <filesystem>
 #include "Zweistein.PrettyBytes.hpp"
 #include <opencv2/core.hpp>
 #include <opencv2/core/mat.hpp>
