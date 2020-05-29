@@ -1,0 +1,7 @@
+{
+    "cmake.configureSettings": {
+    "SIGSLOT_PATH" : "../sigslot/include",
+    "ASIO_EXTENSIONS_PATH": "../asio-extensions/include"
+
+    }
+}

@@ -55,7 +55,7 @@ extern const char* GIT_BRANCH;
 extern const char* GIT_DATE;
 
 Zweistein::Lock histogramsLock;
-std::vector<Histogram> histograms = std::vector<Histogram>(2);
+std::vector<Histogram> histograms; 
 
 namespace po = boost::program_options;
 void conflicting_options(const po::variables_map& vm,
@@ -73,6 +73,7 @@ int main(int argc, char* argv[])
 {
 
 	try {
+		histograms = std::vector<Histogram>(2);
 		boost::locale::generator gen;
 		std::locale loc = gen("de-DE");
 		std::locale::global(loc);

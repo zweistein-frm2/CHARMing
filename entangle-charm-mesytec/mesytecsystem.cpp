@@ -48,7 +48,7 @@ extern const char* GIT_BRANCH;
 extern const char* GIT_DATE;
 
 Zweistein::Lock histogramsLock;
-std::vector<Histogram> histograms = std::vector<Histogram>(2);
+std::vector<Histogram> histograms;
 
 boost::asio::io_service io_service;
 
@@ -75,6 +75,7 @@ struct StartMsmtParameters {
 };
 
 void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, boost::shared_ptr <StartMsmtParameters> ptrStartParameters ) {
+       
         boost::filesystem::path inidirectory = Zweistein::Config::GetConfigDirectory();
         Zweistein::Config::inipath = inidirectory;
         Zweistein::Config::inipath.append(PROJECT_NAME + ".json");
@@ -112,6 +113,7 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
             outfile << ss_1.str();
             outfile.close();
            // boost::property_tree::write_json(Zweistein::Config::inipath.string(), Mesytec::Config::root);
+            if (!configok) LOG_ERROR << "Please edit to fix configuration error : " << fp << std::endl;
         }
         catch (std::exception& e) { // exception expected, //std::cout << boost::diagnostic_information(e); 
             LOG_ERROR << e.what() << " for writing."<<std::endl;
@@ -245,6 +247,7 @@ struct NeutronMeasurement {
         {
 
             Entangle::Init(loghandle);
+            histograms = std::vector<Histogram>(2);
             ptrmsmtsystem1->initatomicortime_point();
             worker_threads.create_thread([this] {startMonitor(ptrmsmtsystem1, ptrStartParameters); });
             LOG_DEBUG << "NeutronMeasurement(" << loghandle << ")" << std::endl;
@@ -307,8 +310,8 @@ struct NeutronMeasurement {
             unsigned short tmp = ptrmsmtsystem1->data.last_deviceStatusdeviceId;
             auto status = Mcpd8::DataPacket::getStatus(tmp);
             if (status & Mcpd8::Status::DAQ_Running) {
-              //  LOG_WARNING << "skipped ," << status << std::endl;
-              //  return;
+                LOG_WARNING << "skipped ," << status << std::endl;
+                return;
 
             }
             

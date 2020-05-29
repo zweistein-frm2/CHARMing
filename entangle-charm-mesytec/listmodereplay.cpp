@@ -52,7 +52,7 @@ extern const char* GIT_BRANCH;
 extern const char* GIT_DATE;
 
 Zweistein::Lock histogramsLock;
-std::vector<Histogram> histograms = std::vector<Histogram>(2);
+std::vector<Histogram> histograms;
 
 boost::asio::io_service io_service;
 
@@ -235,6 +235,7 @@ struct ReplayList {
         {
 
             Entangle::Init(loghandle);
+            histograms = std::vector<Histogram>(2);
             ptrmsmtsystem1->initatomicortime_point();
             worker_threads.create_thread([this] {startMonitor(ptrmsmtsystem1, ptrStartParameters); });
             LOG_DEBUG << "ReplayList(" << loghandle << ")" << std::endl;

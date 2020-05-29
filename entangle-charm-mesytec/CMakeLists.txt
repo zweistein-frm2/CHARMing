@@ -163,7 +163,13 @@ if(ENTANGLE_ROOT )
    ${CMAKE_SOURCE_DIR}/test.py
    DESTINATION ${ENTANGLE_ROOT}/entangle/device/charm
  )
-
+ if(UNIX)
+ install(
+  FILES
+   ${CMAKE_SOURCE_DIR}/privileged.sh
+    DESTINATION ${ENTANGLE_ROOT}
+ )
+ endif()
  if(WIN32)
    if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
      set(WIN32LIB_SUFFIX d)

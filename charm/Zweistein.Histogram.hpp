@@ -103,7 +103,7 @@ namespace Zweistein {
                 rsize = (int) roidata.size();
             }
 
-            LOG_INFO << "getRoi(" << index << ")" << std::endl;
+            //LOG_INFO << "getRoi(" << index << ")" << std::endl;
           
             if (rsize == index) {
                 LOG_DEBUG << "roidata.size()="<<rsize <<", index does not exist, create new : "  << std::endl;
@@ -125,7 +125,7 @@ namespace Zweistein {
                 Zweistein::ReadLock r_lock(histogramsLock);
                 tmp= _getRoi(index);
             }
-            LOG_INFO << tmp << std::endl;
+           // LOG_INFO << tmp << std::endl;
             return tmp;
         }
 
@@ -149,7 +149,7 @@ namespace Zweistein {
             ssroi << maxX << " " << bottom << ",";
             ssroi << left << " " << bottom << "),())";
             std::string roi = ssroi.str();
-            LOG_INFO << __FILE__ << " : " << __LINE__ << " "<<roi << std::endl;
+            //LOG_INFO << __FILE__ << " : " << __LINE__ << " "<<roi << std::endl;
             return roi;
            
         }
@@ -234,7 +234,7 @@ namespace Zweistein {
            
            boost::python::list l;
            
-           for (auto & r : roidata) {
+           for (auto & r : rdc) {
                std::stringstream ss_wkt;
                ss_wkt << boost::geometry::wkt(r.roi);
                auto t=boost::python::make_tuple(ss_wkt.str(),r.count);
@@ -246,8 +246,8 @@ namespace Zweistein {
         boost::python::tuple getSize() {
            
             
-            int width = roidata[0].box.max_corner().get<0>() - roidata[0].box.min_corner().get<0>();
-            int height = roidata[0].box.max_corner().get<1>() - roidata[0].box.min_corner().get<1>();
+            int width = 0;// = roidata[0].box.max_corner().get<0>() - roidata[0].box.min_corner().get<0>();
+            int height = 0;// roidata[0].box.max_corner().get<1>() - roidata[0].box.min_corner().get<1>();
             {
                
                 Zweistein::ReadLock r_lock(histogramsLock);

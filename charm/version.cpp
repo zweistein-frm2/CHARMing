@@ -1,4 +1,4 @@
-const char* GIT_REV="7dbc6f8";
+const char* GIT_REV="a8b3df3";
 const char* GIT_TAG="";
 const char* GIT_BRANCH="master";
-const char* GIT_DATE="2020-05-24 01:25:35 +0200";
+const char* GIT_DATE="2020-05-28 19:04:18 +0200";
