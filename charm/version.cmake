@@ -10,7 +10,8 @@ if ("${GIT_REV}" STREQUAL "")
     set(GIT_REV "")
     set(GIT_DIFF "")
     set(GIT_TAG "")
-    set(GIT_COMMIT_TAG "")
+    set(GIT_LATEST_TAG "")
+    set(GIT_NUMBER_OF_COMMITS "")
     set(GIT_BRANCH "")
     set(GIT_DATE "")
 else()
@@ -27,20 +28,43 @@ else()
          WORKING_DIRECTORY ${repository}
         OUTPUT_VARIABLE GIT_BRANCH)
     execute_process(
+        COMMAND git describe --abbrev=0 --tags
+        WORKING_DIRECTORY ${repository}
+        OUTPUT_VARIABLE GIT_LATEST_TAG)
+
+    execute_process(
+        COMMAND git rev-list ${GIT_LATEST_TAG}..HEAD --count   
+        WORKING_DIRECTORY ${repository}
+        OUTPUT_VARIABLE GIT_NUMBER_OF_COMMITS_SINCE)
+
+    execute_process(
         COMMAND git show -s --format=%cd --date=format:%Y-%m-%dT%H_%M%z
          WORKING_DIRECTORY ${repository}
         OUTPUT_VARIABLE GIT_DATE)
+
+    if ("${GIT_LATEST_TAG}" STREQUAL "")
+     set(GIT_LATEST_TAG 0)
+      execute_process(
+        COMMAND git rev-list  --count master   
+        WORKING_DIRECTORY ${repository}
+        OUTPUT_VARIABLE GIT_NUMBER_OF_COMMITS_SINCE)
+
+    endif()
 
     string(STRIP "${GIT_REV}" GIT_REV)
     string(SUBSTRING "${GIT_REV}" 1 7 GIT_REV)
     string(STRIP "${GIT_DIFF}" GIT_DIFF)
     string(STRIP "${GIT_TAG}" GIT_TAG)
+     string(STRIP "${GIT_LATEST_TAG}" GIT_LATEST_TAG)
+      string(STRIP "${GIT_NUMBER_OF_COMMITS_SINCE}" GIT_NUMBER_OF_COMMITS_SINCE)
     string(STRIP "${GIT_BRANCH}" GIT_BRANCH)
     string(STRIP "${GIT_DATE}" GIT_DATE)
 endif()
 
 set(VERSION "const char* GIT_REV=\"${GIT_REV}${GIT_DIFF}\";
 const char* GIT_TAG=\"${GIT_TAG}\";
+const char* GIT_LATEST_TAG=\"${GIT_LATEST_TAG}\";
+const char* GIT_NUMBER_OF_COMMITS_SINCE=\"${GIT_NUMBER_OF_COMMITS_SINCE}\";
 const char* GIT_BRANCH=\"${GIT_BRANCH}\";
 const char* GIT_DATE=\"${GIT_DATE}\";")
 
