@@ -149,7 +149,7 @@
       "name": "172_25_2_137_pi3",
       "generator": "Ninja",
       "configurationType": "Release",
-      "cmakeExecutable": "/opt/cmake-3.14.7/bin/cmake",
+      "cmakeExecutable": "/snap/cmake/current/bin/cmake",
       "remoteCopySourcesExclusionList": [ ".vs", ".git", "out" ],
       "buildCommandArgs": "",
       "ctestCommandArgs": "",

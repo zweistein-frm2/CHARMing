@@ -23,6 +23,8 @@
 #include <opencv2/core/mat.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
+#define CVUI_IMPLEMENTATION
+#include "cvui.h"
 #include <boost/asio.hpp>
 #include "Zweistein.Histogram.hpp"
 #include "Zweistein.Binning.ApplyOcc.hpp"
@@ -77,38 +79,68 @@ namespace Zweistein {
 			if (NULL == getenv("DISPLAY")) bshow = false;
 #endif
 			bool bbinningwindow = false;
+			std::vector<cv::String> windows = std::vector<cv::String>();
 			if (bshow) {
 				using namespace magic_enum::bitwise_operators; // out-of-the-box bitwise operators for enums.
-				cv::namedWindow("histogram_raw");
+				std::string title = "histogram_raw";
+				windows.push_back(title);
+				cv::namedWindow(title);
 				histogram_setup_status hss = Zweistein::setup_status;
 				if (magic_enum::enum_integer(hss & histogram_setup_status::has_binning)) {
-					cv::namedWindow("histogram_binned");
+					std::string title2 = "histogram_binned";
+					cv::namedWindow(title2);
 					bbinningwindow = true;
 				}
+				cvui::init(windows.data(), windows.size());
+
 			}
 
 			cv::Mat rawimage = cv::Mat_<unsigned char>::zeros(1,1);
 			cv::Mat binnedimage = cv::Mat_<unsigned char>::zeros(1, 1);
 			cv::Mat colormappedimage;
 			cv::Mat colormappedbinnedimage;
+			bool use_clahe_raw = false;
+			bool use_clahe = false;
 			sig.connect(imageUpdate);
 			do {
 				cv::waitKey(500);
 
 				sig(rawimage,binnedimage);
 				if (!rawimage.empty() && rawimage.rows>1) {
-					cv::applyColorMap(rawimage, colormappedimage, cv::COLORMAP_JET);
-					if (bshow) {
+					
+					if (bshow ) {
+						if (use_clahe_raw) {
+							cv::Ptr<cv::CLAHE> clahe=cv::createCLAHE();
+							clahe->setClipLimit(2.0);
+							cv::Mat dst;
+							clahe->apply(rawimage, dst);
+							rawimage = dst;
+
+						}
+						cv::applyColorMap(rawimage, colormappedimage, cv::COLORMAP_JET);
+						cvui::checkbox(colormappedimage, 0, 0, "CLAHE", &use_clahe_raw);
+						cvui::update();
 						cv::imshow("histogram_raw", colormappedimage);
 					}
 				}
 				if (!binnedimage.empty() &&binnedimage.rows>1) {
-					cv::applyColorMap(binnedimage, colormappedbinnedimage, cv::COLORMAP_JET);
+					
 					if (bshow) {
 						if(!bbinningwindow) {
 							cv::namedWindow("histogram_binned");
 								bbinningwindow = true;
 						}
+						if (use_clahe) {
+							cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE();
+							clahe->setClipLimit(2.0);
+							cv::Mat dst;
+							clahe->apply(binnedimage, dst);
+							binnedimage = dst;
+
+						}
+						cv::applyColorMap(binnedimage, colormappedbinnedimage, cv::COLORMAP_JET);
+						cvui::checkbox(colormappedbinnedimage,0,0, "CLAHE", &use_clahe);
+						cvui::update();
 						cv::imshow("histogram_binned", colormappedbinnedimage);
 					}
 				}

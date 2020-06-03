@@ -9,6 +9,12 @@ endif()
 set(repository ${Charm_DIR})
 message(****"repository=" ${repository})
 
+include(version.cmake)
+message(---------> git Date : ${GIT_DATE})
+set(CMAKE_PROJECT_VERSION_MAJOR ${GIT_BRANCH})
+set(CMAKE_PROJECT_VERSION_MINOR ${GIT_TAG}${GIT_REV})
+set(CMAKE_PROJECT_VERSION_PATCH ${GIT_DATE})
+
 
  add_compile_definitions(SIMPLE_LOGGER)
 if(MSVC)
@@ -51,6 +57,7 @@ message(**CMAKE_SOURCE_DIR=${CMAKE_SOURCE_DIR})
 include_directories(${Boost_INCLUDE_DIR} ${OpenCV_INCLUDE_DIRS})
 include_directories(${ASIO_EXTENSIONS_PATH})
 include_directories(./)
+
 include_directories(${SIGSLOT_PATH})
 #include_directories(${_Python_INCLUDE_DIR})
 # Add source to this project's executable.
@@ -71,17 +78,18 @@ add_custom_command(
             )
 
 
+
+
+if(UNIX AND NOT APPLE)
 set(CPACK_GENERATOR "DEB")
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Andreas Langhoff") # required
+set(CPACK_PACKAGE_VERSION_MAJOR ${GIT_BRANCH})
+set(CPACK_PACKAGE_VERSION_MINOR ${GIT_TAG}${GIT_REV})
+set(CPACK_PACKAGE_VERSION_PATCH ${GIT_DATE})
+
 SET (CPACK_DEBIAN_PACKAGE_DEPENDS "libopencv-dev")
-set(CPACK_PACKAGE_VERSION_MAJOR "1")
-set(CPACK_PACKAGE_VERSION_MINOR "0")
-set(CPACK_PACKAGE_VERSION_PATCH "0")
-set(CPACK_PACKAGE_FILE_NAME ${PROJECT_NAME}-${CPACK_PACKAGE_VERSION_MAJOR}-${VCPKG_TARGET_TRIPLET})
-
 include(CPack)
-
-
+endif()
 
 
 if(NOT INSTALL_DIR)

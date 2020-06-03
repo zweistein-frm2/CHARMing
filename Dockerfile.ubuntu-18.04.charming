@@ -40,10 +40,8 @@ RUN cd /vcpkg && ./vcpkg install libuv
 ARG boostversion=1_73_0
 RUN cd /opt && wget https://dl.bintray.com/boostorg/release/$(echo ${boostversion} | sed "s/_/./g")/source/boost_${boostversion}.tar.bz2 && tar --bzip2 -xf ./boost_${boostversion}.tar.bz2
 RUN cd /opt && rm  ./boost_${boostversion}.tar.bz2
-RUN cd /opt/boost_${boostversion} && ./bootstrap.sh --prefix=/usr/ --with-python=python3
-RUN cd /opt/boost_${boostversion} && ./b2 cxxflags=-fPIC
-RUN cd /opt/boost_${boostversion} && ./b2 install
-
+RUN cd /opt/boost_${boostversion} && ./bootstrap.sh  --prefix=/usr/local --with-python=python3 --without-icu
+RUN cd /opt/boost_${boostversion} && ./b2 cxxflags="-std=c++17" --disable-icu boost.locale.icu=off boost.locale.iconv=on install
 
 ENV TANGO_HOST=ictrlfs.ictrl.frm2:10000
 RUN echo "deb [trusted=yes] https://forge.frm2.tum.de/repos bionic/" >>/etc/apt/sources.list.d/mlz.list

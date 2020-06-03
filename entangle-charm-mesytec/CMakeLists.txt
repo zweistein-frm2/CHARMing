@@ -163,7 +163,7 @@ if(ENTANGLE_ROOT )
    ${CMAKE_SOURCE_DIR}/test.py
    DESTINATION ${ENTANGLE_ROOT}/entangle/device/charm
  )
- if(UNIX)
+ if(UNIX AND NOT APPLE)
  install(
   FILES
    ${CMAKE_SOURCE_DIR}/privileged.sh
