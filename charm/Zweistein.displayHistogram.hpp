@@ -85,13 +85,17 @@ namespace Zweistein {
 				std::string title = "histogram_raw";
 				windows.push_back(title);
 				cv::namedWindow(title);
+				
 				histogram_setup_status hss = Zweistein::setup_status;
 				if (magic_enum::enum_integer(hss & histogram_setup_status::has_binning)) {
 					std::string title2 = "histogram_binned";
+					windows.push_back(title2);
 					cv::namedWindow(title2);
+					
 					bbinningwindow = true;
 				}
-				cvui::init(windows.data(), windows.size());
+				cvui::init(windows[0]);
+				if(bbinningwindow) cvui::watch(windows[1]);
 
 			}
 
@@ -107,7 +111,7 @@ namespace Zweistein {
 
 				sig(rawimage,binnedimage);
 				if (!rawimage.empty() && rawimage.rows>1) {
-					
+					cvui::context(windows[0]);
 					if (bshow ) {
 						if (use_clahe_raw) {
 							cv::Ptr<cv::CLAHE> clahe=cv::createCLAHE();
@@ -117,17 +121,19 @@ namespace Zweistein {
 							rawimage = dst;
 
 						}
+
 						cv::applyColorMap(rawimage, colormappedimage, cv::COLORMAP_JET);
 						cvui::checkbox(colormappedimage, 0, 0, "CLAHE", &use_clahe_raw);
-						cvui::update();
-						cv::imshow("histogram_raw", colormappedimage);
+						cvui::update(windows[0]);
+						cv::imshow(windows[0], colormappedimage);
 					}
 				}
 				if (!binnedimage.empty() &&binnedimage.rows>1) {
-					
+					cvui::context(windows[1]);
 					if (bshow) {
 						if(!bbinningwindow) {
-							cv::namedWindow("histogram_binned");
+							cv::namedWindow(windows[1]);
+							cvui::watch(windows[1]);
 								bbinningwindow = true;
 						}
 						if (use_clahe) {
@@ -140,10 +146,11 @@ namespace Zweistein {
 						}
 						cv::applyColorMap(binnedimage, colormappedbinnedimage, cv::COLORMAP_JET);
 						cvui::checkbox(colormappedbinnedimage,0,0, "CLAHE", &use_clahe);
-						cvui::update();
-						cv::imshow("histogram_binned", colormappedbinnedimage);
+						cvui::update(windows[1]);
+						cv::imshow(windows[1], colormappedbinnedimage);
 					}
 				}
+				
 
 
 			} while (!io_service.stopped());

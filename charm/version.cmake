@@ -1,3 +1,9 @@
+
+if ("${repository}" STREQUAL "")
+set(repository ${CMAKE_CURRENT_SOURCE_DIR})
+endif()
+message(****"version.cmake repository=" ${repository})
+
 execute_process(COMMAND git log --pretty=format:'%h' -n 1
                 OUTPUT_VARIABLE GIT_REV
                 WORKING_DIRECTORY ${repository}
@@ -11,7 +17,7 @@ if ("${GIT_REV}" STREQUAL "")
     set(GIT_DIFF "")
     set(GIT_TAG "")
     set(GIT_LATEST_TAG "")
-    set(GIT_NUMBER_OF_COMMITS "")
+    set(GIT_NUMBER_OF_COMMITS_SINCE "")
     set(GIT_BRANCH "")
     set(GIT_DATE "")
 else()
@@ -31,16 +37,30 @@ else()
         COMMAND git describe --abbrev=0 --tags
         WORKING_DIRECTORY ${repository}
         OUTPUT_VARIABLE GIT_LATEST_TAG)
-
+        
+    string(STRIP "${GIT_LATEST_TAG}" GIT_LATEST_TAG)
+      
     execute_process(
-        COMMAND git rev-list ${GIT_LATEST_TAG}..HEAD --count   
+        COMMAND git rev-list --tags ${GIT_LATEST_TAG}..HEAD --count
         WORKING_DIRECTORY ${repository}
         OUTPUT_VARIABLE GIT_NUMBER_OF_COMMITS_SINCE)
 
+
+    execute_process(
+        COMMAND git diff HEAD
+         WORKING_DIRECTORY ${repository}
+        OUTPUT_VARIABLE GIT_DIFF_HEAD)
+
+
+if ("${GIT_DIFF_HEAD}" STREQUAL "")
     execute_process(
         COMMAND git show -s --format=%cd --date=format:%Y-%m-%dT%H_%M%z
          WORKING_DIRECTORY ${repository}
         OUTPUT_VARIABLE GIT_DATE)
+else()
+    string(TIMESTAMP CURRENT_TIME "%Y-%m-%dT%H_%M")
+    set(GIT_DATE Uncommmitted-${CURRENT_TIME})
+endif()
 
     if ("${GIT_LATEST_TAG}" STREQUAL "")
      set(GIT_LATEST_TAG 0)
@@ -55,7 +75,7 @@ else()
     string(SUBSTRING "${GIT_REV}" 1 7 GIT_REV)
     string(STRIP "${GIT_DIFF}" GIT_DIFF)
     string(STRIP "${GIT_TAG}" GIT_TAG)
-     string(STRIP "${GIT_LATEST_TAG}" GIT_LATEST_TAG)
+    
       string(STRIP "${GIT_NUMBER_OF_COMMITS_SINCE}" GIT_NUMBER_OF_COMMITS_SINCE)
     string(STRIP "${GIT_BRANCH}" GIT_BRANCH)
     string(STRIP "${GIT_DATE}" GIT_DATE)
@@ -77,5 +97,5 @@ endif()
 if (NOT "${VERSION}" STREQUAL "${VERSION_}")
     file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/version.cpp "${VERSION}")
 endif()
-message(${CMAKE_CURRENT_BINARY_DIR}/version.cpp)
+message(version.cmake: written:  ${CMAKE_CURRENT_BINARY_DIR}/version.cpp)
 message(${VERSION})

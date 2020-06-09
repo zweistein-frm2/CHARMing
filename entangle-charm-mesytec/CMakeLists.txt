@@ -83,12 +83,6 @@ message(****resolves_to***************** ${${Boost_numpy_library}}**************
 
 add_library(${PROJECT_NAME} SHARED )
 
-#target_compile_options(${PROJECT_NAME} PRIVATE
-#    $<$<CXX_COMPILER_ID:GNU>:-fPIC>
-# )
-
- target_link_options(${PROJECT_NAME}   PRIVATE $<$<CXX_COMPILER_ID:GNU>:$<$<CONFIG:RELEASE>:-static-libstdc++> $<$<CONFIG:DEBUG>:-static-libstdc++> > PRIVATE $<$<CXX_COMPILER_ID:GNU>:-static-libgcc> )
-
 target_link_libraries(${PROJECT_NAME} PRIVATE magic_enum::magic_enum ${Boost_LIBRARIES} ${OpenCV_LIBS}  unofficial::libuv::libuv   )
 target_link_libraries(${PROJECT_NAME} PRIVATE ${Python_LIBRARY_RELEASE} ${${Boost_python_library}} ${${Boost_numpy_library}})
 

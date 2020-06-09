@@ -157,7 +157,7 @@ namespace Zweistein {
         void setRoi(std::string wkt, int index) {
            
             Zweistein::WriteLock w_lock(histogramsLock);
-            LOG_INFO << "setRoi(" << wkt << ", " << index << ")" << std::endl;
+            //LOG_INFO << "setRoi(" << wkt << ", " << index << ")" << std::endl;
             if (roidata.size() - 1 < index) {
                 LOG_ERROR << "index out of range, max=" << roidata.size() - 1 << std::endl;
                 return;
@@ -173,7 +173,7 @@ namespace Zweistein {
 
         void _setRoi(std::string wkt,int index) {
             
-            //LOG_INFO << "_setRoi(" << wkt <<", "<<index <<")" << std::endl;
+            LOG_INFO << "_setRoi(" << wkt <<", "<<index <<")" << std::endl;
             int width = 1;
             int height = 1; 
                                  
@@ -219,7 +219,7 @@ namespace Zweistein {
 #ifdef BOOST_PYTHON_MODULE
         boost::python::tuple update(cv::Mat mat) {
             using namespace magic_enum::bitwise_operators; // out-of-the-box bitwise operators for enums.
-            LOG_INFO << __FILE__ << " : " << __LINE__ << std::endl;
+        //    LOG_INFO << __FILE__ << " : " << __LINE__ << std::endl;
             std::vector<RoiData> rdc = std::vector<RoiData>();
             {
                 Zweistein::ReadLock r_lock(histogramsLock);

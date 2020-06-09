@@ -12,7 +12,6 @@ message(****"repository=" ${repository})
 include(version.cmake)
 message(---------> git Date : ${GIT_DATE})
 set(CMAKE_PROJECT_VERSION_MAJOR ${GIT_LATEST_TAG})
-#string(REGEX REPLACE "/[^0-9]/g" "${CMAKE_PROJECT_VERSION_MAJOR}" CMAKE_PROJECT_VERSION_MAJOR)
 set(CMAKE_PROJECT_VERSION_MINOR ${GIT_NUMBER_OF_COMMITS_SINCE})
 set(CMAKE_PROJECT_VERSION_PATCH ${GIT_REV}-${GIT_DATE})
 
@@ -65,7 +64,7 @@ include_directories(${SIGSLOT_PATH})
 add_executable (${PROJECT_NAME} "mesyDeviceCtrl.cpp" "Mesytec.Mcpd8.cpp" "Mcpd8.Parameters.cpp" "OptionPrinter.cpp" "CustomOptionDescription.cpp" "simpleLogger.cpp" "coloured_console_sink.cpp" "Zweistein.ping.cpp" ${repository}/version.cpp "Mcpd8.CmdPacket.cpp" "Mesyec.Mpsd8.cpp" "Mesytec.listmode.write.cpp" "Mesytec.listmode.cpp" "MesytecSystem.Data.cpp" "Zweistein.GetConfigDir.cpp" "Mesytec.config.cpp")
 
 target_compile_options(${PROJECT_NAME} PRIVATE  $<$<CXX_COMPILER_ID:GNU>: -Wno-error>)
-target_link_options(${PROJECT_NAME}   PRIVATE $<$<CXX_COMPILER_ID:GNU>:$<$<CONFIG:RELEASE>:-static-libstdc++> $<$<CONFIG:DEBUG>:-static-libstdc++> > PRIVATE $<$<CXX_COMPILER_ID:GNU>:-static-libgcc> )
+#target_link_options(${PROJECT_NAME}   PRIVATE $<$<CXX_COMPILER_ID:GNU>:$<$<CONFIG:RELEASE>:-static-libstdc++> $<$<CONFIG:DEBUG>:-static-libstdc++> > PRIVATE $<$<CXX_COMPILER_ID:GNU>:-static-libgcc> )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE  magic_enum::magic_enum ${Boost_LIBRARIES} ${OpenCV_LIBS}  unofficial::libuv::libuv )
 
@@ -73,7 +72,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE  magic_enum::magic_enum ${Boost_LI
 add_custom_command(
     OUTPUT ${repository}/version.cpp
            ${repository}/_version.cpp
-    COMMAND ${CMAKE_COMMAND} -P
+    COMMAND ${CMAKE_COMMAND} -P 
             ${repository}/version.cmake
             WORKING_DIRECTORY ${repository}
             )

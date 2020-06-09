@@ -42,8 +42,11 @@ using boost::asio::ip::udp;
 EXTERN_FUNCDECLTYPE boost::mutex coutGuard;
 EXTERN_FUNCDECLTYPE boost::thread_group worker_threads;
 
+
 extern const char* GIT_REV;
 extern const char* GIT_TAG;
+extern const char* GIT_LATEST_TAG;
+extern const char* GIT_NUMBER_OF_COMMITS_SINCE;
 extern const char* GIT_BRANCH;
 extern const char* GIT_DATE;
 
@@ -168,11 +171,7 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
         Zweistein::Averaging<double> avg(3);
         while (!io_service.stopped()) {
             boost::this_thread::sleep_for(boost::chrono::milliseconds(500));
-             //       if (PyErr_CheckSignals() == -1) {
-         //        io_service.stop();
-        //      }
-
-            
+                      
             boost::chrono::system_clock::time_point tps=ptrmsmtsystem1->started;
             boost::chrono::duration<double> secs = boost::chrono::system_clock::now() - tps;
             boost::chrono::duration<double> Maxsecs(ptrStartParameters->DurationSeconds);
@@ -245,9 +244,11 @@ struct NeutronMeasurement {
         NeutronMeasurement(long loghandle):ptrStartParameters(boost::shared_ptr < StartMsmtParameters>(new StartMsmtParameters())),
             ptrmsmtsystem1(boost::shared_ptr < Mesytec::MesytecSystem>(new Mesytec::MesytecSystem()))
         {
-
+            LOG_INFO << "Here 1" << std::endl;
             Entangle::Init(loghandle);
+            LOG_INFO << "Here 2" << std::endl;
             histograms = std::vector<Histogram>(2);
+            LOG_INFO << "Here 3" << std::endl;
             ptrmsmtsystem1->initatomicortime_point();
             worker_threads.create_thread([this] {startMonitor(ptrmsmtsystem1, ptrStartParameters); });
             LOG_DEBUG << "NeutronMeasurement(" << loghandle << ")" << std::endl;
@@ -302,7 +303,7 @@ struct NeutronMeasurement {
 
         std::string get_version() {
             std::stringstream ss;
-            ss <<PROJECT_NAME << " : BRANCH: " << GIT_BRANCH << " TAG:" << GIT_TAG << " REV: " << GIT_REV << " " << GIT_DATE;
+            ss << PROJECT_NAME << " : BRANCH: " << GIT_BRANCH << "LATEST TAG:" << GIT_LATEST_TAG << "commits since:" << GIT_NUMBER_OF_COMMITS_SINCE << " " << GIT_DATE << std::endl;
             return ss.str();
         }
 

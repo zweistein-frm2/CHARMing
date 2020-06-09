@@ -51,6 +51,8 @@ EXTERN_FUNCDECLTYPE boost::thread_group worker_threads;
 
 extern const char* GIT_REV;
 extern const char* GIT_TAG ;
+extern const char* GIT_LATEST_TAG;
+extern const char* GIT_NUMBER_OF_COMMITS_SINCE;
 extern const char* GIT_BRANCH;
 extern const char* GIT_DATE;
 
@@ -90,7 +92,7 @@ int main(int argc, char* argv[])
 	
 	try
 	{
-		std::cout << PROJECT_NAME << " : BRANCH: " << GIT_BRANCH << " TAG:" << GIT_TAG << " REV: " << GIT_REV <<" "<<GIT_DATE<< std::endl;
+		std::cout << PROJECT_NAME << " : BRANCH: " << GIT_BRANCH << "LATEST TAG:" << GIT_LATEST_TAG << "commits since:"<< GIT_NUMBER_OF_COMMITS_SINCE<<" "<<GIT_DATE<< std::endl;
 		if (argc == 1) {
 			std::cout << "--help for usage info" << std::endl;
 		}

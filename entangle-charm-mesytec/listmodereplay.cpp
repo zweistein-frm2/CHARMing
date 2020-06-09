@@ -48,6 +48,8 @@ EXTERN_FUNCDECLTYPE boost::thread_group worker_threads;
 
 extern const char* GIT_REV;
 extern const char* GIT_TAG;
+extern const char* GIT_LATEST_TAG;
+extern const char* GIT_NUMBER_OF_COMMITS_SINCE;
 extern const char* GIT_BRANCH;
 extern const char* GIT_DATE;
 
@@ -359,8 +361,8 @@ struct ReplayList {
 
         std::string get_version() {
             std::stringstream ss;
-            ss << PROJECT_NAME << " : BRANCH: " << GIT_BRANCH << " TAG:" << GIT_TAG << " REV: " << GIT_REV << " " << GIT_DATE;
-            return ss.str();
+            ss << PROJECT_NAME << " : BRANCH: " << GIT_BRANCH << "LATEST TAG:" << GIT_LATEST_TAG << "commits since:" << GIT_NUMBER_OF_COMMITS_SINCE << " " << GIT_DATE << std::endl;
+           return ss.str();
         }
         void start() {
             // we have to start from beginning of playlist
