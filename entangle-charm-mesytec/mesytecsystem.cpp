@@ -303,7 +303,7 @@ struct NeutronMeasurement {
 
         std::string get_version() {
             std::stringstream ss;
-            ss << PROJECT_NAME << " : BRANCH: " << GIT_BRANCH << "LATEST TAG:" << GIT_LATEST_TAG << "commits since:" << GIT_NUMBER_OF_COMMITS_SINCE << " " << GIT_DATE << std::endl;
+            ss << PROJECT_NAME << " : BRANCH: " << GIT_BRANCH << " LATEST TAG:" << GIT_LATEST_TAG << " commits since:" << GIT_NUMBER_OF_COMMITS_SINCE << " " << GIT_DATE << std::endl;
             return ss.str();
         }
 

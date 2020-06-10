@@ -92,7 +92,7 @@ int main(int argc, char* argv[])
 	
 	try
 	{
-		std::cout << PROJECT_NAME << " : BRANCH: " << GIT_BRANCH << "LATEST TAG:" << GIT_LATEST_TAG << "commits since:"<< GIT_NUMBER_OF_COMMITS_SINCE<<" "<<GIT_DATE<< std::endl;
+		std::cout << PROJECT_NAME << " : BRANCH: " << GIT_BRANCH << " LATEST TAG:" << GIT_LATEST_TAG << " commits since:"<< GIT_NUMBER_OF_COMMITS_SINCE<<" "<<GIT_DATE<< std::endl;
 		if (argc == 1) {
 			std::cout << "--help for usage info" << std::endl;
 		}

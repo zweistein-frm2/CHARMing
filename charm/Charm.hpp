@@ -18,6 +18,21 @@
 
 namespace Charm {
 
+	// must be < max udp transmitt size
+	class alignas(2) DataPacket
+	{
+	public:
+		// we define all struct elements as short, so that endianness can be converted easier
+		unsigned short Length;	//!< length of the buffer in words
+		unsigned short Type;	//!< the buffer type
+		unsigned short headerLength;	//!< the length of the header in words
+		unsigned short Number;	//!< number of the packet 
+		unsigned short runID; 		//!< the run ID
+		unsigned short  deviceStatusdeviceId;	//!< the device state
+		
+
+	};
+
 	class alignas(2) CharmEvent {
 		unsigned short data[3];
 	public:
