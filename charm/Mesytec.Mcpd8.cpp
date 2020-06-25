@@ -37,6 +37,7 @@
 #include "Zweistein.Logger.hpp"
 #include "Zweistein.ping.hpp"
 #include "Mesytec.Mcpd8.hpp"
+#include "CounterMonitor.hpp"
 
 using boost::asio::ip::udp;
 
@@ -810,6 +811,7 @@ namespace Mesytec {
 							if (response.cmd == Mcpd8::Cmd::RESET || response.cmd == Mcpd8::Cmd::START) {
 								kvp.second.starttime=Mcpd8::DataPacket::timeStamp(&response.time[0]);
 								data.evntcount = 0;
+								for (int i = 0; i < COUNTER_MONITOR_COUNT;i++) CounterMonitor[i]= 0;
 								bool ok = data.evntqueue.push(Zweistein::Event::Reset());
 								if (!ok) LOG_ERROR << " cannot push Zweistein::Event::Reset()" << std::endl;
 								// push reset_event?
@@ -895,6 +897,9 @@ namespace Mesytec {
 							params.lastmissed_count = 0;
 						}
 					}
+				}
+				for (int c = 0; c < COUNTER_MONITOR_COUNT; c++) {
+					CounterMonitor[c] += (long long) datapacket.param[c][0] + (long long) datapacket.param[c][1] << 16 + (long long)datapacket.param[c][2] << 32;
 				}
 				params.lastbufnum = datapacket.Number;
 				for (int i = 0; i < numevents; i++) {

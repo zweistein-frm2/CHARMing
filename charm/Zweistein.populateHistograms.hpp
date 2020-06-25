@@ -31,7 +31,6 @@
 #include <cctype>
 #include <sstream>
 #include "Zweistein.GetConfigDir.hpp"
-#include <magic_enum.hpp>
 
 namespace Zweistein {
 	

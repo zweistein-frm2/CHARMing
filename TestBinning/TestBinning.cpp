@@ -39,7 +39,7 @@ int main()
         std::cout << boost::diagnostic_information(e);
     }
 
-    array_type::element* itr = Zweistein::Binning::BINNING.data();
+    array_type::element* itr =(unsigned short *) Zweistein::Binning::BINNING.data();
     auto s = Zweistein::Binning::BINNING.shape();
     unsigned int max_value = 0;
     for (int i = 0; i < s[0] * s[1]; i++) {

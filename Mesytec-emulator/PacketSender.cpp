@@ -6,7 +6,6 @@
  ***************************************************************************/
 #include <boost/locale.hpp>
 #include <boost/array.hpp>
-#define BOOST_CHRONO_VERSION 2
 #include <boost/chrono.hpp>
 #include <boost/asio.hpp>
 #include <boost/filesystem.hpp>
@@ -82,7 +81,7 @@ void setRate(long requested) {
 	std::string df = "MPSD8";
 	if(dataformat == Mcpd8::EventDataFormat::Mdll) df="MDLL";
 
-	std::cout << "Hello from Charm PacketSender, requested "<<df<<"  : " << requested << " Events/s" << std::endl;
+	std::cout << "Hello from Charm-mesytec emulator, requested "<<df<<"  : " << requested << " Events/s" << std::endl;
 	if (requested < 1) {
 		std::cout << "OUT OF RANGE: setting new rate to 1 Event/second" << std::endl;
 		requested = 1;

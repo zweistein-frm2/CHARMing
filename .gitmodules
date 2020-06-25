@@ -1,11 +1,11 @@
 [submodule "sigslot"]
-	path = sigslot
+	path = charm/sigslot
 	url = https://github.com/palacaze/sigslot.git
 [submodule "pyboostcvconverter"]
-	path = pyboostcvconverter
+	path = entangle-charm-mesytec/pyboostcvconverter
 	url = https://github.com/Algomorph/pyboostcvconverter.git
 [submodule "asio-extensions"]
-	path = asio-extensions
+	path = charm/asio-extensions
 	url = https://github.com/timniederhausen/asio-extensions.git
 [submodule "libdl"]
 	path = charm/libdl
@@ -14,5 +14,5 @@
 	path = libuv
 	url = https://github.com/libuv/libuv.git
 [submodule "magic_enum"]
-	path = magic_enum
+	path = charm/magic_enum
 	url = https://github.com/Neargye/magic_enum.git

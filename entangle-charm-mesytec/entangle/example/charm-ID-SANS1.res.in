@@ -10,3 +10,19 @@ type = "charm.charm.Settings"
 type = "charm.charm.Histogram"
 ["test/@ID@-SANS1/Simulator"]
 type = "charm.charm.Simulator"
+["test/@ID@-SANS1/Monitor0"]
+type = "charm.charm.Monitor0"
+absmin = 0
+absmax = 0x7FFFFFFF
+["test/@ID@-SANS1/Monitor1"]
+type = "charm.charm.Monitor1"
+absmin = 0
+absmax = 0x7FFFFFFF
+["test/@ID@-SANS1/Monitor2"]
+type = "charm.charm.Monitor2"
+absmin = 0
+absmax = 0x7FFFFFFF
+["test/@ID@-SANS1/Monitor3"]
+type = "charm.charm.Monitor3"
+absmin = 0
+absmax = 0x7FFFFFFF

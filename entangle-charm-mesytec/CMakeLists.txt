@@ -48,26 +48,26 @@ endif()
 message("ENTANGLE_ROOT=" ${ENTANGLE_ROOT} )
 message("ENTANGLE_RES=" ${ENTANGLE_RES} )
 
-
-
 find_package(Boost 1.71 REQUIRED COMPONENTS python${Python_VERSION_MAJOR}${Python_VERSION_MINOR} numpy${Python_VERSION_MAJOR}${Python_VERSION_MINOR} filesystem chrono thread iostreams) # header only libraries must not be added here
 find_path(Boost_INCLUDE_DIR boost)
 
 message(********************Using Boost :${Boost_INCLUDE_DIR}  ******************************)
 find_package(OpenCV REQUIRED)
-find_package(unofficial-libuv CONFIG REQUIRED)
+
+
+#find_package(unofficial-libuv CONFIG REQUIRED PATHS ${Charm_DIR}/libuv )
 
 #set (magic_enum_DIR ${_VCPKG_ROOT_DIR}/installed/${VCPKG_TARGET_TRIPLET}/share/magic_enum)
 #message("**magic_enum_DIR=" ${magic_enum_DIR}   ************)
-find_package(magic_enum CONFIG REQUIRED )
+#find_package(magic_enum CONFIG REQUIRED )
 
+include_directories(${libuv_INCLUDE_DIR})
 include_directories(${Boost_INCLUDE_DIR})
-include_directories(${ASIO_EXTENSIONS_PATH})
-include_directories(${SIGSLOT_PATH})
 include_directories(${_Python_INCLUDE_DIR})
 include_directories(${Charm_DIR})
+include_directories(${Charm_DIR}/asio-extensions/include)
 include_directories(${PacketSender_DIR})
-include_directories(${pyboostcvconverter_DIR}/include)
+include_directories(pyboostcvconverter/include)
 # Add source to this project's executable.
 include_directories(${_Python_NumPy_INCLUDE_DIR})
 set(Boost_python_library Boost_PYTHON${Python_VERSION_MAJOR}${Python_VERSION_MINOR}_LIBRARY_RELEASE )
@@ -83,7 +83,7 @@ message(****resolves_to***************** ${${Boost_numpy_library}}**************
 
 add_library(${PROJECT_NAME} SHARED )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE magic_enum::magic_enum ${Boost_LIBRARIES} ${OpenCV_LIBS}  unofficial::libuv::libuv   )
+target_link_libraries(${PROJECT_NAME} PRIVATE ${Boost_LIBRARIES} ${OpenCV_LIBS} uv_a  )
 target_link_libraries(${PROJECT_NAME} PRIVATE ${Python_LIBRARY_RELEASE} ${${Boost_python_library}} ${${Boost_numpy_library}})
 
 if(MSVC)
@@ -104,16 +104,16 @@ add_custom_command(
 add_custom_command(
         TARGET ${PROJECT_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
-              ${CMAKE_SOURCE_DIR}/charm-replay.py
+              ${CMAKE_CURRENT_SOURCE_DIR}/charm-replay.py
               ${CMAKE_CURRENT_BINARY_DIR}/charm-replay.py
          COMMAND ${CMAKE_COMMAND} -E copy
-              ${CMAKE_SOURCE_DIR}/test-replay.py
+              ${CMAKE_CURRENT_SOURCE_DIR}/test-replay.py
               ${CMAKE_CURRENT_BINARY_DIR}/test-replay.py
         COMMAND ${CMAKE_COMMAND} -E copy
-                ${CMAKE_SOURCE_DIR}/charm.py
+                ${CMAKE_CURRENT_SOURCE_DIR}/charm.py
                 ${CMAKE_CURRENT_BINARY_DIR}/charm.py
         COMMAND ${CMAKE_COMMAND} -E copy
-                ${CMAKE_SOURCE_DIR}/test.py
+                ${CMAKE_CURRENT_SOURCE_DIR}/test.py
                 ${CMAKE_CURRENT_BINARY_DIR}/test.py
                 
               )
@@ -121,9 +121,9 @@ add_custom_command(
 target_sources(${PROJECT_NAME}
 PRIVATE
 ${PROJECT_NAME}.cpp
-${pyboostcvconverter_DIR}/src/pyboost_cv2_converter.cpp
-${pyboostcvconverter_DIR}/src/pyboost_cv3_converter.cpp
-${pyboostcvconverter_DIR}/src/pyboost_cv4_converter.cpp
+pyboostcvconverter/src/pyboost_cv2_converter.cpp
+pyboostcvconverter/src/pyboost_cv3_converter.cpp
+pyboostcvconverter/src/pyboost_cv4_converter.cpp
 ${Charm_DIR}/Entangle.Logger.cpp
 ${Charm_DIR}/Zweistein.ping.cpp
 ${Charm_DIR}/Mesytec.Mcpd8.cpp
@@ -151,16 +151,16 @@ endforeach()
 if(ENTANGLE_ROOT )
  install(
   FILES
-   ${CMAKE_SOURCE_DIR}/charm-replay.py
-   ${CMAKE_SOURCE_DIR}/test-replay.py
-   ${CMAKE_SOURCE_DIR}/charm.py
-   ${CMAKE_SOURCE_DIR}/test.py
+   ${CMAKE_CURRENT_SOURCE_DIR}/charm-replay.py
+   ${CMAKE_CURRENT_SOURCE_DIR}/test-replay.py
+   ${CMAKE_CURRENT_SOURCE_DIR}/charm.py
+   ${CMAKE_CURRENT_SOURCE_DIR}/test.py
    DESTINATION ${ENTANGLE_ROOT}/entangle/device/charm
  )
  if(UNIX AND NOT APPLE)
  install(
   FILES
-   ${CMAKE_SOURCE_DIR}/privileged.sh
+   ${CMAKE_CURRENT_SOURCE_DIR}/privileged.sh
     DESTINATION ${ENTANGLE_ROOT}
  )
  endif()
@@ -178,7 +178,7 @@ if(ENTANGLE_ROOT )
     "${CMAKE_CURRENT_BINARY_DIR}/boost_numpy${Python_VERSION_MAJOR}${Python_VERSION_MINOR}-vc${MSVC_TOOLSET_VERSION}-mt-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
     "${CMAKE_CURRENT_BINARY_DIR}/boost_python${Python_VERSION_MAJOR}${Python_VERSION_MINOR}-vc${MSVC_TOOLSET_VERSION}-mt-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
     "${CMAKE_CURRENT_BINARY_DIR}/opencv_core${WIN32LIB_SUFFIX}.dll"
-    "${CMAKE_CURRENT_BINARY_DIR}/libuv.dll"
+    "${libuv_BINARY_DIR}/uv.dll"
     "${CMAKE_CURRENT_BINARY_DIR}/bz2${WIN32LIB_SUFFIX}.dll"
     "${CMAKE_CURRENT_BINARY_DIR}/lzma${WIN32LIB_SUFFIX}.dll"
     "${CMAKE_CURRENT_BINARY_DIR}/zlib1${WIN32LIB_SUFFIX}.dll"

@@ -12,7 +12,7 @@
 #include <iostream>
 #include <bitset>
 #include <string_view>
-#include <magic_enum.hpp>
+#include <magic_enum/include/magic_enum.hpp>
 #include <random>
 #include "Mesytec.hpp"
 //#include <opencv2/core.hpp>

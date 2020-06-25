@@ -77,6 +77,11 @@
     <ClInclude Include="Zweistein.PrettyBytes.hpp" />
     <ClInclude Include="Zweistein.ThreadPriority.hpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\libuv.vcxproj">
+      <Project>{261ce9d9-458a-4f44-ad64-d326967441ed}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <ProjectGuid>{D9046E59-414C-4F65-B303-29344B2C8C23}</ProjectGuid>
@@ -191,7 +196,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>SIMPLE_LOGGER;WIN32_PRE10OLDSTYLE;_WIN32_WINNT=0x0601;ASIOEXT_USE_BOOST_ASIO;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\sigslot\include;..\asio-extensions\include;..\PacketSender;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\alanghof\source\repos\CHARMing\libuv\include;C:\Users\alanghof\source\repos\CHARMing\charm\asio-extensions\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
       <AdditionalOptions>
@@ -200,6 +205,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>Iphlpapi.lib;psapi.lib;Userenv.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
@@ -249,7 +255,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>SIMPLE_LOGGER;WIN32_PRE10OLDSTYLE;_WIN32_WINNT=0x0601;ASIOEXT_USE_BOOST_ASIO;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\sigslot\include;..\asio-extensions\include;..\PacketSender;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\alanghof\source\repos\CHARMing\libuv\include;C:\Users\alanghof\source\repos\CHARMing\charm\asio-extensions\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
@@ -260,6 +266,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <StackReserveSize>120000000</StackReserveSize>
       <StackCommitSize>80000000</StackCommitSize>
+      <AdditionalDependencies>Iphlpapi.lib;psapi.lib;Userenv.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">

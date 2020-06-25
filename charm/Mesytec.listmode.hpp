@@ -14,6 +14,7 @@
 #include "Mesytec.DeviceParameter.hpp"
 #include "Zweistein.Logger.hpp"
 #include "Mcpd8.DataPacket.hpp"
+#include "CounterMonitor.hpp"
 
 namespace Mesytec {
 	namespace listmode {
@@ -55,6 +56,10 @@ namespace Mesytec {
 				data(_Data),ab(abfunc){
 				int n=(int)deviceparam.size();
 				for (int i = 0; i < n; i++) listmoderead_first.set(i);
+				data.evntcount = 0;
+				for (int i = 0; i < COUNTER_MONITOR_COUNT; i++) CounterMonitor[i] = 0;
+				bool ok = data.evntqueue.push(Zweistein::Event::Reset());
+				if (!ok) LOG_ERROR << " cannot push Zweistein::Event::Reset()" << std::endl;
 			}
 			
 		private:
@@ -71,6 +76,7 @@ namespace Mesytec {
 				std::size_t bytes_transferred, Mcpd8::DataPacket& datapacket) {
 				if (listmoderead_first!=0) {
 					
+
 					start = Mcpd8::DataPacket::timeStamp(datapacket.time);
 					tp_start = boost::chrono::system_clock::now();
 					unsigned char id = Mcpd8::DataPacket::getId(datapacket.deviceStatusdeviceId);

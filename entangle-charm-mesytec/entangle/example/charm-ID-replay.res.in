@@ -8,4 +8,19 @@ type = "charm.charm-replay.MeasureTime"
 type = "charm.charm-replay.PlayList"
 ["test/@ID@-replay/Histogram"]
 type = "charm.charm-replay.Histogram"
-
+["test/@ID@-replay/Monitor0"]
+type = "charm.charm-replay.Monitor0"
+absmin = 0
+absmax = 0x7FFFFFFF
+["test/@ID@-replay/Monitor1"]
+type = "charm.charm-replay.Monitor1"
+absmin = 0
+absmax = 0x7FFFFFFF
+["test/@ID@-replay/Monitor2"]
+type = "charm.charm-replay.Monitor2"
+absmin = 0
+absmax = 0x7FFFFFFF
+["test/@ID@-replay/Monitor3"]
+type = "charm.charm-replay.Monitor3"
+absmin = 0
+absmax = 0x7FFFFFFF

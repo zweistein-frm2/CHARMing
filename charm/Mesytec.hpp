@@ -9,7 +9,7 @@
 #include <iostream>
 #include <bitset>
 #include <string_view>
-#include <magic_enum.hpp>
+#include "magic_enum/include/magic_enum.hpp"
 
 #define Mpsd8_sizeSLOTS 8
 #define Mpsd8_sizeMODID  8

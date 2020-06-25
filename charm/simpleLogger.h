@@ -38,7 +38,7 @@
 #include "coloured_console_sink.h"
 #endif
 #ifdef __cpp_lib_string_view
-#include <magic_enum.hpp>
+#include "magic_enum/include/magic_enum.hpp"
 
 
 template<typename E,magic_enum::Enum<E>>
@@ -125,5 +125,6 @@ namespace Zweistein
 
 
 #endif
+
 
 

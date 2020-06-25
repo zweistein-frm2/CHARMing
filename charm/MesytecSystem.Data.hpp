@@ -30,6 +30,7 @@ namespace Mcpd8 {
 		boost::lockfree::spsc_queue<DataPacket, boost::lockfree::capacity<PACKETQUEUESIZE>> packetqueue;
 		boost::atomic<unsigned short> widthX;
 		boost::atomic<unsigned short> widthY;
+		
 		/* Using blocking queue:
  * std::queue<int> queue;
  * std::mutex mutex;

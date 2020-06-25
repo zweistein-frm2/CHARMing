@@ -9,7 +9,7 @@
 #include <iostream>
 #include <bitset>
 #include <string_view>
-#include <magic_enum.hpp>
+#include "magic_enum/include/magic_enum.hpp"
 #include "Mesytec.hpp"
 
 
@@ -17,20 +17,24 @@
 #define Charm_sizeY  1024
 
 namespace Charm {
-
-	// must be < max udp transmitt size
-	class alignas(2) DataPacket
+	class  Packet
 	{
 	public:
 		// we define all struct elements as short, so that endianness can be converted easier
 		unsigned short Length;	//!< length of the buffer in words
+		unsigned short sessionid;
 		unsigned short Type;	//!< the buffer type
 		unsigned short headerLength;	//!< the length of the header in words
+		long long timestamp;
 		unsigned short Number;	//!< number of the packet 
-		unsigned short runID; 		//!< the run ID
-		unsigned short  deviceStatusdeviceId;	//!< the device state
-		
-
+		unsigned short  deviceStatus;	//!< the device state
+		unsigned short dummy0;
+		unsigned short dummy1 ;
+		union {
+			long long s64[163];
+			long s32[326];
+			unsigned short u16[652];
+		} data;
 	};
 
 	class alignas(2) CharmEvent {

@@ -12,7 +12,6 @@ if(${CMAKE_CXX_COMPILER_ID} MATCHES "MSVC")
 endif()
 
 set(CMAKE_CXX_STANDARD 17) 
-find_package(magic_enum CONFIG REQUIRED )
 set(Boost_USE_STATIC_LIBS ON) 
 set(Boost_USE_STATIC_RUNTIME ON)  
 find_package(Boost 1.71 REQUIRED COMPONENTS  filesystem chrono thread iostreams log log_setup) # header only libraries must not be added here
@@ -22,7 +21,7 @@ include_directories(${Charm_DIR})
 add_compile_options($<$<CXX_COMPILER_ID:GNU>:-Wno-narrowing>)
 
 add_executable (TestBinning "TestBinning.cpp" )
-target_link_libraries(TestBinning PRIVATE magic_enum::magic_enum ${Boost_LIBRARIES} ) 
+target_link_libraries(TestBinning PRIVATE  ${Boost_LIBRARIES} ) 
 target_link_options(TestBinning PRIVATE $<$<CXX_COMPILER_ID:GNU>:-static> )
 
 target_compile_options(TestBinning PRIVATE

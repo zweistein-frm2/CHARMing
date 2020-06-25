@@ -179,6 +179,34 @@ class MeasureTime(base.TimerChannel):
         return ver + " "+charmsystem.version
 
 
+class Monitor0(base.DiscreteOutput):
+    def read_value(self):
+        global charmsystem
+        if charmsystem:
+            t = charmsystem.monitors_status()
+            return t[0][1]
+
+class Monitor1(base.DiscreteOutput):
+    def read_value(self):
+        global charmsystem
+        if charmsystem:
+            t = charmsystem.monitors_status()
+            return t[1][1]
+
+class Monitor2(base.DiscreteOutput):
+    def read_value(self):
+        global charmsystem
+        if charmsystem:
+            t = charmsystem.monitors_status()
+            return t[2][1]
+
+class Monitor3(base.DiscreteOutput):
+    def read_value(self):
+        global charmsystem
+        if charmsystem:
+            t = charmsystem.monitors_status()
+            return t[3][1]
+
 
 class Histogram(base.ImageChannel):
 
@@ -223,8 +251,8 @@ class Histogram(base.ImageChannel):
         return wkt
         
     def write_RoiWKT(self,value):
-        #print("write_RoiWKT = "+str(value))
-        #print("selectedRoi = "+str(self.selectedRoi))
+        print("write_RoiWKT = "+str(value))
+        print("selectedRoi = "+str(self.selectedRoi))
         self.Histogram().setRoi(value,self.selectedRoi)
         
     def get_RoiWKT_unit(self):
@@ -255,6 +283,7 @@ class Histogram(base.ImageChannel):
             self.selectedRoi = self.maxindexroi
         #print(t[0][self.selectedRoi]);  #should be pair wkt/counts
         self.count=t[0][self.selectedRoi][1]
+        #t[2] is list of Monitors
         return self.mat.flatten()
     def read_version(self):
         ver = super().read_version();

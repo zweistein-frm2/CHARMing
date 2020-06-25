@@ -28,10 +28,7 @@ namespace Mcpd8
 		unsigned short runID; 		//!< the run ID
 		unsigned short  deviceStatusdeviceId;	//!< the device state
 		unsigned short time[3];
-	private:
 		unsigned short param[4][3];	//!< the values of the parameters (belong to the header)
-		//unsigned short data[750];	//!< the events, length of the data = length of the buffer - length of the header
-	public:
 		Mesy::Mpsd8Event events[250];
 		DataPacket() : Type(Mesy::BufferType::DATA), Length(21),
 			headerLength(21), Number(0), runID(0), deviceStatusdeviceId(0) {}

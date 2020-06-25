@@ -158,6 +158,35 @@ class MeasureTime(base.TimerChannel):
         return ver + " "+charmsystem.version
 
 
+class Monitor0(base.DiscreteOutput):
+    def read_value(self):
+        global charmsystem
+        if charmsystem:
+            t = charmsystem.monitors_status()
+            return t[0][1]
+
+class Monitor1(base.DiscreteOutput):
+    def read_value(self):
+        global charmsystem
+        if charmsystem:
+            t = charmsystem.monitors_status()
+            return t[1][1]
+
+class Monitor2(base.DiscreteOutput):
+    def read_value(self):
+        global charmsystem
+        if charmsystem:
+            t = charmsystem.monitors_status()
+            return t[2][1]
+
+class Monitor3(base.DiscreteOutput):
+    def read_value(self):
+        global charmsystem
+        if charmsystem:
+            t = charmsystem.monitors_status()
+            return t[3][1]
+
+
 class Histogram(base.ImageChannel):
 
     

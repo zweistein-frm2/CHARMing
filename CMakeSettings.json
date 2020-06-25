@@ -1,0 +1,172 @@
+﻿{
+  "configurations": [
+     {
+      "name": "Taco102-Ubuntu18.04",
+      "generator": "Unix Makefiles",
+      "configurationType": "Release",
+      "cmakeExecutable": "/snap/cmake/current/bin/cmake",
+      "remoteCopySourcesExclusionList": [ ".vs", "out" ],
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "inheritEnvironments": [ "linux_x64" ],
+      "remoteMachineName": "taco102",
+      "remoteCMakeListsRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/src",
+      "remoteBuildRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/build/${name}",
+      "remoteInstallRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/install/${name}",
+      "remoteCopySources": true,
+      "rsyncCommandArgs": "-t --delete --delete-excluded",
+      "remoteCopyBuildOutput": false,
+      "remoteCopySourcesMethod": "rsync",
+      "addressSanitizerRuntimeFlags": "detect_leaks=0",
+      "variables": [
+        
+      ]
+    },
+    {
+      "name": "Taco07-Ubuntu20",
+      "generator": "Unix Makefiles",
+      "configurationType": "Release",
+      "cmakeExecutable": "/snap/cmake/current/bin/cmake",
+      "remoteCopySourcesExclusionList": [ ".vs", "out" ],
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "inheritEnvironments": [ "linux_x64" ],
+      "remoteMachineName": "taco07",
+      "remoteCMakeListsRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/src",
+      "remoteBuildRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/build/${name}",
+      "remoteInstallRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/install/${name}",
+      "remoteCopySources": true,
+      "rsyncCommandArgs": "-t --delete --delete-excluded",
+      "remoteCopyBuildOutput": false,
+      "remoteCopySourcesMethod": "rsync",
+      "addressSanitizerRuntimeFlags": "detect_leaks=0",
+      "variables": [
+        {
+          "name": "ENTANGLE_ROOT",
+          "value": "/home/localadmin/entangle",
+          "type": "PATH"
+        }
+      ]
+    },
+    {
+      "name": "x64-Release",
+      "generator": "Ninja",
+      "configurationType": "RelWithDebInfo",
+      "buildRoot": "${projectDir}\\out\\build\\${name}",
+      "installRoot": "${projectDir}\\out\\install\\${name}",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "-v",
+      "ctestCommandArgs": "",
+      "inheritEnvironments": [ "msvc_x64_x64" ],
+      "variables": [
+        {
+          "name": "ENTANGLE_ROOT",
+          "value": "C:\\Users\\alanghof\\source\\repos\\entangle",
+          "type": "PATH"
+        }
+      ]
+    },
+	{
+      "name": "x64-Debug",
+      "generator": "Ninja",
+      "configurationType": "Debug",
+      "buildRoot": "${projectDir}\\out\\build\\${name}",
+      "installRoot": "${projectDir}\\out\\install\\${name}",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "-v",
+      "ctestCommandArgs": "",
+      "inheritEnvironments": [ "msvc_x64_x64" ],
+      "variables": [
+        {
+          "name": "ENTANGLE_ROOT",
+          "value": "C:\\Users\\alanghof\\source\\repos\\entangle",
+          "type": "PATH"
+        }
+      ]
+    },
+	
+    {
+      "name": "Raspberrypi4",
+      "generator": "Ninja",
+      "configurationType": "Release",
+      "cmakeExecutable": "/opt/cmake-3.14.7/bin/cmake",
+      "cmakeToolchain": "/vcpkg/scripts/buildsystems/vcpkg.cmake",
+      "remoteCopySourcesExclusionList": [ ".vs", ".git", "out" ],
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "inheritEnvironments": [ "linux_arm" ],
+      "remoteMachineName": "-29794628;raspberrypi4 (username=pi, port=22, authentication=Password)",
+      "remoteCMakeListsRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/src",
+      "remoteBuildRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/build/${name}",
+      "remoteInstallRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/install/${name}",
+      "remoteCopySources": true,
+      "rsyncCommandArgs": "-t --delete --delete-excluded",
+      "remoteCopyBuildOutput": false,
+      "remoteCopySourcesMethod": "rsync",
+      "addressSanitizerRuntimeFlags": "detect_leaks=0",
+      "variables": [
+        {
+          "name": "NETWORKCARDINTERFACE",
+          "value": "192.168.168.121",
+          "type": "STRING"
+        }
+      ]
+    },
+    {
+      "name": "Raspberrypi3",
+      "generator": "Ninja",
+      "configurationType": "Release",
+      "cmakeExecutable": "/opt/cmake-3.14.7/bin/cmake",
+      "remoteCopySourcesExclusionList": [ ".vs", ".git", "out" ],
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "cmakeToolchain": "/vcpkg/scripts/buildsystems/vcpkg.cmake",
+      "inheritEnvironments": [ "linux_arm" ],
+      "variables": [
+        {
+          "name": "NETWORKCARDINTERFACE",
+          "value": "192.168.168.121",
+          "type": "STRING"
+        }
+      ],
+      "remoteMachineName": "rpi3packetsender",
+      "remoteCMakeListsRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/src",
+      "remoteBuildRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/build/${name}",
+      "remoteInstallRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/install/${name}",
+      "remoteCopySources": true,
+      "rsyncCommandArgs": "-t --delete --delete-excluded",
+      "remoteCopyBuildOutput": false,
+      "remoteCopySourcesMethod": "rsync",
+      "addressSanitizerRuntimeFlags": "detect_leaks=0"
+    },
+    {
+      "name": "172_25_2_137_pi3",
+      "generator": "Ninja",
+      "configurationType": "Release",
+      "cmakeExecutable": "/snap/cmake/current/bin/cmake",
+      "remoteCopySourcesExclusionList": [ ".vs", ".git", "out" ],
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "cmakeToolchain": "/vcpkg/scripts/buildsystems/vcpkg.cmake",
+      "inheritEnvironments": [ "linux_arm" ],
+      "variables": [
+        {
+          "name": "NETWORKCARDINTERFACE",
+          "value": "192.168.168.123",
+          "type": "STRING"
+        }
+      ],
+      "remoteMachineName": "172.25.2.137",
+      "remoteCMakeListsRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/src",
+      "remoteBuildRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/build/${name}",
+      "remoteInstallRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/install/${name}",
+      "remoteCopySources": true,
+      "rsyncCommandArgs": "-t --delete --delete-excluded",
+      "remoteCopyBuildOutput": false,
+      "remoteCopySourcesMethod": "rsync",
+      "addressSanitizerRuntimeFlags": "detect_leaks=0"
+    }
+  ]
+}

@@ -28,14 +28,15 @@ namespace np = boost::python::numpy;
 #include <boost/geometry/io/wkt/wkt.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string.hpp>
-#include <magic_enum.hpp>
+#include "magic_enum/include/magic_enum.hpp"
 #include "Zweistein.Locks.hpp"
 #include "Zweistein.Logger.hpp"
 #include "Zweistein.Binning.hpp"
-
+#include "CounterMonitor.hpp"
 
 typedef boost::geometry::model::d2::point_xy<int> point_type;
 typedef boost::geometry::model::polygon<point_type> polygon_type;
+
 
 
 extern Zweistein::Lock histogramsLock;
@@ -85,17 +86,7 @@ namespace Zweistein {
         }
 
         
-        void _delRoi(std::string roi) {
-            LOG_INFO << "_delRoi(" << roi<<")" << std::endl;
-            for (int i = 0;i< roidata.size();i++){
-                if (roi == _getRoi(i)) {
-                    roidata.erase(roidata.begin()+i);
-                    break;
-                }
-            }
-            // we never delete first roi
-            if (!roidata.size()) setRoi("", 0);
-        }
+       
         std::string getRoi(int index) {
             int rsize = 0;
             {
@@ -106,8 +97,8 @@ namespace Zweistein {
             //LOG_INFO << "getRoi(" << index << ")" << std::endl;
           
             if (rsize == index) {
-                LOG_DEBUG << "roidata.size()="<<rsize <<", index does not exist, create new : "  << std::endl;
-                LOG_DEBUG << "roidata.push_back(rd), old size:" << rsize << std::endl;
+                LOG_INFO << "roidata.size()="<<rsize <<", index does not exist, create new : "  << std::endl;
+                LOG_INFO << "roidata.push_back(rd), old size:" << rsize << std::endl;
                 {
                     Zweistein::WriteLock w_lock(histogramsLock);
                     RoiData rd;
@@ -157,16 +148,17 @@ namespace Zweistein {
         void setRoi(std::string wkt, int index) {
            
             Zweistein::WriteLock w_lock(histogramsLock);
-            //LOG_INFO << "setRoi(" << wkt << ", " << index << ")" << std::endl;
+            LOG_INFO << "setRoi(" << wkt << ", " << index << ")" << std::endl;
             if (roidata.size() - 1 < index) {
                 LOG_ERROR << "index out of range, max=" << roidata.size() - 1 << std::endl;
                 return;
             }
            
             if (wkt.empty() && index!=0){
-                     std::string currwkt = _getRoi(index);
-                    _delRoi(currwkt);
-                    return;
+                     LOG_INFO << "roidata.erase(" << index << ")" << std::endl;
+                     roidata.erase(roidata.begin() + index);
+                     LOG_INFO << "roidata.size()=" << roidata.size() << std::endl;
+                     return;
             }
             if(index!=0) _setRoi(wkt,index); // index 0 is always full rectangle
         }
@@ -240,7 +232,7 @@ namespace Zweistein {
                auto t=boost::python::make_tuple(ss_wkt.str(),r.count);
                l.append(t);
            }
-            return boost::python::make_tuple(l, mat);
+           return boost::python::make_tuple(l, mat);
         }
 
         boost::python::tuple getSize() {
@@ -261,3 +253,4 @@ namespace Zweistein {
 #endif
     };
         extern std::vector<Histogram> histograms;
+        

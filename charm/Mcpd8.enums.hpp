@@ -6,7 +6,7 @@
  ***************************************************************************/
 #pragma once
 #include <string_view>
-#include <magic_enum.hpp>
+#include "magic_enum/include/magic_enum.hpp"
 
 namespace Mcpd8 {
 	enum EventDataFormat {

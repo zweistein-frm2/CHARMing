@@ -13,7 +13,7 @@
 #include <boost/format.hpp>
 #include <boost/signals2.hpp>
 #include <boost/thread.hpp>
-#include <sigslot/signal.hpp>
+#include "sigslot/include/sigslot/signal.hpp"
 
 #include <cassert>
 #include <iostream>
@@ -29,7 +29,7 @@
 #include "Zweistein.Histogram.hpp"
 #include "Zweistein.Binning.ApplyOcc.hpp"
 #include "Zweistein.Logger.hpp"
-#include <magic_enum.hpp>
+
 
 namespace Zweistein {
 	void displayHistogram(boost::asio::io_service& io_service, boost::shared_ptr<Mesytec::MesytecSystem> pmsmtsystem1) {

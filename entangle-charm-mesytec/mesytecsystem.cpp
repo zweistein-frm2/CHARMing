@@ -52,6 +52,8 @@ extern const char* GIT_DATE;
 
 Zweistein::Lock histogramsLock;
 std::vector<Histogram> histograms;
+static_assert(COUNTER_MONITOR_COUNT >= 4, "Mcpd8 Datapacket can use up to 4 counters: params[4][3]");
+boost::atomic<long long> CounterMonitor[COUNTER_MONITOR_COUNT];
 
 boost::asio::io_service io_service;
 
@@ -168,7 +170,7 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
 
         boost::chrono::system_clock::time_point lastsec = boost::chrono::system_clock::now();
         long long lastcount = 0;
-        Zweistein::Averaging<double> avg(3);
+        Zweistein::Averaging<double> avg(4);
         while (!io_service.stopped()) {
             boost::this_thread::sleep_for(boost::chrono::milliseconds(500));
                       
@@ -244,11 +246,8 @@ struct NeutronMeasurement {
         NeutronMeasurement(long loghandle):ptrStartParameters(boost::shared_ptr < StartMsmtParameters>(new StartMsmtParameters())),
             ptrmsmtsystem1(boost::shared_ptr < Mesytec::MesytecSystem>(new Mesytec::MesytecSystem()))
         {
-            LOG_INFO << "Here 1" << std::endl;
             Entangle::Init(loghandle);
-            LOG_INFO << "Here 2" << std::endl;
             histograms = std::vector<Histogram>(2);
-            LOG_INFO << "Here 3" << std::endl;
             ptrmsmtsystem1->initatomicortime_point();
             worker_threads.create_thread([this] {startMonitor(ptrmsmtsystem1, ptrStartParameters); });
             LOG_DEBUG << "NeutronMeasurement(" << loghandle << ")" << std::endl;
@@ -287,6 +286,15 @@ struct NeutronMeasurement {
             LOG_INFO << "NeutronMeasurement.stopafter(" << counts << ", " << seconds << ")" << std::endl;
         }
        
+        boost::python::list monitors_status() {
+            boost::python::list l2;
+            for (int i = 0; i < COUNTER_MONITOR_COUNT; i++) {
+                long long val = CounterMonitor[i];
+                auto t = boost::python::make_tuple("MONITOR" + std::to_string(i), val);
+                l2.append(t);
+            }
+            return l2;
+        }
         boost::python::tuple status() {
 
             boost::chrono::system_clock::time_point tps=ptrmsmtsystem1->started;
@@ -338,7 +346,7 @@ struct NeutronMeasurement {
 
         Histogram* getHistogram() {
             using namespace magic_enum::bitwise_operators; // out-of-the-box bitwise operators for enums.
-            LOG_DEBUG << "getHistogram()" << std::endl;
+            //LOG_DEBUG << "getHistogram()" << std::endl;
             Zweistein::histogram_setup_status hss = Zweistein::setup_status;
             if (magic_enum::enum_integer(hss & Zweistein::histogram_setup_status::has_binning)) {
                 return &histograms[1];
@@ -424,6 +432,7 @@ BOOST_PYTHON_MODULE(mesytecsystem)
             .def("start", &NeutronMeasurement::start)
             .def("stopafter", &NeutronMeasurement::stopafter)
             .def("resume", &NeutronMeasurement::resume)
+            .def("monitors_status", &NeutronMeasurement::monitors_status)
             .def("status", &NeutronMeasurement::status)
             .def("stop", &NeutronMeasurement::stop)
             .def("getHistogram", &NeutronMeasurement::getHistogram, return_internal_reference<1, with_custodian_and_ward_postcall<1, 0>>())

@@ -44,21 +44,21 @@ endif()
 find_package(OpenCV  REQUIRED)
 message(******OpenCV_Dir=   ${OpenCV_DIR}  *************)
 
-find_package(unofficial-libuv CONFIG REQUIRED)
+#find_package(unofficial-libuv CONFIG REQUIRED)
 
 #set (magic_enum_DIR ${_VCPKG_ROOT_DIR}/installed/${VCPKG_TARGET_TRIPLET}/share/magic_enum)
 
-message(******magic_enum_DIR= ${magic_enum_DIR}   ************)
-find_package(magic_enum CONFIG REQUIRED )
+#message(******magic_enum_DIR= ${magic_enum_DIR}   ************)
+#find_package(magic_enum CONFIG REQUIRED )
 
 message(**CMAKE_CURRENT_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR})
 message(**CMAKE_SOURCE_DIR=${CMAKE_SOURCE_DIR})
-
+include_directories(${libuv_INCLUDE_DIR})
 include_directories(${Boost_INCLUDE_DIR} ${OpenCV_INCLUDE_DIRS})
-include_directories(${ASIO_EXTENSIONS_PATH})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/asio-extensions/include)
 include_directories(./)
 
-include_directories(${SIGSLOT_PATH})
+#include_directories(${SIGSLOT_PATH})
 #include_directories(${_Python_INCLUDE_DIR})
 # Add source to this project's executable.
 add_executable (${PROJECT_NAME} "mesyDeviceCtrl.cpp" "Mesytec.Mcpd8.cpp" "Mcpd8.Parameters.cpp" "OptionPrinter.cpp" "CustomOptionDescription.cpp" "simpleLogger.cpp" "coloured_console_sink.cpp" "Zweistein.ping.cpp" ${repository}/version.cpp "Mcpd8.CmdPacket.cpp" "Mesyec.Mpsd8.cpp" "Mesytec.listmode.write.cpp" "Mesytec.listmode.cpp" "MesytecSystem.Data.cpp" "Zweistein.GetConfigDir.cpp" "Mesytec.config.cpp")
@@ -66,7 +66,7 @@ add_executable (${PROJECT_NAME} "mesyDeviceCtrl.cpp" "Mesytec.Mcpd8.cpp" "Mcpd8.
 target_compile_options(${PROJECT_NAME} PRIVATE  $<$<CXX_COMPILER_ID:GNU>: -Wno-error>)
 #target_link_options(${PROJECT_NAME}   PRIVATE $<$<CXX_COMPILER_ID:GNU>:$<$<CONFIG:RELEASE>:-static-libstdc++> $<$<CONFIG:DEBUG>:-static-libstdc++> > PRIVATE $<$<CXX_COMPILER_ID:GNU>:-static-libgcc> )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE  magic_enum::magic_enum ${Boost_LIBRARIES} ${OpenCV_LIBS}  unofficial::libuv::libuv )
+target_link_libraries(${PROJECT_NAME} PRIVATE   ${Boost_LIBRARIES} ${OpenCV_LIBS}  uv_a )
 
 
 add_custom_command(
@@ -122,7 +122,6 @@ endif()
     "${CMAKE_CURRENT_BINARY_DIR}/opencv_core${WIN32LIB_SUFFIX}.dll"
     "${CMAKE_CURRENT_BINARY_DIR}/opencv_imgcodecs${WIN32LIB_SUFFIX}.dll"
     "${CMAKE_CURRENT_BINARY_DIR}/opencv_videoio${WIN32LIB_SUFFIX}.dll"
-    "${CMAKE_CURRENT_BINARY_DIR}/libuv.dll"
     "${CMAKE_CURRENT_BINARY_DIR}/bz2${WIN32LIB_SUFFIX}.dll"
     "${CMAKE_CURRENT_BINARY_DIR}/jpeg62.dll"
     "${CMAKE_CURRENT_BINARY_DIR}/libpng16${WIN32LIB_SUFFIX}.dll"
