@@ -31,6 +31,8 @@
 #include "Mesytec.Mpsd8.hpp"
 #include "Mcpd8.enums.hpp"
 #include "PacketSender.Params.hpp"
+#include "CounterMonitor.hpp"
+
 using boost::asio::ip::udp;
 boost::mutex coutGuard;
 boost::thread_group worker_threads; // not used
@@ -73,6 +75,14 @@ unsigned short param[4][3];
 
 unsigned short auxtimer[4];
 
+void fill48bit(unsigned short data[3], long long value) {
+
+	value &= 0x0000FFFFFFFFFFFF;
+	data[0]=
+	data[1]=
+	data[2]=
+
+}
 
 boost::atomic<bool> retry = true;
 
@@ -613,7 +623,13 @@ int main(int argc, char* argv[])
 			int newcounts = 0;
 			dp[0].Number = bufnum++;
 			dp[0].Length = dp[0].headerLength;
-
+			for (int k = 0; k < COUNTER_MONITOR_COUNT; k++) {
+				Mcpd8::DataPacket::setParam(param[k], iloop*k); // only to fill some data
+				dp[0].param[k][0] = param[k][0];
+				dp[0].param[k][1] = param[k][1];
+				dp[0].param[k][2] = param[k][2];
+			}
+			
 			bool bfilldata = false;
 			if (DataeveryNOnly == 1) bfilldata = true;
 			else if (iloop % (DataeveryNOnly *DataeveryNOnly ) == 0) bfilldata = true;

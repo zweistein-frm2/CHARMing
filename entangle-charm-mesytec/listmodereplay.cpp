@@ -36,7 +36,7 @@
 #include <stdio.h>
 
 Entangle::severity_level Entangle::SEVERITY_THRESHOLD =Entangle::severity_level::trace;
-std::string PROJECT_NAME("charm");
+std::string PROJECT_NAME("CHARMing");
 
 namespace p = boost::python;
 namespace np = boost::python::numpy;
@@ -105,6 +105,9 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
                                 Zweistein::setup_status = hss; // next file is all new life 
 
                                 listmodeinputfiles.clear();
+                                ptrmsmtsystem1->data.evntcount = 0;
+                                for (int i = 0; i < COUNTER_MONITOR_COUNT; i++) CounterMonitor[i] = 0;
+                               
                                 boost::mutex::scoped_lock lock(ptrStartParameters->playlistGuard);
 
                                 LOG_INFO << __FILE__ << " : " << __LINE__ << " Mesytec::listmode::start_reading" << std::endl;
@@ -377,6 +380,7 @@ struct ReplayList {
         }
         void start() {
             // we have to start from beginning of playlist
+            ptrmsmtsystem1->started = boost::chrono::system_clock::now();
             LOG_INFO << "ReplayList::start()" << std::endl;
             Mesytec::listmode::whatnext = Mesytec::listmode::start_reading;
         }

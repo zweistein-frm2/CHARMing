@@ -97,6 +97,20 @@ namespace Mcpd8
 			time[2] = (tstamp >> 32) & 0xffff;
 		}
 
+		static void setParam(unsigned short param[3], long long value) {
+			param[0] = value & 0xffff;
+			param[1] = (value >> 16) & 0xffff;
+			param[2] = (value >> 32) & 0xffff;
+		}
+
+		static long long Param(const unsigned short param[3]) {
+			
+			long long tstamp = (long long)param[0] + (((long long)param[1]) << 16) + (((long long)param[2]) << 32);
+
+			
+			return tstamp;
+		}
+
 		//void print(boost::log::formatting_ostream & os) const {
 		void print(std::stringstream & os) const {
 

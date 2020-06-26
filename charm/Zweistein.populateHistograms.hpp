@@ -48,7 +48,7 @@ namespace Zweistein {
 			LOG_ERROR << __FILE__ << " : " << __LINE__ << " maxX=" << maxX << ", maxY=" << maxY << std::endl;
 			return;
 		}
-	
+		
 		//LOG_DEBUG << "pmsmtsystem1->data.widthX=" << maxX << ", pmsmtsystem1->data.widthY=" << maxY << std::endl;
 		int left = 0;
 		int bottom = 0;
@@ -62,9 +62,11 @@ namespace Zweistein {
 		setup_status = hss | histogram_setup_status::histogram0_resized;
 
 		if (!binningfile1.empty() || binningfile1.length() != 0) {
+			bool readfileproblem = true;
 			try {
 				
 				boost::filesystem::path p(binningfile1);
+				
 				std::string ext = boost::algorithm::to_lower_copy(p.extension().string());
 				if (ext == ".txt") {
 					Zweistein::Binning::ReadTxt(binningfile1);
@@ -97,9 +99,18 @@ namespace Zweistein {
 				}
 				hss = setup_status;
 				setup_status = hss | histogram_setup_status::has_binning;
+				readfileproblem = false;
 			}
+			
+			catch(const boost::property_tree::json_parser_error& e1){
+				LOG_ERROR << e1.what() << " " << e1.filename() << std::endl ;
+			}
+
 			catch (std::exception& e) {
-				LOG_WARNING << e.what() << " for reading." << std::endl;
+				LOG_ERROR << e.what() << " for reading." << std::endl;
+			}
+
+			if(readfileproblem){
 				int newy = maxY / 8;
 				Zweistein::Binning::GenerateSimple(newy, maxY, maxX);
 				std::stringstream ss;

@@ -32,7 +32,7 @@
 #include <stdio.h>
 #include "Zweistein.Averaging.hpp"
 Entangle::severity_level Entangle::SEVERITY_THRESHOLD =Entangle::severity_level::trace;
-std::string PROJECT_NAME("charm");
+std::string PROJECT_NAME("CHARMing");
 
 namespace p = boost::python;
 namespace np = boost::python::numpy;

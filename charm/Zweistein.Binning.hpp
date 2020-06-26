@@ -58,7 +58,11 @@ namespace Zweistein {
 
                 for (int n = 0; n < 2; n++)
                 {
-                    std::ifstream infile(txtpath);
+                    std::ifstream infile(txtpath, std::ifstream::in);
+                    if (!infile.good()) {
+                        LOG_ERROR << txtpath << " not found." << std::endl;
+                        return;
+                    }
                     std::string line;
 
                     std::getline(infile, line);

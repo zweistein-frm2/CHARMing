@@ -56,10 +56,7 @@ namespace Mesytec {
 				data(_Data),ab(abfunc){
 				int n=(int)deviceparam.size();
 				for (int i = 0; i < n; i++) listmoderead_first.set(i);
-				data.evntcount = 0;
-				for (int i = 0; i < COUNTER_MONITOR_COUNT; i++) CounterMonitor[i] = 0;
-				bool ok = data.evntqueue.push(Zweistein::Event::Reset());
-				if (!ok) LOG_ERROR << " cannot push Zweistein::Event::Reset()" << std::endl;
+				
 			}
 			
 		private:

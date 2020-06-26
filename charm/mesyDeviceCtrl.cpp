@@ -42,7 +42,7 @@ boost::log::trivial::severity_level SEVERITY_THRESHOLD = boost::log::trivial::tr
 #else
 boost::log::trivial::severity_level SEVERITY_THRESHOLD = boost::log::trivial::info;
 #endif
-std::string PROJECT_NAME("charm");
+std::string PROJECT_NAME("CHARMing");
 
 using boost::asio::ip::udp;
 
@@ -156,7 +156,7 @@ int main(int argc, char* argv[])
 			Zweistein::Config::inipath.append(p.string());
 		}
 		else {
-			Zweistein::Config::inipath.append(appName + ".json");
+			Zweistein::Config::inipath.append(PROJECT_NAME + ".json");
 		}
 		if (!vm.count(LISTMODE_FILE)) LOG_INFO << "Using config file:" << Zweistein::Config::inipath << " " <<std::endl ;
 		std::vector<std::string> listmodeinputfiles = std::vector<std::string>();
