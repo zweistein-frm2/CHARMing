@@ -18,8 +18,8 @@ ARM/
 *.user
 *.userosscache
 *.sln.docstates
-
-
+*.sln
+*.filters
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs

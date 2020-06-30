@@ -73,17 +73,20 @@ void shutdown() {
 
 
 struct StartMsmtParameters {
-    StartMsmtParameters() :MaxCount(0), DurationSeconds(0), playlist(std::list<std::string>()) {}
+    StartMsmtParameters() :MaxCount(0), DurationSeconds(0), playlist(std::list<std::string>()),  monitorbusy(false) {}
     boost::atomic<long long> MaxCount;
     boost::atomic<double> DurationSeconds;
     boost::atomic<int> speedmultiplier;
     std::list<std::string> playlist;
     boost::mutex playlistGuard;
+    boost::atomic<int> monitorbusy;
 };
 
 void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, boost::shared_ptr <StartMsmtParameters> ptrStartParameters ) {
       
         using namespace magic_enum::bitwise_operators; // out-of-the-box bitwise operators for enums.
+        
+       
         boost::asio::signal_set signals(io_service, SIGINT, SIGTERM);
         signals.async_wait(boost::bind(&boost::asio::io_service::stop, &io_service));
 
@@ -93,10 +96,12 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
      
             ptrmsmtsystem1->inputFromListmodeFile = true;
             t = [&ptrmsmtsystem1,&ptrStartParameters, &_devlist]() {
+                using namespace magic_enum::ostream_operators;
                 try {
                     std::list<std::string> listmodeinputfiles = std::list<std::string>();
                     int l = 0;
                     do {
+                        ptrStartParameters->monitorbusy = false;
                         while (Mesytec::listmode::action  lec = Mesytec::listmode::CheckAction()) {
                             if (lec == Mesytec::listmode::start_reading) {
                                 Zweistein::histogram_setup_status hss = Zweistein::setup_status;
@@ -108,30 +113,30 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
                                 ptrmsmtsystem1->data.evntcount = 0;
                                 for (int i = 0; i < COUNTER_MONITOR_COUNT; i++) CounterMonitor[i] = 0;
                                
+                                LOG_INFO << "data.evntcount = 0, Monitors=0" << std::endl;
                                 boost::mutex::scoped_lock lock(ptrStartParameters->playlistGuard);
 
-                                LOG_INFO << __FILE__ << " : " << __LINE__ << " Mesytec::listmode::start_reading" << std::endl;
+                                LOG_INFO << __FILE__ << " : " << __LINE__ << lec << std::endl;
                                 for (auto& s : ptrStartParameters->playlist) {
                                     LOG_INFO << s << std::endl;
                                     listmodeinputfiles.push_back(s);
                                 }
                                 LOG_INFO << std::endl;
+                                
+                                // easy hack to ensure other thread will read the whatnext variable and react on it
+                                // but we can happily live with a tiny delay after start
                                 Mesytec::listmode::whatnext = Mesytec::listmode::continue_reading;
                                 break;
                             }
                             else {
                                 char clessidra[8] = { '|', '/' , '-', '\\', '|', '/', '-', '\\' };
-                               // std::stringstream ss;
-                               // for (int j = 0; j < (l % 5); j++) ss << ".";
-                             
-                                std::cout << "\r  waiting for action " << clessidra[l%8];// ss.str() << "      ";
+                                std::cout << "\r  waiting for action " << clessidra[l%8];
                                 l++;
                                 boost::this_thread::sleep_for(boost::chrono::milliseconds(300));
                             }
                         }
 
-                        LOG_INFO << __FILE__ << " : " << __LINE__ << " action started" << std::endl;
-
+                      
                         for (std::string& fname : listmodeinputfiles) {
                             LOG_INFO  << " " << fname << std::endl;
                             try { boost::property_tree::read_json(fname + ".json", Mesytec::Config::root); }
@@ -150,6 +155,7 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
                                 LOG_INFO << "Configuration error, skipped" << std::endl;
                                 continue;
                             }
+                            ptrStartParameters->monitorbusy = true;
                             ptrmsmtsystem1->eventdataformat = Mcpd8::EventDataFormat::Undefined;
                             ptrmsmtsystem1->listmode_connect(_devlist, io_service); 
                             // find the .json file for the listmode file
@@ -178,14 +184,10 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
                             catch (std::exception& e) {
                                 LOG_ERROR << e.what() << std::endl;
                             }
-                           
-
-
                         }
-                        // alldone, so 
-                        LOG_INFO << __FILE__ << " : " << __LINE__ << std::endl;
-                        LOG_INFO << " all done, so:  Mesytec::listmode::wait_reading" << std::endl;
+                        using namespace magic_enum::ostream_operators;
                         Mesytec::listmode::whatnext = Mesytec::listmode::wait_reading;
+                        LOG_INFO << " all done: " << Mesytec::listmode::whatnext << std::endl;
                     } while (!io_service.stopped());
 
                 }
@@ -332,56 +334,99 @@ struct ReplayList {
       
 
         boost::python::list addfile(std::string file) {
+            LOG_INFO <<"addfile("<< file << ")" << std::endl;
             
-            boost::mutex::scoped_lock lock(ptrStartParameters->playlistGuard);
             boost::python::list l;
-            try {
-                bool duplicate = false;
-                for (auto s : ptrStartParameters->playlist) {
-                    if (s == file) duplicate = true;
-                    break;
-                }
-                if (!duplicate && boost::filesystem::exists(file)) {
-                    boost::filesystem::path p(file);
-                    if (p.extension() != LISTMODEEXTENSION) {
-                        LOG_WARNING << "File not added to playlist (wrong extension !="<< LISTMODEEXTENSION<<") : " << file << std::endl;
+            {
+                boost::mutex::scoped_lock lock(ptrStartParameters->playlistGuard);
+               
+                try {
+                    bool duplicate = false;
+                    for (auto& s : ptrStartParameters->playlist) {
+                        if (s == file) {
+                            duplicate = true;
+                          //  LOG_INFO << s << " == " << file << std::endl;
+                        }
+                       // else LOG_INFO << s << " != " << file << std::endl;
+                       
                     }
-                    else {
-                        ptrStartParameters->playlist.push_back(file);
-                        LOG_INFO << file << " added to playlist" << std::endl;
+                    if (!duplicate) {
+                        if (!boost::filesystem::exists(file)) {
+                            LOG_WARNING << "Not found: " << file << std::endl;
+                        }
+                        else {
+                            boost::filesystem::path p(file);
+                            if (p.extension() != LISTMODEEXTENSION) {
+                                LOG_WARNING << "File not added to playlist (wrong extension !=" << LISTMODEEXTENSION << ") : " << file << std::endl;
+                            }
+                            else {
+                                ptrStartParameters->playlist.push_back(file);
+                                LOG_INFO << file << " added to playlist" << std::endl;
+                            }
+
+                        }
+
                     }
+                    else LOG_WARNING << "File not added to playlist" << "(duplicate)" << " : " << file << std::endl;
+
                 }
-                else LOG_WARNING << "File not added to playlist"<<(duplicate?"(duplicate)": "(not found)")<<" : " << file << std::endl;
-            
+                catch (boost::exception& e) { LOG_ERROR << boost::diagnostic_information(e) << std::endl; }
+                LOG_INFO << "list:" << std::endl;
+                for (auto& s : ptrStartParameters->playlist) {
+                    l.append(s);
+                    LOG_INFO << s << std::endl;
+                }
+                LOG_INFO << "end list:" << std::endl;
+              
             }
-            catch (boost::exception& e) {LOG_ERROR << boost::diagnostic_information(e)<<std::endl;}
-            for (auto& s : ptrStartParameters->playlist) l.append(s);
             return l;
             
         }
 
         boost::python::list removefile(std::string file) {
-
-            boost::mutex::scoped_lock lock(ptrStartParameters->playlistGuard);
+            LOG_INFO << "removefile(" << file << ")" << std::endl;
+            
             boost::python::list l;
-            try {
-                ptrStartParameters->playlist.remove(file);
+            {
+                boost::mutex::scoped_lock lock(ptrStartParameters->playlistGuard);
+                try {
+                    ptrStartParameters->playlist.remove(file);
+                }
+                catch (boost::exception& e) { LOG_ERROR << boost::diagnostic_information(e) << std::endl; }
+                for (auto& s : ptrStartParameters->playlist) l.append(s);
             }
-            catch (boost::exception& e) {LOG_ERROR << boost::diagnostic_information(e) << std::endl;}
-            for (auto& s : ptrStartParameters->playlist) l.append(s);
             return l;
 
         }
 
         std::string get_version() {
             std::stringstream ss;
-            ss << PROJECT_NAME << " : BRANCH: " << GIT_BRANCH << " LATEST TAG:" << GIT_LATEST_TAG << " commits since:" << GIT_NUMBER_OF_COMMITS_SINCE << " " << GIT_DATE << std::endl;
-           return ss.str();
+           // ss << PROJECT_NAME << " : BRANCH: " << GIT_BRANCH << " LATEST TAG:" << GIT_LATEST_TAG << " commits since:" << GIT_NUMBER_OF_COMMITS_SINCE << " " << GIT_DATE << std::endl;
+            std::string git_latest_tag(GIT_LATEST_TAG);
+            git_latest_tag.erase(std::remove_if(git_latest_tag.begin(), git_latest_tag.end(), (int(*)(int)) std::isalpha), git_latest_tag.end());
+            ss << PROJECT_NAME << " : " << git_latest_tag << "." << GIT_NUMBER_OF_COMMITS_SINCE << "." << GIT_DATE;
+            return ss.str();
         }
         void start() {
+            using namespace magic_enum::ostream_operators;
             // we have to start from beginning of playlist
             ptrmsmtsystem1->started = boost::chrono::system_clock::now();
-            LOG_INFO << "ReplayList::start()" << std::endl;
+            LOG_INFO << "ReplayList::start()" << Mesytec::listmode::whatnext << std::endl;
+            Mesytec::listmode::action action= Mesytec::listmode::whatnext;
+            
+            // so we stop an angoing reading.
+            if (ptrStartParameters->monitorbusy) {
+                Mesytec::listmode::whatnext = Mesytec::listmode::start_reading;
+                //hence finally it will exit the reading and go into wait_reading state.
+                int i = 0;
+                for (i = 0; i < 10; i++) {
+                    boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
+                    if (ptrStartParameters->monitorbusy == false) break;
+                    if (i >= 10) { LOG_WARNING << "start(): " << " Monitorbusy waiting timeout" << std::endl; }
+                  
+                }
+               
+            }
             Mesytec::listmode::whatnext = Mesytec::listmode::start_reading;
         }
         void stop() {

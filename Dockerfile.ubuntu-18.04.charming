@@ -31,12 +31,6 @@ RUN cd /opt/cmake-${cmake_ver}  && ./bootstrap
 RUN cd /opt/cmake-${cmake_ver}  && make
 RUN cd /opt/cmake-${cmake_ver}  && make install
 
-RUN git clone https://github.com/microsoft/vcpkg.git
-RUN cd /vcpkg && ./bootstrap-vcpkg.sh
-RUN cd /vcpkg && ./vcpkg integrate install
-RUN cd /vcpkg && ./vcpkg install magic-enum
-RUN cd /vcpkg && ./vcpkg install libuv
-
 ARG boostversion=1_73_0
 RUN cd /opt && wget https://dl.bintray.com/boostorg/release/$(echo ${boostversion} | sed "s/_/./g")/source/boost_${boostversion}.tar.bz2 && tar --bzip2 -xf ./boost_${boostversion}.tar.bz2
 RUN cd /opt && rm  ./boost_${boostversion}.tar.bz2
@@ -66,9 +60,9 @@ RUN cd CHARMing && git submodule init && git submodule update
 ARG targ1=/hiersolleshin
 RUN mkdir ${targ1}
 RUN echo ${targ1}
-RUN cd ${targ1} && cmake -DCMAKE_TOOLCHAIN_FILE=/vcpkg/scripts/buildsystems/vcpkg.cmake   -DSIGSLOT_PATH=/CHARMing/sigslot/include -DASIO_EXTENSIONS_PATH=/CHARMing/asio-extensions/include -S /CHARMing/charm/ -B ${targ1} 
+RUN cd ${targ1} && cmake  -DENTANGLE_ROOT=${entangle_DIR} -S /CHARMing/ -B ${targ1} 
 RUN cd ${targ1} && make
-#RUN cd /etc && mkdir charm/
+#RUN cd /etc && mkdir CHARMing/
 
 ARG targ2=${entangle_DIR}/device/charm
 # we need unique name so that multiple devices can coexist on same tango-server 

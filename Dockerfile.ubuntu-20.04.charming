@@ -16,13 +16,6 @@ RUN apt-get install -y python3-opencv
 RUN apt-get install -y libopencv-dev
 RUN apt-get install -y libboost-all-dev
 
-#RUN git clone https://github.com/microsoft/vcpkg.git
-#RUN cd /vcpkg && ./bootstrap-vcpkg.sh
-#RUN cd /vcpkg && ./vcpkg integrate install
-#RUN cd /vcpkg && ./vcpkg install magic-enum
-#RUN cd /vcpkg && ./vcpkg install libuv
-
-
 
 # >>>>>>>>begin install tango and entangle
 ENV TANGO_HOST=ictrlfs.ictrl.frm2:10000
@@ -50,7 +43,7 @@ ENV TANGO_HOST=ictrlfs.ictrl.frm2:10000
 #ARG targ1=/hiersolleshin
 #RUN mkdir ${targ1}
 #RUN echo ${targ1}
-#RUN cd ${targ1} && cmake -DCMAKE_TOOLCHAIN_FILE=/vcpkg/scripts/buildsystems/vcpkg.cmake   -DSIGSLOT_PATH=/CHARMing/sigslot/include -DASIO_EXTENSIONS_PATH=/CHARMing/asio-extensions/include -S /CHARMing/charm/ -B ${targ1} 
+#RUN cd ${targ1} && cmake -DENTANGE_ROOT=${entangle_DIR} -S /CHARMing/charm/ -B ${targ1} 
 #RUN cd ${targ1} && make
 
 #ARG targ2=${entangle_DIR}/device/charm

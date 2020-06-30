@@ -225,6 +225,16 @@ namespace Mesytec {
 								int f = 0;
 
 							}
+							while (action lec = CheckAction()) {
+								if (lec == action::start_reading) {
+									LOG_INFO << "return from listmode read, to be ready for new file" << std::endl;
+									return;
+								}
+								if (lec == action::wait_reading) {
+									boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
+									//LOG_INFO << "action::wait_reading" << std::endl;
+								}
+							}
 							if (possible_nc != std::string::npos) {
 								if (from != 0) { throw read_error() << my_info(read_errorcode::PROGRAM_LOGIC_ERROR); }
 								std::string_view  haystackBeginOnly(buffer.data(), possible_nc);
@@ -383,10 +393,7 @@ namespace Mesytec {
 								
 							}
 							if (from == bytes_read) break;
-							while(action lec=CheckAction()) {
-								if (lec == action::start_reading) return;
-								if (lec == action::wait_reading) boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
-							}
+							
 							
 						} while (from != std::string::npos);
 						bufnum++;

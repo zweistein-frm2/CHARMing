@@ -96,7 +96,12 @@ int main(int argc, char* argv[])
 	
 	try
 	{
-		std::cout << PROJECT_NAME << " : BRANCH: " << GIT_BRANCH << " LATEST TAG:" << GIT_LATEST_TAG << " commits since:"<< GIT_NUMBER_OF_COMMITS_SINCE<<" "<<GIT_DATE<< std::endl;
+		//std::cout << PROJECT_NAME << " : BRANCH: " << GIT_BRANCH << " LATEST TAG:" << GIT_LATEST_TAG << " commits since:"<< GIT_NUMBER_OF_COMMITS_SINCE<<" "<<GIT_DATE<< std::endl;
+		
+		std::string git_latest_tag(GIT_LATEST_TAG);
+		git_latest_tag.erase(std::remove_if(git_latest_tag.begin(), git_latest_tag.end(), (int(*)(int)) std::isalpha), git_latest_tag.end());
+		std::cout << PROJECT_NAME<<" : "<< git_latest_tag << "." << GIT_NUMBER_OF_COMMITS_SINCE << "." << GIT_DATE;
+
 		if (argc == 1) {
 			std::cout << "--help for usage info" << std::endl;
 		}

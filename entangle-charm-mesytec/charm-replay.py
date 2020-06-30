@@ -5,6 +5,7 @@ from entangle.core.states import BUSY, UNKNOWN,FAULT
 from entangle.core.errors import InvalidValue, InvalidOperation, \
     ConfigurationError
 from entangle.lib.loggers import FdLogMixin
+from entangle.core.device import DeviceWorker
 import signal, os
 import numpy as np
 import cv2 as cv
@@ -14,20 +15,30 @@ from entangle.device.charm import listmodereplay
 charmsystem = None
 
 class DeviceConnection(FdLogMixin,base.MLZDevice):
+    commands = {
+         'Log':
+            Cmd('latest log messages.',None, listof(str), '', ''),
+         
+    }
     def init(self):
         self.init_fd_log('Replay')
         fd = self.get_log_fd()
-        print("charm-replay.py:DeviceConnection.init("+str(fd)+")")
+       # print("charm-replay.py:DeviceConnection.init("+str(fd)+")")
         global charmsystem
         if charmsystem is None:
                 charmsystem=listmodereplay.ReplayList(fd)
-    def __del__(self):
-        print("charm-replay.py: DeviceConnection.__del__")
+   # def __del__(self):
+   #   print("charm-replay.py: DeviceConnection.__del__")
     def read_version(self):
         ver = super().read_version();
         if not charmsystem:
             return ver
         return ver + " "+charmsystem.version
+    def Log(self):
+        #el = logging.getLoggerClass()
+
+        #super(entangle.core.device.DeviceWorker,self).
+        return ['not yet implemented']
 
 class PlayList(base.MLZDevice):
     commands = {

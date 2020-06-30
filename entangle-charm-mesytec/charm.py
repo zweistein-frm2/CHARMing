@@ -14,21 +14,31 @@ from entangle.device.charm import mesytecsystem
 charmsystem = None
 
 class DeviceConnection(FdLogMixin,base.MLZDevice):
+    commands = {
+         'Log':
+            Cmd('latest log messages.',None, listof(str), '', ''),
+    }
+
     def init(self):
         self.init_fd_log('Charm')
         fd = self.get_log_fd()
-        print("charm.py:DeviceConnection.init("+str(fd)+")")
+      #  print("charm.py:DeviceConnection.init("+str(fd)+")")
         global charmsystem
         if charmsystem is None:
                 charmsystem=mesytecsystem.NeutronMeasurement(fd)
        
-    def __del__(self):
-        print("charm.py: DeviceConnection.__del__")
+    #def __del__(self):
+       # print("charm.py: DeviceConnection.__del__")
     def read_version(self):
         ver = super().read_version();
         if not charmsystem:
             return ver
         return ver + " "+charmsystem.version
+    
+    def Log(self):
+        #el = logging.getLoggerClass()
+        #super(entangle.core.device.DeviceWorker,self).
+        return ['not yet implemented']
     
 
 
@@ -88,8 +98,6 @@ class Settings(base.MLZDevice):
 
 class MeasureCounts(base.CounterChannel):
     
-   
-   
     def state(self):
         global charmsystem
         if charmsystem:
