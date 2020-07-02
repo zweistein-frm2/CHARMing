@@ -286,6 +286,20 @@ struct NeutronMeasurement {
             LOG_INFO << "NeutronMeasurement.stopafter(" << counts << ", " << seconds << ")" << std::endl;
         }
        
+        boost::python::list log() {
+            boost::python::list l;
+            {
+                Zweistein::ReadLock r_lock(Entangle::cbLock); //circular buffer lock
+
+                for (auto iter = Entangle::ptrcb->begin(); iter != Entangle::ptrcb->end(); iter++) {
+
+                    std::vector<std::string> strs;
+                    boost::split(strs, *iter, boost::is_any_of("\n"));
+                    for (auto& s : strs) l.append(s);
+                }
+            }
+            return l;
+        }
         boost::python::list monitors_status() {
             boost::python::list l2;
             for (int i = 0; i < COUNTER_MONITOR_COUNT; i++) {
@@ -314,7 +328,7 @@ struct NeutronMeasurement {
             //ss << PROJECT_NAME << " : BRANCH: " << GIT_BRANCH << " LATEST TAG:" << GIT_LATEST_TAG << " commits since:" << GIT_NUMBER_OF_COMMITS_SINCE << " " << GIT_DATE << std::endl;
             std::string git_latest_tag(GIT_LATEST_TAG);
             git_latest_tag.erase(std::remove_if(git_latest_tag.begin(), git_latest_tag.end(), (int(*)(int)) std::isalpha), git_latest_tag.end());
-            ss << PROJECT_NAME << " : " << git_latest_tag << "." << GIT_NUMBER_OF_COMMITS_SINCE << "." << GIT_DATE;
+            ss << PROJECT_NAME << " : " << git_latest_tag << "." << GIT_NUMBER_OF_COMMITS_SINCE << "." << GIT_REV << "_" << GIT_DATE;
             return ss.str();
         }
 
@@ -436,6 +450,7 @@ BOOST_PYTHON_MODULE(mesytecsystem)
             .def("stopafter", &NeutronMeasurement::stopafter)
             .def("resume", &NeutronMeasurement::resume)
             .def("monitors_status", &NeutronMeasurement::monitors_status)
+            .def("log", &NeutronMeasurement::log)
             .def("status", &NeutronMeasurement::status)
             .def("stop", &NeutronMeasurement::stop)
             .def("getHistogram", &NeutronMeasurement::getHistogram, return_internal_reference<1, with_custodian_and_ward_postcall<1, 0>>())

@@ -5,7 +5,7 @@ from entangle.core.states import BUSY, UNKNOWN,FAULT
 from entangle.core.errors import InvalidValue, InvalidOperation, \
     ConfigurationError
 from entangle.lib.loggers import FdLogMixin
-from entangle.core.device import DeviceWorker
+
 import signal, os
 import numpy as np
 import cv2 as cv
@@ -27,18 +27,18 @@ class DeviceConnection(FdLogMixin,base.MLZDevice):
         global charmsystem
         if charmsystem is None:
                 charmsystem=listmodereplay.ReplayList(fd)
+
    # def __del__(self):
    #   print("charm-replay.py: DeviceConnection.__del__")
+
     def read_version(self):
         ver = super().read_version();
         if not charmsystem:
             return ver
         return ver + " "+charmsystem.version
-    def Log(self):
-        #el = logging.getLoggerClass()
 
-        #super(entangle.core.device.DeviceWorker,self).
-        return ['not yet implemented']
+    def Log(self):
+        return charmsystem.log()
 
 class PlayList(base.MLZDevice):
     commands = {
@@ -56,6 +56,7 @@ class PlayList(base.MLZDevice):
         if charmsystem:
             return charmsystem.removefile(file)
         return False
+
     def AddFile(self,file):
         global charmsystem
         if charmsystem:
@@ -80,8 +81,6 @@ class PlayList(base.MLZDevice):
 
 class MeasureCounts(base.CounterChannel):
     
-   
-   
     def state(self):
         global charmsystem
         if charmsystem:
@@ -103,20 +102,24 @@ class MeasureCounts(base.CounterChannel):
     
     def Prepare(self):
         pass
+
     def Resume(self):
         global charmsystem
         if charmsystem:
             charmsystem.resume()
+
     def read_value(self):
         global charmsystem
         if charmsystem:
             t = charmsystem.status()
             return t[0]
+
     def write_preselection(self, value):
         global charmsystem
         if charmsystem:
             t = charmsystem.status()
             charmsystem.stopafter(value,0)
+
     def read_version(self):
         ver = super().read_version();
         if not charmsystem:
@@ -148,20 +151,24 @@ class MeasureTime(base.TimerChannel):
     
     def Prepare(self):
         pass
+
     def Resume(self):
         global charmsystem
         if charmsystem:
             charmsystem.resume()
+
     def read_value(self):
         global charmsystem
         if charmsystem:
             t = charmsystem.status()
             return t[1]
+
     def write_preselection(self, value):
         global charmsystem
         if charmsystem:
              t = charmsystem.status()
              charmsystem.stopafter(0,value)
+
     def read_version(self):
         ver = super().read_version();
         if not charmsystem:
@@ -232,12 +239,16 @@ class Histogram(base.ImageChannel):
 
     def read_CountsInRoi(self):
         return uint64(self.count)
+
     def get_CountsInRoi_unit(self):
         return 'cts'
+
     def Clear(self):
         return
+
     def read_detectorSize(self):
         return self.Histogram().Size
+
     def read_RoiWKT(self):
         #print("read_RoiWKT("+str(self.selectedRoi)+")")
         wkt = self.Histogram().getRoi(self.selectedRoi)
@@ -252,6 +263,7 @@ class Histogram(base.ImageChannel):
     
     def read_selectedRoi(self):
         return self.selectedRoi
+
     def write_selectedRoi(self,value):
         #print("write_selectedRoi("+str(value)+")")
         if value<0 :
@@ -261,10 +273,13 @@ class Histogram(base.ImageChannel):
        
     def get_selectedRoi_unit(self):
         return ''
+
     def read_maxindexroi(self):
         return self.maxindexroi
+
     def get_maxindexroi_unit(self):
         return ''
+
     def read_value(self):
         t = self.Histogram().update(self.mat)
         #t[0] is list of pair(wkt,count)

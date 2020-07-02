@@ -187,7 +187,10 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
                         }
                         using namespace magic_enum::ostream_operators;
                         Mesytec::listmode::whatnext = Mesytec::listmode::wait_reading;
-                        LOG_INFO << " all done: " << Mesytec::listmode::whatnext << std::endl;
+                       
+                        Mesytec::listmode::action ac = Mesytec::listmode::whatnext;
+                       
+                        LOG_INFO << " all done: " << ac << std::endl;
                     } while (!io_service.stopped());
 
                 }
@@ -267,6 +270,20 @@ struct ReplayList {
             LOG_INFO << "ReplayList.stopafter(" << counts << ", " << seconds << ")" << std::endl;
         }
        
+        boost::python::list log() {
+            boost::python::list l;
+            {
+                Zweistein::ReadLock r_lock(Entangle::cbLock);
+
+                for (auto iter = Entangle::ptrcb->begin(); iter != Entangle::ptrcb->end();iter++) {
+                  
+                   std::vector<std::string> strs;
+                   boost::split(strs, *iter, boost::is_any_of("\n"));
+                   for(auto & s: strs) l.append(s);
+                }
+            }
+            return l;
+        }
         boost::python::list monitors_status() {
             boost::python::list l2;
             for (int i = 0; i < COUNTER_MONITOR_COUNT; i++) {
@@ -371,12 +388,12 @@ struct ReplayList {
 
                 }
                 catch (boost::exception& e) { LOG_ERROR << boost::diagnostic_information(e) << std::endl; }
-                LOG_INFO << "list:" << std::endl;
+                //LOG_INFO << "list:" << std::endl;
                 for (auto& s : ptrStartParameters->playlist) {
                     l.append(s);
-                    LOG_INFO << s << std::endl;
+                    //LOG_INFO << s << std::endl;
                 }
-                LOG_INFO << "end list:" << std::endl;
+                //LOG_INFO << "end list:" << std::endl;
               
             }
             return l;
@@ -401,17 +418,17 @@ struct ReplayList {
 
         std::string get_version() {
             std::stringstream ss;
-           // ss << PROJECT_NAME << " : BRANCH: " << GIT_BRANCH << " LATEST TAG:" << GIT_LATEST_TAG << " commits since:" << GIT_NUMBER_OF_COMMITS_SINCE << " " << GIT_DATE << std::endl;
             std::string git_latest_tag(GIT_LATEST_TAG);
             git_latest_tag.erase(std::remove_if(git_latest_tag.begin(), git_latest_tag.end(), (int(*)(int)) std::isalpha), git_latest_tag.end());
-            ss << PROJECT_NAME << " : " << git_latest_tag << "." << GIT_NUMBER_OF_COMMITS_SINCE << "." << GIT_DATE;
+            ss << PROJECT_NAME << " : " << git_latest_tag << "." << GIT_NUMBER_OF_COMMITS_SINCE << "."<< GIT_REV <<"_"<< GIT_DATE;
             return ss.str();
         }
         void start() {
             using namespace magic_enum::ostream_operators;
             // we have to start from beginning of playlist
             ptrmsmtsystem1->started = boost::chrono::system_clock::now();
-            LOG_INFO << "ReplayList::start()" << Mesytec::listmode::whatnext << std::endl;
+            Mesytec::listmode::action ac = Mesytec::listmode::whatnext;
+            LOG_INFO << "ReplayList::start() " << ac << std::endl;
             Mesytec::listmode::action action= Mesytec::listmode::whatnext;
             
             // so we stop an angoing reading.
@@ -530,6 +547,7 @@ BOOST_PYTHON_MODULE(listmodereplay)
             .def("resume", &ReplayList::resume)
             .def("status", &ReplayList::status)
             .def("monitors_status", &ReplayList::monitors_status)
+            .def("log", &ReplayList::log)
             .def("stop", &ReplayList::stop)
             .def("getHistogram", &ReplayList::getHistogram, return_internal_reference<1, with_custodian_and_ward_postcall<1, 0>>())
             ;

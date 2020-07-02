@@ -165,7 +165,7 @@ namespace Zweistein {
 
         void _setRoi(std::string wkt,int index) {
             
-            LOG_INFO << "_setRoi(" << wkt <<", "<<index <<")" << std::endl;
+           // LOG_INFO << "_setRoi(" << wkt <<", "<<index <<")" << std::endl;
             int width = 1;
             int height = 1; 
                                  
@@ -211,8 +211,7 @@ namespace Zweistein {
 #ifdef BOOST_PYTHON_MODULE
         boost::python::tuple update(cv::Mat mat) {
             using namespace magic_enum::bitwise_operators; // out-of-the-box bitwise operators for enums.
-        //    LOG_INFO << __FILE__ << " : " << __LINE__ << std::endl;
-            std::vector<RoiData> rdc = std::vector<RoiData>();
+            std::vector<RoiData> rdc = std::vector<RoiData>(); // rdc = roi data current
             {
                 Zweistein::ReadLock r_lock(histogramsLock);
                 for (auto& a : roidata)   rdc.push_back(a);

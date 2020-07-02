@@ -1,6 +1,6 @@
 from entangle import base
 from entangle.core import states, Prop, uint16, Attr,Cmd
-from entangle.core.defs import uint64, int32, boolean
+from entangle.core.defs import uint64, int32, boolean, listof
 from entangle.core.states import BUSY, UNKNOWN,FAULT
 from entangle.core.errors import InvalidValue, InvalidOperation, \
     ConfigurationError
@@ -22,13 +22,13 @@ class DeviceConnection(FdLogMixin,base.MLZDevice):
     def init(self):
         self.init_fd_log('Charm')
         fd = self.get_log_fd()
-      #  print("charm.py:DeviceConnection.init("+str(fd)+")")
+        #print("charm.py:DeviceConnection.init("+str(fd)+")")
         global charmsystem
         if charmsystem is None:
                 charmsystem=mesytecsystem.NeutronMeasurement(fd)
        
     #def __del__(self):
-       # print("charm.py: DeviceConnection.__del__")
+        #print("charm.py: DeviceConnection.__del__")
     def read_version(self):
         ver = super().read_version();
         if not charmsystem:
@@ -36,10 +36,8 @@ class DeviceConnection(FdLogMixin,base.MLZDevice):
         return ver + " "+charmsystem.version
     
     def Log(self):
-        #el = logging.getLoggerClass()
-        #super(entangle.core.device.DeviceWorker,self).
-        return ['not yet implemented']
-    
+        return charmsystem.log()
+   
 
 
 class Simulator(base.MLZDevice):
@@ -56,6 +54,7 @@ class Simulator(base.MLZDevice):
         global charmsystem
         if charmsystem:
             return charmsystem.simulatorRate
+
     def write_NucleoRate(self,value):
         global charmsystem
         if charmsystem:
@@ -82,6 +81,7 @@ class Settings(base.MLZDevice):
         global charmsystem
         if charmsystem:
             return charmsystem.writelistmode
+
     def write_writelistmode(self,value):
         global charmsystem
         if charmsystem:
@@ -119,15 +119,18 @@ class MeasureCounts(base.CounterChannel):
     
     def Prepare(self):
         pass
+
     def Resume(self):
         global charmsystem
         if charmsystem:
             charmsystem.resume()
+
     def read_value(self):
         global charmsystem
         if charmsystem:
             t = charmsystem.status()
             return t[0]
+
     def write_preselection(self, value):
         global charmsystem
         if charmsystem:
@@ -165,15 +168,18 @@ class MeasureTime(base.TimerChannel):
     
     def Prepare(self):
         pass
+
     def Resume(self):
         global charmsystem
         if charmsystem:
             charmsystem.resume()
+
     def read_value(self):
         global charmsystem
         if charmsystem:
             t = charmsystem.status()
             return t[1]
+
     def write_preselection(self, value):
         global charmsystem
         if charmsystem:
@@ -247,20 +253,24 @@ class Histogram(base.ImageChannel):
         
     def read_CountsInRoi(self):
         return uint64(self.count)
+
     def get_CountsInRoi_unit(self):
         return 'cts'
+
     def Clear(self):
         return
+
     def read_detectorSize(self):
         return self.Histogram().Size
+
     def read_RoiWKT(self):
         #print("read_RoiWKT("+str(self.selectedRoi)+")")
         wkt = self.Histogram().getRoi(self.selectedRoi)
         return wkt
         
     def write_RoiWKT(self,value):
-        print("write_RoiWKT = "+str(value))
-        print("selectedRoi = "+str(self.selectedRoi))
+        #print("write_RoiWKT = "+str(value))
+        #print("selectedRoi = "+str(self.selectedRoi))
         self.Histogram().setRoi(value,self.selectedRoi)
         
     def get_RoiWKT_unit(self):
@@ -268,6 +278,7 @@ class Histogram(base.ImageChannel):
     
     def read_selectedRoi(self):
         return self.selectedRoi
+
     def write_selectedRoi(self,value):
         #print("write_selectedRoi("+str(value)+")")
         if value<0 :
@@ -277,10 +288,13 @@ class Histogram(base.ImageChannel):
        
     def get_selectedRoi_unit(self):
         return ''
+
     def read_maxindexroi(self):
         return self.maxindexroi
+
     def get_maxindexroi_unit(self):
         return ''
+    
     def read_value(self):
         t = self.Histogram().update(self.mat)
         #t[0] is list of pair(wkt,count)
@@ -293,6 +307,7 @@ class Histogram(base.ImageChannel):
         self.count=t[0][self.selectedRoi][1]
         #t[2] is list of Monitors
         return self.mat.flatten()
+
     def read_version(self):
         ver = super().read_version();
         if not charmsystem:

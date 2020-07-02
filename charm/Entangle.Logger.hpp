@@ -15,6 +15,9 @@
 #include <boost/iostreams/stream.hpp>
 #include <boost/iostreams/device/null.hpp>
 #include <boost/exception/diagnostic_information.hpp>
+#include <boost/circular_buffer.hpp>
+#include "Zweistein.Locks.hpp"
+
 namespace Entangle{
 	enum severity_level
 	{
@@ -25,6 +28,8 @@ namespace Entangle{
 		error,
 		fatal
 	};
+	extern Zweistein::Lock cbLock;
+	extern  boost::shared_ptr<boost::circular_buffer<std::string>> ptrcb;
 	struct Logger : public std::ostream{
 
 		class _StreamBuf : public std::stringbuf {
@@ -53,6 +58,14 @@ namespace Entangle{
 					output.write(prefix.c_str(), prefix.length());
 					output.write(str().c_str(), str().length());
 					
+					std::string msg = str();
+					if (*msg.rbegin() == '\n') *msg.rbegin() = '\0';
+					
+					
+					{
+						Zweistein::WriteLock w_lock(Entangle::cbLock);
+						ptrcb->push_back(msg);
+					}
 					str("");
 					
 				}
@@ -76,7 +89,7 @@ namespace Entangle{
 	extern boost::shared_ptr <Entangle::Logger> ptrlogger;
 	void Init(int fd); 
 	extern severity_level SEVERITY_THRESHOLD;
-
+	
 }
 
 extern boost::iostreams::stream< boost::iostreams::null_sink > nullOstream; 
