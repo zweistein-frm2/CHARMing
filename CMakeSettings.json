@@ -147,9 +147,10 @@
       "configurationType": "Release",
       "cmakeExecutable": "/snap/cmake/current/bin/cmake",
       "remoteCopySourcesExclusionList": [ ".vs", ".git", "out" ],
+	  "cmakeCommandArgs": "-DEMULATOR_ONLY=ON",
       "buildCommandArgs": "",
       "ctestCommandArgs": "",
-      "cmakeToolchain": "/vcpkg/scripts/buildsystems/vcpkg.cmake",
+      "cmakeToolchain": "",
       "inheritEnvironments": [ "linux_arm" ],
       "variables": [
         {

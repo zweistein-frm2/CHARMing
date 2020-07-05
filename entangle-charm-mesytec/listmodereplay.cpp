@@ -56,7 +56,7 @@ extern const char* GIT_DATE;
 Zweistein::Lock histogramsLock;
 std::vector<Histogram> histograms;
 static_assert(COUNTER_MONITOR_COUNT >= 4, "Mcpd8 Datapacket can use up to 4 counters: params[4][3]");
-boost::atomic<long long> CounterMonitor[COUNTER_MONITOR_COUNT];
+boost::atomic<unsigned long long> CounterMonitor[COUNTER_MONITOR_COUNT];
 boost::asio::io_service io_service;
 
 
@@ -287,7 +287,7 @@ struct ReplayList {
         boost::python::list monitors_status() {
             boost::python::list l2;
             for (int i = 0; i < COUNTER_MONITOR_COUNT; i++) {
-                long long val = CounterMonitor[i];
+                unsigned long long val = CounterMonitor[i];
                 auto t = boost::python::make_tuple("MONITOR" + std::to_string(i), val );
                 l2.append(t);
             }

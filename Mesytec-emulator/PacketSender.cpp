@@ -75,14 +75,7 @@ unsigned short param[4][3];
 
 unsigned short auxtimer[4];
 
-void fill48bit(unsigned short data[3], long long value) {
 
-	value &= 0x0000FFFFFFFFFFFF;
-	data[0]=
-	data[1]=
-	data[2]=
-
-}
 
 boost::atomic<bool> retry = true;
 

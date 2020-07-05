@@ -61,7 +61,7 @@ Zweistein::Lock histogramsLock;
 std::vector<Histogram> histograms; 
 
 static_assert(COUNTER_MONITOR_COUNT >= 4, "Mcpd8 Datapacket can use up to 4 counters: params[4][3]");
-boost::atomic<long long> CounterMonitor[COUNTER_MONITOR_COUNT];
+boost::atomic<unsigned long long> CounterMonitor[COUNTER_MONITOR_COUNT];
 
 namespace po = boost::program_options;
 void conflicting_options(const po::variables_map& vm,
