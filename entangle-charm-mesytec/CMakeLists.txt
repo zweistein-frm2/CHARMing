@@ -144,6 +144,9 @@ if(ENTANGLE_ROOT )
       RUNTIME DESTINATION ${ENTANGLE_ROOT}/entangle/device/charm
       LIBRARY DESTINATION ${ENTANGLE_ROOT}/entangle/device/charm
  )
+else()
+install(CODE "MESSAGE(\"Entangle not installed, ${PROJECT_NAME} NOT INSTALLED\")")
+#https://forge.frm2.tum.de/entangle/doc/entangle-master/build/
 endif()
 
 endforeach()
