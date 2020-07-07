@@ -145,7 +145,8 @@ if(ENTANGLE_ROOT )
       LIBRARY DESTINATION ${ENTANGLE_ROOT}/entangle/device/charm
  )
 else()
-install(CODE "MESSAGE(\"${PROJECT_NAME}.so NOT INSTALLED\")")
+GET_TARGET_PROPERTY(suffix hello SUFFIX)
+install(CODE "MESSAGE(\"${PROJECT_NAME}${suffix} NOT INSTALLED\")")
 install(CODE "MESSAGE(\"REASON: prerequisite Entangle NOT INSTALLED\")")
 install(CODE "MESSAGE(\"https://forge.frm2.tum.de/entangle/doc/entangle-master/build/\")")
 
