@@ -37,7 +37,7 @@ namespace Zweistein {
 		
 		boost::this_thread::sleep_for(boost::chrono::milliseconds(200));
 
-		// cc::Mat is row, column which corresponds to y, x !!!!
+		// cv::Mat is row, column which corresponds to y, x !!!!
 		auto imageUpdate = [](cv::Mat& image, cv::Mat& binnedimage) {
 			using namespace magic_enum::bitwise_operators; // out-of-the-box bitwise operators for all enums.
 			enum class  HISTYPE {
