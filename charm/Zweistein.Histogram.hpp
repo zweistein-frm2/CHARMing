@@ -1,9 +1,11 @@
 /***************************************************************************
- *   Copyright (C) 2019 by Andreas Langhoff <andreas.langhoff@frm2.tum.de> *
+ *   Copyright (C) 2019 - 2020 by Andreas Langhoff
+ *                                          <andreas.langhoff@frm2.tum.de> *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
  *   the Free Software Foundation;                                         *
  ***************************************************************************/
+
 #pragma once
 #ifdef BOOST_PYTHON_MODULE
 #include <boost/python.hpp>
@@ -65,7 +67,7 @@ namespace Zweistein {
         boost::geometry::model::box<point_type> box;
         RoiData():count(0){}
     };
-     
+
     //https://www.boost.org/doc/libs/1_72_0/libs/geometry/doc/html/geometry/reference/algorithms/within/within_2.html
     // boost::geometry::within(p, poly)
     //https://www.boost.org/doc/libs/1_72_0/libs/geometry/doc/html/geometry/reference/algorithms/envelope/envelope_2.html
@@ -82,11 +84,11 @@ namespace Zweistein {
         void resize(int rows, int cols) {
 
             histogram = cv::Mat_<int32_t>::zeros(rows,cols);
-           
+
         }
 
-        
-       
+
+
         std::string getRoi(int index) {
             int rsize = 0;
             {
@@ -95,7 +97,7 @@ namespace Zweistein {
             }
 
             //LOG_INFO << "getRoi(" << index << ")" << std::endl;
-          
+
             if (rsize == index) {
                 LOG_INFO << "roidata.size()="<<rsize <<", index does not exist, create new : "  << std::endl;
                 LOG_INFO << "roidata.push_back(rd), old size:" << rsize << std::endl;
@@ -107,8 +109,8 @@ namespace Zweistein {
                     _setRoi(wkt, index);
                     return wkt;
                 }
-                
-              
+
+
             }
             if (rsize - 1 < index) return "";
             std::string tmp;
@@ -131,7 +133,7 @@ namespace Zweistein {
                 return "";
             }
     }
-       
+
     std::string WKTRoiRect(int left, int bottom, int maxX, int maxY) {
             std::stringstream ssroi;
             ssroi << ("POLYGON((") << left << " " << bottom << ",";
@@ -142,18 +144,18 @@ namespace Zweistein {
             std::string roi = ssroi.str();
             //LOG_INFO << __FILE__ << " : " << __LINE__ << " "<<roi << std::endl;
             return roi;
-           
+
         }
 
         void setRoi(std::string wkt, int index) {
-           
+
             Zweistein::WriteLock w_lock(histogramsLock);
             LOG_INFO << "setRoi(" << wkt << ", " << index << ")" << std::endl;
             if (roidata.size() - 1 < index) {
                 LOG_ERROR << "index out of range, max=" << roidata.size() - 1 << std::endl;
                 return;
             }
-           
+
             if (wkt.empty() && index!=0){
                      LOG_INFO << "roidata.erase(" << index << ")" << std::endl;
                      roidata.erase(roidata.begin() + index);
@@ -164,11 +166,11 @@ namespace Zweistein {
         }
 
         void _setRoi(std::string wkt,int index) {
-            
+
            // LOG_INFO << "_setRoi(" << wkt <<", "<<index <<")" << std::endl;
             int width = 1;
-            int height = 1; 
-                                 
+            int height = 1;
+
             boost::algorithm::replace_last(wkt,",())",")");
             std::string reason;
             boost::geometry::validity_failure_type failure= boost::geometry::no_failure;
@@ -179,11 +181,11 @@ namespace Zweistein {
                     valid = boost::geometry::is_valid(roidata[index].roi, failure);
                     bool could_be_fixed = (failure == boost::geometry::failure_not_closed
                         || failure == boost::geometry::failure_wrong_orientation);
-                    
+
                     if(could_be_fixed)boost::geometry::correct(roidata[index].roi);
                     valid = boost::geometry::is_valid(roidata[index].roi, reason);
-                   
-                
+
+
                 }
             }
             catch (std::exception& e) {
@@ -191,7 +193,7 @@ namespace Zweistein {
                 wkt = "";
             }
             if (!valid || wkt.empty()) {
-                
+
                 if (failure != boost::geometry::no_failure) {
                        LOG_ERROR << "boost::geometry::validity_failure_type=" << failure << " : "<< reason<< std::endl;
                 }
@@ -221,10 +223,10 @@ namespace Zweistein {
             if (magic_enum::enum_integer(hss & Zweistein::histogram_setup_status::has_binning)) {
                 Zweistein::Binning::Apply_OCC_Correction(mat, rdc[0].roi, rdc[0].count);
             }
-           
-           
+
+
            boost::python::list l;
-           
+
            for (auto & r : rdc) {
                std::stringstream ss_wkt;
                ss_wkt << boost::geometry::wkt(r.roi);
@@ -235,21 +237,20 @@ namespace Zweistein {
         }
 
         boost::python::tuple getSize() {
-           
-            
+
+
             int width = 0;// = roidata[0].box.max_corner().get<0>() - roidata[0].box.min_corner().get<0>();
             int height = 0;// roidata[0].box.max_corner().get<1>() - roidata[0].box.min_corner().get<1>();
             {
-               
+
                 Zweistein::ReadLock r_lock(histogramsLock);
                 width=histogram.cols;
                 height = histogram.rows;
             }
             return boost::python::make_tuple(width,height);
-                     
-           
+
+
         }
 #endif
     };
         extern std::vector<Histogram> histograms;
-        

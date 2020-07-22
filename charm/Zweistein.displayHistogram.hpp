@@ -9,7 +9,6 @@
 #include <boost/chrono.hpp>
 #include <boost/shared_ptr.hpp>
 #include "Zweistein.Event.hpp"
-#include "Mesytec.Mcpd8.hpp"
 #include <boost/format.hpp>
 #include <boost/signals2.hpp>
 #include <boost/thread.hpp>
@@ -24,7 +23,7 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 #define CVUI_IMPLEMENTATION
-#include "cvui.h"
+#include "cvui/cvui.h"
 #include <boost/asio.hpp>
 #include "Zweistein.Histogram.hpp"
 #include "Zweistein.Binning.ApplyOcc.hpp"
@@ -32,9 +31,9 @@
 
 
 namespace Zweistein {
-	void displayHistogram(boost::asio::io_service& io_service, boost::shared_ptr<Mesytec::MesytecSystem> pmsmtsystem1) {
+	void displayHistogram(boost::asio::io_service& io_service, boost::shared_ptr<Zweistein::XYDetectorSystem> pmsmtsystem1) {
 
-		
+
 		boost::this_thread::sleep_for(boost::chrono::milliseconds(200));
 
 		// cv::Mat is row, column which corresponds to y, x !!!!
@@ -45,9 +44,9 @@ namespace Zweistein {
 				BINNED=2
 			};
 			static cv::Mat binned_occ_corrected;
-			
+
 			HISTYPE htype = HISTYPE::RAW|HISTYPE::BINNED;
-					
+
 			histogram_setup_status hss = Zweistein::setup_status;
 			if ((bool)(htype & HISTYPE::BINNED) && magic_enum::enum_integer(hss & histogram_setup_status::has_binning)) {
 				{
@@ -60,7 +59,7 @@ namespace Zweistein {
 				cv::minMaxLoc(binned_occ_corrected, &minVal, &maxVal, &minLoc, &maxLoc);
 				binned_occ_corrected.convertTo(binnedimage, CV_8U, maxVal != 0 ? 255.0 / maxVal : 0, 0);
 			}
-			
+
 			if ((bool)(htype & HISTYPE::RAW)) {
 				Zweistein::ReadLock r_lock(histogramsLock);
 				double minVal, maxVal;
@@ -69,7 +68,7 @@ namespace Zweistein {
 				histograms[0].histogram.convertTo(image, CV_8U, maxVal != 0 ? 255.0 / maxVal : 0, 0);
 			}
 
-		
+
 
 		};
 		boost::function<void()> display = [ &io_service, &imageUpdate]() {
@@ -85,13 +84,13 @@ namespace Zweistein {
 				std::string title = "histogram_raw";
 				windows.push_back(title);
 				cv::namedWindow(title);
-				
+
 				histogram_setup_status hss = Zweistein::setup_status;
 				if (magic_enum::enum_integer(hss & histogram_setup_status::has_binning)) {
 					std::string title2 = "histogram_binned";
 					windows.push_back(title2);
 					cv::namedWindow(title2);
-					
+
 					bbinningwindow = true;
 				}
 				cvui::init(windows[0]);
@@ -150,7 +149,7 @@ namespace Zweistein {
 						cv::imshow(windows[1], colormappedbinnedimage);
 					}
 				}
-				
+
 
 
 			} while (!io_service.stopped());

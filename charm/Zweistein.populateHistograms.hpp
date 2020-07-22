@@ -11,7 +11,6 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/chrono.hpp>
 #include "Zweistein.Event.hpp"
-#include "Mesytec.Mcpd8.hpp"
 #include <boost/format.hpp>
 #include <boost/signals2.hpp>
 #include <boost/thread.hpp>
@@ -19,10 +18,6 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <opencv2/core.hpp>
-#include <opencv2/core/mat.hpp>
-#include <opencv2/highgui.hpp>
-#include <opencv2/imgproc.hpp>
 #include <boost/asio.hpp>
 #include "Zweistein.Histogram.hpp"
 #include "Zweistein.Binning.hpp"
@@ -33,22 +28,22 @@
 #include "Zweistein.GetConfigDir.hpp"
 
 namespace Zweistein {
-	
-	
 
-	void setupHistograms(boost::asio::io_service& io_service, boost::shared_ptr < Mesytec::MesytecSystem> pmsmtsystem1, std::string binningfile1) {
+
+
+	void setupHistograms(boost::asio::io_service& io_service, boost::shared_ptr < Zweistein::XYDetectorSystem> pmsmtsystem1, std::string binningfile1) {
 		using namespace magic_enum::bitwise_operators; // out-of-the-box bitwise operators for enums.
 
 		setup_status = histogram_setup_status::not_done;
 
-		unsigned short maxX = pmsmtsystem1->data.widthX;
-		unsigned short maxY = pmsmtsystem1->data.widthY;
+		unsigned short maxX = pmsmtsystem1->evdata.widthX;
+		unsigned short maxY = pmsmtsystem1->evdata.widthY;
 
 		if (maxX == 0 || maxY == 0) {
 			LOG_ERROR << __FILE__ << " : " << __LINE__ << " maxX=" << maxX << ", maxY=" << maxY << std::endl;
 			return;
 		}
-		
+
 		//LOG_DEBUG << "pmsmtsystem1->data.widthX=" << maxX << ", pmsmtsystem1->data.widthY=" << maxY << std::endl;
 		int left = 0;
 		int bottom = 0;
@@ -64,9 +59,9 @@ namespace Zweistein {
 		if (!binningfile1.empty() || binningfile1.length() != 0) {
 			bool readfileproblem = true;
 			try {
-				
+
 				boost::filesystem::path p(binningfile1);
-				
+
 				std::string ext = boost::algorithm::to_lower_copy(p.extension().string());
 				if (ext == ".txt") {
 					Zweistein::Binning::ReadTxt(binningfile1);
@@ -101,7 +96,7 @@ namespace Zweistein {
 				setup_status = hss | histogram_setup_status::has_binning;
 				readfileproblem = false;
 			}
-			
+
 			catch(const boost::property_tree::json_parser_error& e1){
 				LOG_ERROR << e1.what() << " " << e1.filename() << std::endl ;
 			}
@@ -135,7 +130,7 @@ namespace Zweistein {
 				}
 
 			}
-			
+
 			auto s = Zweistein::Binning::BINNING.shape();
 
 			Zweistein::Binning::array_type::element* itr = Zweistein::Binning::BINNING.data();
@@ -149,7 +144,7 @@ namespace Zweistein {
 			while (power < max_value) power *= 2;
 
 			{
-				
+
 				Zweistein::WriteLock w_lock(histogramsLock);
 				histograms[1].resize(power, maxX);
 				std::string wkt = histograms[1].WKTRoiRect(0, 0, maxX, power);
@@ -179,23 +174,23 @@ namespace Zweistein {
 					boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
 					continue;
 				}
-				unsigned short maxX = pmsmtsystem1->data.widthX;
-				unsigned short maxY = pmsmtsystem1->data.widthY;
+				unsigned short maxX = pmsmtsystem1->evdata.widthX;
+				unsigned short maxY = pmsmtsystem1->evdata.widthY;
 
 				unsigned short binningMaxY = 0;
 				if (magic_enum::enum_integer(hss & histogram_setup_status::has_binning)) {
 					binningMaxY = (unsigned short) Zweistein::Binning::BINNING.shape()[1];
 				}
-				
+
 				{
-					
+
 					Zweistein::WriteLock w_lock(histogramsLock);
 					long evntspopped = 0;
-					while (pmsmtsystem1->data.evntqueue.pop(ev)) {
+					while (pmsmtsystem1->evdata.evntqueue.pop(ev)) {
 					evntspopped++;
-					if (evntspopped > 2 * Mcpd8::Data::EVENTQUEUESIZE / 3) {
+					if (evntspopped > 2 * Zweistein::Data::EVENTQUEUESIZE / 3) {
 						evntspopped = 0;
-						LOG_WARNING << "evntspopped > " << 2 * Mcpd8::Data::EVENTQUEUESIZE / 3 << std::endl;
+						LOG_WARNING << "evntspopped > " << 2 * Zweistein::Data::EVENTQUEUESIZE / 3 << std::endl;
 						break;
 					}
 
@@ -212,8 +207,8 @@ namespace Zweistein {
 
 
 					if (ev.type == Zweistein::Event::EventTypeOther::RESET) {
-						maxX = pmsmtsystem1->data.widthX;
-						maxY = pmsmtsystem1->data.widthY;
+						maxX = pmsmtsystem1->evdata.widthX;
+						maxY = pmsmtsystem1->evdata.widthY;
 						for (auto& h : histograms) {
 							for (auto& r : h.roidata) 	r.count = 0;
 							h.resize(h.histogram.size[0], h.histogram.size[1]);

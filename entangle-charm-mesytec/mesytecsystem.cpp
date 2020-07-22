@@ -11,8 +11,6 @@
 #include <boost/python/numpy.hpp>
 #include <iostream>
 #include "Zweistein.PrettyBytes.hpp"
-#include <opencv2/core.hpp>
-#include <opencv2/core/mat.hpp>
 
 #include <boost/geometry.hpp>
 #include <boost/geometry/geometries/point_xy.hpp>

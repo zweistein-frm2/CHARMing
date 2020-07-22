@@ -31,7 +31,6 @@
 #include "Mesytec.config.hpp"
 #include "Zweistein.populateHistograms.hpp"
 #include "Zweistein.displayHistogram.hpp"
-#include <opencv2/highgui.hpp>
 #include "Zweistein.ThreadPriority.hpp"
 #include "Zweistein.Logger.hpp"
 #include "Zweistein.Averaging.hpp"
@@ -58,7 +57,7 @@ extern const char* GIT_BRANCH;
 extern const char* GIT_DATE;
 
 Zweistein::Lock histogramsLock;
-std::vector<Histogram> histograms; 
+std::vector<Histogram> histograms;
 
 static_assert(COUNTER_MONITOR_COUNT >= 4, "Mcpd8 Datapacket can use up to 4 counters: params[4][3]");
 boost::atomic<unsigned long long> CounterMonitor[COUNTER_MONITOR_COUNT];
@@ -89,15 +88,15 @@ int main(int argc, char* argv[])
 		LOG_ERROR << ex.what() << std::endl;
 	}
 	std::string appName = boost::filesystem::basename(argv[0]);
-	
+
 	boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1 = boost::shared_ptr < Mesytec::MesytecSystem>(new Mesytec::MesytecSystem());
 	ptrmsmtsystem1->initatomicortime_point();
-	
-	
+
+
 	try
 	{
 		//std::cout << PROJECT_NAME << " : BRANCH: " << GIT_BRANCH << " LATEST TAG:" << GIT_LATEST_TAG << " commits since:"<< GIT_NUMBER_OF_COMMITS_SINCE<<" "<<GIT_DATE<< std::endl;
-		
+
 		std::string git_latest_tag(GIT_LATEST_TAG);
 		git_latest_tag.erase(std::remove_if(git_latest_tag.begin(), git_latest_tag.end(), (int(*)(int)) std::isalpha), git_latest_tag.end());
 		std::cout << PROJECT_NAME << " : " << git_latest_tag << "." << GIT_NUMBER_OF_COMMITS_SINCE << "." << GIT_REV << "_" << GIT_DATE;
@@ -126,7 +125,7 @@ int main(int argc, char* argv[])
 			(SETUP, (std::string("config mesytec device(s): ")+ std::string("set module IP addr")).c_str())
 			;
 		po::positional_options_description positionalOptions;
-		positionalOptions.add(LISTMODE_FILE, maxNlistmode); 
+		positionalOptions.add(LISTMODE_FILE, maxNlistmode);
 		po::variables_map vm;
 		po::store(po::command_line_parser(argc, argv).
 			options(desc).positional(positionalOptions).run(), vm);
@@ -165,7 +164,7 @@ int main(int argc, char* argv[])
 		}
 		if (!vm.count(LISTMODE_FILE)) LOG_INFO << "Using config file:" << Zweistein::Config::inipath << " " <<std::endl ;
 		std::vector<std::string> listmodeinputfiles = std::vector<std::string>();
-		
+
 		if (vm.count(LISTMODE_FILE))
 		{
 			inputfromlistfile = true;
@@ -181,10 +180,10 @@ int main(int argc, char* argv[])
 			}
 			std::cout << std::endl;
 		}
-		
+
 		boost::asio::signal_set signals(io_service, SIGINT, SIGTERM);
 		signals.async_wait(boost::bind(&boost::asio::io_service::stop, &io_service));
-			
+
 		std::list<Mcpd8::Parameters> _devlist = std::list<Mcpd8::Parameters>();
 
 		boost::function<void()> t;
@@ -212,20 +211,20 @@ int main(int argc, char* argv[])
 							p.mcpd_ip = fname;
 						}
 
-						
-						
+
+
 						ptrmsmtsystem1->eventdataformat = Mcpd8::EventDataFormat::Undefined;
 						ptrmsmtsystem1->listmode_connect(_devlist, io_service);
 						// find the .json file for the listmode file
 						// check if Binning file not empty, if not empty wait for
 						Zweistein::setupHistograms(io_service,ptrmsmtsystem1,Mesytec::Config::BINNINGFILE.string());
-						bool ok = ptrmsmtsystem1->data.evntqueue.push(Zweistein::Event::Reset());
+						bool ok = ptrmsmtsystem1->evdata.evntqueue.push(Zweistein::Event::Reset());
 						if (!ok) LOG_ERROR << " cannot push Zweistein::Event::Reset()" << std::endl;
 						try {
 							boost::function<void(Mcpd8::DataPacket&)> abfunc = boost::bind(&Mesytec::MesytecSystem::analyzebuffer, ref(ptrmsmtsystem1), boost::placeholders::_1);
 							boost::shared_ptr <Mesytec::listmode::Read> ptrRead = boost::shared_ptr < Mesytec::listmode::Read>(new Mesytec::listmode::Read(abfunc, ptrmsmtsystem1->data, ptrmsmtsystem1->deviceparam));
 							ptrRead->file(fname, io_service);
-							while (ptrmsmtsystem1->data.evntqueue.read_available()); // wait unitl queue consumed
+							while (ptrmsmtsystem1->evdata.evntqueue.read_available()); // wait unitl queue consumed
 							// pointer to obj needed otherwise exceptions are not propagated properly
 						}
 						catch (Mesytec::listmode::read_error& x) {
@@ -242,7 +241,7 @@ int main(int argc, char* argv[])
 						}
 						Zweistein::setup_status = Zweistein::histogram_setup_status::not_done; // next file is all new life
 					}
-					
+
 				}
 				catch (boost::exception & e) {
 					LOG_ERROR << boost::diagnostic_information(e) << std::endl;
@@ -261,10 +260,10 @@ int main(int argc, char* argv[])
 			std::stringstream ss_1;
 			boost::property_tree::write_json(ss_1, Mesytec::Config::root);
 			LOG_INFO << ss_1.str() << std::endl;
-			
-			
 
-						
+
+
+
 			if(configok) Zweistein::Logger::Add_File_Sink(Mesytec::Config::DATAHOME.string() + appName + ".log");
 			try {
 				//we can write as text file:
@@ -275,9 +274,9 @@ int main(int argc, char* argv[])
 				outfile.close();
 
 				if (!configok) LOG_ERROR << "Please edit to fix configuration error : " << fp << std::endl;
-				
+
 			}
-			catch (std::exception& e) { // exception expected, //std::cout << boost::diagnostic_information(e); 
+			catch (std::exception& e) { // exception expected, //std::cout << boost::diagnostic_information(e);
 				LOG_ERROR << e.what() << " for writing." << std::endl;
 			}
 
@@ -285,7 +284,7 @@ int main(int argc, char* argv[])
 
 			if (!inputfromlistfile) {
 				for (Mcpd8::Parameters& p : _devlist) {
-					Zweistein::ping(p.mcpd_ip); // sometime 
+					Zweistein::ping(p.mcpd_ip); // sometime
 				}
 			}
 
@@ -302,17 +301,17 @@ int main(int argc, char* argv[])
 							auto c1_name = magic_enum::enum_name(my_code.value());
 							LOG_ERROR << c1_name<<std::endl;
 						}
-						
+
 					}
-					
+
 				}
 				catch (boost::exception & e) {
 					LOG_ERROR << boost::diagnostic_information(e) << std::endl;
-					
+
 				}
-				
+
 				io_service.stop();
-				
+
 
 			};
 		}
@@ -324,18 +323,18 @@ int main(int argc, char* argv[])
 
 		worker_threads.add_thread(pt);
 		boost::this_thread::sleep_for(boost::chrono::milliseconds(2500));// so msmtsystem1 should be connected
-		
-					
+
+
 		boost::chrono::system_clock::time_point start = boost::chrono::system_clock::now();
 		int i = 0;
 		long long lastcount = 0;
 		{
 			std::cout << std::endl << "Ctrl-C to stop" << std::endl;
 		}
-		
+
 
 		if (inputfromlistfile) {
-			
+
 			worker_threads.create_thread([&ptrmsmtsystem1] {Zweistein::populateHistograms(io_service, ptrmsmtsystem1); });
 			worker_threads.create_thread([&ptrmsmtsystem1] {Zweistein::displayHistogram(io_service, ptrmsmtsystem1); });
 			// nothing to do really,
@@ -357,7 +356,7 @@ int main(int argc, char* argv[])
 									Mcpd8::CmdPacket  cmdpacket;
 									memset(cmdpacket.data, 0, sizeof(unsigned short) * 14);
 									std::cout << "MCPD8 : "<< kvp.second.mcpd_endpoint << std::endl;
-									
+
 									while (true) {
 										std::cout << "enter new mcpd ip addr (0 for no change):";
 										std::string ip_str;
@@ -376,10 +375,10 @@ int main(int argc, char* argv[])
 										}
 										catch (boost::system::system_error const& e) {
 											if (ip_str.empty()) boost::throw_exception(std::runtime_error("aborted by user"));
-											
+
 											std::cout << e.what() << ": " << e.code() << " - " << e.code().message() << "\n";
 										}
-										
+
 									}
 
 									while (true) {
@@ -417,7 +416,7 @@ int main(int argc, char* argv[])
 											if (udpport == -1) boost::throw_exception(std::runtime_error("aborted by user"));
 											std::cout << e.what() << ": " << e.code() << " - " << e.code().message() << "\n";
 										}
-										
+
 									}
 
 									while (true) {
@@ -434,7 +433,7 @@ int main(int argc, char* argv[])
 											if (udpport == -1) boost::throw_exception(std::runtime_error("aborted by user"));
 											std::cout << e.what() << ": " << e.code() << " - " << e.code().message() << "\n";
 										}
-										
+
 									}
 
 									while (true) {
@@ -456,19 +455,19 @@ int main(int argc, char* argv[])
 											if (ip_str.empty()) boost::throw_exception(std::runtime_error("aborted by user"));
 											std::cout << e.what() << ": " << e.code() << " - " << e.code().message() << "\n";
 										}
-										
+
 									}
-									
+
 									cmdpacket.cmd = Mcpd8::Cmd::SETPROTOCOL;
 									cmdpacket.Length = Mcpd8::CmdPacket::defaultLength + 14;
 									Mcpd8::CmdPacket::Send(kvp.second.socket,cmdpacket,kvp.second.mcpd_endpoint);
 
 									std::cout << "OK => parameters written correctly." << std::endl;
-	
+
 								}
 							}
 							catch (Mesytec::cmd_error& x) {
-								
+
 								if (int const* mi = boost::get_error_info<Mesytec::my_info>(x)) {
 									auto  my_code = magic_enum::enum_cast<Mesytec::cmd_errorcode>(*mi);
 									if (my_code.has_value()) {
@@ -544,7 +543,7 @@ int main(int argc, char* argv[])
 					if (setupafterconnect) continue;
 					boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - start;
 					start = boost::chrono::system_clock::now();
-					long long currentcount = ptrmsmtsystem1->data.evntcount;
+					long long currentcount = ptrmsmtsystem1->evdata.evntcount;
 					double evtspersecond = sec.count() != 0 ? (double)(currentcount - lastcount) / sec.count() : 0;
 					avg.addValue(evtspersecond);
 					{
@@ -561,12 +560,12 @@ int main(int argc, char* argv[])
 				};
 			}
 
-		
+
 	}
 	catch (boost::exception & e) {
 		LOG_ERROR<< boost::diagnostic_information(e) << std::endl;
 	}
-	
+
 
 	if (ptrmsmtsystem1 ) {
 		try {ptrmsmtsystem1->SendAll(Mcpd8::Cmd::STOP_UNCHECKED);}
@@ -579,6 +578,6 @@ int main(int argc, char* argv[])
 
 	worker_threads.join_all();
 	LOG_DEBUG << "main() exiting..." << std::endl;
-	
+
 	return 0;
 }

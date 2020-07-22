@@ -41,10 +41,10 @@ else()
     execute_process(
         COMMAND git describe --abbrev=0 --tags
         WORKING_DIRECTORY ${repository}
-        OUTPUT_VARIABLE GIT_LATEST_TAG)
-        
+        OUTPUT_VARIABLE GIT_LATEST_TAG ERROR_QUIET)
+
     string(STRIP "${GIT_LATEST_TAG}" GIT_LATEST_TAG)
-      
+
     execute_process(
         COMMAND git rev-list --tags ${GIT_LATEST_TAG}..HEAD --count
         WORKING_DIRECTORY ${repository}
@@ -70,7 +70,7 @@ endif()
     if ("${GIT_LATEST_TAG}" STREQUAL "")
      set(GIT_LATEST_TAG 0)
       execute_process(
-        COMMAND git rev-list  --count master   
+        COMMAND git rev-list  --count master
         WORKING_DIRECTORY ${repository}
         OUTPUT_VARIABLE GIT_NUMBER_OF_COMMITS_SINCE)
 

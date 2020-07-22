@@ -42,8 +42,11 @@
 #include "Zweistein.Locks.hpp"
 #include "Zweistein.Logger.hpp"
 #include "Zweistein.ping.hpp"
+#include "Zweistein.XYDetectorSystem.hpp"
 
 using boost::asio::ip::udp;
+
+
 
 namespace Mesytec {
 	typedef boost::error_info<struct tag_my_info, int> my_info;
@@ -56,8 +59,8 @@ namespace Mesytec {
 		CMD_RESPONSE_ZERO_LENGTH=4
 	};
 
-	
-	class MesytecSystem {
+
+	class MesytecSystem : public Zweistein::XYDetectorSystem {
 	public:
 		static std::map<const unsigned char, Mesytec::DeviceParameter> deviceparam;
 		MesytecSystem();
@@ -68,43 +71,43 @@ namespace Mesytec {
 		boost::atomic<bool> daq_running;
 		boost::atomic<boost::chrono::system_clock::time_point> started;
 		boost::atomic<boost::chrono::system_clock::time_point> stopped;
-		boost::atomic<bool> connected;
+
 
 		boost::chrono::system_clock::time_point lasteventqueuefull;
 		boost::chrono::system_clock::time_point lastpacketqueuefull;
 		boost::chrono::system_clock::time_point lastlistmodequeuefull;
 		boost::atomic<bool> write2disk;
-		
+
 		unsigned short currentrunid;
 		int icharmid;
 		cmd_errorcode internalerror;
-		boost::asio::io_service *pio_service;
+
 		Mcpd8::EventDataFormat eventdataformat;
 		size_t lasteventqueuefull_missedcount;
 		size_t lastpacketqueuefull_missedcount;
 		size_t lastlistmodequeuefull_missedcount;
-		
-		
+
+
 		Mcpd8::Data data;
 		bool inputFromListmodeFile;
 
 		bool listmode_connect(std::list<Mcpd8::Parameters>& _devlist, boost::asio::io_service& io_service);
-		
+
 		boost::asio::io_service::strand *pstrand=nullptr;
 		bool connect(std::list<Mcpd8::Parameters>& _devlist, boost::asio::io_service& io_service);
-		
+
 		bool CmdSupported(Mesytec::DeviceParameter& mp, unsigned short cmd);
 		void Send(std::pair<const unsigned char, Mesytec::DeviceParameter>& kvp, Mcpd8::Internal_Cmd cmd, unsigned long param = 0);
 
 		void Send(std::pair<const unsigned char, Mesytec::DeviceParameter>& kvp, Mcpd8::Cmd cmd, unsigned long lparam = 0);
 		void SendAll(Mcpd8::Cmd cmd);
-		
+
 	private:
 		boost::atomic<bool> wait_response;
 		Mcpd8::CmdPacket& Send(std::pair<const unsigned char, Mesytec::DeviceParameter>& kvp, Mcpd8::CmdPacket& cmdpacket, bool waitresponse = true);
 
 		void start_receive_charm(){
-			
+
 			deviceparam.at(icharmid).socket->async_receive_from(boost::asio::buffer(charm_buf), deviceparam.at(icharmid).charm_cmd_endpoint, boost::bind(&MesytecSystem::handle__charm_receive, this,
 				boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
 		}
@@ -120,10 +123,10 @@ namespace Mesytec {
 				start_receive_charm();
 		}
 		void start_receive(const Mesytec::DeviceParameter &mp,unsigned char devid) {
-			
+
 			mp.socket->async_receive(boost::asio::buffer(recv_buf), pstrand->wrap(boost::bind(&MesytecSystem::handle_receive, this,
 				boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred, devid)));
-			
+
 			//mp.socket->async_receive_from(boost::asio::buffer(recv_buf), mp.mcpd_endpoint, boost::bind(&MesytecSystem::handle_receive, this,
 			//	boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred,devid));
 		}
@@ -139,9 +142,9 @@ namespace Mesytec {
 			}
 			catch (boost::exception & e) {	LOG_ERROR << boost::diagnostic_information(e) << std::endl;	}
 			LOG_DEBUG << "watch_incoming_packets() exiting..." << std::endl;
-			
+
 		}
-		
+
 		bool firstneutrondiscarded = false;
 		bool warning_notified_bufnum_8bit = false;
 		void handle_receive(const boost::system::error_code& error,
@@ -152,19 +155,19 @@ namespace Mesytec {
 				LOG_ERROR  << " handle_receive(" << error.message() << " ,bytes_transferred=" << bytes_transferred << ", DataPacket=" << dp << std::endl;
 				LOG_ERROR << "PACKET BUFNUM: " << (unsigned short)(dp.Number) << std::endl;
 				//memset(&recv_buf[0], 0, sizeof(Mcpd8::DataPacket));
-			
+
 			}
-			
+
 			auto &mp = deviceparam.at(devid);
-	
+
 			if (dp.Type == Mesy::BufferType::COMMAND) {
-			
+
 				Mcpd8::CmdPacket p = dp;
 				{
 					Zweistein::WriteLock w_lock(cmdLock);
 					cmd_recv_queue.push_front(p);
 				}
-				
+
 			}
 			else {
 				if (daq_running) {
@@ -194,7 +197,7 @@ namespace Mesytec {
 							boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - lastlistmodequeuefull;
 							lastlistmodequeuefull_missedcount += 1;
 							if (sec.count() > 1) {
-								
+
 								//LOG_ERROR << std::endl << boost::chrono::time_fmt(boost::chrono::timezone::local) << boost::chrono::system_clock::now() << ": LISTMODEWRITEQUEUE FULL , SKIPPED " << lastlistmodequeuefull_missedcount << " Event(s)" << std::endl;
 								LOG_ERROR << ": LISTMODEWRITEQUEUE FULL , SKIPPED " << lastlistmodequeuefull_missedcount << " Event(s)" << std::endl;
 
@@ -210,23 +213,23 @@ namespace Mesytec {
 
 
 		void PushNeutronEventOnly_HandleOther(Zweistein::Event& Ev);
-		
-		
-		
+
+
+
 		public:
 			void analyzebuffer(Mcpd8::DataPacket& datapacket);
 		private:
 		udp::endpoint local_endpoint;
-		
+
 		boost::array< unsigned char, 64> charm_buf;
 		boost::circular_buffer<Mcpd8::CmdPacket> cmd_recv_queue;
 		Zweistein::Lock cmdLock;
 
 		boost::array< Mcpd8::DataPacket, 1> recv_buf;
 		std::map<const unsigned char, unsigned char> oldidnewid = std::map<const unsigned char, unsigned char>();
-		
+
 	};
-		
+
 }
 
 

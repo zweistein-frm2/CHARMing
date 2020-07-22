@@ -17,7 +17,7 @@
 #include <vector>
 #include <boost/atomic.hpp>
 #include "Zweistein.Logger.hpp"
-#include <boost/atomic.hpp>
+
 
 
 namespace Zweistein {
