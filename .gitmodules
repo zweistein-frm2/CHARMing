@@ -16,3 +16,6 @@
 [submodule "magic_enum"]
 	path = charm/magic_enum
 	url = https://github.com/Neargye/magic_enum.git
+[submodule "charm/cvui"]
+	path = charm/cvui
+	url = https://github.com/Dovyski/cvui.git
