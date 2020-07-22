@@ -1,126 +1,124 @@
+from entangle import base
+from entangle.core import states, Prop, uint16, Attr,Cmd
+from entangle.core.defs import uint64, int32, boolean, listof
+from entangle.core.states import BUSY, UNKNOWN,FAULT
+from entangle.core.errors import InvalidValue, InvalidOperation, \
+    ConfigurationError
+
+import signal, os
+import numpy as np
+import cv2 as cv
+
+from entangle.device.charming import msmtsystem
+
 class MeasureCounts(base.CounterChannel):
 
     def state(self):
-        global msmtsystem
-        if msmtsystem:
-            t = msmtsystem.status()
+
+        if msmtsystem.msmtsystem:
+            t = msmtsystem.msmtsystem.status()
             if not(t[2] &2): return (FAULT,t[3])
             #if(t[2] & 1): return (BUSY,t[3])
             _state = base.ImageChannel.state(self)
             return (_state[0],t[3])
 
     def Start(self):
-        global msmtsystem
-        if msmtsystem:
-            msmtsystem.start()
+        if msmtsystem.msmtsystem:
+            msmtsystem.msmtsystem.start()
 
     def Stop(self):
-        global msmtsystem
-        if msmtsystem:
-            msmtsystem.stop()
+        if msmtsystem.msmtsystem:
+            msmtsystem.msmtsystem.stop()
 
     def Prepare(self):
         pass
 
     def Resume(self):
-        global msmtsystem
-        if msmtsystem:
-            msmtsystem.resume()
+        if msmtsystem.msmtsystem:
+            msmtsystem.msmtsystem.resume()
 
     def read_value(self):
-        global msmtsystem
-        if msmtsystem:
-            t = msmtsystem.status()
+        if msmtsystem.msmtsystem:
+            t = msmtsystem.msmtsystem.status()
             return t[0]
 
     def write_preselection(self, value):
-        global msmtsystem
         if msmtsystem:
-            t = msmtsystem.status()
-            msmtsystem.stopafter(value,0)
+            t = msmtsystem.msmtsystem.status()
+            msmtsystem.msmtsystem.stopafter(value,0)
 
     def read_version(self):
         ver = super().read_version();
-        if not msmtsystem:
+        if not msmtsystem.msmtsystem:
             return ver
-        return ver + " "+msmtsystem.version
+        return ver + " "+msmtsystem.msmtsystem.version
 
 
 class MeasureTime(base.TimerChannel):
 
 
     def state(self):
-        global msmtsystem
-        if msmtsystem:
-            t = msmtsystem.status()
+        if msmtsystem.msmtsystem:
+            t = msmtsystem.msmtsystem.status()
             if not(t[2] &2): return (FAULT,t[3])
             #if(t[2] & 1): return (BUSY,t[3])
             _state = base.ImageChannel.state(self)
             return (_state[0],t[3])
 
     def Start(self):
-        global msmtsystem
-        if msmtsystem:
-            msmtsystem.start()
+        if msmtsystem.msmtsystem:
+            msmtsystem.msmtsystem.start()
 
     def Stop(self):
-        global msmtsystem
-        if msmtsystem:
-            msmtsystem.stop()
+        if msmtsystem.msmtsystem:
+            msmtsystem.msmtsystem.stop()
 
     def Prepare(self):
         pass
 
     def Resume(self):
-        global msmtsystem
-        if msmtsystem:
-            msmtsystem.resume()
+        if msmtsystem.msmtsystem:
+            msmtsystem.msmtsystem.resume()
 
     def read_value(self):
-        global msmtsystem
-        if msmtsystem:
-            t = msmtsystem.status()
+        if msmtsystem.msmtsystem:
+            t = msmtsystem.msmtsystem.status()
             return t[1]
 
     def write_preselection(self, value):
-        global msmtsystem
-        if msmtsystem:
-             t = msmtsystem.status()
-             msmtsystem.stopafter(0,value)
+        if msmtsystem.msmtsystem:
+             t = msmtsystem.msmtsystem.status()
+             msmtsystem.msmtsystem.stopafter(0,value)
 
     def read_version(self):
         ver = super().read_version();
-        if not msmtsystem:
+        if not msmtsystem.msmtsystem:
             return ver
-        return ver + " "+msmtsystem.version
+        return ver + " "+msmtsystem.msmtsystem.version
 
 
 class Monitor0(base.DiscreteOutput):
     def read_value(self):
-        global msmtsystem
-        if msmtsystem:
-            t = msmtsystem.monitors_status()
+        if msmtsystem.msmtsystem:
+            t = msmtsystem.msmtsystem.monitors_status()
             return t[0][1]
 
 class Monitor1(base.DiscreteOutput):
     def read_value(self):
-        global msmtsystem
-        if msmtsystem:
-            t = msmtsystem.monitors_status()
+        if msmtsystem.msmtsystem:
+            t = msmtsystem.msmtsystem.monitors_status()
             return t[1][1]
 
 class Monitor2(base.DiscreteOutput):
     def read_value(self):
-        global msmtsystem
-        if msmtsystem:
-            t = msmtsystem.monitors_status()
+        if msmtsystem.msmtsystem:
+            t = msmtsystem.msmtsystem.monitors_status()
             return t[2][1]
 
 class Monitor3(base.DiscreteOutput):
     def read_value(self):
-        global msmtsystem
-        if msmtsystem:
-            t = msmtsystem.monitors_status()
+        if msmtsystem.msmtsystem:
+            t = msmtsystem.msmtsystem.monitors_status()
             return t[3][1]
 
 
@@ -147,8 +145,8 @@ class Histogram(base.ImageChannel):
         self.histogram = None
 
     def Histogram(self):
-        if msmtsystem:
-            self.histogram = msmtsystem.getHistogram()
+        if msmtsystem.msmtsystem:
+            self.histogram = msmtsystem.msmtsystem.getHistogram()
         else:
             return None
         return self.histogram
@@ -212,8 +210,8 @@ class Histogram(base.ImageChannel):
 
     def read_version(self):
         ver = super().read_version();
-        if not msmtsystem:
+        if not msmtsystem.msmtsystem:
             return ver
-        return ver + " "+msmtsystem.version
+        return ver + " "+msmtsystem.msmtsystem.version
 
 

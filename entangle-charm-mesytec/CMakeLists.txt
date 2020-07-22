@@ -113,12 +113,19 @@ add_custom_command(
         COMMAND ${CMAKE_COMMAND} -E copy
               ${CMAKE_CURRENT_SOURCE_DIR}/mesytec-replay.py
               ${CMAKE_CURRENT_BINARY_DIR}/mesytec-replay.py
+        COMMAND ${CMAKE_COMMAND} -E copy
+              ${CMAKE_CURRENT_SOURCE_DIR}/msmtsystem.py
+              ${CMAKE_CURRENT_BINARY_DIR}/msmtsystem.py
+
          COMMAND ${CMAKE_COMMAND} -E copy
-              ${CMAKE_CURRENT_SOURCE_DIR}/Settings.py
-              ${CMAKE_CURRENT_BINARY_DIR}/Settings.py
+              ${CMAKE_CURRENT_SOURCE_DIR}/core.py
+              ${CMAKE_CURRENT_BINARY_DIR}/core.py
          COMMAND ${CMAKE_COMMAND} -E copy
-                ${CMAKE_CURRENT_SOURCE_DIR}/Simulator.py
-                ${CMAKE_CURRENT_BINARY_DIR}/Simulator.py
+              ${CMAKE_CURRENT_SOURCE_DIR}/settings.py
+              ${CMAKE_CURRENT_BINARY_DIR}/settings.py
+         COMMAND ${CMAKE_COMMAND} -E copy
+                ${CMAKE_CURRENT_SOURCE_DIR}/simulator.py
+                ${CMAKE_CURRENT_BINARY_DIR}/simulator.py
          COMMAND ${CMAKE_COMMAND} -E copy
               ${CMAKE_CURRENT_SOURCE_DIR}/test-replay.py
               ${CMAKE_CURRENT_BINARY_DIR}/test-replay.py
@@ -171,6 +178,10 @@ if(ENTANGLE_ROOT )
    ${CMAKE_CURRENT_SOURCE_DIR}/charm.py
     ${CMAKE_CURRENT_SOURCE_DIR}/mesytec.py
    ${CMAKE_CURRENT_SOURCE_DIR}/mesytec-replay.py
+    ${CMAKE_CURRENT_SOURCE_DIR}/msmtsystem.py
+   ${CMAKE_CURRENT_SOURCE_DIR}/core.py
+   ${CMAKE_CURRENT_SOURCE_DIR}/settings.py
+   ${CMAKE_CURRENT_SOURCE_DIR}/simulator.py
    ${CMAKE_CURRENT_SOURCE_DIR}/test-replay.py
    ${CMAKE_CURRENT_SOURCE_DIR}/test.py
    DESTINATION ${ENTANGLE_ROOT}/entangle/device/charming

@@ -8,13 +8,15 @@ from entangle.core.errors import InvalidValue, InvalidOperation, \
     ConfigurationError
 from entangle.lib.loggers import FdLogMixin
 import signal, os
-import numpy as np
-import cv2 as cv
-
-from entangle.device.charm import mesytecsystem
 
 
-msmtsystem = None
+from entangle.device.charming import mesytecsystem
+import entangle.device.charming.msmtsystem as msmtsystem
+
+from entangle.device.charming.core import *
+from entangle.device.charming.settings import *
+from entangle.device.charming.simulator import *
+
 
 class DeviceConnection(FdLogMixin,base.MLZDevice):
     commands = {
@@ -23,26 +25,22 @@ class DeviceConnection(FdLogMixin,base.MLZDevice):
     }
 
     def init(self):
-        self.init_fd_log('Charm')
+        self.init_fd_log('Mesytec')
         fd = self.get_log_fd()
         #print("charm.py:DeviceConnection.init("+str(fd)+")")
-        global msmtsystem
-        if msmtsystem is None:
-                msmtsystem=mesytecsystem.NeutronMeasurement(fd)
+        if msmtsystem.msmtsystem is None:
+                msmtsystem.msmtsystem=mesytecsystem.NeutronMeasurement(fd)
 
     #def __del__(self):
         #print("charm.py: DeviceConnection.__del__")
     def read_version(self):
         ver = super().read_version();
-        if not msmtsystem:
+        if not msmtsystem.msmtsystem:
             return ver
-        return ver + " "+msmtsystem.version
+        return ver + " "+msmtsystem.msmtsystem.version
 
     def Log(self):
-        return msmtsystem.log()
+        return msmtsystem.msmtsystem.log()
 
-importlib.import_module('Settings')
-importlib.import_module('Simulator')
-importlib.import_module('charming-core')
 
 

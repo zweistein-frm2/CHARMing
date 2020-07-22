@@ -8,12 +8,11 @@ from entangle.core.errors import InvalidValue, InvalidOperation, \
 from entangle.lib.loggers import FdLogMixin
 
 import signal, os
-import numpy as np
-import cv2 as cv
 
-from entangle.device.charm import listmodereplay
+from entangle.device.charming import listmodereplay
+import entangle.device.charming.msmtsystem as msmtsystem
 
-charmsystem = None
+from entangle.device.charming.core import *
 
 class DeviceConnection(FdLogMixin,base.MLZDevice):
     commands = {
@@ -25,21 +24,21 @@ class DeviceConnection(FdLogMixin,base.MLZDevice):
         self.init_fd_log('Replay')
         fd = self.get_log_fd()
        # print("charm-replay.py:DeviceConnection.init("+str(fd)+")")
-        global charmsystem
-        if charmsystem is None:
-                charmsystem=listmodereplay.ReplayList(fd)
+        if msmtsystem.msmtsystem is None:
+                msmtsystem.msmtsystem=listmodereplay.ReplayList(fd)
+
 
    # def __del__(self):
    #   print("charm-replay.py: DeviceConnection.__del__")
 
     def read_version(self):
         ver = super().read_version();
-        if not charmsystem:
+        if not msmtsystem.msmtsystem:
             return ver
-        return ver + " "+charmsystem.version
+        return ver + " "+msmtsystem.msmtsystem.version
 
     def Log(self):
-        return charmsystem.log()
+        return msmtsystem.msmtsystem.log()
 
 class PlayList(base.MLZDevice):
     commands = {
@@ -53,31 +52,29 @@ class PlayList(base.MLZDevice):
 
 
     def RemoveFile(self,file):
-        global charmsystem
-        if charmsystem:
-            return charmsystem.removefile(file)
+        if msmtsystem.msmtsystem:
+            return msmtsystem.msmtsystem.removefile(file)
         return False
 
     def AddFile(self,file):
-        global charmsystem
-        if charmsystem:
-            return charmsystem.addfile(file)
+        if msmtsystem.msmtsystem:
+            return msmtsystem.msmtsystem.addfile(file)
         return False
 
     def FilesInDirectory(self,directory):
         print('FilesInDirectory('+str(directory)+')')
 
-        global charmsystem
-        if charmsystem:
-            return charmsystem.files(directory)
+        if msmtsystem.msmtsystem:
+            return msmtsystem.msmtsystem.files(directory)
 
     def read_version(self):
         ver = super().read_version();
-        if not charmsystem:
+        if not msmtsystem.msmtsystem:
             return ver
-        return ver + "\r\n"+charmsystem.version
+        return ver + "\r\n"+msmtsystem.msmtsystem.version
 
 
 
 
-importlib.import_module('charming-core')
+
+

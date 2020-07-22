@@ -1,0 +1,2 @@
+global msmtsystem
+msmtsystem = None
