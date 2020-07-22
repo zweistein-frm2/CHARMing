@@ -35,7 +35,7 @@
 #include "Zweistein.Logger.hpp"
 #include "Zweistein.Averaging.hpp"
 #include "CounterMonitor.hpp"
-
+#include "Charm.System.hpp"
 #ifdef _DEBUG
 boost::log::trivial::severity_level SEVERITY_THRESHOLD = boost::log::trivial::trace;
 #else
@@ -89,7 +89,7 @@ int main(int argc, char* argv[])
 	}
 	std::string appName = boost::filesystem::basename(argv[0]);
 
-	boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1 = boost::shared_ptr < Mesytec::MesytecSystem>(new Mesytec::MesytecSystem());
+	boost::shared_ptr < Charm::CharmSystem> ptrmsmtsystem1 = boost::shared_ptr < Charm::CharmSystem>(new Charm::CharmSystem());
 	ptrmsmtsystem1->initatomicortime_point();
 
 
@@ -499,10 +499,10 @@ int main(int argc, char* argv[])
 								if (write2disk) worker_threads.create_thread([&ptrmsmtsystem1] {Mesytec::writeListmode(io_service, ptrmsmtsystem1); });
 								ptrmsmtsystem1->SendAll(Mcpd8::Cmd::START);
 								for (auto& kvp : ptrmsmtsystem1->deviceparam) {
-									if (kvp.second.datagenerator == Mesytec::DataGenerator::NucleoSimulator) {
+									if (kvp.second.datagenerator == Zweistein::DataGenerator::NucleoSimulator) {
 										ptrmsmtsystem1->Send(kvp, Mcpd8::Internal_Cmd::SETNUCLEORATEEVENTSPERSECOND, rate);//1650000 is maximum
 									}
-									if (kvp.second.datagenerator == Mesytec::DataGenerator::CharmSimulator) {
+									if (kvp.second.datagenerator == Zweistein::DataGenerator::CharmSimulator) {
 										ptrmsmtsystem1->Send(kvp, Mcpd8::Internal_Cmd::CHARMSETEVENTRATE, rate); // oder was du willst
 										ptrmsmtsystem1->Send(kvp, Mcpd8::Internal_Cmd::CHARMPATTERNGENERATOR, 1); // oder was du willst
 									}

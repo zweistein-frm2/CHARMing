@@ -45,8 +45,8 @@ namespace Mesytec {
 
 		MesytecSystem::MesytecSystem():recv_buf(), cmd_recv_queue(5), internalerror(cmd_errorcode::OK), currentrunid(0),
 			lastpacketqueuefull_missedcount(0), lastlistmodequeuefull_missedcount(0),
-			lasteventqueuefull_missedcount(0), inputFromListmodeFile(false),
-			eventdataformat(Mcpd8::EventDataFormat::Undefined),icharmid(0){
+			inputFromListmodeFile(false),
+			eventdataformat(Mcpd8::EventDataFormat::Undefined){
 
 		}
 		MesytecSystem::~MesytecSystem(){
@@ -55,21 +55,7 @@ namespace Mesytec {
 			}
 			if (pstrand) delete pstrand;
 		}
-		void MesytecSystem::initatomicortime_point() {
-			auto now = boost::chrono::system_clock::now();
-			started = now;
-			stopped = now;
-			simulatordatarate = 51;
-			connected = false;
-			daq_running = false;
-			write2disk = false;
-			auto max= boost::chrono::system_clock::time_point::max();
-			lasteventqueuefull = max;
-			lastpacketqueuefull = max;
-			lastlistmodequeuefull=max;
-			wait_response = false;
 
-		}
 		bool MesytecSystem::listmode_connect(std::list<Mcpd8::Parameters>& _devlist, boost::asio::io_service& io_service)
 		{
 			pio_service = &io_service;
@@ -182,7 +168,7 @@ namespace Mesytec {
 				}
 				mp.lastbufnum = 0;
 
-				if (mp.datagenerator == Mesytec::DataGenerator::Charm || mp.datagenerator == Mesytec::DataGenerator::CharmSimulator) {
+				if (mp.datagenerator == Zweistein::DataGenerator::Charm || mp.datagenerator == Zweistein::DataGenerator::CharmSimulator) {
 					mp.charm_cmd_endpoint = udp::endpoint(boost::asio::ip::address::from_string(p.mcpd_ip), p.charm_port);
 				}
 				if (!skip) {
@@ -210,12 +196,6 @@ namespace Mesytec {
 
 			for (const auto& [key, value] : deviceparam) {
 				if(value.bNewSocket) start_receive(value,key);
-
-				if (value.datagenerator == Mesytec::DataGenerator::Charm || value.datagenerator == Mesytec::DataGenerator::CharmSimulator) {
-					icharmid = key;
-
-				}
-
 			}
 
 			for (auto& kvp : deviceparam) {
@@ -312,7 +292,7 @@ namespace Mesytec {
 
 					}
 				}
-				if (kvp.second.datagenerator == Mesytec::DataGenerator::Mcpd8 || kvp.second.datagenerator == Mesytec::DataGenerator::NucleoSimulator) {
+				if (kvp.second.datagenerator == Zweistein::DataGenerator::Mcpd8 || kvp.second.datagenerator == Zweistein::DataGenerator::NucleoSimulator) {
 					for (int i = 0; i < Mpsd8_sizeSLOTS; i++) {
 						if (kvp.second.module_id[i] == Mesy::ModuleId::MPSD8P) {
 							Send(kvp, Mcpd8::Cmd::GETMPSD8PLUSPARAMETERS, i);
@@ -358,7 +338,7 @@ namespace Mesytec {
 
 			bool rv = true;
 
-			if (mp.datagenerator == Mesytec::DataGenerator::NucleoSimulator) {
+			if (mp.datagenerator == Zweistein::DataGenerator::NucleoSimulator) {
 
 				if (cmd_2.has_value()) {
 					if (cmd_2 == Mcpd8::Internal_Cmd::CHARMPATTERNGENERATOR || cmd_2 == Mcpd8::Internal_Cmd::CHARMSETEVENTRATE) {
@@ -368,7 +348,7 @@ namespace Mesytec {
 					}
 				}
 			}
-			if (mp.datagenerator == Mesytec::DataGenerator::Mcpd8) {
+			if (mp.datagenerator ==Zweistein::DataGenerator::Mcpd8) {
 				if (cmd_2.has_value()) {
 					if (cmd_2 == Mcpd8::Internal_Cmd::SETNUCLEORATEEVENTSPERSECOND
 						|| cmd_2 == Mcpd8::Internal_Cmd::CHARMPATTERNGENERATOR || cmd_2 == Mcpd8::Internal_Cmd::CHARMSETEVENTRATE) {

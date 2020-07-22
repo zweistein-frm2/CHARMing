@@ -1,4 +1,5 @@
 import importlib
+
 from entangle import base
 from entangle.core import states, Prop, uint16, Attr,Cmd
 from entangle.core.defs import uint64, int32, boolean, listof
@@ -10,7 +11,8 @@ import signal, os
 import numpy as np
 import cv2 as cv
 
-from entangle.device.charm import charmsystem
+from entangle.device.charm import mesytecsystem
+
 
 msmtsystem = None
 
@@ -26,7 +28,7 @@ class DeviceConnection(FdLogMixin,base.MLZDevice):
         #print("charm.py:DeviceConnection.init("+str(fd)+")")
         global msmtsystem
         if msmtsystem is None:
-                msmtsystem=charmsystem.NeutronMeasurement(fd)
+                msmtsystem=mesytecsystem.NeutronMeasurement(fd)
 
     #def __del__(self):
         #print("charm.py: DeviceConnection.__del__")

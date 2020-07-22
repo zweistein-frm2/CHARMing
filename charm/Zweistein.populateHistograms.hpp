@@ -11,6 +11,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/chrono.hpp>
 #include "Zweistein.Event.hpp"
+#include "Zweistein.XYDetectorSystem.hpp"
 #include <boost/format.hpp>
 #include <boost/signals2.hpp>
 #include <boost/thread.hpp>
@@ -160,7 +161,7 @@ namespace Zweistein {
 	}
 
 
-	void populateHistograms(boost::asio::io_service & io_service, boost::shared_ptr < Mesytec::MesytecSystem> pmsmtsystem1) {
+	void populateHistograms(boost::asio::io_service & io_service, boost::shared_ptr < Zweistein::XYDetectorSystem> pmsmtsystem1) {
 		using namespace magic_enum::bitwise_operators; // out-of-the-box bitwise operators for enums.
 		boost::chrono::system_clock::time_point start = boost::chrono::system_clock::now();
 		try {

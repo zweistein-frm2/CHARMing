@@ -8,7 +8,7 @@
 #include <string>
 #include <iostream>
 #include "Mcpd8.enums.hpp"
-#include "Mesytec.enums.Generator.hpp"
+#include "Zweistein.enums.Generator.hpp"
 
 namespace Mcpd8 {
 
@@ -25,13 +25,13 @@ namespace Mcpd8 {
 		unsigned char mcpd_id;
 		std::string counterADC[8];
 		std::string moduleparam[8];
-		Mesytec::DataGenerator datagenerator;
+		Zweistein::DataGenerator datagenerator;
 		void print(std::ostream& os) const {
 			using namespace magic_enum::ostream_operators;
 			os << "mcpd_ip:" << mcpd_ip << " networkcard:" << networkcard << " data_host:" << data_host << " mcpd_port:" << mcpd_port << " eventdataformat:" << eventdataformat << " datagenerator:" << " mcpd_id:" << mcpd_id << std::endl;
 		}
 	};
-	
+
 }
 
 namespace Charm {

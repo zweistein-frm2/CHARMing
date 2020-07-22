@@ -9,21 +9,21 @@
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/filesystem.hpp>
 #include "Mcpd8.Parameters.hpp"
-#include "Mesytec.enums.Generator.hpp"
+#include "Zweistein.enums.Generator.hpp"
 #include "Zweistein.GetLocalInterfaces.hpp"
 #include "Zweistein.HomePath.hpp"
 #include "Zweistein.Logger.hpp"
 #include "Zweistein.GetConfigDir.hpp"
 namespace Mesytec {
-	
-	 namespace Config { 
-		
+
+	 namespace Config {
+
 		extern boost::filesystem::path DATAHOME;
 		extern boost::filesystem::path BINNINGFILE;
 		extern boost::property_tree::ptree root;
 		inline bool get(std::list<Mcpd8::Parameters>& _devlist, boost::filesystem::path inidirectory,bool checknetwork=true) {
 			bool rv = true;
-			
+
 			try {
 				std::string oursystem = "MsmtSystem";
 				std::string mesytecdevice = "MesytecDevice";
@@ -38,7 +38,7 @@ namespace Mesytec {
 				const int maxCounter = 8;
 				const int MaxDevices = 4;
 
-				
+
 
 				DATAHOME = root.get<std::string>(oursystem + punkt + datahome, Zweistein::GetHomePath().string());
 				root.put<std::string>(oursystem + punkt + datahome, DATAHOME.string());
@@ -101,15 +101,15 @@ namespace Mesytec {
 					root.put<std::string>(s2 + "eventdataformat", m4);
 
 					if (n == 0) {
-						auto a5 = magic_enum::enum_name(Mesytec::DataGenerator::NucleoSimulator);
+						auto a5 = magic_enum::enum_name(Zweistein::DataGenerator::NucleoSimulator);
 						std::string m5 = std::string(a5.data(), a5.size());
 						std::string enum_tmp = root.get<std::string>(s2 + "datagenerator", m5);
-						auto a = magic_enum::enum_cast<Mesytec::DataGenerator>(enum_tmp);
+						auto a = magic_enum::enum_cast<Zweistein::DataGenerator>(enum_tmp);
 						p1.datagenerator = a.value();
 					}
 					else {
 						std::string enum_tmp = root.get<std::string>(s2 + "datagenerator");
-						auto a = magic_enum::enum_cast<Mesytec::DataGenerator>(enum_tmp);
+						auto a = magic_enum::enum_cast<Zweistein::DataGenerator>(enum_tmp);
 						p1.datagenerator = a.value();
 					}
 					auto a6 = magic_enum::enum_name(p1.datagenerator);
@@ -129,7 +129,7 @@ namespace Mesytec {
 						root.put<std::string>(currmodule, r);
 						p1.moduleparam[m] = r;
 					}
-					
+
 
 
 					std::stringstream ss2;
@@ -206,7 +206,7 @@ namespace Mesytec {
 				boost::property_tree::write_json(ss_1, root);
 				std::cout << ss_1.str() << std::endl;
 			}
-			catch (std::exception& e) { // exception expected, //std::cout << boost::diagnostic_information(e); 
+			catch (std::exception& e) { // exception expected, //std::cout << boost::diagnostic_information(e);
 				std::cout << e.what() << " for writing." << std::endl;
 			}
 			return true;
@@ -214,5 +214,5 @@ namespace Mesytec {
 
 		}
 	}
-	
+
 }

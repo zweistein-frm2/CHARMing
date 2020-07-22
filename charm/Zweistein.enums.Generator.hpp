@@ -9,7 +9,7 @@
 #include <string_view>
 #include "magic_enum/include/magic_enum.hpp"
 
-namespace Mesytec {
+namespace Zweistein {
 
 	enum DataGenerator {
 		Undefined = 0,

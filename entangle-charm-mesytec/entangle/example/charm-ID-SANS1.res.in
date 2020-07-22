@@ -1,28 +1,28 @@
 ["test/@ID@-SANS1/DeviceConnection"]
-type = "charm.charm.DeviceConnection"
+type = "charming.mesytec.DeviceConnection"
 ["test/@ID@-SANS1/MeasureCounts"]
-type = "charm.charm.MeasureCounts"
+type = "charming.mesytec.MeasureCounts"
 ["test/@ID@-SANS1/MeasureTime"]
-type = "charm.charm.MeasureTime"
+type = "charming.mesytec.MeasureTime"
 ["test/@ID@-SANS1/Settings"]
-type = "charm.charm.Settings"
+type = "charming.mesytec.Settings"
 ["test/@ID@-SANS1/Histogram"]
-type = "charm.charm.Histogram"
+type = "charming.mesytec.Histogram"
 ["test/@ID@-SANS1/Simulator"]
-type = "charm.charm.Simulator"
+type = "charming.mesytec.Simulator"
 ["test/@ID@-SANS1/Monitor0"]
-type = "charm.charm.Monitor0"
+type = "charming.mesytec.Monitor0"
 absmin = 0
 absmax = 0x7FFFFFFF
 ["test/@ID@-SANS1/Monitor1"]
-type = "charm.charm.Monitor1"
+type = "charming.mesytec.Monitor1"
 absmin = 0
 absmax = 0x7FFFFFFF
 ["test/@ID@-SANS1/Monitor2"]
-type = "charm.charm.Monitor2"
+type = "charming.mesytec.Monitor2"
 absmin = 0
 absmax = 0x7FFFFFFF
 ["test/@ID@-SANS1/Monitor3"]
-type = "charm.charm.Monitor3"
+type = "charming.mesytec.Monitor3"
 absmin = 0
 absmax = 0x7FFFFFFF

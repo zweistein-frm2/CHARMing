@@ -5,69 +5,23 @@
  *   the Free Software Foundation;                                         *
  ***************************************************************************/
 #define PY_ARRAY_UNIQUE_SYMBOL pbcvt_ARRAY_API
-#include <boost/python.hpp>
-#include <boost/python/tuple.hpp>
-#include <pyboostcvconverter/pyboostcvconverter.hpp>
-#include <boost/python/numpy.hpp>
-#include <iostream>
-#include "Zweistein.PrettyBytes.hpp"
-
-#include <boost/geometry.hpp>
-#include <boost/geometry/geometries/point_xy.hpp>
-#include <boost/geometry/geometries/polygon.hpp>
-#include <boost/geometry/io/wkt/wkt.hpp>
-
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
-#include "Zweistein.Histogram.hpp"
+#include "Module.Include.hpp"
 #include "Mesytec.Mcpd8.hpp"
-#include "Zweistein.HomePath.hpp"
-#include "Zweistein.GetConfigDir.hpp"
 #include "Mesytec.config.hpp"
-#include "Zweistein.ThreadPriority.hpp"
-#include "Zweistein.populateHistograms.hpp"
 #include "Mesytec.listmode.write.hpp"
-#include <stdio.h>
 #include "Zweistein.Averaging.hpp"
-Entangle::severity_level Entangle::SEVERITY_THRESHOLD =Entangle::severity_level::trace;
-std::string PROJECT_NAME("CHARMing");
 
+#include "Module.Globals.hpp"
+
+
+std::string PROJECT_NAME("CHARMing");
+std::string CONFIG_FILE("mesytec");
 namespace p = boost::python;
 namespace np = boost::python::numpy;
 using boost::asio::ip::udp;
 
 
-EXTERN_FUNCDECLTYPE boost::mutex coutGuard;
-EXTERN_FUNCDECLTYPE boost::thread_group worker_threads;
-
-
-extern const char* GIT_REV;
-extern const char* GIT_TAG;
-extern const char* GIT_LATEST_TAG;
-extern const char* GIT_NUMBER_OF_COMMITS_SINCE;
-extern const char* GIT_BRANCH;
-extern const char* GIT_DATE;
-
-Zweistein::Lock histogramsLock;
-std::vector<Histogram> histograms;
-static_assert(COUNTER_MONITOR_COUNT >= 4, "Mcpd8 Datapacket can use up to 4 counters: params[4][3]");
-boost::atomic<unsigned long long> CounterMonitor[COUNTER_MONITOR_COUNT];
-
-boost::asio::io_service io_service;
-
-
-
-
-void initialize() { LOG_DEBUG << "initialize()" << std::endl;  }
-void shutdown() {
-    LOG_DEBUG << "shutdown()" << std::endl;
-       io_service.stop();
-       boost::this_thread::sleep_for(boost::chrono::milliseconds(450));
-       //worker_threads.join_all();
-  
-    }
-
-
+#define MSMTSYSTEM Mesytec::MesytecSystem
 
 struct StartMsmtParameters {
     StartMsmtParameters() :MaxCount(0), DurationSeconds(0), writelistmode(false) {}
@@ -77,11 +31,11 @@ struct StartMsmtParameters {
 
 };
 
-void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, boost::shared_ptr <StartMsmtParameters> ptrStartParameters ) {
-       
+void startMonitor(boost::shared_ptr < MSMTSYSTEM> ptrmsmtsystem1, boost::shared_ptr <StartMsmtParameters> ptrStartParameters ) {
+
         boost::filesystem::path inidirectory = Zweistein::Config::GetConfigDirectory();
         Zweistein::Config::inipath = inidirectory;
-        Zweistein::Config::inipath.append(PROJECT_NAME + ".json");
+        Zweistein::Config::inipath.append(CONFIG_FILE + ".json");
         LOG_INFO << "Using config file:" << Zweistein::Config::inipath << " " << std::endl;
         boost::asio::signal_set signals(io_service, SIGINT, SIGTERM);
         signals.async_wait(boost::bind(&boost::asio::io_service::stop, &io_service));
@@ -106,8 +60,8 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
         boost::property_tree::write_json(ss_1, Mesytec::Config::root);
         LOG_INFO << ss_1.str()<<std::endl;
 
-        
-        
+
+
 
         try {
             std::string fp = Zweistein::Config::inipath.string();
@@ -118,16 +72,16 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
            // boost::property_tree::write_json(Zweistein::Config::inipath.string(), Mesytec::Config::root);
             if (!configok) LOG_ERROR << "Please edit to fix configuration error : " << fp << std::endl;
         }
-        catch (std::exception& e) { // exception expected, //std::cout << boost::diagnostic_information(e); 
+        catch (std::exception& e) { // exception expected, //std::cout << boost::diagnostic_information(e);
             LOG_ERROR << e.what() << " for writing."<<std::endl;
         }
         if (!configok)      return;
 
 
         for (Mcpd8::Parameters& p : _devlist) {
-                Zweistein::ping(p.mcpd_ip); // sometime 
+                Zweistein::ping(p.mcpd_ip); // sometime
         }
-        
+
         boost::function<void()> t;
         t = [&ptrmsmtsystem1, &_devlist]() {
             try {
@@ -154,7 +108,7 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
         Zweistein::Thread::SetThreadPriority(pt->native_handle(), Zweistein::Thread::PRIORITY::HIGH);
         worker_threads.add_thread(pt);
         boost::this_thread::sleep_for(boost::chrono::milliseconds(3000));// so msmtsystem1 should be connected
-       
+
         for (int i = 0; i < 10; i++) {
             // we try to connect for 10 seconds
             if (ptrmsmtsystem1->connected) {
@@ -171,11 +125,11 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
         Zweistein::Averaging<double> avg(4);
         while (!io_service.stopped()) {
             boost::this_thread::sleep_for(boost::chrono::milliseconds(500));
-                      
+
             boost::chrono::system_clock::time_point tps=ptrmsmtsystem1->started;
             boost::chrono::duration<double> secs = boost::chrono::system_clock::now() - tps;
             boost::chrono::duration<double> Maxsecs(ptrStartParameters->DurationSeconds);
-            long long currcount = ptrmsmtsystem1->data.evntcount;
+            long long currcount = ptrmsmtsystem1->evdata.evntcount;
             long long maxcount = ptrStartParameters->MaxCount;
              if (ptrmsmtsystem1->data.last_deviceStatusdeviceId & Mcpd8::Status::DAQ_Running) {
                 bool sendstop = false;
@@ -190,17 +144,17 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
                     sendstop = true;
 
                 }
-                   
+
                 if (sendstop) ptrmsmtsystem1->SendAll(Mcpd8::Cmd::STOP);
              }
-            
+
             boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - lastsec;
             lastsec = boost::chrono::system_clock::now();
-            long long currentcount = ptrmsmtsystem1->data.evntcount; 
+            long long currentcount = ptrmsmtsystem1->evdata.evntcount;
             double evtspersecond = sec.count() != 0 ? (double)(currentcount - lastcount) / sec.count() : 0;
             avg.addValue(evtspersecond);
             {
-              
+
                 std::stringstream ss1;
 
                 unsigned short tmp = ptrmsmtsystem1->data.last_deviceStatusdeviceId;
@@ -236,199 +190,22 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
 
     }
 
-struct NeutronMeasurement {
-     public:
-       
-        boost::shared_ptr<StartMsmtParameters> ptrStartParameters;
-        boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1;
-        NeutronMeasurement(long loghandle):ptrStartParameters(boost::shared_ptr < StartMsmtParameters>(new StartMsmtParameters())),
-            ptrmsmtsystem1(boost::shared_ptr < Mesytec::MesytecSystem>(new Mesytec::MesytecSystem()))
-        {
-            Entangle::Init(loghandle);
-            histograms = std::vector<Histogram>(2);
-            ptrmsmtsystem1->initatomicortime_point();
-            worker_threads.create_thread([this] {startMonitor(ptrmsmtsystem1, ptrStartParameters); });
-            LOG_DEBUG << "NeutronMeasurement(" << loghandle << ")" << std::endl;
-            LOG_INFO << get_version() << std::endl;
-        }
-        ~NeutronMeasurement() {
-            LOG_DEBUG << "~NeutronMeasurement()" << std::endl;
-        
-        }
 
-        bool get_writelistmode() {
-            return ptrStartParameters->writelistmode;
-        }
-        void set_writelistmode(bool val) {
-            ptrStartParameters->writelistmode = val;
-        }
-         long get_simulatorRate() {
-             long rate= ptrmsmtsystem1->simulatordatarate;
-             return rate;
-        }
-        void set_simulatorRate(long rate) {
-            for (auto& kvp : ptrmsmtsystem1->deviceparam) {
-                if (kvp.second.datagenerator == Mesytec::DataGenerator::NucleoSimulator) {
-                    ptrmsmtsystem1->Send(kvp, Mcpd8::Internal_Cmd::SETNUCLEORATEEVENTSPERSECOND, rate);//1650000 is maximum
-                }
-                if (kvp.second.datagenerator == Mesytec::DataGenerator::CharmSimulator) {
-                    ptrmsmtsystem1->Send(kvp, Mcpd8::Internal_Cmd::CHARMSETEVENTRATE, rate); // oder was du willst
-                    ptrmsmtsystem1->Send(kvp, Mcpd8::Internal_Cmd::CHARMPATTERNGENERATOR, 1); // oder was du willst
-                }
-            }
-        }
+#include "Module.NeutronMeasurement.hpp"
+#include "Module.legacy_api_guard.hpp"
 
-        void stopafter(uint64 counts, double seconds) {
-            ptrStartParameters->MaxCount = counts;
-            ptrStartParameters->DurationSeconds = seconds;
-            LOG_INFO << "NeutronMeasurement.stopafter(" << counts << ", " << seconds << ")" << std::endl;
-        }
-       
-        boost::python::list log() {
-            boost::python::list l;
-            {
-                Zweistein::ReadLock r_lock(Entangle::cbLock); //circular buffer lock
-
-                for (auto iter = Entangle::ptrcb->begin(); iter != Entangle::ptrcb->end(); iter++) {
-
-                    std::vector<std::string> strs;
-                    boost::split(strs, *iter, boost::is_any_of("\n"));
-                    for (auto& s : strs) l.append(s);
-                }
-            }
-            return l;
-        }
-        boost::python::list monitors_status() {
-            boost::python::list l2;
-            for (int i = 0; i < COUNTER_MONITOR_COUNT; i++) {
-                unsigned long long val = CounterMonitor[i];
-                auto t = boost::python::make_tuple("MONITOR" + std::to_string(i), val);
-                l2.append(t);
-            }
-            return l2;
-        }
-        boost::python::tuple status() {
-
-            boost::chrono::system_clock::time_point tps=ptrmsmtsystem1->started;
-            boost::chrono::duration<double> secs = boost::chrono::system_clock::now() - tps;
-            long long count = ptrmsmtsystem1->data.evntcount;
-            unsigned short tmp = ptrmsmtsystem1->data.last_deviceStatusdeviceId;
-            unsigned char devstatus = Mcpd8::DataPacket::getStatus(tmp);
-            std::string msg = Mcpd8::DataPacket::deviceStatus(devstatus);
-            //LOG_INFO << "started:"<<tps<<", now="<< boost::chrono::system_clock::now()<< ":"<<secs<<std::endl;
-           // LOG_INFO <<"count="<<count<<", elapsed="<<secs << ",devstatus=" << (int)devstatus << ", " << msg<<std::endl;
-            return boost::python::make_tuple(count, secs.count(), devstatus,msg);
-
-        }
-
-        std::string get_version() {
-            std::stringstream ss;
-            //ss << PROJECT_NAME << " : BRANCH: " << GIT_BRANCH << " LATEST TAG:" << GIT_LATEST_TAG << " commits since:" << GIT_NUMBER_OF_COMMITS_SINCE << " " << GIT_DATE << std::endl;
-            std::string git_latest_tag(GIT_LATEST_TAG);
-            git_latest_tag.erase(std::remove_if(git_latest_tag.begin(), git_latest_tag.end(), (int(*)(int)) std::isalpha), git_latest_tag.end());
-            ss << PROJECT_NAME << " : " << git_latest_tag << "." << GIT_NUMBER_OF_COMMITS_SINCE << "." << GIT_REV << "_" << GIT_DATE;
-            return ss.str();
-        }
-
-        void start() {
-            unsigned short tmp = ptrmsmtsystem1->data.last_deviceStatusdeviceId;
-            auto status = Mcpd8::DataPacket::getStatus(tmp);
-            if (status & Mcpd8::Status::DAQ_Running) {
-                LOG_WARNING << "skipped ," << status << std::endl;
-                return;
-
-            }
-            
-            try {
-                if (ptrStartParameters->writelistmode) {
-                        ptrmsmtsystem1->write2disk = true;
-                        worker_threads.create_thread([this] {Mesytec::writeListmode(io_service, ptrmsmtsystem1); });
-            }
-                ptrmsmtsystem1->SendAll(Mcpd8::Cmd::START);
-                set_simulatorRate(get_simulatorRate());
-            }
-            catch (boost::exception& e) { LOG_ERROR << boost::diagnostic_information(e)<<std::endl;}
-
-        }
-        void stop() {
-            try { ptrmsmtsystem1->SendAll(Mcpd8::Cmd::STOP); }
-            catch (boost::exception& e) { LOG_ERROR << boost::diagnostic_information(e) << std::endl;}
-        }
-        void resume() {
-            try { ptrmsmtsystem1->SendAll(Mcpd8::Cmd::CONTINUE); }
-            catch (boost::exception& e) { LOG_ERROR << boost::diagnostic_information(e) << std::endl;}
-        }
-
-        Histogram* getHistogram() {
-            using namespace magic_enum::bitwise_operators; // out-of-the-box bitwise operators for enums.
-            //LOG_DEBUG << "getHistogram()" << std::endl;
-            Zweistein::histogram_setup_status hss = Zweistein::setup_status;
-            if (magic_enum::enum_integer(hss & Zweistein::histogram_setup_status::has_binning)) {
-                return &histograms[1];
-            }
-            return &histograms[0];
-        }
-
-    };
-
-namespace {
-struct legacy_api_guard
-{
-    legacy_api_guard() { initialize(); }
-    ~legacy_api_guard() { shutdown(); }
-};
-
-/// @brief Global shared guard for the legacy API.
-boost::shared_ptr<legacy_api_guard> legacy_api_guard_;
-/// @brief Get (or create) guard for legacy API.
-boost::shared_ptr<legacy_api_guard> get_api_guard()
-{
-    if (!legacy_api_guard_)
-    {
-        legacy_api_guard_ = boost::make_shared<legacy_api_guard>();
-    }
-    return legacy_api_guard_;
-}
-
-void release_guard()
-{
-    try {
-        LOG_DEBUG << "release_guard()"<<std::endl;
-     }
-    catch(std::exception  &){}
-    legacy_api_guard_.reset();
-}
-
-
-
-} // namespace 
-
-
-
-
-#if (PY_VERSION_HEX >= 0x03000000)
-
-static void* init_ar() {
-#else
-static void init_ar() {
-#endif
-    Py_Initialize();
-
-    import_array();
-    return NUMPY_IMPORT_ARRAY_RETVAL;
-}
 
 
 
 BOOST_PYTHON_MODULE(mesytecsystem)
 {
-    
+
     using namespace boost::python;
 
     try {
-        ::get_api_guard(); // Initialize.  
+        ::get_api_guard(); // Initialize.
         init_ar();
-        
+
         np::initialize();
 
         to_python_converter<cv::Mat,
@@ -453,7 +230,7 @@ BOOST_PYTHON_MODULE(mesytecsystem)
             .def("stop", &NeutronMeasurement::stop)
             .def("getHistogram", &NeutronMeasurement::getHistogram, return_internal_reference<1, with_custodian_and_ward_postcall<1, 0>>())
             ;
-      
+
         import("atexit").attr("register")(make_function(&::release_guard));
 
 
@@ -464,8 +241,8 @@ BOOST_PYTHON_MODULE(mesytecsystem)
         throw;
     }
 
-   
-   
+
+
 }
 
 

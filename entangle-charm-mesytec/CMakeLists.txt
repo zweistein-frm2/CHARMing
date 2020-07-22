@@ -5,12 +5,13 @@ cmake_minimum_required (VERSION 3.14)
 
 set(PROJECT1 mesytecsystem)
 set(PROJECT2 listmodereplay)
+set(PROJECT3 charmsystem)
 
 set(repository ${Charm_DIR})
 
 set(Boost_USE_STATIC_LIBS ON)
 
-foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2)
+foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3)
     message(STATUS "PROJECT_NAME=${PROJECT_NAME}")
 
 project(${PROJECT_NAME})
@@ -23,10 +24,10 @@ message("on linux boost >= 1.71 must be installed from source with speficic comp
 #set(BOOST_ROOT /usr )
 #set(Boost_INCLUDE_DIR ${BOOST_ROOT}/include)
 endif()
-  
+
 add_compile_definitions(ASIOEXT_USE_BOOST_ASIO)
 add_compile_definitions(BOOST_CHRONO_VERSION=2)
-set(CMAKE_CXX_STANDARD 17) 
+set(CMAKE_CXX_STANDARD 17)
 
 find_package (Python COMPONENTS Interpreter Development NumPy)
 
@@ -34,7 +35,7 @@ if(NOT ENTANGLE_ROOT)
     if(WIN32)
       message(**   "python lib is here :"  ${Python_SITELIB})
     else()
-      execute_process(COMMAND  find /usr/local/lib/python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}/dist-packages/ -type d -name "entangle-*.egg"  OUTPUT_VARIABLE ENTANGLE_ROOT ERROR_QUIET) 
+      execute_process(COMMAND  find /usr/local/lib/python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}/dist-packages/ -type d -name "entangle-*.egg"  OUTPUT_VARIABLE ENTANGLE_ROOT ERROR_QUIET)
       if(ENTANGLE_ROOT)
         set(ENTANGLE_RES /etc/entangle)  # if standard install .res should go there (or one could parse /etc/entangle/entangle.conf.dist to know better)
       endif()
@@ -79,7 +80,7 @@ message(****resolves_to***************** ${${Boost_numpy_library}}**************
 
 
 
- 
+
 
 add_library(${PROJECT_NAME} SHARED )
 
@@ -103,19 +104,29 @@ add_custom_command(
 
 add_custom_command(
         TARGET ${PROJECT_NAME} POST_BUILD
+         COMMAND ${CMAKE_COMMAND} -E copy
+                ${CMAKE_CURRENT_SOURCE_DIR}/charm.py
+                ${CMAKE_CURRENT_BINARY_DIR}/charm.py
+         COMMAND ${CMAKE_COMMAND} -E copy
+                ${CMAKE_CURRENT_SOURCE_DIR}/mesytec.py
+                ${CMAKE_CURRENT_BINARY_DIR}/mesytec.py
         COMMAND ${CMAKE_COMMAND} -E copy
-              ${CMAKE_CURRENT_SOURCE_DIR}/charm-replay.py
-              ${CMAKE_CURRENT_BINARY_DIR}/charm-replay.py
+              ${CMAKE_CURRENT_SOURCE_DIR}/mesytec-replay.py
+              ${CMAKE_CURRENT_BINARY_DIR}/mesytec-replay.py
+         COMMAND ${CMAKE_COMMAND} -E copy
+              ${CMAKE_CURRENT_SOURCE_DIR}/Settings.py
+              ${CMAKE_CURRENT_BINARY_DIR}/Settings.py
+         COMMAND ${CMAKE_COMMAND} -E copy
+                ${CMAKE_CURRENT_SOURCE_DIR}/Simulator.py
+                ${CMAKE_CURRENT_BINARY_DIR}/Simulator.py
          COMMAND ${CMAKE_COMMAND} -E copy
               ${CMAKE_CURRENT_SOURCE_DIR}/test-replay.py
               ${CMAKE_CURRENT_BINARY_DIR}/test-replay.py
-        COMMAND ${CMAKE_COMMAND} -E copy
-                ${CMAKE_CURRENT_SOURCE_DIR}/charm.py
-                ${CMAKE_CURRENT_BINARY_DIR}/charm.py
+
         COMMAND ${CMAKE_COMMAND} -E copy
                 ${CMAKE_CURRENT_SOURCE_DIR}/test.py
                 ${CMAKE_CURRENT_BINARY_DIR}/test.py
-                
+
               )
 
 target_sources(${PROJECT_NAME}
@@ -135,14 +146,15 @@ ${Charm_DIR}/Mesytec.listmode.cpp
 ${Charm_DIR}/MesytecSystem.Data.cpp
 ${Charm_DIR}/Zweistein.GetConfigDir.cpp
 ${Charm_DIR}/Mesytec.config.cpp
+${Charm_DIR}/Zweistein.XYDetectorSystem.cpp
 ${repository}/version.cpp
 )
 
 if(ENTANGLE_ROOT )
  install(
     TARGETS ${PROJECT_NAME}
-      RUNTIME DESTINATION ${ENTANGLE_ROOT}/entangle/device/charm
-      LIBRARY DESTINATION ${ENTANGLE_ROOT}/entangle/device/charm
+      RUNTIME DESTINATION ${ENTANGLE_ROOT}/entangle/device/charming
+      LIBRARY DESTINATION ${ENTANGLE_ROOT}/entangle/device/charming
  )
 else()
 install(CODE "MESSAGE(\"${PROJECT_NAME} NOT INSTALLED\")")
@@ -156,11 +168,12 @@ endforeach()
 if(ENTANGLE_ROOT )
  install(
   FILES
-   ${CMAKE_CURRENT_SOURCE_DIR}/charm-replay.py
-   ${CMAKE_CURRENT_SOURCE_DIR}/test-replay.py
    ${CMAKE_CURRENT_SOURCE_DIR}/charm.py
+    ${CMAKE_CURRENT_SOURCE_DIR}/mesytec.py
+   ${CMAKE_CURRENT_SOURCE_DIR}/mesytec-replay.py
+   ${CMAKE_CURRENT_SOURCE_DIR}/test-replay.py
    ${CMAKE_CURRENT_SOURCE_DIR}/test.py
-   DESTINATION ${ENTANGLE_ROOT}/entangle/device/charm
+   DESTINATION ${ENTANGLE_ROOT}/entangle/device/charming
  )
  if(UNIX AND NOT APPLE)
  install(
@@ -177,8 +190,8 @@ if(ENTANGLE_ROOT )
    install(
     FILES
     "${CMAKE_CURRENT_BINARY_DIR}/boost_filesystem-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
-    "${CMAKE_CURRENT_BINARY_DIR}/boost_thread-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll" 
-    "${CMAKE_CURRENT_BINARY_DIR}/boost_chrono-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll" 
+    "${CMAKE_CURRENT_BINARY_DIR}/boost_thread-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
+    "${CMAKE_CURRENT_BINARY_DIR}/boost_chrono-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
     "${CMAKE_CURRENT_BINARY_DIR}/boost_iostreams-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
     "${CMAKE_CURRENT_BINARY_DIR}/boost_numpy${Python_VERSION_MAJOR}${Python_VERSION_MINOR}-vc${MSVC_TOOLSET_VERSION}-mt-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
     "${CMAKE_CURRENT_BINARY_DIR}/boost_python${Python_VERSION_MAJOR}${Python_VERSION_MINOR}-vc${MSVC_TOOLSET_VERSION}-mt-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
@@ -188,16 +201,16 @@ if(ENTANGLE_ROOT )
     "${CMAKE_CURRENT_BINARY_DIR}/lzma${WIN32LIB_SUFFIX}.dll"
     "${CMAKE_CURRENT_BINARY_DIR}/zlib1${WIN32LIB_SUFFIX}.dll"
     "${CMAKE_CURRENT_BINARY_DIR}/zstd${WIN32LIB_SUFFIX}.dll"
-    DESTINATION ${ENTANGLE_ROOT}/entangle/device/charm
+    DESTINATION ${ENTANGLE_ROOT}/entangle/device/charming
    )
    endif()
   if(${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR} VERSION_LESS "1_73")
    install(
    FILES
       "${CMAKE_CURRENT_BINARY_DIR}/boost_date_time-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
-    DESTINATION ${ENTANGLE_ROOT}/entangle/device/charm
+    DESTINATION ${ENTANGLE_ROOT}/entangle/device/charming
    )
-   endif()  
+   endif()
 endif()
 
 add_subdirectory (entangle)

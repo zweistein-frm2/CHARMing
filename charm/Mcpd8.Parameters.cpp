@@ -6,7 +6,6 @@
  ***************************************************************************/
 #include <string>
 #include "Mcpd8.enums.hpp"
-#include "Mesytec.enums.Generator.hpp"
 #include "Mcpd8.Parameters.hpp"
 
 namespace Mcpd8 {

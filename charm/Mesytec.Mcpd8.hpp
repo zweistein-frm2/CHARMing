@@ -66,24 +66,25 @@ namespace Mesytec {
 		MesytecSystem();
 		~MesytecSystem();
 
-		void initatomicortime_point();
-		boost::atomic<long> simulatordatarate;
-		boost::atomic<bool> daq_running;
-		boost::atomic<boost::chrono::system_clock::time_point> started;
-		boost::atomic<boost::chrono::system_clock::time_point> stopped;
+		virtual void initatomicortime_point() {
+			XYDetectorSystem::initatomicortime_point();
+			auto max = boost::chrono::system_clock::time_point::max();
+			lastpacketqueuefull = max;
+			lastlistmodequeuefull = max;
+			wait_response = false;
+		}
 
 
-		boost::chrono::system_clock::time_point lasteventqueuefull;
 		boost::chrono::system_clock::time_point lastpacketqueuefull;
 		boost::chrono::system_clock::time_point lastlistmodequeuefull;
-		boost::atomic<bool> write2disk;
+
 
 		unsigned short currentrunid;
-		int icharmid;
+
 		cmd_errorcode internalerror;
 
 		Mcpd8::EventDataFormat eventdataformat;
-		size_t lasteventqueuefull_missedcount;
+
 		size_t lastpacketqueuefull_missedcount;
 		size_t lastlistmodequeuefull_missedcount;
 
@@ -94,7 +95,7 @@ namespace Mesytec {
 		bool listmode_connect(std::list<Mcpd8::Parameters>& _devlist, boost::asio::io_service& io_service);
 
 		boost::asio::io_service::strand *pstrand=nullptr;
-		bool connect(std::list<Mcpd8::Parameters>& _devlist, boost::asio::io_service& io_service);
+		virtual bool connect(std::list<Mcpd8::Parameters>& _devlist, boost::asio::io_service& io_service);
 
 		bool CmdSupported(Mesytec::DeviceParameter& mp, unsigned short cmd);
 		void Send(std::pair<const unsigned char, Mesytec::DeviceParameter>& kvp, Mcpd8::Internal_Cmd cmd, unsigned long param = 0);
@@ -106,22 +107,7 @@ namespace Mesytec {
 		boost::atomic<bool> wait_response;
 		Mcpd8::CmdPacket& Send(std::pair<const unsigned char, Mesytec::DeviceParameter>& kvp, Mcpd8::CmdPacket& cmdpacket, bool waitresponse = true);
 
-		void start_receive_charm(){
 
-			deviceparam.at(icharmid).socket->async_receive_from(boost::asio::buffer(charm_buf), deviceparam.at(icharmid).charm_cmd_endpoint, boost::bind(&MesytecSystem::handle__charm_receive, this,
-				boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
-		}
-
-		void handle__charm_receive(const boost::system::error_code& error,
-			std::size_t bytes_transferred) {
-				LOG_DEBUG << "handle__charm_receive(" << error.message() << " ,bytes_transferred=" << bytes_transferred << std::endl;
-				for (int i = 0; i < bytes_transferred; i++) {
-					LOG_DEBUG << std::hex << charm_buf[i] << " ";
-					if (i % 8 == 0) LOG_DEBUG << std::endl;
-				}
-				LOG_DEBUG <<std::dec<< std::endl;
-				start_receive_charm();
-		}
 		void start_receive(const Mesytec::DeviceParameter &mp,unsigned char devid) {
 
 			mp.socket->async_receive(boost::asio::buffer(recv_buf), pstrand->wrap(boost::bind(&MesytecSystem::handle_receive, this,
@@ -221,7 +207,7 @@ namespace Mesytec {
 		private:
 		udp::endpoint local_endpoint;
 
-		boost::array< unsigned char, 64> charm_buf;
+
 		boost::circular_buffer<Mcpd8::CmdPacket> cmd_recv_queue;
 		Zweistein::Lock cmdLock;
 
