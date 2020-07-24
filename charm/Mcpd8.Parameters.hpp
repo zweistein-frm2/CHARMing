@@ -16,7 +16,7 @@ namespace Mcpd8 {
 		static const std::string defaultIpAddress;
 		static const unsigned short defaultUdpPort;
 		static const unsigned char defaultmcpd_id;
-		EventDataFormat eventdataformat;
+		Zweistein::Format::EventData eventdataformat;
 		std::string networkcard;
 		std::string mcpd_ip;
 		std::string data_host;

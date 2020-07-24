@@ -70,9 +70,7 @@ public:
         return l2;
     }
     boost::python::tuple status() {
-
-        boost::chrono::system_clock::time_point tps = ptrmsmtsystem1->started;
-        boost::chrono::duration<double> secs = boost::chrono::system_clock::now() - tps;
+        boost::chrono::duration<double> secs = boost::chrono::system_clock::now() - ptrmsmtsystem1->getStart();
         long long count = ptrmsmtsystem1->evdata.evntcount;
         unsigned short tmp = ptrmsmtsystem1->data.last_deviceStatusdeviceId;
         unsigned char devstatus = Mcpd8::DataPacket::getStatus(tmp);

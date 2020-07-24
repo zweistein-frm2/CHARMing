@@ -4,6 +4,9 @@
  *   it under the terms of the GNU General Public License as published by  *
  *   the Free Software Foundation;                                         *
  ***************************************************************************/
+#ifdef __GNUC__
+#include <cxxabi.h>
+#endif
 
 #include "stdafx.h"
 #include <boost/exception/all.hpp>
@@ -25,9 +28,7 @@
 #include <asioext/file.hpp>
 #include <asioext/thread_pool_file_service.hpp>
 #include <asioext/open_flags.hpp>
-
 #include <asioext/linear_buffer.hpp>
-
 #include "Mesytec.listmode.hpp"
 #include "MesytecSystem.Data.hpp"
 #include "Mcpd8.CmdPacket.hpp"
@@ -46,7 +47,7 @@ namespace Mesytec {
 		MesytecSystem::MesytecSystem():recv_buf(), cmd_recv_queue(5), internalerror(cmd_errorcode::OK), currentrunid(0),
 			lastpacketqueuefull_missedcount(0), lastlistmodequeuefull_missedcount(0),
 			inputFromListmodeFile(false),
-			eventdataformat(Mcpd8::EventDataFormat::Undefined){
+			eventdataformat(Zweistein::Format::EventData::Undefined){
 
 		}
 		MesytecSystem::~MesytecSystem(){
@@ -66,16 +67,13 @@ namespace Mesytec {
 				Mesytec::DeviceParameter mp;
 				bool skip = false;
 				mp.datagenerator = p.datagenerator;
-				if (eventdataformat == Mcpd8::EventDataFormat::Undefined) {
+				if (eventdataformat == Zweistein::Format::EventData::Undefined) {
 					eventdataformat = p.eventdataformat;
 				}
 				else {
 					if (p.eventdataformat != eventdataformat) {
-						std::stringstream ss;
-						using namespace magic_enum::ostream_operators;
-						ss << p.eventdataformat << " different to " << eventdataformat << std::endl;
-						ss << "skipping " << mp.datagenerator << " " << p.mcpd_ip << std::endl;
-						LOG_ERROR << ss.str();
+						LOG_ERROR << MENUMSTR(p.eventdataformat) << " different to " << MENUMSTR(eventdataformat) << std::endl;
+						LOG_ERROR << "skipping " << MENUMSTR(mp.datagenerator) << " " << p.mcpd_ip << std::endl;
 						skip = true;
 					}
 				}
@@ -85,17 +83,17 @@ namespace Mesytec {
 					mp.offset = evdata.widthX;
 					deviceparam.insert(std::pair<const unsigned char, Mesytec::DeviceParameter>(p.mcpd_id, mp));
 					switch (eventdataformat) {
-					case Mcpd8::EventDataFormat::Mpsd8:
+					case Zweistein::Format::EventData::Mpsd8:
 						evdata.widthY = (unsigned short)Mpsd8_sizeY;
 						evdata.widthX += (unsigned short)(Mpsd8_sizeMODID * Mpsd8_sizeSLOTS);
 						break;
-					case Mcpd8::EventDataFormat::Mdll:
+					case Zweistein::Format::EventData::Mdll:
 						evdata.widthX += (unsigned short)Mdll_sizeX;
 						evdata.widthY = (unsigned short)Mdll_sizeY;
 						break;
-					case Mcpd8::EventDataFormat::Charm:
-						evdata.widthX += (unsigned short)Mdll_sizeX;
-						evdata.widthY = (unsigned short)Mdll_sizeY;
+					case Zweistein::Format::EventData::Charm:
+						evdata.widthX += (unsigned short)Charm_sizeX;
+						evdata.widthY = (unsigned short)Charm_sizeY;
 						break;
 					}
 				}
@@ -106,8 +104,7 @@ namespace Mesytec {
 			if (evdata.widthX == 0) evdata.widthX = 1;
 			if (evdata.widthY == 0) evdata.widthY = 1;
 			connected = true;
-			boost::chrono::system_clock::time_point tpstarted = started;
-			boost::chrono::milliseconds ms = boost::chrono::duration_cast<boost::chrono::milliseconds> (boost::chrono::system_clock::now() - tpstarted);
+			boost::chrono::milliseconds ms = boost::chrono::duration_cast<boost::chrono::milliseconds> (boost::chrono::system_clock::now() - getStart());
 			{
 				LOG_INFO << "MESYTECHSYSTEM LISTMODEREAD READY: +" << ms << std::endl;
 			}
@@ -155,14 +152,34 @@ namespace Mesytec {
 
 				bool skip = false;
 				mp.datagenerator = p.datagenerator;
-				if (eventdataformat == Mcpd8::EventDataFormat::Undefined) {
+				if (eventdataformat == Zweistein::Format::EventData::Undefined) {
 					eventdataformat = p.eventdataformat;
+
+					if (!((eventdataformat == Zweistein::Format::EventData::Mpsd8 ||
+								eventdataformat == Zweistein::Format::EventData::Mdll)
+										&&		typeid(Mesytec::MesytecSystem) == typeid(*this)	))
+					{
+						std::string classname = typeid(*this).name();
+
+#ifdef __GNUC__
+						char output[255];
+						size_t len = 255;
+						int status;
+						const char* p = __cxxabiv1::__cxa_demangle(classname.c_str(), output, &len, &status);
+#else
+						const char *p = classname.c_str();
+#endif
+						LOG_ERROR << MENUMSTR(eventdataformat) << " not handled by  " << p << std::endl;
+						eventdataformat == Zweistein::Format::EventData::Undefined;
+						skip = true;
+					}
+
+
 				}
 				else {
 					if (p.eventdataformat != eventdataformat) {
-						using namespace magic_enum::ostream_operators;
-						LOG_ERROR << "ERROR: " << p.eventdataformat << "different to " << eventdataformat << std::endl;
-						LOG_ERROR << "skipping " << mp.datagenerator << " " << mp.mcpd_endpoint.address().to_string() << std::endl;
+						LOG_ERROR << "ERROR: " << MENUMSTR(p.eventdataformat) << "different to " << MENUMSTR(eventdataformat) << std::endl;
+						LOG_ERROR << "skipping " << MENUMSTR(mp.datagenerator) << " " << mp.mcpd_endpoint.address().to_string() << std::endl;
 						skip = true;
 					}
 				}
@@ -175,17 +192,17 @@ namespace Mesytec {
 					mp.offset = evdata.widthX;
 					deviceparam.insert(std::pair<const unsigned char, Mesytec::DeviceParameter>(p.mcpd_id, mp));
 					switch (eventdataformat) {
-					case Mcpd8::EventDataFormat::Mpsd8:
+					case Zweistein::Format::EventData::Mpsd8:
 						evdata.widthY = (unsigned short) Mpsd8_sizeY;
 						evdata.widthX+= (unsigned short)(Mpsd8_sizeMODID * Mpsd8_sizeSLOTS );
 						break;
-					case Mcpd8::EventDataFormat::Mdll:
+					case Zweistein::Format::EventData::Mdll:
 						evdata.widthX+= (unsigned short)Mdll_sizeX;
 						evdata.widthY = (unsigned short)Mdll_sizeY;
 						break;
-					case Mcpd8::EventDataFormat::Charm:
-						evdata.widthX+= (unsigned short)Mdll_sizeX;
-						evdata.widthY = (unsigned short) Mdll_sizeY;
+					case Zweistein::Format::EventData::Charm:
+						evdata.widthX+= (unsigned short)Charm_sizeX;
+						evdata.widthY = (unsigned short) Charm_sizeY;
 						break;
 					}
 				}
@@ -323,76 +340,19 @@ namespace Mesytec {
 				}
 			}
 			connected = true;
-			boost::chrono::system_clock::time_point tpstarted = started;
+			boost::chrono::system_clock::time_point tpstarted = getStart();
 			boost::chrono::milliseconds ms = boost::chrono::duration_cast<boost::chrono::milliseconds> (boost::chrono::system_clock::now() - tpstarted);
 			{
 				LOG_INFO << "MESYTECHSYSTEM CONNECTED: +" << ms << std::endl;
 			}
 			return connected;
 		}
-		bool MesytecSystem::CmdSupported(Mesytec::DeviceParameter& mp, unsigned short cmd) {
 
-			using namespace magic_enum::ostream_operators;
-			auto cmd_1 = magic_enum::enum_cast<Mcpd8::Cmd>(cmd);
-			auto cmd_2 = magic_enum::enum_cast<Mcpd8::Internal_Cmd>(cmd);
-
-			bool rv = true;
-
-			if (mp.datagenerator == Zweistein::DataGenerator::NucleoSimulator) {
-
-				if (cmd_2.has_value()) {
-					if (cmd_2 == Mcpd8::Internal_Cmd::CHARMPATTERNGENERATOR || cmd_2 == Mcpd8::Internal_Cmd::CHARMSETEVENTRATE) {
-							using namespace magic_enum::ostream_operators;
-							//LOG_ERROR << mp.datagenerator << " not supported:" << cmd_2 << std::endl; // TODO string conversion?
-						rv = false;
-					}
-				}
-			}
-			if (mp.datagenerator ==Zweistein::DataGenerator::Mcpd8) {
-				if (cmd_2.has_value()) {
-					if (cmd_2 == Mcpd8::Internal_Cmd::SETNUCLEORATEEVENTSPERSECOND
-						|| cmd_2 == Mcpd8::Internal_Cmd::CHARMPATTERNGENERATOR || cmd_2 == Mcpd8::Internal_Cmd::CHARMSETEVENTRATE) {
-						using namespace magic_enum::ostream_operators;
-						//LOG_ERROR << mp.datagenerator << " not supported:" << cmd_2 << std::endl; // TODO string conversion?
-						rv = false;
-					}
-				}
-
-			}
-			return rv;
-		}
 		void MesytecSystem::Send(std::pair<const unsigned char, Mesytec::DeviceParameter> &kvp,Mcpd8::Internal_Cmd cmd, unsigned long param) {
 			Mcpd8::CmdPacket cmdpacket;
 			Mcpd8::CmdPacket response;
 			cmdpacket.cmd = cmd;
 			switch (cmd) {
-			case Mcpd8::Internal_Cmd::CHARMPATTERNGENERATOR:
-			{
-				char cmdbytes[] = { '\x06','\x00','\x06','\x00','\x04','\x00','\x01','\x00','\x00','\x8a','\x00','\x00' };
-				if (param == 1) cmdbytes[10] = '\x01';
-				size_t bytessent = kvp.second.socket->send_to(boost::asio::buffer(cmdbytes), kvp.second.charm_cmd_endpoint);
-
-			}
-			break;
-			case Mcpd8::Internal_Cmd::CHARMSETEVENTRATE:
-			{
-				char cmdbytes[] = { '\x06','\x00','\x06','\x00','\x04','\x00','\x02','\x00','\x30','\x8a','\x00','\x00' };
-				unsigned short data = (unsigned short)(50 * 1000000 / (param));
-
-				if (data <= 2) {
-					using namespace magic_enum::ostream_operators;
-					auto cmd_2 = magic_enum::enum_cast<Mcpd8::Internal_Cmd>(cmdpacket.cmd);
-					std::stringstream ss1;
-					ss1 << cmd_2 << ":data must be >2";
-					LOG_WARNING << ss1.str()<<std::endl;
-					break;
-				}
-				short* sp = (short*)&cmdbytes[10];
-				*sp = data;
-				size_t bytessent = kvp.second.socket->send_to(boost::asio::buffer(cmdbytes),kvp.second.charm_cmd_endpoint);
-				simulatordatarate = param;
-			}
-			break;
 			case Mcpd8::Internal_Cmd::SETNUCLEORATEEVENTSPERSECOND:
 			{
 				unsigned long* p = reinterpret_cast<unsigned long*>(&cmdpacket.data[0]);
@@ -659,6 +619,12 @@ namespace Mesytec {
 				break;
 			}
 		}
+		void MesytecSystem::setStart(boost::chrono::system_clock::time_point& t) {
+			Zweistein::XYDetectorSystem::setStart(t);
+			allow8bitbufnums = true;
+			b_bufnums_8BIT = false;
+		}
+
 		void MesytecSystem::SendAll(Mcpd8::Cmd cmd) {
 			//if (internalerror != Mesytec::cmd_errorcode::OK) return;
 			{
@@ -673,14 +639,18 @@ namespace Mesytec {
 				for (auto &kvp : deviceparam) {
 					Send(kvp, Mcpd8::Cmd::SETRUNID,currentrunid);
 				}
-				started = boost::chrono::system_clock::now();
+				auto now = boost::chrono::system_clock::now();
+				setStart(now);
 				currentrunid++;
 				daq_running = true;
+
+
 			}
 			if (cmd == Mcpd8::Cmd::CONTINUE) {
-				boost::chrono::system_clock::time_point tpstarted = started;
+				boost::chrono::system_clock::time_point tpstarted = getStart();
 				boost::chrono::system_clock::time_point tpstopped = stopped;
-				started = boost::chrono::system_clock::now() - (tpstopped - tpstarted);
+				auto origstarted = boost::chrono::system_clock::now() - (tpstopped - tpstarted);
+				setStart(origstarted);
 				daq_running = true;
 
 			}
@@ -706,7 +676,7 @@ namespace Mesytec {
 				boost::this_thread::sleep_for(boost::chrono::milliseconds(25));
 			}
 			assert(wait_response == false);
-			CmdSupported(kvp.second, cmdpacket.cmd);
+			//CmdSupported(kvp.second, cmdpacket.cmd);
 			using namespace magic_enum::ostream_operators;
 			auto cmd_1 = magic_enum::enum_cast<Mcpd8::Cmd>(cmdpacket.cmd);
 			auto cmd_2 = magic_enum::enum_cast<Mcpd8::Internal_Cmd>(cmdpacket.cmd);
@@ -856,18 +826,33 @@ namespace Mesytec {
 
 
 				if (datapacket.Number != (unsigned short)(params.lastbufnum + 1)) {
-					if (datapacket.Number == (unsigned char)(params.lastbufnum + 1)) {
-						if (!warning_notified_bufnum_8bit) {
-							warning_notified_bufnum_8bit = true;
-							LOG_WARNING <<  "Buffer Number Counter 8 bit only (heuristic detection)" << std::endl;
+					bool secondcheckok = false;
+					if (allow8bitbufnums) {
+						if (datapacket.Number == (unsigned char)(params.lastbufnum + 1)) {
+							secondcheckok = true;
+							if (!warning_notified_bufnum_8bit) {
+								warning_notified_bufnum_8bit = true;
+								LOG_WARNING << "Buffer Number Counter 8 bit only (heuristic detection)" << std::endl;
+							}
 						}
+
+						else {
+							// so no 8 bit number
+							boost::chrono::system_clock::time_point tps(getStart());
+							if (boost::chrono::system_clock::now() - tps >= boost::chrono::seconds(3)) {
+								allow8bitbufnums = false;
+							}
+
+						}
+
+
 					}
-					else {
+					if(!secondcheckok){
 						boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - params.lastmissed_time;
 						unsigned short missed = (unsigned short)(datapacket.Number - (unsigned short)(params.lastbufnum + 1));
 						params.lastmissed_count += missed;
 						if (sec.count() > 1) {
-							boost::chrono::system_clock::time_point tps(started);
+							boost::chrono::system_clock::time_point tps(getStart());
 							if (boost::chrono::system_clock::now() - tps >= boost::chrono::seconds(3)) {
 								LOG_ERROR << params.mcpd_endpoint << ": MISSED " << params.lastmissed_count << " BUFFER(s)" << std::endl;
 							}
@@ -891,7 +876,7 @@ namespace Mesytec {
 					unsigned short missed = (unsigned short)(datapacket.Number - (unsigned short)(params.lastbufnum + 1));
 					params.lastmissed_count += missed;
 					if (sec.count() > 1) {
-						boost::chrono::system_clock::time_point tps(started);
+						boost::chrono::system_clock::time_point tps(getStart());
 						if (boost::chrono::system_clock::now() - tps >= boost::chrono::seconds(3)){
 							LOG_ERROR << params.mcpd_endpoint << ": MISSED " << params.lastmissed_count << " BUFFER(s)" << std::endl;
 						}

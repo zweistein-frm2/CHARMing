@@ -24,7 +24,7 @@ namespace Mcpd8
 		unsigned short Length;	//!< length of the buffer in words
 		unsigned short Type;	//!< the buffer type
 		unsigned short headerLength;	//!< the length of the header in words
-		unsigned short Number;	//!< number of the packet 
+		unsigned short Number;	//!< number of the packet
 		unsigned short runID; 		//!< the run ID
 		unsigned short  deviceStatusdeviceId;	//!< the device state
 		unsigned short time[3];
@@ -33,12 +33,12 @@ namespace Mcpd8
 		DataPacket() : Type(Mesy::BufferType::DATA), Length(21),
 			headerLength(21), Number(0), runID(0), deviceStatusdeviceId(0) {}
 
-		
+
 		friend struct CmdPacket;
-		static unsigned char getId(unsigned short deviceStatusdeviceId){
+		inline static unsigned char getId(unsigned short deviceStatusdeviceId){
 			return deviceStatusdeviceId >> 8;
 		}
-		static unsigned char getStatus(unsigned short deviceStatusdeviceId) {
+		inline static unsigned char getStatus(unsigned short deviceStatusdeviceId) {
 			return deviceStatusdeviceId & 0xff;
 		}
 		static std::string deviceStatus(unsigned short deviceStatusdeviceId) {
@@ -70,7 +70,7 @@ namespace Mcpd8
 			}
 		}
 
-		
+
 		static boost::chrono::nanoseconds  timeStamp(const unsigned short time[3]){
 			/*
 			 DONT USE:  *U reads past time[3]
@@ -104,10 +104,10 @@ namespace Mcpd8
 		}
 
 		static long long Param(const unsigned short param[3]) {
-			
+
 			long long tstamp = (long long)param[0] + (((long long)param[1]) << 16) + (((long long)param[2]) << 32);
 
-			
+
 			return tstamp;
 		}
 
@@ -117,27 +117,27 @@ namespace Mcpd8
 			using namespace magic_enum::ostream_operators;
 			auto buffertype = magic_enum::enum_cast<Mesy::BufferType>(Zweistein::reverse_u16(Type));
 			auto status = Mcpd8::DataPacket::getStatus(deviceStatusdeviceId);
-			
+
 			std::stringstream ss_status;
 			for (auto s : magic_enum::enum_values<Status>()) {
 				if (s & status) ss_status << s << " ";
 			}
 
-					
+
 			os << buffertype << ", ";
 			os << "Buffer Number:" << Number << ", ";
 			os << "Status:" << ss_status.str() << hexfmt((unsigned char)status);
 			os << "Id:" << (unsigned short)Mcpd8::DataPacket::getId(deviceStatusdeviceId) << ", ";
 			os << "RunID:" << runID << ", " << numEvents() << " Events ";
 			os << "Timestamp:"<< boost::chrono::duration_cast<boost::chrono::milliseconds>(Mcpd8::DataPacket::timeStamp(time)) << std::endl;
-			
+
 			int rest = (Length - headerLength) % 3;
 			if (rest) { os << std::endl << "WARNING: trailing " << rest << " Bytes"; }
 		}
-		
+
 
 	};
-	
+
 }
 
 inline std::ostream& operator<<(std::ostream& p, Mcpd8::DataPacket& dp) {

@@ -17,7 +17,7 @@
 #define Charm_sizeY  1024
 
 namespace Charm {
-	class  Packet
+	class  proposal9june2020_Packet
 	{
 	public:
 		// we define all struct elements as short, so that endianness can be converted easier
@@ -26,14 +26,18 @@ namespace Charm {
 		unsigned short Type;	//!< the buffer type
 		unsigned short headerLength;	//!< the length of the header in words
 		long long timestamp;
-		unsigned short Number;	//!< number of the packet 
+		unsigned short Number;	//!< number of the packet
 		unsigned short  deviceStatus;	//!< the device state
 		unsigned short dummy0;
 		unsigned short dummy1 ;
+		typedef struct {
+			unsigned short data[3];
+		} mesytec48;
 		union {
-			long long s64[163];
-			long s32[326];
-			unsigned short u16[652];
+			long long s64[184];
+			mesytec48 u48 [245];
+			long s32[368];
+			unsigned short u16[736];
 		} data;
 	};
 
@@ -80,6 +84,6 @@ namespace Charm {
 
 	};
 
-	
+
 
 }

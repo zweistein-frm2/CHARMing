@@ -104,7 +104,7 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
                                 continue;
                             }
                             ptrStartParameters->monitorbusy = true;
-                            ptrmsmtsystem1->eventdataformat = Mcpd8::EventDataFormat::Undefined;
+                            ptrmsmtsystem1->eventdataformat = Zweistein::Format::EventData::Undefined;
                             ptrmsmtsystem1->listmode_connect(_devlist, io_service);
                             // find the .json file for the listmode file
                             // check if Binning file not empty, if not empty wait for
@@ -160,7 +160,7 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
 
             long long currcount = ptrmsmtsystem1->evdata.evntcount;
             long long maxcount = ptrStartParameters->MaxCount;
-            boost::chrono::system_clock::time_point tps = ptrmsmtsystem1->started;
+            boost::chrono::system_clock::time_point tps = ptrmsmtsystem1->getStart();
             boost::chrono::duration<double> secs = boost::chrono::system_clock::now() - tps;
             boost::chrono::duration<double> Maxsecs(ptrStartParameters->DurationSeconds);
 
@@ -244,7 +244,7 @@ struct ReplayList {
 
         boost::python::tuple status() {
 
-            boost::chrono::system_clock::time_point tps=ptrmsmtsystem1->started;
+            boost::chrono::system_clock::time_point tps=ptrmsmtsystem1->getStart();
             boost::chrono::duration<double> secs = boost::chrono::system_clock::now() - tps;
             long long count = ptrmsmtsystem1->evdata.evntcount;
             unsigned short tmp = ptrmsmtsystem1->data.last_deviceStatusdeviceId;
@@ -374,7 +374,8 @@ struct ReplayList {
         void start() {
             using namespace magic_enum::ostream_operators;
             // we have to start from beginning of playlist
-            ptrmsmtsystem1->started = boost::chrono::system_clock::now();
+            auto now = boost::chrono::system_clock::now();
+            ptrmsmtsystem1->setStart(now);
             Mesytec::listmode::action ac = Mesytec::listmode::whatnext;
             LOG_INFO << "ReplayList::start() " << ac << std::endl;
             Mesytec::listmode::action action= Mesytec::listmode::whatnext;

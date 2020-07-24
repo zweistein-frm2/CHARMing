@@ -8,17 +8,13 @@
 #include <string_view>
 #include "magic_enum/include/magic_enum.hpp"
 
-namespace Mcpd8 {
-	enum EventDataFormat {
-		Undefined = 0,
-		Mpsd8 = 1,
-		Mdll = 2,
-		Charm = 3
-	};
+
+
+	namespace Mcpd8 {
 	enum Status {
 		DAQ_Running = 1,
 		sync_ok = 2,
-		
+
 	};
 	enum Cmd {
 		RESET = 0,
@@ -83,7 +79,7 @@ namespace Mcpd8 {
 		TPA=4
 
 	};
-		
+
 	/*
 namespace magic_enum {
 	template <>

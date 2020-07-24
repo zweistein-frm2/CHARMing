@@ -113,6 +113,10 @@ add_custom_command(
         COMMAND ${CMAKE_COMMAND} -E copy
               ${CMAKE_CURRENT_SOURCE_DIR}/mesytec-replay.py
               ${CMAKE_CURRENT_BINARY_DIR}/mesytec-replay.py
+         COMMAND ${CMAKE_COMMAND} -E copy
+              ${CMAKE_CURRENT_SOURCE_DIR}/__init__.py
+              ${CMAKE_CURRENT_BINARY_DIR}/__init__.py
+
         COMMAND ${CMAKE_COMMAND} -E copy
               ${CMAKE_CURRENT_SOURCE_DIR}/msmtsystem.py
               ${CMAKE_CURRENT_BINARY_DIR}/msmtsystem.py
@@ -179,6 +183,7 @@ if(ENTANGLE_ROOT )
     ${CMAKE_CURRENT_SOURCE_DIR}/mesytec.py
    ${CMAKE_CURRENT_SOURCE_DIR}/mesytec-replay.py
     ${CMAKE_CURRENT_SOURCE_DIR}/msmtsystem.py
+    ${CMAKE_CURRENT_SOURCE_DIR}/__init__.py
    ${CMAKE_CURRENT_SOURCE_DIR}/core.py
    ${CMAKE_CURRENT_SOURCE_DIR}/settings.py
    ${CMAKE_CURRENT_SOURCE_DIR}/simulator.py

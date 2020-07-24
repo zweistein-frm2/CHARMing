@@ -9,7 +9,6 @@
 #include "stdafx.h"
 #include <boost/asio.hpp>
 #include "Mcpd8.DataPacket.hpp"
-#include "Zweistein.bitreverse.hpp"
 #include "Zweistein.Logger.hpp"
 
 namespace Mcpd8 {
@@ -19,7 +18,7 @@ namespace Mcpd8 {
 		unsigned short Length;	//!< length of the buffer
 		unsigned short Type;
 		unsigned short headerLength;	//!< the length of the buffer header
-		unsigned short Number;	//!< number of the packet 
+		unsigned short Number;	//!< number of the packet
 		unsigned short cmd; 		//!< the run ID
 		unsigned short deviceStatusdeviceId;	//!< the device state
 		unsigned short time[3];
@@ -28,7 +27,7 @@ namespace Mcpd8 {
 		static const int defaultLength;
 		CmdPacket() :Type(Mesy::BufferType::COMMAND), Length(defaultLength),
 			headerLength(defaultLength), Number(0), deviceStatusdeviceId(0) {
-			
+
 		}
 		CmdPacket(const DataPacket & p)
 		{
@@ -42,7 +41,7 @@ namespace Mcpd8 {
 			time[1] = p.time[1];
 			time[2] = p.time[2];
 			headerchksum = p.param[0][0];
-			unsigned short items = (Length - headerLength)+1; // we want trailing 0xffff also 
+			unsigned short items = (Length - headerLength)+1; // we want trailing 0xffff also
 			if (items > 750) {
 				LOG_ERROR << "ERROR in CmdPacket, " << items << " > 750" << std::endl;
 				items = 750;
@@ -68,10 +67,10 @@ namespace Mcpd8 {
 			//for (int i = 0; i <len; i++) 	boost::endian::big_to_native_inplace(sp[i]);
 			size_t bytessent=socket->send_to(boost::asio::buffer(reinterpret_cast<unsigned short*>(&cmdpacket), (cmdpacket.Length)*sizeof(short)), mcpd_endpoint);
 			return bytessent;
-			
+
 		}
 
-		
+
 		void print(std::stringstream& os) const {
 			using namespace magic_enum::ostream_operators;
 			using namespace magic_enum::bitwise_operators;
@@ -81,7 +80,7 @@ namespace Mcpd8 {
 			for (auto s : magic_enum::enum_values<Status>()) {
 				if (s & status) ss_status << s<<" ";
 			}
-			
+
 			bool understood = true;
 			unsigned short realcmd = cmd;
 			if (realcmd!= Mcpd8::Internal_Cmd::SETNUCLEORATEEVENTSPERSECOND && realcmd & 0x8000 ) {
@@ -91,12 +90,12 @@ namespace Mcpd8 {
 			}
 			auto cmd_1 = magic_enum::enum_cast<Mcpd8::Cmd>(realcmd);
 			auto cmd_2 = magic_enum::enum_cast<Mcpd8::Internal_Cmd>(realcmd);
-			
+
 			std::stringstream ss_cmd;
 			if (cmd_1.has_value()) 	ss_cmd << cmd_1 ;
 			else {
 				ss_cmd << cmd_2;
-				if (!cmd_2.has_value()) { 
+				if (!cmd_2.has_value()) {
 					if (realcmd == Mcpd8::Internal_Cmd::SETNUCLEORATEEVENTSPERSECOND) {
 						ss_cmd << "(SETNUCLEORATEEVENTSPERSECOND)";
 					}
@@ -108,7 +107,7 @@ namespace Mcpd8 {
 				ss_cmd << "( NOT UNDERSTOOD)";
 			}
 
-			
+
 
 			os << buffertype << " " << ss_cmd.str() << ", ";
 			os << "Buffer Number:" << Number<< ", ";
@@ -125,8 +124,8 @@ namespace Mcpd8 {
 		}
 
 	};
-	
-	
+
+
 }
 
 inline std::ostream& operator<<(std::ostream& p, Mcpd8::CmdPacket& cp) {

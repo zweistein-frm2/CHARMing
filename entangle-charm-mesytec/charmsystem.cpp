@@ -46,7 +46,7 @@ void startMonitor(boost::shared_ptr < MSMTSYSTEM> ptrmsmtsystem1, boost::shared_
     }
     std::list<Mcpd8::Parameters> _devlist = std::list<Mcpd8::Parameters>();
 
-    ptrmsmtsystem1->data.Format = Mcpd8::EventDataFormat::Mpsd8;
+    ptrmsmtsystem1->evdata.Format = Zweistein::Format::EventData::Charm;
 
     bool configok = Mesytec::Config::get(_devlist, inidirectory.string());
 
@@ -126,8 +126,7 @@ void startMonitor(boost::shared_ptr < MSMTSYSTEM> ptrmsmtsystem1, boost::shared_
     while (!io_service.stopped()) {
         boost::this_thread::sleep_for(boost::chrono::milliseconds(500));
 
-        boost::chrono::system_clock::time_point tps = ptrmsmtsystem1->started;
-        boost::chrono::duration<double> secs = boost::chrono::system_clock::now() - tps;
+        boost::chrono::duration<double> secs = boost::chrono::system_clock::now() - ptrmsmtsystem1->getStart();
         boost::chrono::duration<double> Maxsecs(ptrStartParameters->DurationSeconds);
         long long currcount = ptrmsmtsystem1->evdata.evntcount;
         long long maxcount = ptrStartParameters->MaxCount;

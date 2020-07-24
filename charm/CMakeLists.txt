@@ -21,11 +21,11 @@ if(MSVC)
     add_compile_definitions(_WIN32_WINNT=0x0601)
      add_compile_definitions(WIN32_PRE10OLDSTYLE)
 endif()
-  
+
 add_compile_definitions(ASIOEXT_USE_BOOST_ASIO)
 add_compile_definitions(BOOST_CHRONO_VERSION=2)
 
-set(CMAKE_CXX_STANDARD 17) 
+set(CMAKE_CXX_STANDARD 17)
 
 #find_package (Python COMPONENTS Interpreter Development NumPy)
 
@@ -39,17 +39,8 @@ if(DEFINED Protobuf_DIR )
 #sort of hack for snapcraft.yaml build
 find_package(Protobuf REQUIRED PATHS ${Protobuf_DIR})
 endif()
-#set ("OpenCV_DIR" "${_VCPKG_ROOT_DIR}/installed/${VCPKG_TARGET_TRIPLET}/share/opencv")
-
 find_package(OpenCV  REQUIRED)
 message(******OpenCV_Dir=   ${OpenCV_DIR}  *************)
-
-#find_package(unofficial-libuv CONFIG REQUIRED)
-
-#set (magic_enum_DIR ${_VCPKG_ROOT_DIR}/installed/${VCPKG_TARGET_TRIPLET}/share/magic_enum)
-
-#message(******magic_enum_DIR= ${magic_enum_DIR}   ************)
-#find_package(magic_enum CONFIG REQUIRED )
 
 message(**CMAKE_CURRENT_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR})
 message(**CMAKE_SOURCE_DIR=${CMAKE_SOURCE_DIR})
@@ -58,8 +49,6 @@ include_directories(${Boost_INCLUDE_DIR} ${OpenCV_INCLUDE_DIRS})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/asio-extensions/include)
 include_directories(./)
 
-#include_directories(${SIGSLOT_PATH})
-#include_directories(${_Python_INCLUDE_DIR})
 # Add source to this project's executable.
 add_executable (${PROJECT_NAME} "mesyDeviceCtrl.cpp" "Mesytec.Mcpd8.cpp" "Mcpd8.Parameters.cpp" "OptionPrinter.cpp" "CustomOptionDescription.cpp" "simpleLogger.cpp" "coloured_console_sink.cpp" "Zweistein.ping.cpp" ${repository}/version.cpp "Mcpd8.CmdPacket.cpp" "Mesyec.Mpsd8.cpp" "Mesytec.listmode.write.cpp" "Mesytec.listmode.cpp" "MesytecSystem.Data.cpp" "Zweistein.GetConfigDir.cpp" "Mesytec.config.cpp" "Charm.System.cpp" "Zweistein.XYDetectorSystem.cpp")
 
@@ -72,7 +61,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE   ${Boost_LIBRARIES} ${OpenCV_LIBS
 add_custom_command(
     OUTPUT ${repository}/version.cpp
            ${repository}/_version.cpp
-    COMMAND ${CMAKE_COMMAND} -P 
+    COMMAND ${CMAKE_COMMAND} -P
             ${repository}/version.cmake
             WORKING_DIRECTORY ${repository}
             )
@@ -94,7 +83,7 @@ endif()
 
 if(NOT INSTALL_DIR)
 if(WIN32)
-set(INSTALL_DIR $ENV{HOMEDRIVE}$ENV{HOMEPATH}) # or $ENV{USERPROFILE}
+set(INSTALL_DIR  $ENV{USERPROFILE} ) # or $ENV{HOMEDRIVE}$ENV{HOMEPATH}
 else()
 set(INSTALL_DIR ~/)
 endif()
@@ -108,10 +97,10 @@ endif()
   install(TARGETS ${PROJECT_NAME}
         RUNTIME  DESTINATION ${INSTALL_DIR}
         )
-  install(FILES 
+  install(FILES
     "${CMAKE_CURRENT_BINARY_DIR}/boost_filesystem-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
-    "${CMAKE_CURRENT_BINARY_DIR}/boost_thread-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll" 
-    "${CMAKE_CURRENT_BINARY_DIR}/boost_chrono-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll" 
+    "${CMAKE_CURRENT_BINARY_DIR}/boost_thread-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
+    "${CMAKE_CURRENT_BINARY_DIR}/boost_chrono-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
     "${CMAKE_CURRENT_BINARY_DIR}/boost_program_options-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
     "${CMAKE_CURRENT_BINARY_DIR}/boost_iostreams-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
     "${CMAKE_CURRENT_BINARY_DIR}/boost_regex-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
@@ -138,11 +127,11 @@ endif()
       "${CMAKE_CURRENT_BINARY_DIR}/boost_date_time-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
     DESTINATION ${INSTALL_DIR}
    )
-   endif()  	
-		
+   endif()
+
 else()
  install(TARGETS ${PROJECT_NAME}
         RUNTIME  DESTINATION ${INSTALL_DIR}
         )
 endif()
- 
+

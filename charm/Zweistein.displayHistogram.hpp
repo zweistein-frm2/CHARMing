@@ -110,8 +110,9 @@ namespace Zweistein {
 
 				sig(rawimage,binnedimage);
 				if (!rawimage.empty() && rawimage.rows>1) {
-					cvui::context(windows[0]);
+
 					if (bshow ) {
+						cvui::context(windows[0]);
 						if (use_clahe_raw) {
 							cv::Ptr<cv::CLAHE> clahe=cv::createCLAHE();
 							clahe->setClipLimit(2.0);
@@ -128,8 +129,9 @@ namespace Zweistein {
 					}
 				}
 				if (!binnedimage.empty() &&binnedimage.rows>1) {
-					cvui::context(windows[1]);
+
 					if (bshow) {
+						cvui::context(windows[1]);
 						if(!bbinningwindow) {
 							cv::namedWindow(windows[1]);
 							cvui::watch(windows[1]);

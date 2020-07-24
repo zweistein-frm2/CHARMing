@@ -85,15 +85,15 @@ namespace Mesytec {
 					}
 
 					if (n == 0) {
-						auto a3 = magic_enum::enum_name(Mcpd8::EventDataFormat::Mpsd8);
+						auto a3 = magic_enum::enum_name(Zweistein::Format::EventData::Mpsd8);
 						std::string m3 = std::string(a3.data(), a3.size());
 						std::string enum_tmp = root.get<std::string>(s2 + "eventdataformat", m3);
-						auto a = magic_enum::enum_cast<Mcpd8::EventDataFormat>(enum_tmp);
+						auto a = magic_enum::enum_cast<Zweistein::Format::EventData>(enum_tmp);
 						p1.eventdataformat = a.value();
 					}
 					else {
 						std::string enum_tmp = root.get<std::string>(s2 + "eventdataformat");
-						auto a = magic_enum::enum_cast<Mcpd8::EventDataFormat>(enum_tmp);
+						auto a = magic_enum::enum_cast<Zweistein::Format::EventData>(enum_tmp);
 						p1.eventdataformat = a.value();
 					}
 					auto a4 = magic_enum::enum_name(p1.eventdataformat);

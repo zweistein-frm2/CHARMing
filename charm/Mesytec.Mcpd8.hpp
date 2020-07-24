@@ -13,7 +13,6 @@
 #include <vector>
 #include <map>
 #include <boost/asio.hpp>
-//#include <boost/bind/bind.hpp>
 #include <boost/foreach.hpp>
 #include <boost/chrono.hpp>
 #include <boost/circular_buffer.hpp>
@@ -83,22 +82,21 @@ namespace Mesytec {
 
 		cmd_errorcode internalerror;
 
-		Mcpd8::EventDataFormat eventdataformat;
+		Zweistein::Format::EventData eventdataformat;
 
 		size_t lastpacketqueuefull_missedcount;
 		size_t lastlistmodequeuefull_missedcount;
 
-
+		bool b_bufnums_8BIT ;
 		Mcpd8::Data data;
 		bool inputFromListmodeFile;
-
+		virtual void setStart(boost::chrono::system_clock::time_point& t);
 		bool listmode_connect(std::list<Mcpd8::Parameters>& _devlist, boost::asio::io_service& io_service);
 
 		boost::asio::io_service::strand *pstrand=nullptr;
 		virtual bool connect(std::list<Mcpd8::Parameters>& _devlist, boost::asio::io_service& io_service);
 
-		bool CmdSupported(Mesytec::DeviceParameter& mp, unsigned short cmd);
-		void Send(std::pair<const unsigned char, Mesytec::DeviceParameter>& kvp, Mcpd8::Internal_Cmd cmd, unsigned long param = 0);
+		virtual void Send(std::pair<const unsigned char, Mesytec::DeviceParameter>& kvp, Mcpd8::Internal_Cmd cmd, unsigned long param = 0);
 
 		void Send(std::pair<const unsigned char, Mesytec::DeviceParameter>& kvp, Mcpd8::Cmd cmd, unsigned long lparam = 0);
 		void SendAll(Mcpd8::Cmd cmd);
@@ -119,9 +117,11 @@ namespace Mesytec {
 		void watch_incoming_packets() {
 			try {
 				Mcpd8::DataPacket dp;
+				boost::function<void(Mcpd8::DataPacket&)> abfunc = boost::bind(&Mesytec::MesytecSystem::analyzebuffer, this, boost::placeholders::_1);
+
 				do {
 					while (data.packetqueue.pop(dp)) {
-						analyzebuffer(dp);
+						abfunc(dp);
 					}
 				} while (!pio_service->stopped());
 
@@ -133,6 +133,7 @@ namespace Mesytec {
 
 		bool firstneutrondiscarded = false;
 		bool warning_notified_bufnum_8bit = false;
+		bool allow8bitbufnums = false;
 		void handle_receive(const boost::system::error_code& error,
 			std::size_t bytes_transferred,unsigned char devid) {
 			Mcpd8::DataPacket& dp = recv_buf[0];
@@ -196,14 +197,14 @@ namespace Mesytec {
 			}
 			start_receive(mp,devid);
 		}
-
+		protected:
 
 		void PushNeutronEventOnly_HandleOther(Zweistein::Event& Ev);
 
 
 
 		public:
-			void analyzebuffer(Mcpd8::DataPacket& datapacket);
+			virtual void analyzebuffer(Mcpd8::DataPacket& datapacket);
 		private:
 		udp::endpoint local_endpoint;
 

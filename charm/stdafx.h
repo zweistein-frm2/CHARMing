@@ -33,6 +33,14 @@ std::string hexfmt(T const& t) {
     return oss.str();
 }
 
+#include "magic_enum/include/magic_enum.hpp"
+template<typename T>
+std::string MENUMSTR(T const& t) {
+    using namespace magic_enum::ostream_operators;
+    std::ostringstream oss;
+    oss << t;
+    return oss.str();
+}
 
 
 #ifdef WIN32

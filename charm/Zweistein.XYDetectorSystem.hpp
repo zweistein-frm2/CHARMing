@@ -11,7 +11,17 @@ namespace Zweistein {
 		boost::atomic<bool> connected;
 		boost::atomic<long> simulatordatarate;
 		boost::atomic<bool> daq_running;
+	private:
 		boost::atomic<boost::chrono::system_clock::time_point> started;
+	public:
+		virtual void setStart(boost::chrono::system_clock::time_point & t) {
+			started = t;
+		}
+		boost::chrono::system_clock::time_point getStart() {
+			boost::chrono::system_clock::time_point t = started; // neded because atomic
+			return t;
+		}
+
 		boost::atomic<boost::chrono::system_clock::time_point> stopped;
 		boost::chrono::system_clock::time_point lasteventqueuefull;
 		boost::atomic<bool> write2disk;

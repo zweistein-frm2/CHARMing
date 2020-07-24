@@ -10,6 +10,15 @@
 #include "magic_enum/include/magic_enum.hpp"
 
 namespace Zweistein {
+	namespace Format {
+		enum EventData {
+			Undefined = 0,
+			Mpsd8 = 1,
+			Mdll = 2,
+			Charm = 3
+		};
+	}
+
 
 	enum DataGenerator {
 		Undefined = 0,

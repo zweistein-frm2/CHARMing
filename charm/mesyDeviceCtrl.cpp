@@ -42,7 +42,7 @@ boost::log::trivial::severity_level SEVERITY_THRESHOLD = boost::log::trivial::tr
 boost::log::trivial::severity_level SEVERITY_THRESHOLD = boost::log::trivial::info;
 #endif
 std::string PROJECT_NAME("CHARMing");
-
+std::string CONFIG_FILE("charm"); // or "mesytec"
 using boost::asio::ip::udp;
 
 
@@ -89,8 +89,8 @@ int main(int argc, char* argv[])
 	}
 	std::string appName = boost::filesystem::basename(argv[0]);
 
-	boost::shared_ptr < Charm::CharmSystem> ptrmsmtsystem1 = boost::shared_ptr < Charm::CharmSystem>(new Charm::CharmSystem());
-	ptrmsmtsystem1->initatomicortime_point();
+	boost::shared_ptr <  Mesytec::MesytecSystem> ptrmsmtsystem1 = nullptr;
+
 
 
 	try
@@ -99,7 +99,7 @@ int main(int argc, char* argv[])
 
 		std::string git_latest_tag(GIT_LATEST_TAG);
 		git_latest_tag.erase(std::remove_if(git_latest_tag.begin(), git_latest_tag.end(), (int(*)(int)) std::isalpha), git_latest_tag.end());
-		std::cout << PROJECT_NAME << " : " << git_latest_tag << "." << GIT_NUMBER_OF_COMMITS_SINCE << "." << GIT_REV << "_" << GIT_DATE;
+		std::cout << PROJECT_NAME << " : " << git_latest_tag << "." << GIT_NUMBER_OF_COMMITS_SINCE << "." << GIT_REV << "_" << GIT_DATE << std::endl;
 
 		if (argc == 1) {
 			std::cout << "--help for usage info" << std::endl;
@@ -112,9 +112,11 @@ int main(int argc, char* argv[])
 		const char *CONFIG="config-file";
 		const char *WRITE2DISK="writelistmode";
 		const char* SETUP = "setup";
+		const char* CHARMDEVICE = "charmdevice";
 		bool inputfromlistfile = false;
 		bool write2disk = false;
 		bool setupafterconnect = false;
+		bool bmesyteconly = false;
 		po::options_description desc("command line options");
 		int maxNlistmode = 16;// maximal 16 listmode files
 		desc.add_options()
@@ -122,6 +124,7 @@ int main(int argc, char* argv[])
 			(LISTMODE_FILE, po::value< std::vector<std::string> >(),(std::string("file1 [file2] ... [file")+std::to_string(maxNlistmode)+std::string("N]")).c_str())
 			(CONFIG, po::value< std::string>(), (std::string("alternative config file[.json], must be in ")+ inidirectory.string()).c_str())
 			(WRITE2DISK, (std::string("write DataPackets to ")+ Mesytec::writelistmodeFileNameInfo()).c_str())
+			(CHARMDEVICE, (std::string("use charm device protocol. ")).c_str())
 			(SETUP, (std::string("config mesytec device(s): ")+ std::string("set module IP addr")).c_str())
 			;
 		po::positional_options_description positionalOptions;
@@ -134,11 +137,11 @@ int main(int argc, char* argv[])
 			std::cout<<"connects to mesytec/charm hardware (or simulator=>PacketSender) and starts data acquisition"<< std::endl;
 		    boost::filesystem::path preferred=Zweistein::Config::PreferredDirectory();
 			preferred /= PROJECT_NAME;
-			preferred.append(PROJECT_NAME + ".json");
+			preferred.append(CONFIG_FILE + ".json");
 			std::cout << "according to [preferred settings] in "<<preferred.string() << std::endl;
 			boost::filesystem::path current = inidirectory;
 			current/= PROJECT_NAME;
-			current.append(PROJECT_NAME + ".json");
+			current.append(CONFIG_FILE + ".json");
 			std::cout << "[current settings] : " << current.string() << std::endl;
 			rad::OptionPrinter::printStandardAppDesc(appName,
 				std::cout,
@@ -151,6 +154,15 @@ int main(int argc, char* argv[])
 		conflicting_options(vm, LISTMODE_FILE, SETUP);
 		conflicting_options(vm, WRITE2DISK, SETUP);
 		po::notify(vm);
+		if (vm.count(CHARMDEVICE)) {
+			bmesyteconly = false;
+			CONFIG_FILE = "charm";
+		}
+		else {
+			bmesyteconly = true;
+			CONFIG_FILE = "mesytec";
+		}
+
 		if (vm.count(WRITE2DISK)) write2disk = true;
 		if (vm.count(SETUP)) setupafterconnect = true;
 		if (vm.count(CONFIG)) {
@@ -160,7 +172,7 @@ int main(int argc, char* argv[])
 			Zweistein::Config::inipath.append(p.string());
 		}
 		else {
-			Zweistein::Config::inipath.append(PROJECT_NAME + ".json");
+			Zweistein::Config::inipath.append(CONFIG_FILE + ".json");
 		}
 		if (!vm.count(LISTMODE_FILE)) LOG_INFO << "Using config file:" << Zweistein::Config::inipath << " " <<std::endl ;
 		std::vector<std::string> listmodeinputfiles = std::vector<std::string>();
@@ -180,6 +192,13 @@ int main(int argc, char* argv[])
 			}
 			std::cout << std::endl;
 		}
+
+		if (bmesyteconly) ptrmsmtsystem1 = boost::shared_ptr < Mesytec::MesytecSystem>(new  Mesytec::MesytecSystem());
+		else ptrmsmtsystem1 = boost::shared_ptr <  Mesytec::MesytecSystem>(new Charm::CharmSystem());
+		ptrmsmtsystem1->initatomicortime_point();
+
+
+
 
 		boost::asio::signal_set signals(io_service, SIGINT, SIGTERM);
 		signals.async_wait(boost::bind(&boost::asio::io_service::stop, &io_service));
@@ -213,7 +232,7 @@ int main(int argc, char* argv[])
 
 
 
-						ptrmsmtsystem1->eventdataformat = Mcpd8::EventDataFormat::Undefined;
+						ptrmsmtsystem1->eventdataformat = Zweistein::Format::EventData::Undefined;
 						ptrmsmtsystem1->listmode_connect(_devlist, io_service);
 						// find the .json file for the listmode file
 						// check if Binning file not empty, if not empty wait for
@@ -494,7 +513,7 @@ int main(int argc, char* argv[])
 						worker_threads.create_thread([&ptrmsmtsystem1] {Zweistein::populateHistograms(io_service, ptrmsmtsystem1); });
 						worker_threads.create_thread([&ptrmsmtsystem1] {Zweistein::displayHistogram(io_service, ptrmsmtsystem1); });
 						boost::function<void()> sendstartcmd = [&ptrmsmtsystem1, &_devlist, &write2disk]() {
-							unsigned long rate = 1850;
+							unsigned long rate = 1100000;
 							try {
 								if (write2disk) worker_threads.create_thread([&ptrmsmtsystem1] {Mesytec::writeListmode(io_service, ptrmsmtsystem1); });
 								ptrmsmtsystem1->SendAll(Mcpd8::Cmd::START);
@@ -503,6 +522,7 @@ int main(int argc, char* argv[])
 										ptrmsmtsystem1->Send(kvp, Mcpd8::Internal_Cmd::SETNUCLEORATEEVENTSPERSECOND, rate);//1650000 is maximum
 									}
 									if (kvp.second.datagenerator == Zweistein::DataGenerator::CharmSimulator) {
+										//if(typeid(*ptrmsmtsystem1) !=
 										ptrmsmtsystem1->Send(kvp, Mcpd8::Internal_Cmd::CHARMSETEVENTRATE, rate); // oder was du willst
 										ptrmsmtsystem1->Send(kvp, Mcpd8::Internal_Cmd::CHARMPATTERNGENERATOR, 1); // oder was du willst
 									}
@@ -548,7 +568,7 @@ int main(int argc, char* argv[])
 					avg.addValue(evtspersecond);
 					{
 						boost::mutex::scoped_lock lock(coutGuard);
-						boost::chrono::system_clock::time_point tps(ptrmsmtsystem1->started);
+						boost::chrono::system_clock::time_point tps(ptrmsmtsystem1->getStart());
 						boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - tps;
 						std::cout << "\r" << std::setprecision(0) << std::fixed << avg.getAverage() << " Events/s, (" << Zweistein::PrettyBytes((size_t)(evtspersecond * sizeof(Mesy::Mpsd8Event))) << "/s)\t" << Mcpd8::DataPacket::deviceStatus(ptrmsmtsystem1->data.last_deviceStatusdeviceId) << " elapsed:" << sec << " ";// << std::endl;
 						lastcount = currentcount;

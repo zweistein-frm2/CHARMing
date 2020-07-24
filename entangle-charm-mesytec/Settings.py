@@ -1,3 +1,12 @@
+from entangle import base
+from entangle.core import states, Prop, uint16, Attr,Cmd
+from entangle.core.defs import uint64, int32, boolean, listof
+from entangle.core.errors import InvalidValue, InvalidOperation, \
+    ConfigurationError
+
+
+from entangle.device.charming import msmtsystem
+
 class Settings(base.MLZDevice):
     attributes = {
         'writelistmode':
@@ -7,20 +16,18 @@ class Settings(base.MLZDevice):
     }
 
     def read_writelistmode(self):
-        global msmtsystem
-        if msmtsystem:
-            return msmtsystem.writelistmode
+        if msmtsystem.msmtsystem:
+            return msmtsystem.msmtsystem.writelistmode
 
     def write_writelistmode(self,value):
-        global msmtsystem
-        if msmtsystem:
-            msmtsystem.writelistmode=value
+        if msmtsystem.msmtsystem:
+            msmtsystem.msmtsystem.writelistmode=value
 
     def get_writelistmode_unit(self):
         return ''
 
     def read_version(self):
         ver = super().read_version();
-        if not msmtsystem:
+        if not msmtsystem.msmtsystem:
             return ver
-        return ver + " "+msmtsystem.version
+        return ver + " "+msmtsystem.msmtsystem.version
