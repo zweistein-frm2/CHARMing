@@ -1,9 +1,16 @@
-/***************************************************************************
- *   Copyright (C) 2019 by Andreas Langhoff <andreas.langhoff@frm2.tum.de> *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation;                                         *
- ***************************************************************************/
+/*                          _              _                _
+	___  __ __ __  ___     (_)     ___    | |_     ___     (_)    _ _
+   |_ /  \ V  V / / -_)    | |    (_-<    |  _|   / -_)    | |   | ' \
+  _/__|   \_/\_/  \___|   _|_|_   /__/_   _\__|   \___|   _|_|_  |_||_|
+_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|
+"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'
+
+   Copyright (C) 2019 - 2020 by Andreas Langhoff
+										 <andreas.langhoff@frm2.tum.de>
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation;*/
+
 #pragma once
 #include "stdafx.h"
 #include <iostream>
@@ -70,27 +77,27 @@ namespace Mesy {
 			rv += data[0];
 			boost::chrono::nanoseconds ns(rv * 100);
 			return ns;
-			
+
 		}
 		static void settime19bit(unsigned short data[3], boost::chrono::nanoseconds nsec) {
-			
+
 			data[0] = nsec.count()/100 & 0xffff;
 			data[1] |= (nsec.count()/100 & 0b1110000000000000000) >> 16;
 
 		}
-	
+
 		void print(std::ostream & os) const {
 			using namespace magic_enum::ostream_operators;
 			auto eventtype = magic_enum::enum_cast<Mesy::EventType>(ID());
 			os << std::bitset<16>(data[0]) << " " << std::bitset<16>(data[1]) << " " << std::bitset<16>(data[2]) << std::endl;
 			os << "ID:" << eventtype << " MODID:" << (short)MODID() << " SLOTID:" << SLOTID() << " AMPLITUDE:" << AMPLITUDE() << " POSITION:" << POSITION() << " TIMESTAMP:" << TIMESTAMP()<<std::endl;
 		}
-		
+
 	};
 
-	
 
- 	
+
+
 
 
 	class alignas(2) MdllEvent {

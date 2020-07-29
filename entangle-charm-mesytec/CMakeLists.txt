@@ -26,7 +26,7 @@ message("on linux boost >= 1.71 must be installed from source with speficic comp
 endif()
 
 add_compile_definitions(ASIOEXT_USE_BOOST_ASIO)
-add_compile_definitions(BOOST_CHRONO_VERSION=2)
+
 set(CMAKE_CXX_STANDARD 17)
 
 find_package (Python COMPONENTS Interpreter Development NumPy)

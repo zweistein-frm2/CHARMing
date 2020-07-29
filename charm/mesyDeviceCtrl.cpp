@@ -36,6 +36,7 @@
 #include "Zweistein.Averaging.hpp"
 #include "CounterMonitor.hpp"
 #include "Charm.System.hpp"
+#include "version.h"
 #ifdef _DEBUG
 boost::log::trivial::severity_level SEVERITY_THRESHOLD = boost::log::trivial::trace;
 #else
@@ -48,13 +49,6 @@ using boost::asio::ip::udp;
 
 EXTERN_FUNCDECLTYPE boost::mutex coutGuard;
 EXTERN_FUNCDECLTYPE boost::thread_group worker_threads;
-
-extern const char* GIT_REV;
-extern const char* GIT_TAG ;
-extern const char* GIT_LATEST_TAG;
-extern const char* GIT_NUMBER_OF_COMMITS_SINCE;
-extern const char* GIT_BRANCH;
-extern const char* GIT_DATE;
 
 Zweistein::Lock histogramsLock;
 std::vector<Histogram> histograms;

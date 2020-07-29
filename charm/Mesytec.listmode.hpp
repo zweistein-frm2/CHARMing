@@ -1,9 +1,17 @@
-/***************************************************************************
- *   Copyright (C) 2019 by Andreas Langhoff <andreas.langhoff@frm2.tum.de> *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation;                                         *
- ***************************************************************************/
+/*                          _              _                _
+	___  __ __ __  ___     (_)     ___    | |_     ___     (_)    _ _
+   |_ /  \ V  V / / -_)    | |    (_-<    |  _|   / -_)    | |   | ' \
+  _/__|   \_/\_/  \___|   _|_|_   /__/_   _\__|   \___|   _|_|_  |_||_|
+_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|
+"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'
+
+   Copyright (C) 2019 - 2020 by Andreas Langhoff
+										 <andreas.langhoff@frm2.tum.de>
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation;*/
+
+
 #pragma once
 #include <asioext/file.hpp>
 #include <boost/endian/conversion.hpp>
@@ -28,7 +36,7 @@ namespace Mesytec {
 		const  char header_separator[] =	{ '\x00','\x00','\x55','\x55','\xAA','\xAA','\xFF','\xFF' };
 		const  char datablock_separator[] = { '\x00','\x00','\xFF','\xFF','\x55','\x55','\xAA','\xAA' };
 		const  char closing_signature[] =	{ '\xFF','\xFF','\xAA','\xAA','\x55','\x55','\x00','\x00' };
-		
+
 		inline listmode::action CheckAction() {
 			action r = whatnext;
 			return  r;
@@ -56,28 +64,28 @@ namespace Mesytec {
 				data(_Data),ab(abfunc){
 				int n=(int)deviceparam.size();
 				for (int i = 0; i < n; i++) listmoderead_first.set(i);
-				
+
 			}
-			
+
 		private:
 			Mcpd8::Data& data;
 			std::map<const unsigned char, Mesytec::DeviceParameter>& deviceparam;
 			std::bitset<8> listmoderead_first;
-			
+
 			boost::chrono::system_clock::time_point tp_start;
 			boost::chrono::nanoseconds start;
 			boost::function<void(Mcpd8::DataPacket &)>  ab;
 
-			
+
 			void listmoderead_analyzebuffer(const boost::system::error_code& error,
 				std::size_t bytes_transferred, Mcpd8::DataPacket& datapacket) {
 				if (listmoderead_first!=0) {
-					
+
 
 					start = Mcpd8::DataPacket::timeStamp(datapacket.time);
 					tp_start = boost::chrono::system_clock::now();
 					unsigned char id = Mcpd8::DataPacket::getId(datapacket.deviceStatusdeviceId);
-					
+
 					if (listmoderead_first.test(id)) {
 						auto& params = deviceparam[id];
 						params.lastbufnum = datapacket.Number - 1;
@@ -87,14 +95,14 @@ namespace Mesytec {
 							i++;
 						}
 					}
-					
-					
+
+
 				}
-				
+
 				//unsigned char id = Mcpd8::DataPacket::getId(datapacket.deviceStatusdeviceId);
 				//LOG_DEBUG << (id==1?"                           ":"")<<"datapacket.Number=" << datapacket.Number << std::endl;
 				ab.operator()(datapacket);
-				
+
 
 				boost::chrono::milliseconds elapsed = boost::chrono::duration_cast<boost::chrono::milliseconds>(Mcpd8::DataPacket::timeStamp(&datapacket.time[0]) - start);
 				if (elapsed.count() > 300) {
@@ -108,8 +116,8 @@ namespace Mesytec {
 					tp_start = boost::chrono::system_clock::now();
 
 				}
-				
-				
+
+
 			}
 
 		public:
@@ -121,7 +129,7 @@ namespace Mesytec {
 #else
 					const int bufsize = 80000;
 #endif
-					std::array<char, bufsize> buffer; 
+					std::array<char, bufsize> buffer;
 					boost::system::error_code ec;
 					boost::system::error_code error;
 					size_t bufnum = 0;
@@ -202,7 +210,7 @@ namespace Mesytec {
 					std::string nneedle(Mesytec::listmode::datablock_separator, Mesytec::listmode::datablock_separator + sizeof(Mesytec::listmode::datablock_separator));
 					std::string ncneedle(Mesytec::listmode::closing_signature, Mesytec::listmode::closing_signature + sizeof(Mesytec::listmode::closing_signature));
 
-					
+
 					do {
 						const std::size_t bytes_read = source.read_some(boost::asio::buffer(buffer), ec);
 						size_t from = 0;
@@ -241,7 +249,7 @@ namespace Mesytec {
 								std::string n_restofneedle(Mesytec::listmode::closing_signature + (sizeof(Mesytec::listmode::closing_signature) - possible_nc)
 									, Mesytec::listmode::closing_signature + sizeof(Mesytec::listmode::closing_signature));
 								if (haystackBeginOnly.find(n_restofneedle) != std::string::npos) {
-									// needle confirmed, so remove possible_n from 
+									// needle confirmed, so remove possible_n from
 									closing_sigfound = true;
 									never_closing_sigfound = false;
 									from  = possible_nc;
@@ -309,7 +317,7 @@ namespace Mesytec {
 								std::string n_restofneedle(Mesytec::listmode::header_separator + (sizeof(Mesytec::listmode::header_separator) - possible_nh)
 									, Mesytec::listmode::header_separator + sizeof(Mesytec::listmode::header_separator));
 								if (haystackBeginOnly.find(n_restofneedle) != std::string::npos) {
-									// needle confirmed, so remove possible_n from 
+									// needle confirmed, so remove possible_n from
 									headerfound = true;
 									never_headerfound = false;
 									from += possible_nh; // forces next buffer read
@@ -390,11 +398,11 @@ namespace Mesytec {
 								recvbuf_data.filldest(buffer.data() + from, to - from);
 								from = to;
 								check_closing_signature = false;
-								
+
 							}
 							if (from == bytes_read) break;
-							
-							
+
+
 						} while (from != std::string::npos);
 						bufnum++;
 						total_bytes_processed += bytes_read;
@@ -406,9 +414,9 @@ namespace Mesytec {
 					}
 
 				}
-			
 
-			
+
+
 		};
 	}
 

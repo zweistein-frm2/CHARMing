@@ -21,3 +21,4 @@
 #include "Zweistein.GetConfigDir.hpp"
 #include "Zweistein.ThreadPriority.hpp"
 #include "Zweistein.populateHistograms.hpp"
+#include "version.h"

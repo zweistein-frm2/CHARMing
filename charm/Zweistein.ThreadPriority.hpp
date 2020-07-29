@@ -1,9 +1,11 @@
 /***************************************************************************
- *   Copyright (C) 2019 by Andreas Langhoff <andreas.langhoff@frm2.tum.de> *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation;                                         *
- ***************************************************************************/
+  *   Copyright (C) 2019 - 2020 by Andreas Langhoff
+  *                                          <andreas.langhoff@frm2.tum.de> *
+  *   This program is free software; you can redistribute it and/or modify  *
+  *   it under the terms of the GNU General Public License as published by  *
+  *   the Free Software Foundation;                                         *
+  ***************************************************************************/
+
 #pragma once
 #include <boost/thread.hpp>
 #include <iostream>
@@ -16,14 +18,14 @@
 #if defined(__cplusplus)
 extern "C"
 {
-#endif  
+#endif
 #include <unistd.h>
 #include <sys/syscall.h>
 #include "libdl/dl_syscalls.h"
 #include "libdl/dl_syscalls.c"
 #if defined(__cplusplus)
 }
-#endif 
+#endif
 
 #endif
 
@@ -77,7 +79,7 @@ namespace Zweistein {
 				long buffersize = std::atol(data[0].substr(t + 1).c_str());
 
 				if (buffersize < 26214400L) {
-						
+
 					bp::ipstream is2;
 					bp::ipstream ierr2;
 					std::string cmdline = p.string() + " -w net.core.rmem_max=26214400";
@@ -89,7 +91,7 @@ namespace Zweistein {
 					}
 					c.wait_for(std::chrono::seconds(1), ec);
 					if (c.running()) c.terminate();
-				
+
 					if (bdenied) {
 						LOG_ERROR << " cannot change udp buffer size from " << buffersize << " to 26214400  => check permissions (sudo needed)" << std::endl;
 						return false;
@@ -99,13 +101,13 @@ namespace Zweistein {
 				return true;
 			}
 			catch (boost::exception& e) {
-				
+
 				LOG_ERROR << boost::diagnostic_information(e) << std::endl;
 			}
 			return false;
 #endif
 		}
-		
+
 		bool SetThreadPriority(boost::thread::native_handle_type nh, enum PRIORITY priority) {
 			bool rv = false;
 #ifdef WIN32

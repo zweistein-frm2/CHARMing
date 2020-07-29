@@ -1,9 +1,10 @@
-/***************************************************************************
- *   Copyright (C) 2019 by Andreas Langhoff <andreas.langhoff@frm2.tum.de> *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation;                                         *
- ***************************************************************************/
+ /***************************************************************************
+  *   Copyright (C) 2019 - 2020 by Andreas Langhoff
+  *                                          <andreas.langhoff@frm2.tum.de> *
+  *   This program is free software; you can redistribute it and/or modify  *
+  *   it under the terms of the GNU General Public License as published by  *
+  *   the Free Software Foundation;                                         *
+  ***************************************************************************/
 
 #pragma once
 #include "stdafx.h"
@@ -84,6 +85,21 @@ namespace Mesytec {
 
 		Zweistein::Format::EventData eventdataformat;
 
+		virtual bool singleModuleXYSize(Zweistein::Format::EventData eventdataformat, unsigned short& x, unsigned short& y) {
+			switch (eventdataformat) {
+			case Zweistein::Format::EventData::Mpsd8:
+				y = (unsigned short)Mpsd8_sizeY;
+				x = (unsigned short)(Mpsd8_sizeMODID * Mpsd8_sizeSLOTS);
+				return true;
+
+			case Zweistein::Format::EventData::Mdll:
+				x = (unsigned short)Mdll_sizeX;
+				y = (unsigned short)Mdll_sizeY;
+				return true;
+			}
+			return false;
+
+		}
 		size_t lastpacketqueuefull_missedcount;
 		size_t lastlistmodequeuefull_missedcount;
 

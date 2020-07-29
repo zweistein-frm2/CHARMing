@@ -1,9 +1,11 @@
 /***************************************************************************
- *   Copyright (C) 2020 by Andreas Langhoff <andreas.langhoff@frm2.tum.de> *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation;                                         *
- ***************************************************************************/
+  *   Copyright (C) 2020 by Andreas Langhoff
+  *                                          <andreas.langhoff@frm2.tum.de> *
+  *   This program is free software; you can redistribute it and/or modify  *
+  *   it under the terms of the GNU General Public License as published by  *
+  *   the Free Software Foundation;                                         *
+  ***************************************************************************/
+
 #pragma once
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
@@ -26,7 +28,7 @@ namespace Zweistein {
         namespace pt = boost::property_tree;
         typedef boost::multi_array<short, 2> array_type;
         typedef array_type::index index;
-       
+
         array_type BINNING;
         array_type OCC;
         short occmultiplier = 10000;
@@ -47,8 +49,8 @@ namespace Zweistein {
 				}
 			}
 		}
-       
-   
+
+
         void ReadTxt(std::string txtpath) {
                 LOG_INFO << "Zweistein::Binning::ReadTxt:" << txtpath << std::endl;
                 std::string firstline = "mesydaq Position Calibration File";
@@ -128,7 +130,7 @@ namespace Zweistein {
             int cols = 0;
             for (int n = 0; n < 2; n++) {
                 if (n == 1) {
-             
+
                     BINNING.resize(boost::extents[cols][rows]);
                     OCC_default(rows, cols);
                 }
@@ -138,15 +140,15 @@ namespace Zweistein {
                     int y = 0;
                     for (pt::ptree::value_type& cell : row.second)
                     {
-                       
+
                         if (n != 0) BINNING[x][y] = cell.second.get_value<short>();
                         y++;
                         if (n == 0) { if (y > rows) rows = y; }
-                        
+
                     }
                     x++;
                     if (n == 0) if (x > cols) cols = x;
-                   
+
                 }
             }
 
@@ -157,9 +159,9 @@ namespace Zweistein {
             auto s = BINNING.shape();
             int cols = (int) s[0];
 			int rows = (int) s[1];
-      
-           
-            
+
+
+
             pt::ptree oroot;
             // Add a matrix
             pt::ptree matrix_node;

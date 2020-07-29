@@ -94,14 +94,26 @@ const char* GIT_NUMBER_OF_COMMITS_SINCE=\"${GIT_NUMBER_OF_COMMITS_SINCE}\";
 const char* GIT_BRANCH=\"${GIT_BRANCH}\";
 const char* GIT_DATE=\"${GIT_DATE}\";")
 
-if(EXISTS ${CMAKE_CURRENT_BINARY_DIR}/version.cpp)
-    file(READ ${CMAKE_CURRENT_BINARY_DIR}/version.cpp VERSION_)
+set(VERSION_HEADER  "extern const char* GIT_REV;
+extern const char* GIT_TAG;
+extern const char* GIT_LATEST_TAG;
+extern const char* GIT_DESCRIBE_TAGS;
+extern const char* GIT_NUMBER_OF_COMMITS_SINCE;
+extern const char* GIT_BRANCH;
+extern const char* GIT_DATE;"
+)
+
+if(EXISTS ${repository}/version.cpp)
+    file(READ ${repository}/version.cpp VERSION_)
 else()
     set(VERSION_ "")
 endif()
 
 if (NOT "${VERSION}" STREQUAL "${VERSION_}")
-    file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/version.cpp "${VERSION}")
+    file(WRITE ${repository}/version.cpp "${VERSION}")
+    file(WRITE ${repository}/version.h "${VERSION_HEADER}")
+    message(version.cmake: written:  ${repository}/version.cpp)
+    message(${VERSION})
 endif()
-message(version.cmake: written:  ${CMAKE_CURRENT_BINARY_DIR}/version.cpp)
-message(${VERSION})
+
+

@@ -1,9 +1,10 @@
 /***************************************************************************
- *   Copyright (C) 2019 by Andreas Langhoff <andreas.langhoff@frm2.tum.de> *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation;                                         *
- ***************************************************************************/
+  *   Copyright (C) 2019 - 2020 by Andreas Langhoff
+  *                                          <andreas.langhoff@frm2.tum.de> *
+  *   This program is free software; you can redistribute it and/or modify  *
+  *   it under the terms of the GNU General Public License as published by  *
+  *   the Free Software Foundation;                                         *
+  ***************************************************************************/
 
 #pragma once
 #include <random>
@@ -31,7 +32,7 @@ namespace Zweistein {
 			//_test++;
 			type = mpsd8ev->ID();
 			ModId = mpsd8ev->MODID();
-			
+
 			if (modules[ModId] == Mesy::ModuleId::MPSD8OLD) {
 				Amplitude >>= 2;
 				Y >>= 2;
@@ -45,7 +46,7 @@ namespace Zweistein {
 				X = l & (unsigned short) (Mcpd8::sizeMCPDID * Mesy::Mpsd8Event::sizeMODID * Mesy::Mpsd8Event::sizeSLOTS - 1);
 			}
 			*/
-			
+
 		}
 
 		Event(Mesy::MdllEvent* mdllev, const boost::chrono::nanoseconds& headertime, unsigned short offsetX, Mesy::ModuleId modules[Mpsd8_sizeSLOTS]) {
@@ -77,7 +78,7 @@ namespace Zweistein {
 
 	};
 
-	
-	
+
+
 
 }

@@ -1,9 +1,18 @@
-/***************************************************************************
- *   Copyright (C) 2019 by Andreas Langhoff <andreas.langhoff@frm2.tum.de> *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation;                                         *
- ***************************************************************************/
+/*                          _              _                _
+    ___  __ __ __  ___     (_)     ___    | |_     ___     (_)    _ _
+   |_ /  \ V  V / / -_)    | |    (_-<    |  _|   / -_)    | |   | ' \
+  _/__|   \_/\_/  \___|   _|_|_   /__/_   _\__|   \___|   _|_|_  |_||_|
+_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|
+"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'
+
+   Copyright (C) 2019 - 2020 by Andreas Langhoff
+									     <andreas.langhoff@frm2.tum.de>
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation;*/
+
+
+
 #ifdef __GNUC__
 #include <cxxabi.h>
 #endif
@@ -82,20 +91,19 @@ namespace Mesytec {
 				if (!skip) {
 					mp.offset = evdata.widthX;
 					deviceparam.insert(std::pair<const unsigned char, Mesytec::DeviceParameter>(p.mcpd_id, mp));
-					switch (eventdataformat) {
-					case Zweistein::Format::EventData::Mpsd8:
-						evdata.widthY = (unsigned short)Mpsd8_sizeY;
-						evdata.widthX += (unsigned short)(Mpsd8_sizeMODID * Mpsd8_sizeSLOTS);
-						break;
-					case Zweistein::Format::EventData::Mdll:
-						evdata.widthX += (unsigned short)Mdll_sizeX;
-						evdata.widthY = (unsigned short)Mdll_sizeY;
-						break;
-					case Zweistein::Format::EventData::Charm:
-						evdata.widthX += (unsigned short)Charm_sizeX;
-						evdata.widthY = (unsigned short)Charm_sizeY;
-						break;
+
+					unsigned short x;
+					unsigned short y;
+
+					if (!singleModuleXYSize(eventdataformat, x, y)) {
+						LOG_ERROR << MENUMSTR(eventdataformat) << " not supported" << std::endl;
 					}
+					else {
+						evdata.widthY = y;
+						evdata.widthX += x;
+					}
+
+
 				}
 
 
@@ -111,6 +119,8 @@ namespace Mesytec {
 			return connected;
 
 		}
+
+
 		bool MesytecSystem::connect(std::list<Mcpd8::Parameters> &_devlist, boost::asio::io_service &io_service)
 		{
 			pio_service = &io_service;
@@ -170,7 +180,7 @@ namespace Mesytec {
 						const char *p = classname.c_str();
 #endif
 						LOG_ERROR << MENUMSTR(eventdataformat) << " not handled by  " << p << std::endl;
-						eventdataformat == Zweistein::Format::EventData::Undefined;
+						eventdataformat = Zweistein::Format::EventData::Undefined;
 						skip = true;
 					}
 
@@ -191,20 +201,17 @@ namespace Mesytec {
 				if (!skip) {
 					mp.offset = evdata.widthX;
 					deviceparam.insert(std::pair<const unsigned char, Mesytec::DeviceParameter>(p.mcpd_id, mp));
-					switch (eventdataformat) {
-					case Zweistein::Format::EventData::Mpsd8:
-						evdata.widthY = (unsigned short) Mpsd8_sizeY;
-						evdata.widthX+= (unsigned short)(Mpsd8_sizeMODID * Mpsd8_sizeSLOTS );
-						break;
-					case Zweistein::Format::EventData::Mdll:
-						evdata.widthX+= (unsigned short)Mdll_sizeX;
-						evdata.widthY = (unsigned short)Mdll_sizeY;
-						break;
-					case Zweistein::Format::EventData::Charm:
-						evdata.widthX+= (unsigned short)Charm_sizeX;
-						evdata.widthY = (unsigned short) Charm_sizeY;
-						break;
+					unsigned short x;
+					unsigned short y;
+
+					if (!singleModuleXYSize(eventdataformat, x, y)) {
+						LOG_ERROR << MENUMSTR(eventdataformat) << " not supported" << std::endl;
 					}
+					else {
+						evdata.widthY = y;
+						evdata.widthX += x;
+					}
+
 				}
 			}
 

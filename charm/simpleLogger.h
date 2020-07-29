@@ -1,9 +1,10 @@
 /***************************************************************************
- *   Copyright (C) 2019 by Andreas Langhoff <andreas.langhoff@frm2.tum.de> *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation;                                         *
- ***************************************************************************/
+  *   Copyright (C) 2019  by Andreas Langhoff
+  *                                          <andreas.langhoff@frm2.tum.de> *
+  *   This program is free software; you can redistribute it and/or modify  *
+  *   it under the terms of the GNU General Public License as published by  *
+  *   the Free Software Foundation;                                         *
+  ***************************************************************************/
 
 #ifndef simpleLogger_hpp__
 #define simpleLogger_hpp__
@@ -53,7 +54,7 @@ inline boost::log::BOOST_LOG_VERSION_NAMESPACE::basic_record_ostream<char>& oper
 
 namespace magic_enum {
 
-    
+
 
     namespace ostream_operators {
 
@@ -114,7 +115,7 @@ BOOST_LOG_ATTRIBUTE_KEYWORD(severity, "Severity", logging::trivial::severity_lev
 
 
 void coloring_formatter( logging::record_view const& rec, logging::formatting_ostream& strm);
-namespace Zweistein 
+namespace Zweistein
 {
 
     namespace Logger {

@@ -23,7 +23,6 @@ if(MSVC)
 endif()
 
 add_compile_definitions(ASIOEXT_USE_BOOST_ASIO)
-add_compile_definitions(BOOST_CHRONO_VERSION=2)
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -48,6 +47,7 @@ include_directories(${libuv_INCLUDE_DIR})
 include_directories(${Boost_INCLUDE_DIR} ${OpenCV_INCLUDE_DIRS})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/asio-extensions/include)
 include_directories(./)
+
 
 # Add source to this project's executable.
 add_executable (${PROJECT_NAME} "mesyDeviceCtrl.cpp" "Mesytec.Mcpd8.cpp" "Mcpd8.Parameters.cpp" "OptionPrinter.cpp" "CustomOptionDescription.cpp" "simpleLogger.cpp" "coloured_console_sink.cpp" "Zweistein.ping.cpp" ${repository}/version.cpp "Mcpd8.CmdPacket.cpp" "Mesyec.Mpsd8.cpp" "Mesytec.listmode.write.cpp" "Mesytec.listmode.cpp" "MesytecSystem.Data.cpp" "Zweistein.GetConfigDir.cpp" "Mesytec.config.cpp" "Charm.System.cpp" "Zweistein.XYDetectorSystem.cpp")
@@ -76,7 +76,7 @@ set(CPACK_PACKAGE_VERSION_MAJOR ${CMAKE_PROJECT_VERSION_MAJOR})
 set(CPACK_PACKAGE_VERSION_MINOR ${CMAKE_PROJECT_VERSION_MINOR})
 set(CPACK_PACKAGE_VERSION_PATCH ${CMAKE_PROJECT_VERSION_PATCH})
 
-SET (CPACK_DEBIAN_PACKAGE_DEPENDS "libopencv-dev")
+SET (CPACK_DEBIAN_PACKAGE_DEPENDS "libopencv")
 include(CPack)
 endif()
 
@@ -133,5 +133,7 @@ else()
  install(TARGETS ${PROJECT_NAME}
         RUNTIME  DESTINATION ${INSTALL_DIR}
         )
+ install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/charm-sudo.sh"
+    DESTINATION ${INSTALL_DIR})
 endif()
 

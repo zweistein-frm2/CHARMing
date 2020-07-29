@@ -1,9 +1,11 @@
 ﻿/***************************************************************************
- *   Copyright (C) 2019 by Andreas Langhoff <andreas.langhoff@frm2.tum.de> *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation;                                         *
- ***************************************************************************/
+  *   Copyright (C) 2019 - 2020 by Andreas Langhoff
+  *                                          <andreas.langhoff@frm2.tum.de> *
+  *   This program is free software; you can redistribute it and/or modify  *
+  *   it under the terms of the GNU General Public License as published by  *
+  *   the Free Software Foundation;                                         *
+  ***************************************************************************/
+
 
 // stdafx.h : Include file for standard system include files,
 // or project specific include files.
@@ -16,7 +18,6 @@
 #define DllExport   __declspec( dllexport )
 #endif
 
-#define BOOST_CHRONO_VERSION 2
 #include <boost/chrono.hpp>
 #include <iostream>
 #include <boost/thread.hpp>

@@ -1,9 +1,22 @@
+/*                          _              _                _
+	___  __ __ __  ___     (_)     ___    | |_     ___     (_)    _ _
+   |_ /  \ V  V / / -_)    | |    (_-<    |  _|   / -_)    | |   | ' \
+  _/__|   \_/\_/  \___|   _|_|_   /__/_   _\__|   \___|   _|_|_  |_||_|
+_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|
+"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'
+
+   Copyright (C) 2019 - 2020 by Andreas Langhoff
+										 <andreas.langhoff@frm2.tum.de>
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation;*/
+
 #include "Mesytec.listmode.write.hpp"
 #include <filesystem>
 namespace Mesytec {
 	 boost::atomic<bool> bListmodeWriting = false;
 	 void writeListmode(boost::asio::io_service& io_service, boost::shared_ptr < Mesytec::MesytecSystem> device1) {
-		 
+
 		 if (bListmodeWriting) {
 			 int MaxWait = 15;
 			 int i = 0;
@@ -76,11 +89,11 @@ namespace Mesytec {
 		 std::filesystem::resize_file(tmppath.string(), byteswritten);
 
 		 boost::filesystem::path jsonpath(tmppath.string() + ".json");
-		
+
 		 try {
 			 boost::property_tree::write_json(jsonpath.string(), Mesytec::Config::root);
 		 }
-		 catch (std::exception& e) { // exception expected, //std::cout << boost::diagnostic_information(e); 
+		 catch (std::exception& e) { // exception expected, //std::cout << boost::diagnostic_information(e);
 			 LOG_ERROR << e.what() << " for writing." << std::endl;
 		 }
 
@@ -90,9 +103,9 @@ namespace Mesytec {
 		 {
 			 LOG_INFO << Zweistein::PrettyBytes(byteswritten) << " written to:" << tmppath.string() << std::endl;
 		 }
-		 
+
 	 }
 
-	 
+
 
 }
