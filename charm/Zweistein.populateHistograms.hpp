@@ -30,8 +30,6 @@
 
 namespace Zweistein {
 
-
-
 	void setupHistograms(boost::asio::io_service& io_service, boost::shared_ptr < Zweistein::XYDetectorSystem> pmsmtsystem1, std::string binningfile1) {
 		using namespace magic_enum::bitwise_operators; // out-of-the-box bitwise operators for enums.
 
@@ -214,7 +212,7 @@ namespace Zweistein {
 							for (auto& r : h.roidata) 	r.count = 0;
 							h.resize(h.histogram.size[0], h.histogram.size[1]);
 						}
-						continue;
+						break;
 					}
 					if (ev.X < 0 || ev.X >= maxX) {
 						LOG_WARNING << "0 < Event.X=" << ev.X << " < " << maxX << " Event.X ouside bounds" << std::endl;

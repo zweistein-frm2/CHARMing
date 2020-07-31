@@ -6,30 +6,43 @@ cmake_minimum_required (VERSION 3.14)
 set(PROJECT1 mesytecsystem)
 set(PROJECT2 listmodereplay)
 set(PROJECT3 charmsystem)
+set(PROJECT4 DebugHelper)
 
 set(repository ${Charm_DIR})
 
 set(Boost_USE_STATIC_LIBS ON)
 
-foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3)
+foreach(PROJECT_NAME IN LISTS PROJECT4 )
+#foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3)
     message(STATUS "PROJECT_NAME=${PROJECT_NAME}")
 
 project(${PROJECT_NAME})
 add_compile_definitions(ENTANGLE_LOGGER)
-if(MSVC)
+if(WIN32)
     add_compile_definitions(_WIN32_WINNT=0x0601)
-else()
-message("on linux boost >= 1.71 must be installed from source with speficic compile settings (static link, no icu")
+  #  set (Python_VERSION_MAJOR 3)
+  #  set(Python_VERSION_MINOR 7)
+  # set(Python_FIND_ABI "OFF" "ANY" "ANY")
 
-#set(BOOST_ROOT /usr )
-#set(Boost_INCLUDE_DIR ${BOOST_ROOT}/include)
+else()
+  message("on linux boost >= 1.71 must be installed from source with speficic compile settings (static link, no icu")
+
+  #set(BOOST_ROOT /usr )
+  #set(Boost_INCLUDE_DIR ${BOOST_ROOT}/include)
 endif()
 
 add_compile_definitions(ASIOEXT_USE_BOOST_ASIO)
 
 set(CMAKE_CXX_STANDARD 17)
 
-find_package (Python COMPONENTS Interpreter Development NumPy)
+if(WIN32)
+#find_package (Python "${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}" EXACT REQUIRED COMPONENTS Interpreter Development NumPy)
+find_package (Python  REQUIRED COMPONENTS Interpreter Development NumPy)
+else()
+find_package (Python  REQUIRED COMPONENTS Interpreter Development NumPy)
+endif()
+
+
 
 if(NOT ENTANGLE_ROOT)
     if(WIN32)
@@ -49,7 +62,17 @@ endif()
 message("ENTANGLE_ROOT=" ${ENTANGLE_ROOT} )
 message("ENTANGLE_RES=" ${ENTANGLE_RES} )
 
-find_package(Boost 1.71 REQUIRED COMPONENTS python${Python_VERSION_MAJOR}${Python_VERSION_MINOR} numpy${Python_VERSION_MAJOR}${Python_VERSION_MINOR} filesystem chrono thread iostreams) # header only libraries must not be added here
+if(BOOST_ROOT)
+# HINTS ${BOOST_ROOT}
+set(HINT1 "HINTS ${BOOST_ROOT}")
+else()
+set(HINT1 )
+endif()
+find_package(Boost 1.71 REQUIRED COMPONENTS python${Python_VERSION_MAJOR}${Python_VERSION_MINOR}
+            numpy${Python_VERSION_MAJOR}${Python_VERSION_MINOR}
+            filesystem chrono thread iostreams
+            ${HINT1}
+            ) # header only libraries must not be added here
 find_path(Boost_INCLUDE_DIR boost)
 
 message(********************Using Boost :${Boost_INCLUDE_DIR}  ******************************)
@@ -71,8 +94,8 @@ include_directories(${PacketSender_DIR})
 include_directories(pyboostcvconverter/include)
 # Add source to this project's executable.
 include_directories(${_Python_NumPy_INCLUDE_DIR})
-set(Boost_python_library Boost_PYTHON${Python_VERSION_MAJOR}${Python_VERSION_MINOR}_LIBRARY_RELEASE )
-set(Boost_numpy_library Boost_NUMPY${Python_VERSION_MAJOR}${Python_VERSION_MINOR}_LIBRARY_RELEASE )
+set(Boost_python_library Boost_PYTHON${Python_VERSION_MAJOR}${Python_VERSION_MINOR}_LIBRARY_DEBUG )
+set(Boost_numpy_library Boost_NUMPY${Python_VERSION_MAJOR}${Python_VERSION_MINOR}_LIBRARY_DEBUG )
 message(**Boost_python_library********** ${Boost_python_library}*********************)
 message(****resolves_to***************** ${${Boost_python_library}}**************************)
 message(**Boost_numpy_library********** ${Boost_numpy_library}*********************)
@@ -80,7 +103,16 @@ message(****resolves_to***************** ${${Boost_numpy_library}}**************
 
 
 
+if(${PROJECT_NAME} STREQUAL "DebugHelper")
+message(***DebugHelper executable********)
 
+message(**Python Lib: ${Python_LIBRARIES} ****)
+add_executable(${PROJECT_NAME}  )
+target_compile_options(${PROJECT_NAME} PRIVATE  $<$<CXX_COMPILER_ID:GNU>: -Wno-error>)
+#target_link_options(${PROJECT_NAME}   PRIVATE $<$<CXX_COMPILER_ID:GNU>:$<$<CONFIG:RELEASE>:-static-libstdc++> $<$<CONFIG:DEBUG>:-static-libstdc++> > PRIVATE $<$<CXX_COMPILER_ID:GNU>:-static-libgcc> )
+target_link_libraries(${PROJECT_NAME} PRIVATE  ${Python_LIBRARY_RELEASE} ${Boost_LIBRARIES} ${OpenCV_LIBS}  uv_a )
+
+else()
 
 add_library(${PROJECT_NAME} SHARED )
 
@@ -91,6 +123,8 @@ if(MSVC)
 set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".pyd")
 else()
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "")
+endif()
+
 endif()
 
 add_custom_command(

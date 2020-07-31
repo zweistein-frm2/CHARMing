@@ -59,6 +59,7 @@ namespace Mesytec {
 		CMD_RESPONSE_ZERO_LENGTH=4
 	};
 
+	std::string cmd_errorstring(Mesytec::cmd_error& x);
 
 	class MesytecSystem : public Zweistein::XYDetectorSystem {
 	public:
@@ -68,12 +69,21 @@ namespace Mesytec {
 
 		virtual void initatomicortime_point() {
 			XYDetectorSystem::initatomicortime_point();
-			auto max = boost::chrono::system_clock::time_point::max();
-			lastpacketqueuefull = max;
-			lastlistmodequeuefull = max;
+			auto now = boost::chrono::system_clock::now();
+			auto min = now - boost::chrono::minutes(60);
+			lastpacketqueuefull = min;
+			lastlistmodequeuefull = min;
 			wait_response = false;
+			currentrunid = 0;
+			internalerror = Mesytec::cmd_errorcode::OK;
+			firstneutrondiscarded = false;
+			warning_notified_bufnum_8bit = false;
+			allow8bitbufnums = false;
+			inputFromListmodeFile = false;
+			eventdataformat = Zweistein::Format::EventData::Undefined;
 		}
 
+		void closeConnection();
 
 		boost::chrono::system_clock::time_point lastpacketqueuefull;
 		boost::chrono::system_clock::time_point lastlistmodequeuefull;
@@ -109,7 +119,7 @@ namespace Mesytec {
 		virtual void setStart(boost::chrono::system_clock::time_point& t);
 		bool listmode_connect(std::list<Mcpd8::Parameters>& _devlist, boost::asio::io_service& io_service);
 
-		boost::asio::io_service::strand *pstrand=nullptr;
+		boost::asio::io_service::strand *pstrand;
 		virtual bool connect(std::list<Mcpd8::Parameters>& _devlist, boost::asio::io_service& io_service);
 
 		virtual void Send(std::pair<const unsigned char, Mesytec::DeviceParameter>& kvp, Mcpd8::Internal_Cmd cmd, unsigned long param = 0);
@@ -121,16 +131,13 @@ namespace Mesytec {
 		boost::atomic<bool> wait_response;
 		Mcpd8::CmdPacket& Send(std::pair<const unsigned char, Mesytec::DeviceParameter>& kvp, Mcpd8::CmdPacket& cmdpacket, bool waitresponse = true);
 
-
 		void start_receive(const Mesytec::DeviceParameter &mp,unsigned char devid) {
-
 			mp.socket->async_receive(boost::asio::buffer(recv_buf), pstrand->wrap(boost::bind(&MesytecSystem::handle_receive, this,
 				boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred, devid)));
 
-			//mp.socket->async_receive_from(boost::asio::buffer(recv_buf), mp.mcpd_endpoint, boost::bind(&MesytecSystem::handle_receive, this,
-			//	boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred,devid));
 		}
 		void watch_incoming_packets() {
+
 			try {
 				Mcpd8::DataPacket dp;
 				boost::function<void(Mcpd8::DataPacket&)> abfunc = boost::bind(&Mesytec::MesytecSystem::analyzebuffer, this, boost::placeholders::_1);
@@ -143,7 +150,7 @@ namespace Mesytec {
 
 			}
 			catch (boost::exception & e) {	LOG_ERROR << boost::diagnostic_information(e) << std::endl;	}
-			LOG_DEBUG << "watch_incoming_packets() exiting..." << std::endl;
+			LOG_INFO << "watch_incoming_packets() exiting..." << std::endl;
 
 		}
 
@@ -155,10 +162,13 @@ namespace Mesytec {
 			Mcpd8::DataPacket& dp = recv_buf[0];
 			data.last_deviceStatusdeviceId = dp.deviceStatusdeviceId;
 			if (error) {
-				LOG_ERROR  << " handle_receive(" << error.message() << " ,bytes_transferred=" << bytes_transferred << ", DataPacket=" << dp << std::endl;
+				LOG_ERROR  << " handle_receive(" <<error.message() << " ,bytes_transferred=" << bytes_transferred << ", DataPacket=" << dp <<")"<< std::endl;
 				LOG_ERROR << "PACKET BUFNUM: " << (unsigned short)(dp.Number) << std::endl;
 				//memset(&recv_buf[0], 0, sizeof(Mcpd8::DataPacket));
-
+				if (pio_service->stopped()) {
+					LOG_INFO << "handle_receive: return. " << std::endl;
+					return;
+				}
 			}
 
 			auto &mp = deviceparam.at(devid);

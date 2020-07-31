@@ -89,16 +89,11 @@ void startMonitor(boost::shared_ptr < MSMTSYSTEM> ptrmsmtsystem1, boost::shared_
             io_service.run();
         }
         catch (Mesytec::cmd_error& x) {
-            if (int const* mi = boost::get_error_info<Mesytec::my_info>(x)) {
-                auto  my_code = magic_enum::enum_cast<Mesytec::cmd_errorcode>(*mi);
-                if (my_code.has_value()) {
-                    auto c1_name = magic_enum::enum_name(my_code.value());
-                    LOG_ERROR << c1_name << std::endl;
-                }
-            }
+            LOG_ERROR << Mesytec::cmd_errorstring(x) << std::endl;
         }
         catch (boost::exception& e) { LOG_ERROR << boost::diagnostic_information(e) << std::endl; }
         io_service.stop();
+        LOG_INFO << "exiting connection..." << std::endl;
 
     };
 
@@ -181,8 +176,7 @@ void startMonitor(boost::shared_ptr < MSMTSYSTEM> ptrmsmtsystem1, boost::shared_
     if (ptrmsmtsystem1) {
         try { ptrmsmtsystem1->SendAll(Mcpd8::Cmd::STOP_UNCHECKED); }
         catch (boost::exception& e) { LOG_ERROR << boost::diagnostic_information(e) << std::endl; }
-        //	delete ptrmsmtsystem1;
-        //	ptrmsmtsystem1 = nullptr;
+
     }
     boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
     LOG_DEBUG << "startMonitor() exiting..." << std::endl;
@@ -230,6 +224,8 @@ BOOST_PYTHON_MODULE(charmsystem)
             .def("log", &NeutronMeasurement::log)
             .def("status", &NeutronMeasurement::status)
             .def("stop", &NeutronMeasurement::stop)
+            .def("on", &NeutronMeasurement::on)
+            .def("off", &NeutronMeasurement::off)
             .def("getHistogram", &NeutronMeasurement::getHistogram, return_internal_reference<1, with_custodian_and_ward_postcall<1, 0>>())
             ;
 

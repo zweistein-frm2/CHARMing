@@ -30,9 +30,16 @@ class DeviceConnection(FdLogMixin,base.MLZDevice):
         #print("charm.py:DeviceConnection.init("+str(fd)+")")
         if msmtsystem.msmtsystem is None:
                 msmtsystem.msmtsystem=mesytecsystem.NeutronMeasurement(fd)
+                self.On()
 
     #def __del__(self):
         #print("charm.py: DeviceConnection.__del__")
+    def On(self):
+      if msmtsystem.msmtsystem:
+            msmtsystem.msmtsystem.on()
+    def Off(self):
+      if msmtsystem.msmtsystem:
+            msmtsystem.msmtsystem.off()
     def read_version(self):
         ver = super().read_version();
         if not msmtsystem.msmtsystem:

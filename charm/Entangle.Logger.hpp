@@ -33,7 +33,7 @@ namespace Entangle{
 	struct Logger : public std::ostream{
 
 		class _StreamBuf : public std::stringbuf {
-			boost::iostreams::file_descriptor_sink output; 
+			boost::iostreams::file_descriptor_sink output;
 			std::string prefix;
 		public:
 			_StreamBuf(boost::iostreams::file_descriptor_sink &sink):output(sink),prefix(" : INFO : "){}
@@ -51,23 +51,23 @@ namespace Entangle{
 				return 0;
 			}
 			void putOutput() {
-				
+
 				// Called by destructor.
 				// destructor can not call virtual methods.
 				try {
 					output.write(prefix.c_str(), prefix.length());
 					output.write(str().c_str(), str().length());
-					
+
 					std::string msg = str();
 					if (*msg.rbegin() == '\n') *msg.rbegin() = '\0';
-					
-					
+
+
 					{
 						Zweistein::WriteLock w_lock(Entangle::cbLock);
 						ptrcb->push_back(msg);
 					}
 					str("");
-					
+
 				}
 				catch (boost::exception &e) {
 					std::cerr<< boost::diagnostic_information(e)<<std::endl;
@@ -76,23 +76,23 @@ namespace Entangle{
 		};
 		boost::iostreams::file_descriptor_sink sink;
 		_StreamBuf buffer;
-		
+
 		Logger(int fd) :sink(fd, boost::iostreams::file_descriptor_flags::never_close_handle),buffer(sink), std::ostream(&buffer) {}
 		Logger& setPrefix(std::string s) {
 			buffer.setPrefix(s);
 			return *this;
 		}
-		
+
 
 	};
 
 	extern boost::shared_ptr <Entangle::Logger> ptrlogger;
-	void Init(int fd); 
+	void Init(int fd);
 	extern severity_level SEVERITY_THRESHOLD;
-	
+
 }
 
-extern boost::iostreams::stream< boost::iostreams::null_sink > nullOstream; 
+extern boost::iostreams::stream< boost::iostreams::null_sink > nullOstream;
 
 
 #define LOG_DEBUG ((Entangle::SEVERITY_THRESHOLD<=Entangle::debug)? ((Entangle::ptrlogger?	Entangle::ptrlogger->setPrefix(" : DEBUG : "):	std::cout<<"DEBUG:")): nullOstream)

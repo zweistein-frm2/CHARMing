@@ -1,23 +1,67 @@
+boost::thread_group control_threads;
+
 struct NeutronMeasurement {
 public:
 
     boost::shared_ptr<StartMsmtParameters> ptrStartParameters;
     boost::shared_ptr < MSMTSYSTEM> ptrmsmtsystem1;
-    NeutronMeasurement(long loghandle) :ptrStartParameters(boost::shared_ptr < StartMsmtParameters>(new StartMsmtParameters())),
+    std::string cmderror;
+    NeutronMeasurement(long loghandle): cmderror(""),ptrStartParameters(boost::shared_ptr < StartMsmtParameters>(new StartMsmtParameters())),
         ptrmsmtsystem1(boost::shared_ptr < MSMTSYSTEM>(new MSMTSYSTEM()))
     {
-        Entangle::Init(loghandle);
+      //  Entangle::Init(loghandle);
         histograms = std::vector<Histogram>(2);
-        ptrmsmtsystem1->initatomicortime_point();
-        worker_threads.create_thread([this] {startMonitor(ptrmsmtsystem1, ptrStartParameters); });
+        //ptrmsmtsystem1->initatomicortime_point();
+        //worker_threads.create_thread([this] {startMonitor(ptrmsmtsystem1, ptrStartParameters); });
         LOG_DEBUG << "NeutronMeasurement(" << loghandle << ")" << std::endl;
         LOG_INFO << get_version() << std::endl;
     }
     ~NeutronMeasurement() {
-        LOG_DEBUG << "~NeutronMeasurement()" << std::endl;
+        LOG_INFO << "~NeutronMeasurement()" << std::endl;
 
     }
 
+    void off() {
+        LOG_INFO<< std::endl;
+        for (int i = 0; i < 3; i++) LOG_INFO << "**************" << std::endl;
+        LOG_INFO << "off(): begin." << std::endl;
+        io_service.stop();
+        /*
+        bool bwait = true;
+        for (int i = 0; i < 30; i++) {
+            boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
+            bwait = startMonitorRunning;
+            if (!bwait) break;
+        }
+        if (bwait) {
+            LOG_ERROR << "off(): startMonitor still running." << std::endl;
+        }
+        */
+        control_threads.join_all();
+        LOG_INFO << "off(): end." << std::endl;
+        for (int i = 0; i < 3; i++) LOG_INFO << "**************" << std::endl;
+    }
+
+    void on(){
+        LOG_INFO << std::endl;
+        for (int i = 0; i < 3; i++) LOG_INFO << "**************" << std::endl;
+        LOG_INFO << "on(): begin." << std::endl;
+        bool bwait = true;
+        for(int i=0;i<20;i++){
+            bwait = startMonitorRunning;
+            if (!bwait) break;
+            boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
+        }
+        if (bwait) {
+            LOG_WARNING << "on(): startMonitor aready on." << std::endl;
+            return;
+        }
+        cmderror = "";
+
+        if(!bwait) control_threads.create_thread([this] {startMonitor(ptrmsmtsystem1, ptrStartParameters); });
+        LOG_INFO << "on(): end." << std::endl;
+        for (int i = 0; i < 3; i++) LOG_INFO << "**************" << std::endl;
+    }
     bool get_writelistmode() {
         return ptrStartParameters->writelistmode;
     }
@@ -49,7 +93,7 @@ public:
     boost::python::list log() {
         boost::python::list l;
         {
-            Zweistein::ReadLock r_lock(Entangle::cbLock); //circular buffer lock
+           /* Zweistein::ReadLock r_lock(Entangle::cbLock); //circular buffer lock
 
             for (auto iter = Entangle::ptrcb->begin(); iter != Entangle::ptrcb->end(); iter++) {
 
@@ -57,6 +101,7 @@ public:
                 boost::split(strs, *iter, boost::is_any_of("\n"));
                 for (auto& s : strs) l.append(s);
             }
+            */
         }
         return l;
     }
@@ -75,6 +120,9 @@ public:
         unsigned short tmp = ptrmsmtsystem1->data.last_deviceStatusdeviceId;
         unsigned char devstatus = Mcpd8::DataPacket::getStatus(tmp);
         std::string msg = Mcpd8::DataPacket::deviceStatus(devstatus);
+        if (!cmderror.empty()) {
+            return boost::python::make_tuple(count, secs.count(), devstatus, msg,cmderror);
+        }
         //LOG_INFO << "started:"<<tps<<", now="<< boost::chrono::system_clock::now()<< ":"<<secs<<std::endl;
        // LOG_INFO <<"count="<<count<<", elapsed="<<secs << ",devstatus=" << (int)devstatus << ", " << msg<<std::endl;
         return boost::python::make_tuple(count, secs.count(), devstatus, msg);
@@ -107,15 +155,29 @@ public:
             ptrmsmtsystem1->SendAll(Mcpd8::Cmd::START);
             set_simulatorRate(get_simulatorRate());
         }
-        catch (boost::exception& e) { LOG_ERROR << boost::diagnostic_information(e) << std::endl; }
+        catch (Mesytec::cmd_error& x) {
+            cmderror = Mesytec::cmd_errorstring(x);
+            LOG_ERROR << cmderror << std::endl;
+        }
+        catch (boost::exception& e) {
+            LOG_ERROR << boost::diagnostic_information(e) << std::endl;
+        }
 
     }
     void stop() {
         try { ptrmsmtsystem1->SendAll(Mcpd8::Cmd::STOP); }
+        catch (Mesytec::cmd_error& x) {
+                cmderror = Mesytec::cmd_errorstring(x);
+                LOG_ERROR << cmderror << std::endl;
+        }
         catch (boost::exception& e) { LOG_ERROR << boost::diagnostic_information(e) << std::endl; }
     }
     void resume() {
         try { ptrmsmtsystem1->SendAll(Mcpd8::Cmd::CONTINUE); }
+        catch (Mesytec::cmd_error& x) {
+            cmderror = Mesytec::cmd_errorstring(x);
+            LOG_ERROR << cmderror << std::endl;
+        }
         catch (boost::exception& e) { LOG_ERROR << boost::diagnostic_information(e) << std::endl; }
     }
 

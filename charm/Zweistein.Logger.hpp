@@ -10,12 +10,13 @@
 
 
 
-#ifdef ENTANGLE_LOGGER
+#ifdef ENTANGLE_LOGGERAA
 #include "Entangle.Logger.hpp"
 #else
 #ifdef SIMPLE_LOGGER
 #include "simpleLogger.h"
 #else
+#include <iostream>
 #define LOG_DEBUG std::cout<<":DEBUG:"
 #define LOG_INFO std::cout<<":INFO:"
 #define LOG_WARNING std::cout<<":WARN:"

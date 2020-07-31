@@ -2,15 +2,12 @@
     ___  __ __ __  ___     (_)     ___    | |_     ___     (_)    _ _
    |_ /  \ V  V / / -_)    | |    (_-<    |  _|   / -_)    | |   | ' \
   _/__|   \_/\_/  \___|   _|_|_   /__/_   _\__|   \___|   _|_|_  |_||_|
-_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|
-"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'
-
-   Copyright (C) 2019 - 2020 by Andreas Langhoff
-									     <andreas.langhoff@frm2.tum.de>
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation;*/
-
+	   .
+	   |\       Copyright (C) 2019 - 2020 by Andreas Langhoff
+     _/]_\_                            <andreas.langhoff@frm2.tum.de>
+ ~~~"~~~~~^~~   This program is free software; you can redistribute it
+ and/or modify it under the terms of the GNU General Public License as
+ published by the Free Software Foundation;*/
 
 
 #ifdef __GNUC__
@@ -53,17 +50,44 @@ using boost::asio::ip::udp;
 
 namespace Mesytec {
 
-		MesytecSystem::MesytecSystem():recv_buf(), cmd_recv_queue(5), internalerror(cmd_errorcode::OK), currentrunid(0),
+		std::string cmd_errorstring(Mesytec::cmd_error& x) {
+			std::string rv;
+			if (int const* mi = boost::get_error_info<Mesytec::my_info>(x)) {
+				auto  my_code = magic_enum::enum_cast<Mesytec::cmd_errorcode>(*mi);
+				if (my_code.has_value()) {
+					rv = magic_enum::enum_name(my_code.value());
+				}
+			}
+			return rv;
+		}
+
+		MesytecSystem::MesytecSystem():recv_buf(), cmd_recv_queue(5), internalerror(cmd_errorcode::OK), currentrunid(0),pstrand(nullptr),
 			lastpacketqueuefull_missedcount(0), lastlistmodequeuefull_missedcount(0),
 			inputFromListmodeFile(false),
 			eventdataformat(Zweistein::Format::EventData::Undefined){
 
 		}
 		MesytecSystem::~MesytecSystem(){
-			for (const auto& [key, value] : deviceparam) {
-				if (value.bNewSocket && value.socket) value.socket->close();
+			closeConnection();
+		}
+
+		void MesytecSystem::closeConnection() {
+			for (auto& [key, value] : deviceparam) {
+				if (value.socket) {
+					try {
+						if (value.socket->is_open()) {
+							//value.socket->release();
+							//value.socket->shutdown(boost::asio::socket_base::shutdown_both);
+							value.socket->close();
+							value.bNewSocket = false;
+							LOG_INFO << "value.socket->close()" << std::endl;
+						}
+					}
+					catch (boost::exception& e) {
+						LOG_ERROR << boost::diagnostic_information(e) << std::endl;
+					}
+				}
 			}
-			if (pstrand) delete pstrand;
 		}
 
 		bool MesytecSystem::listmode_connect(std::list<Mcpd8::Parameters>& _devlist, boost::asio::io_service& io_service)
@@ -128,7 +152,10 @@ namespace Mesytec {
 			evdata.widthY = 0;
 			if (pstrand) delete pstrand;
 			pstrand=new boost::asio::io_service::strand(io_service);
-			boost::system::error_code ec;
+			oldidnewid.clear();
+			deviceparam.clear();
+
+			boost::system::error_code ec ;
 			for(Mcpd8::Parameters& p:_devlist) {
 				Mesytec::DeviceParameter mp;
 				for(int c=0;c<8;c++){ mp.counterADC[c]=p.counterADC[c];	}
@@ -136,9 +163,7 @@ namespace Mesytec {
 
 				local_endpoint = udp::endpoint(boost::asio::ip::address::from_string(p.networkcard), p.mcpd_port);
 				mp.mcpd_endpoint = udp::endpoint(boost::asio::ip::address::from_string(p.mcpd_ip),p.mcpd_port);
-				{
-					LOG_DEBUG << "Local bind " << local_endpoint << " to " << mp.mcpd_endpoint << std::endl;
-				}
+
 				bool local_endpoint_is_bound = false;
 
 				for (const auto& [key,value] : deviceparam) {
@@ -154,10 +179,11 @@ namespace Mesytec {
 					mp.socket = new udp::socket(io_service);
 					mp.bNewSocket = true;
 					mp.socket->open(udp::v4());
-					//mp.socket->set_option(boost::asio::socket_base::reuse_address(true));
+					mp.socket->set_option(boost::asio::socket_base::reuse_address(true));
 					//	socket->set_option(asio::ip::multicast::join_group((address.to_v4().any())));
 					// remember only for address in range 224.0.0.0 to 239.255...
 					mp.socket->bind(local_endpoint);
+					LOG_INFO << "Local bind " << local_endpoint << " to " << mp.mcpd_endpoint << std::endl;
 				}
 
 				bool skip = false;
@@ -635,10 +661,7 @@ namespace Mesytec {
 		void MesytecSystem::SendAll(Mcpd8::Cmd cmd) {
 			//if (internalerror != Mesytec::cmd_errorcode::OK) return;
 			{
-				using namespace magic_enum::ostream_operators;
-				std::stringstream ss;
-				ss << cmd;
-				LOG_DEBUG << "SendAll(" <<  ss.str() << ")" << std::endl;
+				LOG_DEBUG << "SendAll(" << MENUMSTR(cmd) << ")" << std::endl;
 			}
 
 
@@ -714,7 +737,6 @@ namespace Mesytec {
 			auto start=boost::chrono::system_clock::now();
 			{
 					ss_log <<  " SEND(" << ss_cmd.str() << ") to " << kvp.second.mcpd_endpoint << ":";
-				//LOG_DEBUG<< cmdpacket << std::endl;
 			}
 			boost::function<void()> send = [this,&kvp, &cmdpacket]() {
 				auto start = boost::chrono::system_clock::now();
@@ -730,11 +752,20 @@ namespace Mesytec {
 			};
 
 			if (waitresponse)	worker_threads.create_thread(boost::bind(send)); // so use thread to send and wait here
-			else Mcpd8::CmdPacket::Send(kvp.second.socket, cmdpacket, kvp.second.mcpd_endpoint);
+			else {
+				try {
+					Mcpd8::CmdPacket::Send(kvp.second.socket, cmdpacket, kvp.second.mcpd_endpoint);
+				}
+				catch (std::exception & e) {
+					ss_log << e.what();
+					LOG_ERROR << ss_log.str() << std::endl;
+					throw;
+				}
+			}
 
 			if (!waitresponse) {
 				ss_log << " =>RESPONSE UNKNOWN (not checked)" ;
-				LOG_DEBUG << ss_log.str() << std::endl;
+				LOG_INFO << ss_log.str() << std::endl;
 				return response;
 			}
 			wait_response = true;

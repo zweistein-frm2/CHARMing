@@ -8,6 +8,8 @@
 #pragma once
 #include "stdafx.h"
 #include <boost/asio.hpp>
+#include <memory>
+#include <boost/shared_ptr.hpp>
 #include "Mcpd8.DataPacket.hpp"
 #include "Zweistein.Logger.hpp"
 
@@ -54,7 +56,7 @@ namespace Mcpd8 {
 			param[1] = (value >> 16) & 0xffff;
 			param[2] = (value >> 32) & 0xffff;
 		}
-		static size_t Send(boost::asio::ip::udp::socket* socket, CmdPacket& cmdpacket, boost::asio::ip::udp::endpoint &mcpd_endpoint) {
+		static size_t Send(boost::asio::ip::udp::socket *socket, CmdPacket& cmdpacket, boost::asio::ip::udp::endpoint &mcpd_endpoint) {
 			unsigned short items = (cmdpacket.Length - cmdpacket.headerLength);
 			cmdpacket.data[items] = 0xffff;
 			cmdpacket.headerchksum = 0;

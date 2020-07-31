@@ -245,7 +245,7 @@ int main(int argc, char* argv[])
 								auto  my_code = magic_enum::enum_cast<Mesytec::listmode::read_errorcode>(*mi);
 								if (my_code.has_value()) {
 									auto c1_name = magic_enum::enum_name(my_code.value());
-									LOG_ERROR << c1_name << std::endl;
+									 LOG_ERROR << c1_name << std::endl;
 								}
 							}
 						}
@@ -307,17 +307,11 @@ int main(int argc, char* argv[])
 					ptrmsmtsystem1->connect(_devlist, io_service);
 					io_service.run();
 				}
+
 				catch (Mesytec::cmd_error& x) {
-					if (int const* mi = boost::get_error_info<Mesytec::my_info>(x)) {
-						auto  my_code = magic_enum::enum_cast<Mesytec::cmd_errorcode>(*mi);
-						if (my_code.has_value()) {
-							auto c1_name = magic_enum::enum_name(my_code.value());
-							LOG_ERROR << c1_name<<std::endl;
-						}
-
-					}
-
+					LOG_ERROR << Mesytec::cmd_errorstring(x) << std::endl;
 				}
+
 				catch (boost::exception & e) {
 					LOG_ERROR << boost::diagnostic_information(e) << std::endl;
 
@@ -479,17 +473,9 @@ int main(int argc, char* argv[])
 
 								}
 							}
+
 							catch (Mesytec::cmd_error& x) {
-
-								if (int const* mi = boost::get_error_info<Mesytec::my_info>(x)) {
-									auto  my_code = magic_enum::enum_cast<Mesytec::cmd_errorcode>(*mi);
-									if (my_code.has_value()) {
-										auto c1_name = magic_enum::enum_name(my_code.value());
-										LOG_ERROR << c1_name << std::endl;
-									}
-
-								}
-
+								LOG_ERROR << Mesytec::cmd_errorstring(x) << std::endl;
 							}
 
 							catch (boost::exception& e) {
@@ -523,15 +509,7 @@ int main(int argc, char* argv[])
 								}
 							}
 							catch (Mesytec::cmd_error& x) {
-									if (int const* mi = boost::get_error_info<Mesytec::my_info>(x)) {
-									auto  my_code = magic_enum::enum_cast<Mesytec::cmd_errorcode>(*mi);
-									if (my_code.has_value()) {
-										auto c1_name = magic_enum::enum_name(my_code.value());
-										LOG_ERROR << c1_name << std::endl;
-									}
-
-								}
-
+								LOG_ERROR << Mesytec::cmd_errorstring(x) << std::endl;
 							}
 
 							catch (boost::exception& e) {

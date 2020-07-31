@@ -14,6 +14,8 @@ _|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|
 
 #pragma once
 #include <boost/asio.hpp>
+#include <memory>
+#include <boost/shared_ptr.hpp>
 #include <boost/chrono.hpp>
 #include "Zweistein.enums.Generator.hpp"
 #include "Mesytec.Mpsd8.hpp"
@@ -28,7 +30,7 @@ namespace  Mesytec {
 		boost::chrono::nanoseconds starttime;
 		udp::endpoint mcpd_endpoint;
 		udp::endpoint charm_cmd_endpoint;
-		udp::socket* socket;
+		udp::socket *socket;
 		bool bNewSocket;
 		unsigned short lastbufnum;
 		Zweistein::DataGenerator datagenerator;
@@ -39,10 +41,10 @@ namespace  Mesytec {
 		std::string moduleparam[8];
 		Mesytec::Mpsd8::Module module[Mpsd8_sizeSLOTS];
 		Mesy::ModuleId module_id[Mpsd8_sizeSLOTS];
-		DeviceParameter():offset(0),bNewSocket(false), lastmissed_count(0), lastmissed_time(boost::chrono::system_clock::now()) {
+		DeviceParameter():offset(0),bNewSocket(false),socket(nullptr), lastmissed_count(0), lastmissed_time(boost::chrono::system_clock::now()) {
 			for (int i = 0; i < Mpsd8_sizeSLOTS; i++) module_id[i] = Mesy::ModuleId::NOMODULE;
 		}
-
+		~DeviceParameter(){}
 	};
 
 

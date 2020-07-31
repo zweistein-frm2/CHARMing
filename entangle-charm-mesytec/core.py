@@ -20,7 +20,12 @@ class MeasureCounts(base.CounterChannel):
             if not(t[2] &2): return (FAULT,t[3])
             #if(t[2] & 1): return (BUSY,t[3])
             _state = base.ImageChannel.state(self)
+            if len(t) > 4:
+                return (FAULT,t[4])
+
             return (_state[0],t[3])
+
+
 
     def Start(self):
         if msmtsystem.msmtsystem:
@@ -63,7 +68,17 @@ class MeasureTime(base.TimerChannel):
             if not(t[2] &2): return (FAULT,t[3])
             #if(t[2] & 1): return (BUSY,t[3])
             _state = base.ImageChannel.state(self)
+            if len(t) > 4:
+                return (FAULT,t[4])
+
             return (_state[0],t[3])
+
+    def On(self):
+      if msmtsystem.msmtsystem:
+            msmtsystem.msmtsystem.on()
+    def Off(self):
+      if msmtsystem.msmtsystem:
+            msmtsystem.msmtsystem.off()
 
     def Start(self):
         if msmtsystem.msmtsystem:

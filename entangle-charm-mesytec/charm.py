@@ -30,6 +30,15 @@ class DeviceConnection(FdLogMixin,base.MLZDevice):
 
     #def __del__(self):
         #print("charm.py: DeviceConnection.__del__")
+
+    def On(self):
+      if msmtsystem.msmtsystem:
+            msmtsystem.msmtsystem.on()
+
+    def Off(self):
+      if msmtsystem.msmtsystem:
+            msmtsystem.msmtsystem.off()
+
     def read_version(self):
         ver = super().read_version();
         if not msmtsystem.msmtsystem:

@@ -1,4 +1,4 @@
-Entangle::severity_level Entangle::SEVERITY_THRESHOLD = Entangle::severity_level::trace;
+//Entangle::severity_level Entangle::SEVERITY_THRESHOLD = Entangle::severity_level::trace;
 EXTERN_FUNCDECLTYPE boost::mutex coutGuard;
 EXTERN_FUNCDECLTYPE boost::thread_group worker_threads;
 
@@ -9,12 +9,12 @@ boost::atomic<unsigned long long> CounterMonitor[COUNTER_MONITOR_COUNT];
 
 boost::asio::io_service io_service;
 
+boost::atomic<bool> startMonitorRunning = false;
 
 
-
-void initialize() { LOG_DEBUG << "initialize()" << std::endl; }
+void initialize() { LOG_INFO << "initialize()" << std::endl; }
 void shutdown() {
-    LOG_DEBUG << "shutdown()" << std::endl;
+    LOG_INFO << "shutdown()" << std::endl;
     io_service.stop();
     boost::this_thread::sleep_for(boost::chrono::milliseconds(450));
     //worker_threads.join_all();

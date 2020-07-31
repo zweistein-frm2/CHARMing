@@ -1,30 +1,24 @@
 cmake_minimum_required (VERSION 3.16)
 set(CMAKE_VERBOSE_MAKEFILE ON)
-set(DO_CPPCHECK OFF)
 if(NOT DEFINED EMULATOR_ONLY)
 set(EMULATOR_ONLY OFF)
 endif()
 message("use cmake  -DEMULATOR_ONLY=ON   to build mesytec-emulator")
 
-if(${DO_CPPCHECK} STREQUAL ON )
-message(cppcheck does not support C++ 17)
 if(WIN32)
-find_program(CMAKE_CXX_CPPCHECK NAMES cppcheck PATHS "C:\\Program Files\\cppcheck")
-else()
-find_program(CMAKE_CXX_CPPCHECK NAMES cppcheck)
+  message("on windows boost should be installed outside vcpkg")
+  set(Boost_NO_SYSTEM_PATHS FALSE)
+if (${Boost_NO_SYSTEM_PATHS})
+  set(Boost_VERBOSE TRUE)
+  set(BOOST_ROOT "C:/boost/boost_1_73_0")
+  set(BOOST_INCLUDE_DIRS "${BOOST_ROOT}/include")
+  set(BOOST_LIBRARY_DIRS "${BOOST_ROOT}/stage/lib")
+  set(Boost_DIR "${BOOST_LIBRARY_DIRS}/cmake/Boost-1.73.0" )
+  list(APPEND CMAKE_PREFIX_PATH ${BOOST_ROOT})
 endif()
-if (CMAKE_CXX_CPPCHECK)
-    list(
-        APPEND CMAKE_CXX_CPPCHECK
-            " --suppress='*:magic_enum.hpp'"
-            " --suppress='*:boost/*'"
-            " --suppress='*:cstdint.hpp'"
-            " --inline-suppr"
+#set(Python_ROOT_DIR "C:/Users/alanghof/AppData/Local/Programs/Python/Python37" )
+endif()
 
-    )
-    message(**CMAKE_CXX_CPPCHECK=${CMAKE_CXX_CPPCHECK})
-endif()
-endif()
 
 project(CHARMing)
 add_subdirectory(libuv)
@@ -32,8 +26,8 @@ target_compile_options(uv_a PRIVATE $<$<CXX_COMPILER_ID:GNU>:-fPIC>)
 set(libuv_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/libuv/include)
 set(Charm_DIR ${CMAKE_SOURCE_DIR}/charm)
 if(${EMULATOR_ONLY} STREQUAL OFF)
-add_subdirectory(charm)
+#add_subdirectory(charm)
 add_subdirectory(entangle-charm-mesytec)
 else()
-add_subdirectory(mesytec-emulator)
+#add_subdirectory(mesytec-emulator)
 endif()
