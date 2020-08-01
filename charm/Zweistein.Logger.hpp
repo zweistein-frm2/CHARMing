@@ -10,7 +10,7 @@
 
 
 
-#ifdef ENTANGLE_LOGGERAA
+#ifdef ENTANGLE_LOGGER
 #include "Entangle.Logger.hpp"
 #else
 #ifdef SIMPLE_LOGGER

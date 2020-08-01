@@ -141,13 +141,11 @@ namespace Mesytec {
 			try {
 				Mcpd8::DataPacket dp;
 				boost::function<void(Mcpd8::DataPacket&)> abfunc = boost::bind(&Mesytec::MesytecSystem::analyzebuffer, this, boost::placeholders::_1);
-
 				do {
 					while (data.packetqueue.pop(dp)) {
 						abfunc(dp);
 					}
 				} while (!pio_service->stopped());
-
 			}
 			catch (boost::exception & e) {	LOG_ERROR << boost::diagnostic_information(e) << std::endl;	}
 			LOG_INFO << "watch_incoming_packets() exiting..." << std::endl;

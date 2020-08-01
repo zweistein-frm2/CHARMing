@@ -9,6 +9,7 @@
 
 #include <boost/iostreams/device/file_descriptor.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
+#include <boost/thread.hpp>
 #include <sstream>
 #include <ostream>
 #include <iostream>
@@ -35,16 +36,18 @@ namespace Entangle{
 		class _StreamBuf : public std::stringbuf {
 			boost::iostreams::file_descriptor_sink output;
 			std::string prefix;
+			static std::string msg;
 		public:
-			_StreamBuf(boost::iostreams::file_descriptor_sink &sink):output(sink),prefix(" : INFO : "){}
+			_StreamBuf(boost::iostreams::file_descriptor_sink &sink):output(sink){
+				setPrefix(" : INFO : ");
+			}
 			~_StreamBuf() {
 				if (pbase() != pptr()) {
 					putOutput();
 				}
 			}
 			void setPrefix(std::string pre) {
-				// we should flush before
-				prefix = pre;
+					prefix = pre;
 			}
 			virtual int sync() {
 				putOutput();
@@ -55,15 +58,15 @@ namespace Entangle{
 				// Called by destructor.
 				// destructor can not call virtual methods.
 				try {
+					Zweistein::WriteLock w_lock(Entangle::cbLock);
 					output.write(prefix.c_str(), prefix.length());
-					output.write(str().c_str(), str().length());
-
-					std::string msg = str();
+					//output.write(str().c_str(), str().length());
+					msg = str(); // we need the write data in a static or variable
+					// otherwise heap_corruption in output in certain multithreading  exit thread conditions
+					// LOG call just before exit of thread)
+					output.write(msg.c_str(), msg.length());
 					if (*msg.rbegin() == '\n') *msg.rbegin() = '\0';
-
-
 					{
-						Zweistein::WriteLock w_lock(Entangle::cbLock);
 						ptrcb->push_back(msg);
 					}
 					str("");

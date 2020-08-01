@@ -73,15 +73,16 @@ namespace Mesytec {
 
 		void MesytecSystem::closeConnection() {
 			for (auto& [key, value] : deviceparam) {
-				if (value.socket) {
+				if (value.socket && value.bNewSocket) {
 					try {
+
+						//value.socket->release();
+						//value.socket->shutdown(boost::asio::socket_base::shutdown_both);
 						if (value.socket->is_open()) {
-							//value.socket->release();
-							//value.socket->shutdown(boost::asio::socket_base::shutdown_both);
 							value.socket->close();
-							value.bNewSocket = false;
-							LOG_INFO << "value.socket->close()" << std::endl;
 						}
+						value.bNewSocket = false;
+						value.socket = nullptr;
 					}
 					catch (boost::exception& e) {
 						LOG_ERROR << boost::diagnostic_information(e) << std::endl;
@@ -167,15 +168,21 @@ namespace Mesytec {
 				bool local_endpoint_is_bound = false;
 
 				for (const auto& [key,value] : deviceparam) {
-					if (local_endpoint == value.socket->local_endpoint()) {
+					if (value.socket->is_open() && local_endpoint == value.socket->local_endpoint()) {
 						mp.socket = value.socket;
 						mp.bNewSocket = false;
 						local_endpoint_is_bound = true;
+						LOG_DEBUG  << local_endpoint << " already bound , good also for " << mp.mcpd_endpoint << std::endl;
+
 						break;
 					}
 				}
 
 				if (!local_endpoint_is_bound) {
+					if (mp.socket && mp.socket->is_open()) {
+						mp.socket->close();
+						mp.socket = nullptr;
+					}
 					mp.socket = new udp::socket(io_service);
 					mp.bNewSocket = true;
 					mp.socket->open(udp::v4());
@@ -183,7 +190,7 @@ namespace Mesytec {
 					//	socket->set_option(asio::ip::multicast::join_group((address.to_v4().any())));
 					// remember only for address in range 224.0.0.0 to 239.255...
 					mp.socket->bind(local_endpoint);
-					LOG_INFO << "Local bind " << local_endpoint << " to " << mp.mcpd_endpoint << std::endl;
+					LOG_DEBUG << "Local bind " << local_endpoint << " to " << mp.mcpd_endpoint << std::endl;
 				}
 
 				bool skip = false;

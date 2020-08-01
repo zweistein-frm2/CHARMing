@@ -1,10 +1,13 @@
-/***************************************************************************
-  *   Copyright (C) 2019 - 2020 by Andreas Langhoff
-  *                                          <andreas.langhoff@frm2.tum.de> *
-  *   This program is free software; you can redistribute it and/or modify  *
-  *   it under the terms of the GNU General Public License as published by  *
-  *   the Free Software Foundation;                                         *
-  ***************************************************************************/
+/*                          _              _                _
+	___  __ __ __  ___     (_)     ___    | |_     ___     (_)    _ _
+   |_ /  \ V  V / / -_)    | |    (_-<    |  _|   / -_)    | |   | ' \
+  _/__|   \_/\_/  \___|   _|_|_   /__/_   _\__|   \___|   _|_|_  |_||_|
+	   .
+	   |\       Copyright (C) 2019 - 2020 by Andreas Langhoff
+	 _/]_\_                            <andreas.langhoff@frm2.tum.de>
+ ~~~"~~~~~^~~   This program is free software; you can redistribute it
+ and/or modify it under the terms of the GNU General Public License as
+ published by the Free Software Foundation;*/
 
 #pragma once
 #include <boost/function.hpp>
@@ -148,7 +151,7 @@ namespace Zweistein {
 				histograms[1].resize(power, maxX);
 				std::string wkt = histograms[1].WKTRoiRect(0, 0, maxX, power);
 				histograms[1]._setRoi(wkt, 0);
-				LOG_INFO << "histograms[1] :rows=" << histograms[1].histogram.rows << ", cols=" << histograms[1].histogram.cols << std::endl;
+				LOG_DEBUG << "histograms[1] :rows=" << histograms[1].histogram.rows << ", cols=" << histograms[1].histogram.cols << std::endl;
 				LOG_INFO << "Zweistein::Binning::BINNING.shape(" << s[0] << "," << s[1] << ")" << std::endl;
 			}
 			hss = setup_status;

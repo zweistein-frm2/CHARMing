@@ -103,12 +103,19 @@ message(****resolves_to***************** ${${Boost_numpy_library}}**************
 
 
 
+
 if(${PROJECT_NAME} STREQUAL "DebugHelper")
 message(***DebugHelper executable********)
 
 message(**Python Lib: ${Python_LIBRARIES} ****)
+
+
 add_executable(${PROJECT_NAME}  )
 target_compile_options(${PROJECT_NAME} PRIVATE  $<$<CXX_COMPILER_ID:GNU>: -Wno-error>)
+target_compile_options(${PROJECT_NAME} PRIVATE
+  $<$<COMPILE_LANGUAGE:CXX>:$<$<CXX_COMPILER_ID:MSVC>:/Od>>
+  $<$<COMPILE_LANGUAGE:CXX>:$<$<CXX_COMPILER_ID:MSVC>:/GS>>
+ )
 #target_link_options(${PROJECT_NAME}   PRIVATE $<$<CXX_COMPILER_ID:GNU>:$<$<CONFIG:RELEASE>:-static-libstdc++> $<$<CONFIG:DEBUG>:-static-libstdc++> > PRIVATE $<$<CXX_COMPILER_ID:GNU>:-static-libgcc> )
 target_link_libraries(${PROJECT_NAME} PRIVATE  ${Python_LIBRARY_RELEASE} ${Boost_LIBRARIES} ${OpenCV_LIBS}  uv_a )
 

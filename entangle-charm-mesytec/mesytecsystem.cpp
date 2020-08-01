@@ -20,6 +20,7 @@ namespace p = boost::python;
 namespace np = boost::python::numpy;
 using boost::asio::ip::udp;
 
+boost::atomic<bool> cancelrequested = false;
 
 #define MSMTSYSTEM Mesytec::MesytecSystem
 
@@ -85,37 +86,38 @@ void startMonitor(boost::shared_ptr < MSMTSYSTEM> ptrmsmtsystem1, boost::shared_
         try {
             boost::function<void()> t;
             t = [&ptrmsmtsystem1, &_devlist]() {
+                std::chrono::milliseconds ms(200);
                 try {
-
                     ptrmsmtsystem1->connect(_devlist, io_service);
-                    io_service.run();
+                    while (!cancelrequested) {
+                        io_service.run_for(ms);
+                    }
+                    for (auto& [key, value] : ptrmsmtsystem1->deviceparam) {
+                        if (value.socket && value.bNewSocket) {
+                            try {
+                                value.socket->cancel();
+                                LOG_INFO << "value.socket->cancel()" << std::endl;
+                                //  same socket can be used for reception from multiple devices,
+                                // so it is enough to cancel just the bNewSocket == true one.
+                            }
+                            catch (boost::exception& e) {
+                                LOG_ERROR << boost::diagnostic_information(e) << std::endl;
+                            }
+                        }
+                    }
                 }
                 catch (Mesytec::cmd_error& x) {
                     LOG_ERROR << Mesytec::cmd_errorstring(x) << std::endl;
                 }
                 catch (boost::exception& e) { LOG_ERROR << boost::diagnostic_information(e) << std::endl; }
 
-                if (!io_service.stopped()) {
-                    LOG_ERROR << "io_stop() called" << std::endl << std::flush;
-                    io_service.stop();
-                }
-                LOG_INFO << "exiting connection..." << std::endl;
-                bool ok = ptrmsmtsystem1->evdata.evntqueue.push(Zweistein::Event::Reset());
+                               bool ok = ptrmsmtsystem1->evdata.evntqueue.push(Zweistein::Event::Reset());
                 if (!ok) LOG_ERROR << " cannot push Zweistein::Event::Reset()" << std::endl;
-                for (auto& [key, value] : ptrmsmtsystem1->deviceparam) {
-                    if (value.socket && value.bNewSocket) {
-                        try {
-                            //value.socket->cancel();
-                            //LOG_INFO << "value.socket->cancel()" << std::endl;
-                            //  same socket can be used for reception from multiple devices,
-                            // so it is enough to cancel just the bNewSocket == true one.
-                        }
-                        catch (boost::exception& e) {
-                            LOG_ERROR << boost::diagnostic_information(e) << std::endl;
-                        }
-                    }
-                }
                 ptrmsmtsystem1->closeConnection();
+                if (!io_service.stopped()) { io_service.stop(); }
+                LOG_INFO << "exiting connection..." << "io_service.stopped() = " << io_service.stopped() << std::endl;
+                cancelrequested = false;
+
 
             };
 
@@ -203,9 +205,9 @@ void startMonitor(boost::shared_ptr < MSMTSYSTEM> ptrmsmtsystem1, boost::shared_
         //    catch (std::exception& e) {LOG_ERROR << e.what() << std::endl;}
         //}
         worker_threads.join_all();
-        LOG_INFO << "startMonitor() exiting..." << std::endl;
         startMonitorRunning = false;
-        io_service.restart();
+        // io_service.restart();
+        LOG_DEBUG << std::endl<<"startMonitor() exiting..." << "io_service.stopped() = " << io_service.stopped() << std::endl;
     }
 
 

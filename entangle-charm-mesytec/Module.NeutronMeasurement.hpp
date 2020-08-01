@@ -1,3 +1,14 @@
+/*                          _              _                _
+    ___  __ __ __  ___     (_)     ___    | |_     ___     (_)    _ _
+   |_ /  \ V  V / / -_)    | |    (_-<    |  _|   / -_)    | |   | ' \
+  _/__|   \_/\_/  \___|   _|_|_   /__/_   _\__|   \___|   _|_|_  |_||_|
+       .
+       |\       Copyright (C) 2019 - 2020 by Andreas Langhoff
+     _/]_\_                            <andreas.langhoff@frm2.tum.de>
+ ~~~"~~~~~^~~   This program is free software; you can redistribute it
+ and/or modify it under the terms of the GNU General Public License as
+ published by the Free Software Foundation;*/
+
 boost::thread_group control_threads;
 
 struct NeutronMeasurement {
@@ -9,45 +20,33 @@ public:
     NeutronMeasurement(long loghandle): cmderror(""),ptrStartParameters(boost::shared_ptr < StartMsmtParameters>(new StartMsmtParameters())),
         ptrmsmtsystem1(boost::shared_ptr < MSMTSYSTEM>(new MSMTSYSTEM()))
     {
-      //  Entangle::Init(loghandle);
+        Entangle::Init(loghandle);
         histograms = std::vector<Histogram>(2);
-        //ptrmsmtsystem1->initatomicortime_point();
-        //worker_threads.create_thread([this] {startMonitor(ptrmsmtsystem1, ptrStartParameters); });
         LOG_DEBUG << "NeutronMeasurement(" << loghandle << ")" << std::endl;
         LOG_INFO << get_version() << std::endl;
     }
     ~NeutronMeasurement() {
-        LOG_INFO << "~NeutronMeasurement()" << std::endl;
+        LOG_DEBUG << "~NeutronMeasurement()" << std::endl;
 
     }
 
     void off() {
-        LOG_INFO<< std::endl;
-        for (int i = 0; i < 3; i++) LOG_INFO << "**************" << std::endl;
-        LOG_INFO << "off(): begin." << std::endl;
-        io_service.stop();
-        /*
-        bool bwait = true;
-        for (int i = 0; i < 30; i++) {
-            boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
-            bwait = startMonitorRunning;
-            if (!bwait) break;
-        }
-        if (bwait) {
-            LOG_ERROR << "off(): startMonitor still running." << std::endl;
-        }
-        */
+        LOG_DEBUG << std::endl << "off(): begin." << std::endl;
+        cancelrequested = true;
         control_threads.join_all();
-        LOG_INFO << "off(): end." << std::endl;
-        for (int i = 0; i < 3; i++) LOG_INFO << "**************" << std::endl;
+        LOG_DEBUG << "off(): end." << "io_service.stopped() = " << io_service.stopped() << std::endl;
+
     }
 
     void on(){
-        LOG_INFO << std::endl;
-        for (int i = 0; i < 3; i++) LOG_INFO << "**************" << std::endl;
-        LOG_INFO << "on(): begin." << std::endl;
+        LOG_DEBUG << "on(): " << std::endl;
+       /* if (control_threads.size()) {
+            LOG_WARNING << "on(): startMonitor aready on." << std::endl;
+            return;
+        }
+        */
         bool bwait = true;
-        for(int i=0;i<20;i++){
+        for (int i = 0; i < 20; i++) {
             bwait = startMonitorRunning;
             if (!bwait) break;
             boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
@@ -57,10 +56,8 @@ public:
             return;
         }
         cmderror = "";
+        control_threads.create_thread([this] {startMonitor(ptrmsmtsystem1, ptrStartParameters); });
 
-        if(!bwait) control_threads.create_thread([this] {startMonitor(ptrmsmtsystem1, ptrStartParameters); });
-        LOG_INFO << "on(): end." << std::endl;
-        for (int i = 0; i < 3; i++) LOG_INFO << "**************" << std::endl;
     }
     bool get_writelistmode() {
         return ptrStartParameters->writelistmode;
@@ -93,7 +90,7 @@ public:
     boost::python::list log() {
         boost::python::list l;
         {
-           /* Zweistein::ReadLock r_lock(Entangle::cbLock); //circular buffer lock
+           Zweistein::ReadLock r_lock(Entangle::cbLock); //circular buffer lock
 
             for (auto iter = Entangle::ptrcb->begin(); iter != Entangle::ptrcb->end(); iter++) {
 
@@ -101,7 +98,7 @@ public:
                 boost::split(strs, *iter, boost::is_any_of("\n"));
                 for (auto& s : strs) l.append(s);
             }
-            */
+
         }
         return l;
     }

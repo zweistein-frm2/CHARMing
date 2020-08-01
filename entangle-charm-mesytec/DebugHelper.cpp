@@ -1,3 +1,15 @@
+/*                          _              _                _
+	___  __ __ __  ___     (_)     ___    | |_     ___     (_)    _ _
+   |_ /  \ V  V / / -_)    | |    (_-<    |  _|   / -_)    | |   | ' \
+  _/__|   \_/\_/  \___|   _|_|_   /__/_   _\__|   \___|   _|_|_  |_||_|
+	   .
+	   |\       Copyright (C) 2019 - 2020 by Andreas Langhoff
+	 _/]_\_                            <andreas.langhoff@frm2.tum.de>
+ ~~~"~~~~~^~~   This program is free software; you can redistribute it
+ and/or modify it under the terms of the GNU General Public License as
+ published by the Free Software Foundation;*/
+
+
 #include <boost/exception/all.hpp>
 #include <boost/system/error_code.hpp>
 #include <boost/exception/error_info.hpp>
@@ -10,7 +22,7 @@ bool retry = true;
 void catch_ctrlc(const boost::system::error_code& error, int signal_number) {
 	{
 		boost::mutex::scoped_lock lock(coutGuard);
-		std::cout << "handling signal " << signal_number << std::endl;
+		LOG_INFO << "handling signal " << signal_number << std::endl;
 	}
 	if (signal_number == 2) {
 		retry = false;
@@ -35,8 +47,9 @@ int main(int argc, char* argv[])
 		pNM->off();
 		boost::this_thread::sleep_for(boost::chrono::milliseconds(2000));
 
-		LOG_INFO << "io_service.stopped() = "<< io_service.stopped() << std::endl;
 
+
+		boost::this_thread::sleep_for(boost::chrono::milliseconds(2000));
 		pNM->on();
 		int l = 0;
 		do {

@@ -23,6 +23,6 @@ void Entangle::Init(int fd) {
 
 boost::shared_ptr <Entangle::Logger> Entangle::ptrlogger = nullptr;
 boost::shared_ptr <boost::circular_buffer<std::string>> Entangle::ptrcb = nullptr;
-
+std::string Entangle::Logger::_StreamBuf::msg = "";
 Zweistein::Lock Entangle::cbLock;
 
