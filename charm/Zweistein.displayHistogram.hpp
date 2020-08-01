@@ -1,10 +1,14 @@
-/***************************************************************************
-  *   Copyright (C) 2019 - 2020 by Andreas Langhoff
-  *                                          <andreas.langhoff@frm2.tum.de> *
-  *   This program is free software; you can redistribute it and/or modify  *
-  *   it under the terms of the GNU General Public License as published by  *
-  *   the Free Software Foundation;                                         *
-  ***************************************************************************/
+/*                          _              _                _
+	___  __ __ __  ___     (_)     ___    | |_     ___     (_)    _ _
+   |_ /  \ V  V / / -_)    | |    (_-<    |  _|   / -_)    | |   | ' \
+  _/__|   \_/\_/  \___|   _|_|_   /__/_   _\__|   \___|   _|_|_  |_||_|
+	   .
+	   |\       Copyright (C) 2019 - 2020 by Andreas Langhoff
+	 _/]_\_                            <andreas.langhoff@frm2.tum.de>
+ ~~~"~~~~~^~~   This program is free software; you can redistribute it
+ and/or modify it under the terms of the GNU General Public License as
+ published by the Free Software Foundation;*/
+
 #pragma once
 #include <boost/function.hpp>
 #include <boost/chrono.hpp>
@@ -33,8 +37,6 @@
 
 namespace Zweistein {
 	void displayHistogram(boost::asio::io_service& io_service, boost::shared_ptr<Zweistein::XYDetectorSystem> pmsmtsystem1) {
-
-
 		boost::this_thread::sleep_for(boost::chrono::milliseconds(200));
 
 		// cv::Mat is row, column which corresponds to y, x !!!!
@@ -68,9 +70,6 @@ namespace Zweistein {
 				cv::minMaxLoc(histograms[0].histogram, &minVal, &maxVal, &minLoc, &maxLoc);
 				histograms[0].histogram.convertTo(image, CV_8U, maxVal != 0 ? 255.0 / maxVal : 0, 0);
 			}
-
-
-
 		};
 		boost::function<void()> display = [ &io_service, &imageUpdate]() {
 			sigslot::signal<cv::Mat&, cv::Mat&> sig;
@@ -163,8 +162,5 @@ namespace Zweistein {
 
 		};
 		worker_threads.create_thread(boost::bind(display));
-
-
-
 	}
 }
