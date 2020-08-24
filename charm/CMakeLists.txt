@@ -29,7 +29,8 @@ set(CMAKE_CXX_STANDARD 17)
 #find_package (Python COMPONENTS Interpreter Development NumPy)
 
 set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost 1.71 REQUIRED COMPONENTS filesystem chrono thread program_options iostreams log log_setup locale) # header only libraries must not be added here
+
+find_package(Boost 1.71 REQUIRED COMPONENTS filesystem chrono thread program_options iostreams log log_setup locale ${BOOST_PATHS}) # header only libraries must not be added here
 #find_path(Boost_INCLUDE_DIR boost)
 
 message(********cmake_toolchain=  ${CMAKE_TOOLCHAIN_FILE}             ***********)
@@ -121,7 +122,7 @@ endif()
     "${CMAKE_CURRENT_BINARY_DIR}/zstd${WIN32LIB_SUFFIX}.dll"
        DESTINATION ${INSTALL_DIR}
         )
-	if(${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR} VERSION_LESS "1_73")
+	if(${Boost_VERSION_MAJOR}.${Boost_VERSION_MINOR} VERSION_LESS 1.73)
    install(
    FILES
       "${CMAKE_CURRENT_BINARY_DIR}/boost_date_time-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"

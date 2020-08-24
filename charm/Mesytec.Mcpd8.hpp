@@ -2,8 +2,8 @@
   *   Copyright (C) 2019 - 2020 by Andreas Langhoff
   *                                          <andreas.langhoff@frm2.tum.de> *
   *   This program is free software; you can redistribute it and/or modify  *
-  *   it under the terms of the GNU General Public License as published by  *
-  *   the Free Software Foundation;                                         *
+  *   it under the terms of the GNU General Public License v3 as published  *
+  *   by the Free Software Foundation;                                      *
   ***************************************************************************/
 
 #pragma once
@@ -119,7 +119,7 @@ namespace Mesytec {
 		virtual void setStart(boost::chrono::system_clock::time_point& t);
 		bool listmode_connect(std::list<Mcpd8::Parameters>& _devlist, boost::asio::io_service& io_service);
 
-		boost::asio::io_service::strand *pstrand;
+
 		virtual bool connect(std::list<Mcpd8::Parameters>& _devlist, boost::asio::io_service& io_service);
 
 		virtual void Send(std::pair<const unsigned char, Mesytec::DeviceParameter>& kvp, Mcpd8::Internal_Cmd cmd, unsigned long param = 0);
@@ -132,7 +132,7 @@ namespace Mesytec {
 		Mcpd8::CmdPacket& Send(std::pair<const unsigned char, Mesytec::DeviceParameter>& kvp, Mcpd8::CmdPacket& cmdpacket, bool waitresponse = true);
 
 		void start_receive(const Mesytec::DeviceParameter &mp,unsigned char devid) {
-			mp.socket->async_receive(boost::asio::buffer(recv_buf), pstrand->wrap(boost::bind(&MesytecSystem::handle_receive, this,
+			mp.socket->async_receive(boost::asio::buffer(recv_buf), mp.pstrand->wrap(boost::bind(&MesytecSystem::handle_receive, this,
 				boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred, devid)));
 
 		}

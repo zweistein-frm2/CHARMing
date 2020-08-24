@@ -68,6 +68,7 @@ namespace Mcpd8 {
 			size_t len = cmdpacket.Length;
 			//for (int i = 0; i <len; i++) 	boost::endian::big_to_native_inplace(sp[i]);
 			size_t bytessent=socket->send_to(boost::asio::buffer(reinterpret_cast<unsigned short*>(&cmdpacket), (cmdpacket.Length)*sizeof(short)), mcpd_endpoint);
+			boost::this_thread::sleep_for(boost::chrono::milliseconds(10)); // needed for multiple sends , otherwise SEND_TIMEOUT
 			return bytessent;
 
 		}

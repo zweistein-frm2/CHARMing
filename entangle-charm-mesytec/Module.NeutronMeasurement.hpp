@@ -26,7 +26,7 @@ public:
         LOG_INFO << get_version() << std::endl;
     }
     ~NeutronMeasurement() {
-        LOG_DEBUG << "~NeutronMeasurement()" << std::endl;
+        LOG_INFO << "~NeutronMeasurement()" << std::endl;
 
     }
 
@@ -34,7 +34,7 @@ public:
         LOG_DEBUG << std::endl << "off(): begin." << std::endl;
         cancelrequested = true;
         control_threads.join_all();
-        LOG_DEBUG << "off(): end." << "io_service.stopped() = " << io_service.stopped() << std::endl;
+        LOG_INFO << "off(): end." << "io_service.stopped() = " << ptr_ctx->stopped() << std::endl;
 
     }
 
@@ -48,7 +48,7 @@ public:
         bool bwait = true;
         for (int i = 0; i < 20; i++) {
             bwait = startMonitorRunning;
-            if (!bwait) break;
+            if (bwait) break;
             boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
         }
         if (bwait) {
@@ -147,7 +147,7 @@ public:
         try {
             if (ptrStartParameters->writelistmode) {
                 ptrmsmtsystem1->write2disk = true;
-                worker_threads.create_thread([this] {Mesytec::writeListmode(io_service, ptrmsmtsystem1); });
+                worker_threads.create_thread([this] {Mesytec::writeListmode(*ptr_ctx, ptrmsmtsystem1); });
             }
             ptrmsmtsystem1->SendAll(Mcpd8::Cmd::START);
             set_simulatorRate(get_simulatorRate());

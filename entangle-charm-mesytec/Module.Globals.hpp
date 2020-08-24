@@ -6,9 +6,8 @@
        |\       Copyright (C) 2019 - 2020 by Andreas Langhoff
      _/]_\_                            <andreas.langhoff@frm2.tum.de>
  ~~~"~~~~~^~~   This program is free software; you can redistribute it
- and/or modify it under the terms of the GNU General Public License as
- published by the Free Software Foundation;*/
-
+ and/or modify it under the terms of the GNU General Public License v3
+ as published by the Free Software Foundation;*/
 
 Entangle::severity_level Entangle::SEVERITY_THRESHOLD = Entangle::severity_level::trace;
 EXTERN_FUNCDECLTYPE boost::mutex coutGuard;
@@ -19,7 +18,7 @@ std::vector<Histogram> histograms;
 static_assert(COUNTER_MONITOR_COUNT >= 4, "Mcpd8 Datapacket can use up to 4 counters: params[4][3]");
 boost::atomic<unsigned long long> CounterMonitor[COUNTER_MONITOR_COUNT];
 
-boost::asio::io_service io_service;
+boost::scoped_ptr<boost::asio::io_context> ptr_ctx(new boost::asio::io_context);
 
 boost::atomic<bool> startMonitorRunning = false;
 
@@ -27,7 +26,7 @@ boost::atomic<bool> startMonitorRunning = false;
 void initialize() { LOG_INFO << "initialize()" << std::endl; }
 void shutdown() {
     LOG_INFO << "shutdown()" << std::endl;
-    io_service.stop();
+    ptr_ctx->stop();
     boost::this_thread::sleep_for(boost::chrono::milliseconds(450));
     //worker_threads.join_all();
 

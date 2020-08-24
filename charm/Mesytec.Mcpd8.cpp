@@ -6,8 +6,8 @@
 	   |\       Copyright (C) 2019 - 2020 by Andreas Langhoff
      _/]_\_                            <andreas.langhoff@frm2.tum.de>
  ~~~"~~~~~^~~   This program is free software; you can redistribute it
- and/or modify it under the terms of the GNU General Public License as
- published by the Free Software Foundation;*/
+ and/or modify it under the terms of the GNU General Public License v3
+ as published by the Free Software Foundation;*/
 
 
 #ifdef __GNUC__
@@ -61,10 +61,10 @@ namespace Mesytec {
 			return rv;
 		}
 
-		MesytecSystem::MesytecSystem():recv_buf(), cmd_recv_queue(5), internalerror(cmd_errorcode::OK), currentrunid(0),pstrand(nullptr),
+		MesytecSystem::MesytecSystem():recv_buf(), cmd_recv_queue(25), internalerror(cmd_errorcode::OK), currentrunid(0),
 			lastpacketqueuefull_missedcount(0), lastlistmodequeuefull_missedcount(0),
 			inputFromListmodeFile(false),
-			eventdataformat(Zweistein::Format::EventData::Undefined){
+			eventdataformat(Zweistein::Format::EventData::Undefined),b_bufnums_8BIT(false){
 
 		}
 		MesytecSystem::~MesytecSystem(){
@@ -75,7 +75,6 @@ namespace Mesytec {
 			for (auto& [key, value] : deviceparam) {
 				if (value.socket && value.bNewSocket) {
 					try {
-
 						//value.socket->release();
 						//value.socket->shutdown(boost::asio::socket_base::shutdown_both);
 						if (value.socket->is_open()) {
@@ -151,10 +150,11 @@ namespace Mesytec {
 			pio_service = &io_service;
 			evdata.widthX = 0;
 			evdata.widthY = 0;
-			if (pstrand) delete pstrand;
-			pstrand=new boost::asio::io_service::strand(io_service);
+
 			oldidnewid.clear();
 			deviceparam.clear();
+
+			LOG_INFO << "MesytecSystem::connect(): " << "io_service.stopped() = " << pio_service->stopped() << std::endl;
 
 			boost::system::error_code ec ;
 			for(Mcpd8::Parameters& p:_devlist) {
@@ -251,8 +251,13 @@ namespace Mesytec {
 			worker_threads.create_thread(boost::bind(&MesytecSystem::watch_incoming_packets, this));		//worker_threads.add_thread(new boost::thread(&MesytecSystem::watch_incoming_packets, this, &io_service));
 			boost::this_thread::sleep_for(boost::chrono::milliseconds(100)); // we want watch_incoming_packets active
 
-			for (const auto& [key, value] : deviceparam) {
-				if(value.bNewSocket) start_receive(value,key);
+			for ( auto& [key, value] : deviceparam) {
+
+					if (value.bNewSocket) {
+						if (value.pstrand) delete value.pstrand;
+						value.pstrand = new boost::asio::io_service::strand(*pio_service);
+						start_receive(value, key);
+					}
 			}
 
 			for (auto& kvp : deviceparam) {

@@ -1,9 +1,13 @@
-/***************************************************************************
- *   Copyright (C) 2020 by Andreas Langhoff <andreas.langhoff@frm2.tum.de> *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation;                                         *
- ***************************************************************************/
+/*                          _              _                _
+    ___  __ __ __  ___     (_)     ___    | |_     ___     (_)    _ _
+   |_ /  \ V  V / / -_)    | |    (_-<    |  _|   / -_)    | |   | ' \
+  _/__|   \_/\_/  \___|   _|_|_   /__/_   _\__|   \___|   _|_|_  |_||_|
+       .
+       |\       Copyright (C) 2019 - 2020 by Andreas Langhoff
+     _/]_\_                            <andreas.langhoff@frm2.tum.de>
+ ~~~"~~~~~^~~   This program is free software; you can redistribute it
+ and/or modify it under the terms of the GNU General Public License v3
+ as published by the Free Software Foundation;*/
 
 #define PY_ARRAY_UNIQUE_SYMBOL pbcvt_ARRAY_API
 #include "Module.Include.hpp"
@@ -35,8 +39,8 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
         using namespace magic_enum::bitwise_operators; // out-of-the-box bitwise operators for enums.
 
 
-        boost::asio::signal_set signals(io_service, SIGINT, SIGTERM);
-        signals.async_wait(boost::bind(&boost::asio::io_service::stop, &io_service));
+        boost::asio::signal_set signals(*ptr_ctx, SIGINT, SIGTERM);
+        signals.async_wait(boost::bind(&boost::asio::io_service::stop, & *ptr_ctx));
 
         std::list<Mcpd8::Parameters> _devlist = std::list<Mcpd8::Parameters>();
 
@@ -105,17 +109,17 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
                             }
                             ptrStartParameters->monitorbusy = true;
                             ptrmsmtsystem1->eventdataformat = Zweistein::Format::EventData::Undefined;
-                            ptrmsmtsystem1->listmode_connect(_devlist, io_service);
+                            ptrmsmtsystem1->listmode_connect(_devlist, *ptr_ctx);
                             // find the .json file for the listmode file
                             // check if Binning file not empty, if not empty wait for
                             try {
-                                Zweistein::setupHistograms(io_service, ptrmsmtsystem1, Mesytec::Config::BINNINGFILE.string());
+                                Zweistein::setupHistograms(*ptr_ctx, ptrmsmtsystem1, Mesytec::Config::BINNINGFILE.string());
                                 bool ok = ptrmsmtsystem1->evdata.evntqueue.push(Zweistein::Event::Reset());
                                 if (!ok) LOG_ERROR << " cannot push Zweistein::Event::Reset()" << std::endl;
                                 boost::function<void(Mcpd8::DataPacket&)> abfunc = boost::bind(&Mesytec::MesytecSystem::analyzebuffer, ptrmsmtsystem1, boost::placeholders::_1);
                                 boost::shared_ptr <Mesytec::listmode::Read> ptrRead = boost::shared_ptr < Mesytec::listmode::Read>(new Mesytec::listmode::Read(abfunc, ptrmsmtsystem1->data, ptrmsmtsystem1->deviceparam));
                                 // pointer to obj needed otherwise exceptions are not propagated properly
-                                ptrRead->file(fname, io_service);
+                                ptrRead->file(fname, *ptr_ctx);
                                 while (ptrmsmtsystem1->evdata.evntqueue.read_available()); // wait unitl queue consumed
 
 
@@ -139,7 +143,7 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
                         Mesytec::listmode::action ac = Mesytec::listmode::whatnext;
 
                         LOG_INFO << " all done: " << ac << std::endl;
-                    } while (!io_service.stopped());
+                    } while (!ptr_ctx->stopped());
 
                 }
                 catch (boost::exception& e) {
@@ -153,10 +157,10 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
         auto pt = new boost::thread(boost::bind(t));
         worker_threads.add_thread(pt);
 
-        worker_threads.create_thread([&ptrmsmtsystem1] {Zweistein::populateHistograms(io_service, ptrmsmtsystem1); });
+        worker_threads.create_thread([&ptrmsmtsystem1] {Zweistein::populateHistograms(*ptr_ctx, ptrmsmtsystem1); });
 
         // nothing to do really,
-        while (!io_service.stopped()) {
+        while (!ptr_ctx->stopped()) {
 
             long long currcount = ptrmsmtsystem1->evdata.evntcount;
             long long maxcount = ptrStartParameters->MaxCount;
@@ -175,7 +179,7 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
             }
             boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
             std::chrono::milliseconds maxblocking(100);
-            io_service.run_one_for(maxblocking);
+            ptr_ctx->run_one_for(maxblocking);
 
         }
 

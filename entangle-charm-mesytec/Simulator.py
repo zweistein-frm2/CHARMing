@@ -16,6 +16,8 @@ from entangle.core.defs import uint64, int32, boolean, listof
 from entangle.core.errors import InvalidValue, InvalidOperation, \
     ConfigurationError
 
+import entangle.device.charming.msmtsystem as msmtsystem
+
 
 class Simulator(base.MLZDevice):
 

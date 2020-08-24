@@ -16,8 +16,7 @@ from entangle.core.defs import uint64, int32, boolean, listof
 from entangle.core.errors import InvalidValue, InvalidOperation, \
     ConfigurationError
 
-
-from entangle.device.charming import msmtsystem
+import entangle.device.charming.msmtsystem as msmtsystem
 
 class Settings(base.MLZDevice):
     attributes = {

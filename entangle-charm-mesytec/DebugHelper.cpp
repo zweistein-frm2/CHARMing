@@ -15,8 +15,21 @@
 #include <boost/exception/error_info.hpp>
 #include <errno.h>
 #include <stdio.h>
-#include "MesytecSystem.cpp"
+#ifndef WIN32
+#if defined(__cplusplus)
+extern "C"
+{
+#endif
+#include <unistd.h>
+#if defined(__cplusplus)
+}
+#endif
+#else
+#define STDOUT_FILENO  _fileno(stdout)
 
+#endif
+
+#include "mesytecsystem.cpp"
 
 bool retry = true;
 void catch_ctrlc(const boost::system::error_code& error, int signal_number) {
@@ -36,12 +49,12 @@ void catch_ctrlc(const boost::system::error_code& error, int signal_number) {
 
 int main(int argc, char* argv[])
 {
-	boost::asio::signal_set signals(io_service, SIGINT, SIGSEGV);
+	boost::asio::signal_set signals(*ptr_ctx, SIGINT, SIGSEGV);
 	//signals.async_wait(boost::bind(&boost::asio::io_service::stop, &io_service));
 	signals.async_wait(&catch_ctrlc);
 	boost::shared_ptr < NeutronMeasurement> pNM ;
 	try {
-		pNM.reset( new NeutronMeasurement(_fileno(stdout)));
+		pNM.reset( new NeutronMeasurement(STDOUT_FILENO));
 		pNM->on();
 		boost::this_thread::sleep_for(boost::chrono::milliseconds(8000));
 		pNM->off();
@@ -57,7 +70,7 @@ int main(int argc, char* argv[])
 			//std::cout << "\r  waiting for action " << clessidra[l % 8];
 			l++;
 			std::chrono::milliseconds ms(100);
-			io_service.run_for(ms);
+			ptr_ctx->run_for(ms);
 
 		}
 		while (retry);

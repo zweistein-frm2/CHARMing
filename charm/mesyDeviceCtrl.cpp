@@ -1,8 +1,8 @@
 ﻿/***************************************************************************
  *   Copyright (C) 2019 by Andreas Langhoff <andreas.langhoff@frm2.tum.de> *
  *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation;                                         *
+ *   it under the terms of the GNU General Public License v3 as published  *
+ *   by the Free Software Foundation;                                      *
  ***************************************************************************/
 
 #include "stdafx.h"
@@ -66,7 +66,7 @@ void conflicting_options(const po::variables_map& vm,
 			+ opt1 + "' and '" + opt2 + "'.");
 }
 
-boost::asio::io_service io_service;
+boost::scoped_ptr<boost::asio::io_context> ptr_ctx( new boost::asio::io_context);
 
 int main(int argc, char* argv[])
 {
@@ -194,8 +194,8 @@ int main(int argc, char* argv[])
 
 
 
-		boost::asio::signal_set signals(io_service, SIGINT, SIGTERM);
-		signals.async_wait(boost::bind(&boost::asio::io_service::stop, &io_service));
+		boost::asio::signal_set signals(*ptr_ctx, SIGINT, SIGTERM);
+		signals.async_wait(boost::bind(&boost::asio::io_service::stop,& *ptr_ctx));
 
 		std::list<Mcpd8::Parameters> _devlist = std::list<Mcpd8::Parameters>();
 
@@ -227,16 +227,16 @@ int main(int argc, char* argv[])
 
 
 						ptrmsmtsystem1->eventdataformat = Zweistein::Format::EventData::Undefined;
-						ptrmsmtsystem1->listmode_connect(_devlist, io_service);
+						ptrmsmtsystem1->listmode_connect(_devlist, *ptr_ctx);
 						// find the .json file for the listmode file
 						// check if Binning file not empty, if not empty wait for
-						Zweistein::setupHistograms(io_service,ptrmsmtsystem1,Mesytec::Config::BINNINGFILE.string());
+						Zweistein::setupHistograms(*ptr_ctx,ptrmsmtsystem1,Mesytec::Config::BINNINGFILE.string());
 						bool ok = ptrmsmtsystem1->evdata.evntqueue.push(Zweistein::Event::Reset());
 						if (!ok) LOG_ERROR << " cannot push Zweistein::Event::Reset()" << std::endl;
 						try {
 							boost::function<void(Mcpd8::DataPacket&)> abfunc = boost::bind(&Mesytec::MesytecSystem::analyzebuffer, ref(ptrmsmtsystem1), boost::placeholders::_1);
 							boost::shared_ptr <Mesytec::listmode::Read> ptrRead = boost::shared_ptr < Mesytec::listmode::Read>(new Mesytec::listmode::Read(abfunc, ptrmsmtsystem1->data, ptrmsmtsystem1->deviceparam));
-							ptrRead->file(fname, io_service);
+							ptrRead->file(fname, *ptr_ctx);
 							while (ptrmsmtsystem1->evdata.evntqueue.read_available()); // wait unitl queue consumed
 							// pointer to obj needed otherwise exceptions are not propagated properly
 						}
@@ -304,8 +304,8 @@ int main(int argc, char* argv[])
 			t = [ &ptrmsmtsystem1, &_devlist,&write2disk]() {
 				try {
 					ptrmsmtsystem1->write2disk=write2disk;
-					ptrmsmtsystem1->connect(_devlist, io_service);
-					io_service.run();
+					ptrmsmtsystem1->connect(_devlist, *ptr_ctx);
+					ptr_ctx->run();
 				}
 
 				catch (Mesytec::cmd_error& x) {
@@ -317,7 +317,7 @@ int main(int argc, char* argv[])
 
 				}
 
-				io_service.stop();
+				ptr_ctx->stop();
 
 
 			};
@@ -342,18 +342,19 @@ int main(int argc, char* argv[])
 
 		if (inputfromlistfile) {
 
-			worker_threads.create_thread([&ptrmsmtsystem1] {Zweistein::populateHistograms(io_service, ptrmsmtsystem1); });
-			worker_threads.create_thread([&ptrmsmtsystem1] {Zweistein::displayHistogram(io_service, ptrmsmtsystem1); });
+			worker_threads.create_thread([&ptrmsmtsystem1] {Zweistein::populateHistograms(*ptr_ctx, ptrmsmtsystem1); });
+			worker_threads.create_thread([&ptrmsmtsystem1] {Zweistein::displayHistogram(*ptr_ctx, ptrmsmtsystem1); });
 			// nothing to do really,
-			while (!io_service.stopped()) {
+			while (!ptr_ctx->stopped()) {
 				boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
-				io_service.run_one();
+				ptr_ctx->run_one();
 			}
 		}
 		else {
 			// data acquisition monitoring loop
 			int k = 0;
-			for ( k = 0; k < 10; k++) {
+			int maxK = 10;
+			for ( k = 0; k < maxK; k++) {
 				if (ptrmsmtsystem1->connected) {
 					if (setupafterconnect) {
 						boost::function<void()> setipaddrcmd = [&ptrmsmtsystem1, &_devlist]() {
@@ -482,20 +483,20 @@ int main(int argc, char* argv[])
 									LOG_ERROR << boost::diagnostic_information(e) << std::endl;
 
 							}
-							io_service.stop();
+							ptr_ctx->stop();
 						};
 						worker_threads.create_thread(boost::bind(setipaddrcmd));
 						boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
 						break;
 					}
 					else {
-						Zweistein::setupHistograms(io_service, ptrmsmtsystem1, Mesytec::Config::BINNINGFILE.string());
-						worker_threads.create_thread([&ptrmsmtsystem1] {Zweistein::populateHistograms(io_service, ptrmsmtsystem1); });
-						worker_threads.create_thread([&ptrmsmtsystem1] {Zweistein::displayHistogram(io_service, ptrmsmtsystem1); });
+						Zweistein::setupHistograms(*ptr_ctx, ptrmsmtsystem1, Mesytec::Config::BINNINGFILE.string());
+						worker_threads.create_thread([&ptrmsmtsystem1] {Zweistein::populateHistograms(*ptr_ctx, ptrmsmtsystem1); });
+						worker_threads.create_thread([&ptrmsmtsystem1] {Zweistein::displayHistogram(*ptr_ctx, ptrmsmtsystem1); });
 						boost::function<void()> sendstartcmd = [&ptrmsmtsystem1, &_devlist, &write2disk]() {
 							unsigned long rate = 1100000;
 							try {
-								if (write2disk) worker_threads.create_thread([&ptrmsmtsystem1] {Mesytec::writeListmode(io_service, ptrmsmtsystem1); });
+								if (write2disk) worker_threads.create_thread([&ptrmsmtsystem1] {Mesytec::writeListmode(*ptr_ctx, ptrmsmtsystem1); });
 								ptrmsmtsystem1->SendAll(Mcpd8::Cmd::START);
 								for (auto& kvp : ptrmsmtsystem1->deviceparam) {
 									if (kvp.second.datagenerator == Zweistein::DataGenerator::NucleoSimulator) {
@@ -526,12 +527,16 @@ int main(int argc, char* argv[])
 				}
 					boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
 				}
-				if (k == 10) {
+				if (k == maxK) {
 					LOG_ERROR << " NOT CONNECTED (tried " << k << " seconds)" << std::endl;
 				}
 			Zweistein::Averaging<double> avg(3);
-			while (!io_service.stopped()) {
-					boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
+			int l = 0;
+			char clessidra[8] = { '|', '/' , '-', '\\', '|', '/', '-', '\\' };
+			std::chrono::milliseconds ms(100);
+
+			while (!ptr_ctx->stopped()) {
+					boost::this_thread::sleep_for(boost::chrono::milliseconds(500)); // we want watch_incoming_packets active
 					if (setupafterconnect) continue;
 					boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - start;
 					start = boost::chrono::system_clock::now();
@@ -542,13 +547,13 @@ int main(int argc, char* argv[])
 						boost::mutex::scoped_lock lock(coutGuard);
 						boost::chrono::system_clock::time_point tps(ptrmsmtsystem1->getStart());
 						boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - tps;
-						std::cout << "\r" << std::setprecision(0) << std::fixed << avg.getAverage() << " Events/s, (" << Zweistein::PrettyBytes((size_t)(evtspersecond * sizeof(Mesy::Mpsd8Event))) << "/s)\t" << Mcpd8::DataPacket::deviceStatus(ptrmsmtsystem1->data.last_deviceStatusdeviceId) << " elapsed:" << sec << " ";// << std::endl;
+						std::cout << "\r"<<clessidra[l++ % 8] <<" "<< std::setprecision(0) << std::fixed << avg.getAverage() << " Events/s, (" << Zweistein::PrettyBytes((size_t)(evtspersecond * sizeof(Mesy::Mpsd8Event))) << "/s)\t" << Mcpd8::DataPacket::deviceStatus(ptrmsmtsystem1->data.last_deviceStatusdeviceId) << " elapsed:" << sec << "     ";// << std::endl;
 						lastcount = currentcount;
 #ifndef _WIN32
 						std::cout << std::flush;
 #endif
 					}
-					io_service.run_one();
+					ptr_ctx->run_for(ms);
 				};
 			}
 

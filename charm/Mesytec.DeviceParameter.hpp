@@ -2,16 +2,12 @@
 	___  __ __ __  ___     (_)     ___    | |_     ___     (_)    _ _
    |_ /  \ V  V / / -_)    | |    (_-<    |  _|   / -_)    | |   | ' \
   _/__|   \_/\_/  \___|   _|_|_   /__/_   _\__|   \___|   _|_|_  |_||_|
-_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|
-"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'
-
-   Copyright (C) 2019 - 2020 by Andreas Langhoff
-										 <andreas.langhoff@frm2.tum.de>
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation;*/
-
-
+	   .
+	   |\       Copyright (C) 2019 - 2020 by Andreas Langhoff
+	 _/]_\_                            <andreas.langhoff@frm2.tum.de>
+ ~~~"~~~~~^~~   This program is free software; you can redistribute it
+ and/or modify it under the terms of the GNU General Public License v3
+ as published by the Free Software Foundation;*/
 #pragma once
 #include <boost/asio.hpp>
 #include <memory>
@@ -31,6 +27,7 @@ namespace  Mesytec {
 		udp::endpoint mcpd_endpoint;
 		udp::endpoint charm_cmd_endpoint;
 		udp::socket *socket;
+		boost::asio::io_service::strand* pstrand;
 		bool bNewSocket;
 		unsigned short lastbufnum;
 		Zweistein::DataGenerator datagenerator;
@@ -41,7 +38,7 @@ namespace  Mesytec {
 		std::string moduleparam[8];
 		Mesytec::Mpsd8::Module module[Mpsd8_sizeSLOTS];
 		Mesy::ModuleId module_id[Mpsd8_sizeSLOTS];
-		DeviceParameter():offset(0),bNewSocket(false),socket(nullptr), lastmissed_count(0), lastmissed_time(boost::chrono::system_clock::now()) {
+		DeviceParameter():offset(0),bNewSocket(false),socket(nullptr), pstrand(nullptr), lastmissed_count(0), lastmissed_time(boost::chrono::system_clock::now()) {
 			for (int i = 0; i < Mpsd8_sizeSLOTS; i++) module_id[i] = Mesy::ModuleId::NOMODULE;
 		}
 		~DeviceParameter(){}

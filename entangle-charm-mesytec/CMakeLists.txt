@@ -1,7 +1,7 @@
 ﻿# CMakeList.txt : CMake project for BMesy, include source and define
 # project specific logic here.
 #
-cmake_minimum_required (VERSION 3.14)
+cmake_minimum_required (VERSION 3.16)
 
 set(PROJECT1 mesytecsystem)
 set(PROJECT2 listmodereplay)
@@ -12,8 +12,8 @@ set(repository ${Charm_DIR})
 
 set(Boost_USE_STATIC_LIBS ON)
 
-foreach(PROJECT_NAME IN LISTS PROJECT4 )
-#foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3)
+#foreach(PROJECT_NAME IN LISTS PROJECT4 )
+foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3 PROJECT4)
     message(STATUS "PROJECT_NAME=${PROJECT_NAME}")
 
 project(${PROJECT_NAME})
@@ -42,7 +42,8 @@ else()
 find_package (Python  REQUIRED COMPONENTS Interpreter Development NumPy)
 endif()
 
-
+message(STATUS "Python: version=${Python3_VERSION} interpreter=${Python3_EXECUTABLE}")
+message(STATUS "Include Dirs=${Python_INCLUDE_DIRS} version=${Python_VERSION}")
 
 if(NOT ENTANGLE_ROOT)
     if(WIN32)
@@ -64,14 +65,14 @@ message("ENTANGLE_RES=" ${ENTANGLE_RES} )
 
 if(BOOST_ROOT)
 # HINTS ${BOOST_ROOT}
-set(HINT1 "HINTS ${BOOST_ROOT}")
+set(BOOST_HINTS "HINTS ${BOOST_ROOT}")
 else()
-set(HINT1 )
+set(BOOST_HINTS )
 endif()
 find_package(Boost 1.71 REQUIRED COMPONENTS python${Python_VERSION_MAJOR}${Python_VERSION_MINOR}
             numpy${Python_VERSION_MAJOR}${Python_VERSION_MINOR}
             filesystem chrono thread iostreams
-            ${HINT1}
+            ${BOOST_HINTS}
             ) # header only libraries must not be added here
 find_path(Boost_INCLUDE_DIR boost)
 
@@ -261,13 +262,16 @@ if(ENTANGLE_ROOT )
     DESTINATION ${ENTANGLE_ROOT}/entangle/device/charming
    )
    endif()
-  if(${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR} VERSION_LESS "1_73")
+
+  if(${Boost_VERSION_MAJOR}.${Boost_VERSION_MINOR} VERSION_LESS 1.73)
+   message("${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}  INSTALL EXTRA")
    install(
    FILES
       "${CMAKE_CURRENT_BINARY_DIR}/boost_date_time-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
     DESTINATION ${ENTANGLE_ROOT}/entangle/device/charming
    )
-   endif()
+  else()
+  endif()
 endif()
 
 add_subdirectory (entangle)

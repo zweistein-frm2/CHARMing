@@ -39,7 +39,7 @@ class DeviceConnection(FdLogMixin,base.MLZDevice):
     def init(self):
         self.init_fd_log('Mesytec')
         fd = self.get_log_fd()
-        #print("charm.py:DeviceConnection.init("+str(fd)+")")
+        print("mesytec.py:DeviceConnection.init("+str(fd)+")")
         if msmtsystem.msmtsystem is None:
                 msmtsystem.msmtsystem=mesytecsystem.NeutronMeasurement(fd)
                 self.On()
