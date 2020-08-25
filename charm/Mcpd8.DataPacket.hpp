@@ -21,14 +21,14 @@ namespace Mcpd8
 	{
 	public:
 		// we define all struct elements as short, so that endianness can be converted easier
-		unsigned short Length;	//!< length of the buffer in words
-		unsigned short Type;	//!< the buffer type
-		unsigned short headerLength;	//!< the length of the header in words
-		unsigned short Number;	//!< number of the packet
-		unsigned short runID; 		//!< the run ID
-		unsigned short  deviceStatusdeviceId;	//!< the device state
-		unsigned short time[3];
-		unsigned short param[4][3];	//!< the values of the parameters (belong to the header)
+		uint16_t Length;	//!< length of the buffer in words
+		uint16_t Type;	//!< the buffer type
+		uint16_t headerLength;	//!< the length of the header in words
+		uint16_t Number;	//!< number of the packet
+		uint16_t runID; 		//!< the run ID
+		uint16_t  deviceStatusdeviceId;	//!< the device state
+		uint16_t time[3];
+		uint16_t param[4][3];	//!< the values of the parameters (belong to the header)
 		Mesy::Mpsd8Event events[250];
 		DataPacket() : Type(Mesy::BufferType::DATA), Length(21),
 			headerLength(21), Number(0), runID(0), deviceStatusdeviceId(0) {}
@@ -51,10 +51,10 @@ namespace Mcpd8
 			}
 			return ss_status.str();
 		}
-		unsigned short BytesUsed() {
-			return Length * sizeof(unsigned short);
+		uint16_t BytesUsed() {
+			return Length * sizeof(uint16_t);
 		}
-		unsigned short numEvents() const {
+		uint16_t numEvents() const {
 			int numEvents = (Length - headerLength) / 3;
 			BOOST_ASSERT(numEvents >= 0);
 			return (unsigned short)numEvents;
@@ -71,7 +71,7 @@ namespace Mcpd8
 		}
 
 
-		static boost::chrono::nanoseconds  timeStamp(const unsigned short time[3]){
+		static boost::chrono::nanoseconds  timeStamp(const uint16_t time[3]){
 			/*
 			 DONT USE:  *U reads past time[3]
 			   typedef union {
@@ -89,7 +89,7 @@ namespace Mcpd8
 			return ns;
 		}
 
-		static void setTimeStamp(unsigned short time[3], boost::chrono::nanoseconds nanos) {
+		static void setTimeStamp(uint16_t time[3], boost::chrono::nanoseconds nanos) {
 			long long tstamp = nanos.count() / 100;
 
 			time[0] = tstamp & 0xffff;
@@ -97,13 +97,13 @@ namespace Mcpd8
 			time[2] = (tstamp >> 32) & 0xffff;
 		}
 
-		static void setParam(unsigned short param[3], long long value) {
+		static void setParam(uint16_t param[3], long long value) {
 			param[0] = value & 0xffff;
 			param[1] = (value >> 16) & 0xffff;
 			param[2] = (value >> 32) & 0xffff;
 		}
 
-		static long long Param(const unsigned short param[3]) {
+		static long long Param(const uint16_t param[3]) {
 
 			long long tstamp = (long long)param[0] + (((long long)param[1]) << 16) + (((long long)param[2]) << 32);
 

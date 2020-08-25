@@ -25,29 +25,29 @@ namespace Charm {
 	class  proposal9june2020_Packet
 	{
 	public:
-		// we define all struct elements as short, so that endianness can be converted easier
-		unsigned short Length;	//!< length of the buffer in words
-		unsigned short sessionid;
-		unsigned short Type;	//!< the buffer type
-		unsigned short headerLength;	//!< the length of the header in words
-		long long timestamp;
-		unsigned short Number;	//!< number of the packet
-		unsigned short  deviceStatus;	//!< the device state
-		unsigned short dummy0;
-		unsigned short dummy1 ;
+		// we define all struct elements as uint16_t, so that endianness can be converted easier
+		uint16_t Length;	//!< length of the buffer in words
+		uint16_t sessionid;
+		uint16_t Type;	//!< the buffer type
+		uint16_t headerLength;	//!< the length of the header in words
+		int64_t timestamp;
+		uint16_t Number;	//!< number of the packet
+		uint16_t deviceStatus;	//!< the device state
+		uint16_t dummy0;
+		uint16_t dummy1 ;
 		typedef struct {
-			unsigned short data[3];
+			uint16_t data[3];
 		} mesytec48;
 		union {
-			long long s64[184];
+			int64_t s64[184];
 			mesytec48 u48 [245];
-			long s32[368];
-			unsigned short u16[736];
+			int32_t s32[368];
+			uint16_t u16[736];
 		} data;
 	};
 
 	class alignas(2) CharmEvent {
-		unsigned short data[3];
+		uint16_t data[3];
 	public:
 		inline unsigned char ID() const {
 			return (data[2] & 0x8000) >> 15;
@@ -83,7 +83,7 @@ namespace Charm {
 			using namespace magic_enum::ostream_operators;
 			auto eventtype = magic_enum::enum_cast<Mesy::EventType>(ID());
 			os << std::bitset<16>(data[0]) << " " << std::bitset<16>(data[1]) << " " << std::bitset<16>(data[2]) << std::endl;
-			os << "ID:" << eventtype << ", AMPLITUDE:" << (short)AMPLITUDE() << ", YPOSITION:" << YPOSITION() << ",XPOSITION:" << XPOSITION() << ", TIMESTAMP:" << TIMESTAMP() << std::endl;
+			os << "ID:" << eventtype << ", AMPLITUDE:" << (unsigned short)AMPLITUDE() << ", YPOSITION:" << YPOSITION() << ",XPOSITION:" << XPOSITION() << ", TIMESTAMP:" << TIMESTAMP() << std::endl;
 		}
 
 

@@ -17,16 +17,16 @@ namespace Mcpd8 {
 	extern  unsigned short sendcounter;
 	struct alignas(2) CmdPacket
 	{
-		unsigned short Length;	//!< length of the buffer
-		unsigned short Type;
-		unsigned short headerLength;	//!< the length of the buffer header
-		unsigned short Number;	//!< number of the packet
-		unsigned short cmd; 		//!< the run ID
-		unsigned short deviceStatusdeviceId;	//!< the device state
-		unsigned short time[3];
-		unsigned short headerchksum;
-		unsigned short data[750];
-		static const int defaultLength;
+		uint16_t Length;	//!< length of the buffer
+		uint16_t Type;
+		uint16_t headerLength;	//!< the length of the buffer header
+		uint16_t Number;	//!< number of the packet
+		uint16_t cmd; 		//!< the run ID
+		uint16_t deviceStatusdeviceId;	//!< the device state
+		uint16_t time[3];
+		uint16_t headerchksum;
+		uint16_t data[750];
+		static const uint16_t defaultLength;
 		CmdPacket() :Type(Mesy::BufferType::COMMAND), Length(defaultLength),
 			headerLength(defaultLength), Number(0), deviceStatusdeviceId(0) {
 

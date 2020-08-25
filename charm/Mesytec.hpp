@@ -51,7 +51,7 @@ namespace Mesy {
 		ZERO =0
 	};
 	class alignas(2) Mpsd8Event {
-		unsigned short data[3];
+		uint16_t data[3];
 	public:
 	//MSB Version
 		inline unsigned char ID() const {
@@ -101,7 +101,7 @@ namespace Mesy {
 
 
 	class alignas(2) MdllEvent {
-		unsigned short data[3];
+		uint16_t data[3];
 	public:
 		inline unsigned char ID() const {
 			return (data[2] & 0x8000) >> 15;
@@ -137,7 +137,7 @@ namespace Mesy {
 			using namespace magic_enum::ostream_operators;
 			auto eventtype = magic_enum::enum_cast<Mesy::EventType>(ID());
 			os << std::bitset<16>(data[0]) << " " << std::bitset<16>(data[1]) << " " << std::bitset<16>(data[2]) << std::endl;
-			os << "ID:" << eventtype << ", AMPLITUDE:" << (short)AMPLITUDE() << ", YPOSITION:" << YPOSITION() << ",XPOSITION:" << XPOSITION() << ", TIMESTAMP:" << TIMESTAMP() << std::endl;
+			os << "ID:" << eventtype << ", AMPLITUDE:" << (unsigned short)AMPLITUDE() << ", YPOSITION:" << YPOSITION() << ",XPOSITION:" << XPOSITION() << ", TIMESTAMP:" << TIMESTAMP() << std::endl;
 		}
 	};
 }
