@@ -19,3 +19,9 @@
 [submodule "charm/cvui"]
 	path = charm/cvui
 	url = https://github.com/Dovyski/cvui.git
+[submodule "boost"]
+	path = boost
+	url = https://github.com/boostorg/boost.git
+[submodule "entangle-charming/libuv"]
+	path = entangle-charming/libuv
+	url = https://github.com/libuv/libuv.git
