@@ -1,10 +1,10 @@
 ﻿# CMakeList.txt : CMake project for BMesy, include source and define
 # project specific logic here.
 #
-cmake_minimum_required (VERSION 3.16)
+cmake_minimum_required (VERSION 3.11)
 project(charm)
 if(NOT Charm_DIR)
-set(Charm_DIR ${PROJECT_SOURCE_DIR})
+set(Charm_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 endif()
 
 
@@ -24,23 +24,16 @@ set(CMAKE_CXX_STANDARD 17)
 set(Boost_USE_STATIC_LIBS ON)
 
 find_package(Boost 1.71 REQUIRED COMPONENTS filesystem chrono thread program_options iostreams log log_setup locale ${BOOST_PATHS}) # header only libraries must not be added here
-#find_path(Boost_INCLUDE_DIR boost)
 
-message(********cmake_toolchain=  ${CMAKE_TOOLCHAIN_FILE}             ***********)
 #message(*** is debug==  ${$<$<CONFIG:DEBUG>:-gd>>} ****************)
-if(DEFINED Protobuf_DIR )
-#sort of hack for snapcraft.yaml build
-find_package(Protobuf REQUIRED PATHS ${Protobuf_DIR})
-endif()
+
 find_package(OpenCV  REQUIRED)
 message(******OpenCV_Dir=   ${OpenCV_DIR}  *************)
 
-message(**CMAKE_CURRENT_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR})
-message(**CMAKE_SOURCE_DIR=${CMAKE_SOURCE_DIR})
 include_directories(${libuv_INCLUDE_DIR})
 include_directories(${Boost_INCLUDE_DIR} ${OpenCV_INCLUDE_DIRS})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/asio-extensions/include)
-include_directories(./)
+
 
 
 # Add source to this project's executable.

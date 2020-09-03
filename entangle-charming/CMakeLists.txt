@@ -1,15 +1,44 @@
 ﻿# CMakeList.txt : CMake project for BMesy, include source and define
 # project specific logic here.
 #
-cmake_minimum_required (VERSION 3.16)
+cmake_minimum_required (VERSION 3.11)
 
 set(PROJECT1 mesytecsystem)
 set(PROJECT2 listmodereplay)
 set(PROJECT3 charmsystem)
 set(PROJECT4 DebugHelper)
 
+get_filename_component(parentdir ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY )
+message(parentdir=${parentdir})
+
+set(BOOST_PREFIX ${parentdir}/boost/out)
+file(MAKE_DIRECTORY ${BOOST_PREFIX})
+
+#set(Boost_DEBUG ON)
+#set(Boost_DETAILED_FAILURE_MSG ON)
+#set(Boost_VERBOSE ON)
+set(Boost_NO_SYSTEM_PATHS ON)
+
+# in ${CMAKE_CURRENT_SOURCE_DIR}/boost/jamroot or in ${CMAKE_CURRENT_SOURCE_DIR}/boost/CMakeLists.txt
+# the actual boost version is contained and can be extracted to set boost_currentversion automatically
+set(boost_currentversion 1.74.0)
+set(BOOST_ROOT ${BOOST_PREFIX})
+if(WIN32)
+ set(BOOST_INCLUDEDIR ${BOOST_PREFIX}/include/Boost-${boost_currentversion} )
+else()
+#APPLE or LINUX
+set(BOOST_INCLUDEDIR ${BOOST_PREFIX}/include )
+endif()
+set(BOOST_LIBRARYDIR ${BOOST_PREFIX}/lib)
+set(Boost_DIR ${BOOST_PREFIX}/lib/cmake/Boost-${boost_currentversion})
+file(MAKE_DIRECTORY ${Boost_DIR})
+message(BOOST_PREFIX=${BOOST_PREFIX})
+
+set(Charm_DIR ${parentdir}/charm )
 set(repository ${Charm_DIR})
 
+
+set(libuv_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libuv/include)
 set(Boost_USE_STATIC_LIBS ON)
 
 set(ENTANGLE_FILES "")
@@ -19,6 +48,11 @@ foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3 PROJECT4)
     message(STATUS "PROJECT_NAME=${PROJECT_NAME}")
 
 project(${PROJECT_NAME})
+
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../libuv ${CMAKE_CURRENT_BINARY_DIR}/libuv_2)
+target_compile_options(uv_a PRIVATE $<$<CXX_COMPILER_ID:GNU>:-fPIC>)
+set(libuv_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/libuv/include)
+
 add_compile_definitions(ENTANGLE_LOGGER)
 if(WIN32)
     add_compile_definitions(_WIN32_WINNT=0x0601)
@@ -37,12 +71,9 @@ add_compile_definitions(ASIOEXT_USE_BOOST_ASIO)
 
 set(CMAKE_CXX_STANDARD 17)
 
-if(WIN32)
+
 #find_package (Python "${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}" EXACT REQUIRED COMPONENTS Interpreter Development NumPy)
 find_package (Python  REQUIRED COMPONENTS Interpreter Development NumPy)
-else()
-find_package (Python  REQUIRED COMPONENTS Interpreter Development NumPy)
-endif()
 
 message(STATUS "Python: version=${Python3_VERSION} interpreter=${Python3_EXECUTABLE}")
 message(STATUS "Include Dirs=${Python_INCLUDE_DIRS} version=${Python_VERSION}")
@@ -65,28 +96,12 @@ endif()
 message("ENTANGLE_ROOT=" ${ENTANGLE_ROOT} )
 message("ENTANGLE_RES=" ${ENTANGLE_RES} )
 
-if(BOOST_ROOT)
-# HINTS ${BOOST_ROOT}
-set(BOOST_HINTS "HINTS ${BOOST_ROOT}")
-else()
-set(BOOST_HINTS )
-endif()
-find_package(Boost 1.71 REQUIRED COMPONENTS python${Python_VERSION_MAJOR}${Python_VERSION_MINOR}
-            numpy${Python_VERSION_MAJOR}${Python_VERSION_MINOR}
-            filesystem chrono thread iostreams
-            ${BOOST_HINTS}
-            ) # header only libraries must not be added here
-find_path(Boost_INCLUDE_DIR boost)
+find_package(Boost 1.71 REQUIRED COMPONENTS filesystem chrono thread  iostreams  python${Python_VERSION_MAJOR}${Python_VERSION_MINOR}
+            numpy${Python_VERSION_MAJOR}${Python_VERSION_MINOR} locale  ${BOOST_PATHS}) # header only libraries must not be added here
 
-message(********************Using Boost :${Boost_INCLUDE_DIR}  ******************************)
+include_directories("${Boost_INCLUDE_DIRS}" )
+
 find_package(OpenCV REQUIRED)
-
-
-#find_package(unofficial-libuv CONFIG REQUIRED PATHS ${Charm_DIR}/libuv )
-
-#set (magic_enum_DIR ${_VCPKG_ROOT_DIR}/installed/${VCPKG_TARGET_TRIPLET}/share/magic_enum)
-#message("**magic_enum_DIR=" ${magic_enum_DIR}   ************)
-#find_package(magic_enum CONFIG REQUIRED )
 
 include_directories(${libuv_INCLUDE_DIR})
 include_directories(${Boost_INCLUDE_DIR})
@@ -105,8 +120,6 @@ message(**Boost_numpy_library********** ${Boost_numpy_library}******************
 message(****resolves_to***************** ${${Boost_numpy_library}}**************************)
 
 
-
-
 if(${PROJECT_NAME} STREQUAL "DebugHelper")
 message(***DebugHelper executable********)
 
@@ -119,6 +132,7 @@ target_compile_options(${PROJECT_NAME} PRIVATE
   $<$<COMPILE_LANGUAGE:CXX>:$<$<CXX_COMPILER_ID:MSVC>:/Od>>
   $<$<COMPILE_LANGUAGE:CXX>:$<$<CXX_COMPILER_ID:MSVC>:/GS>>
  )
+target_include_directories(${PROJECT_NAME} PRIVATE ${libuv_INCLUDE_DIR} )
 #target_link_options(${PROJECT_NAME}   PRIVATE $<$<CXX_COMPILER_ID:GNU>:$<$<CONFIG:RELEASE>:-static-libstdc++> $<$<CONFIG:DEBUG>:-static-libstdc++> > PRIVATE $<$<CXX_COMPILER_ID:GNU>:-static-libgcc> )
 target_link_libraries(${PROJECT_NAME} PRIVATE  ${Python_LIBRARY_RELEASE} ${Boost_LIBRARIES} ${OpenCV_LIBS}  uv_a )
 

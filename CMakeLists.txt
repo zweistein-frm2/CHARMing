@@ -1,26 +1,36 @@
-cmake_minimum_required (VERSION 3.16)
-set(CMAKE_VERBOSE_MAKEFILE ON)
+cmake_minimum_required (VERSION 3.11)
+#set(CMAKE_VERBOSE_MAKEFILE ON)
 if(NOT DEFINED EMULATOR_ONLY)
 set(EMULATOR_ONLY OFF)
 endif()
 message("use cmake  -DEMULATOR_ONLY=ON   to build mesytec-emulator")
 
+cmake_minimum_required (VERSION 3.11)
+set(BOOST_PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/boost/out)
+file(MAKE_DIRECTORY ${BOOST_PREFIX})
+
+#set(Boost_DEBUG ON)
+#set(Boost_DETAILED_FAILURE_MSG ON)
+#set(Boost_VERBOSE ON)
+set(Boost_NO_SYSTEM_PATHS ON)
+
+# in ${CMAKE_CURRENT_SOURCE_DIR}/boost/jamroot or in ${CMAKE_CURRENT_SOURCE_DIR}/boost/CMakeLists.txt
+# the actual boost version is contained and can be extracted to set boost_currentversion automatically
+set(boost_currentversion 1.74.0)
+set(BOOST_ROOT ${BOOST_PREFIX})
 if(WIN32)
-  set(Boost_NO_SYSTEM_PATHS OFF)
- if (${Boost_NO_SYSTEM_PATHS})
-  message("HARD_CODED_BOOST_PATH")
-  set(BOOST_ROOT 'C:/boost/boost_1_73_0')
-  set(BOOST_INCLUDE_DIRS "${BOOST_ROOT}/include")
-  set(BOOST_LIBRARY_DIRS "${BOOST_ROOT}/stage/lib")
-  set(Boost_DIR "${BOOST_LIBRARY_DIRS}/cmake/Boost-1.73.0" )
-  set(BOOST_PATHS "PATHS ${BOOST_ROOT}")
-  list(APPEND CMAKE_PREFIX_PATH ${Boost_DIR})
- else()
-  message("ON_WINDOWS_BOOST_SHOULD_BE_INSTALLED_OUTSIDE_VCPKG")
-   set(BOOST_PATHS )
+ set(BOOST_INCLUDEDIR ${BOOST_PREFIX}/include/Boost-${boost_currentversion} )
+else()
+#APPLE or LINUX
+set(BOOST_INCLUDEDIR ${BOOST_PREFIX}/include )
 endif()
-#set(Python_ROOT_DIR "C:/Users/alanghof/AppData/Local/Programs/Python/Python37" )
-endif()
+set(BOOST_LIBRARYDIR ${BOOST_PREFIX}/lib)
+set(Boost_DIR ${BOOST_PREFIX}/lib/cmake/Boost-${boost_currentversion})
+file(MAKE_DIRECTORY ${Boost_DIR})
+message(BOOST_PREFIX=${BOOST_PREFIX})
+
+
+
 if(WIN32)
 set(INSTALL_DIR  $ENV{USERPROFILE} ) # or $ENV{HOMEDRIVE}$ENV{HOMEPATH}
 else()
@@ -46,9 +56,9 @@ set(CMAKE_PROJECT_VERSION_PATCH ${GIT_PATCH})
 
 
 if(${EMULATOR_ONLY} STREQUAL OFF)
+
 add_subdirectory(charm)
-add_subdirectory(entangle-charming)
-add_subdirectory(charm-entangle-install)
+#add_subdirectory(charm-entangle-install)
 
 
 

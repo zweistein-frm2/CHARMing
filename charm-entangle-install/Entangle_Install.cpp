@@ -393,6 +393,10 @@ int main()
     catch (boost::exception& e) {
         std::cout << boost::diagnostic_information(e) << std::endl;
         Zweistein::install_log.push_back(boost::diagnostic_information(e));
+		std::cout << "Prerequisite Entangle NOT INSTALLED." <<std::endl;
+		std::cout << "Please install from: "<<std::endl;
+		std::cout << "https://forge.frm2.tum.de/entangle/doc/entangle-master/build/"<<std::endl;
+		
     }
 
     boost::filesystem::path p = Zweistein::UserIniDir();
