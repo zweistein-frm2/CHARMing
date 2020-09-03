@@ -20,13 +20,13 @@
       "remoteCopySourcesMethod": "rsync",
       "addressSanitizerRuntimeFlags": "detect_leaks=0",
       "variables": [
-        
+
       ]
     },
     {
       "name": "Taco07-Ubuntu20",
       "generator": "Unix Makefiles",
-      "configurationType": "Release",
+      "configurationType": "Debug",
       "cmakeExecutable": "/snap/cmake/current/bin/cmake",
       "remoteCopySourcesExclusionList": [ ".vs", "out" ],
       "cmakeCommandArgs": "",
@@ -86,7 +86,7 @@
         }
       ]
     },
-	
+
     {
       "name": "Raspberrypi4",
       "generator": "Ninja",

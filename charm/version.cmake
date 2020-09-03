@@ -21,6 +21,7 @@ if ("${GIT_REV}" STREQUAL "")
     set(GIT_NUMBER_OF_COMMITS_SINCE "")
     set(GIT_BRANCH "")
     set(GIT_DATE "")
+    set(GIT_PATCH "")
 else()
     execute_process(
         COMMAND bash -c "git diff --quiet --exit-code || echo +"
@@ -59,12 +60,20 @@ else()
 
 if ("${GIT_DIFF_HEAD}" STREQUAL "")
     execute_process(
-        COMMAND git show -s --format=%cd --date=format:%Y-%m-%dT%H_%M%z
+        COMMAND git show -s --format=%cd --date=format:%y-%m-%dT%H_%M%z
          WORKING_DIRECTORY ${repository}
         OUTPUT_VARIABLE GIT_DATE)
+    execute_process(
+        COMMAND git show -s --format=%cd --date=format:%y%m%d
+         WORKING_DIRECTORY ${repository}
+        OUTPUT_VARIABLE GIT_PATCH)
 else()
-    string(TIMESTAMP CURRENT_TIME "%Y-%m-%dT%H_%M")
+    string(TIMESTAMP CURRENT_TIME "%y-%m-%dT%H_%M")
     set(GIT_DATE Uncommmitted-${CURRENT_TIME})
+
+     string(TIMESTAMP PATCH_TIME "%y%m%d%H%M")
+    set(GIT_PATCH ${PATCH_TIME})
+
 endif()
 
     if ("${GIT_LATEST_TAG}" STREQUAL "")
@@ -84,6 +93,7 @@ endif()
     string(STRIP "${GIT_NUMBER_OF_COMMITS_SINCE}" GIT_NUMBER_OF_COMMITS_SINCE)
     string(STRIP "${GIT_BRANCH}" GIT_BRANCH)
     string(STRIP "${GIT_DATE}" GIT_DATE)
+    string(STRIP "${GIT_PATCH}" GIT_PATCH)
 endif()
 
 set(VERSION "const char* GIT_REV=\"${GIT_REV}${GIT_DIFF}\";
@@ -92,7 +102,8 @@ const char* GIT_LATEST_TAG=\"${GIT_LATEST_TAG}\";
 const char* GIT_DESCRIBE_TAGS=\"${GIT_DESCRIBE_TAGS}\";
 const char* GIT_NUMBER_OF_COMMITS_SINCE=\"${GIT_NUMBER_OF_COMMITS_SINCE}\";
 const char* GIT_BRANCH=\"${GIT_BRANCH}\";
-const char* GIT_DATE=\"${GIT_DATE}\";")
+const char* GIT_DATE=\"${GIT_DATE}\";
+const char* GIT_PATCH=\"${GIT_PATCH}\";")
 
 set(VERSION_HEADER  "extern const char* GIT_REV;
 extern const char* GIT_TAG;
@@ -100,7 +111,8 @@ extern const char* GIT_LATEST_TAG;
 extern const char* GIT_DESCRIBE_TAGS;
 extern const char* GIT_NUMBER_OF_COMMITS_SINCE;
 extern const char* GIT_BRANCH;
-extern const char* GIT_DATE;"
+extern const char* GIT_DATE;
+extern const char* GIT_PATCH;"
 )
 
 if(EXISTS ${repository}/version.cpp)

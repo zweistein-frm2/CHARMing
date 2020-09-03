@@ -1,0 +1,62 @@
+{
+    "MsmtSystem": {
+        "DataHome": "\/Users\/alanghof\/",
+        "BinningFile": "\/Users\/alanghof\/.CHARMing\/pos_cal_lut_2016_07_13.txt",
+        "MesytecDevice0": {
+            "mcpd_ip": "192.168.168.121",
+            "mcpd_port": "54321",
+            "mcpd_id": "0",
+            "data_host": "0.0.0.0",
+            "networkcard": "192.168.168.100",
+            "eventdataformat": "Mpsd8",
+            "datagenerator": "NucleoSimulator",
+            "CounterADC0": "",
+            "CounterADC1": "",
+            "CounterADC2": "",
+            "CounterADC3": "",
+            "CounterADC4": "",
+            "CounterADC5": "",
+            "CounterADC6": "",
+            "CounterADC7": "",
+            "Threshold_and_Gains0": "",
+            "Threshold_and_Gains1": "",
+            "Threshold_and_Gains2": "",
+            "Threshold_and_Gains3": "",
+            "Threshold_and_Gains4": "",
+            "Threshold_and_Gains5": "",
+            "Threshold_and_Gains6": "",
+            "Threshold_and_Gains7": ""
+        },
+        "CharmDevice0": {
+            "charm_port": "54340"
+        },
+        "MesytecDevice1": {
+            "mcpd_ip": "192.168.168.122",
+            "mcpd_port": "54321",
+            "mcpd_id": "1",
+            "data_host": "0.0.0.0",
+            "networkcard": "192.168.168.100",
+            "eventdataformat": "Mpsd8",
+            "datagenerator": "NucleoSimulator",
+            "CounterADC0": "",
+            "CounterADC1": "",
+            "CounterADC2": "",
+            "CounterADC3": "",
+            "CounterADC4": "",
+            "CounterADC5": "",
+            "CounterADC6": "",
+            "CounterADC7": "",
+            "Threshold_and_Gains0": "",
+            "Threshold_and_Gains1": "",
+            "Threshold_and_Gains2": "",
+            "Threshold_and_Gains3": "",
+            "Threshold_and_Gains4": "",
+            "Threshold_and_Gains5": "",
+            "Threshold_and_Gains6": "",
+            "Threshold_and_Gains7": ""
+        },
+        "CharmDevice1": {
+            "charm_port": "54340"
+        }
+    }
+}

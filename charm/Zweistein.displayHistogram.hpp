@@ -23,10 +23,11 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <opencv2/core.hpp>
+#include <opencv2/contrib/contrib.hpp>
+#include <opencv2/core/core.hpp>
 #include <opencv2/core/mat.hpp>
-#include <opencv2/highgui.hpp>
-#include <opencv2/imgproc.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 #define CVUI_IMPLEMENTATION
 #include "cvui/cvui.h"
 #include <boost/asio.hpp>

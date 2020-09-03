@@ -6,14 +6,7 @@ project(charm)
 if(NOT Charm_DIR)
 set(Charm_DIR ${PROJECT_SOURCE_DIR})
 endif()
-set(repository ${Charm_DIR})
-message(****"repository=" ${repository})
 
-include(version.cmake)
-message(---------> git Date : ${GIT_DATE})
-set(CMAKE_PROJECT_VERSION_MAJOR ${GIT_LATEST_TAG})
-set(CMAKE_PROJECT_VERSION_MINOR ${GIT_NUMBER_OF_COMMITS_SINCE})
-set(CMAKE_PROJECT_VERSION_PATCH ${GIT_REV}-${GIT_DATE})
 
 
  add_compile_definitions(SIMPLE_LOGGER)
@@ -51,7 +44,7 @@ include_directories(./)
 
 
 # Add source to this project's executable.
-add_executable (${PROJECT_NAME} "mesyDeviceCtrl.cpp" "Mesytec.Mcpd8.cpp" "Mcpd8.Parameters.cpp" "OptionPrinter.cpp" "CustomOptionDescription.cpp" "simpleLogger.cpp" "coloured_console_sink.cpp" "Zweistein.ping.cpp" ${repository}/version.cpp "Mcpd8.CmdPacket.cpp" "Mesyec.Mpsd8.cpp" "Mesytec.listmode.write.cpp" "Mesytec.listmode.cpp" "MesytecSystem.Data.cpp" "Zweistein.GetConfigDir.cpp" "Mesytec.config.cpp" "Charm.System.cpp" "Zweistein.XYDetectorSystem.cpp")
+add_executable (${PROJECT_NAME} "mesyDeviceCtrl.cpp" "Mesytec.Mcpd8.cpp" "Mcpd8.Parameters.cpp" "OptionPrinter.cpp" "CustomOptionDescription.cpp" "simpleLogger.cpp" "coloured_console_sink.cpp" "Zweistein.ping.cpp" "version.cpp" "Mcpd8.CmdPacket.cpp" "Mesyec.Mpsd8.cpp" "Mesytec.listmode.write.cpp" "Mesytec.listmode.cpp" "MesytecSystem.Data.cpp" "Zweistein.GetConfigDir.cpp" "Mesytec.config.cpp" "Charm.System.cpp" "Zweistein.XYDetectorSystem.cpp")
 
 target_compile_options(${PROJECT_NAME} PRIVATE  $<$<CXX_COMPILER_ID:GNU>: -Wno-error>)
 #target_link_options(${PROJECT_NAME}   PRIVATE $<$<CXX_COMPILER_ID:GNU>:$<$<CONFIG:RELEASE>:-static-libstdc++> $<$<CONFIG:DEBUG>:-static-libstdc++> > PRIVATE $<$<CXX_COMPILER_ID:GNU>:-static-libgcc> )
@@ -59,36 +52,22 @@ target_compile_options(${PROJECT_NAME} PRIVATE  $<$<CXX_COMPILER_ID:GNU>: -Wno-e
 target_link_libraries(${PROJECT_NAME} PRIVATE   ${Boost_LIBRARIES} ${OpenCV_LIBS}  uv_a )
 
 
-add_custom_command(
-    OUTPUT ${repository}/version.cpp
-           ${repository}/_version.cpp
-    COMMAND ${CMAKE_COMMAND} -P
-            ${repository}/version.cmake
-            WORKING_DIRECTORY ${repository}
-            )
-
-
-
-
-if(UNIX AND NOT APPLE)
-set(CPACK_GENERATOR "DEB")
-set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Andreas Langhoff") # required
-set(CPACK_PACKAGE_VERSION_MAJOR ${CMAKE_PROJECT_VERSION_MAJOR})
-set(CPACK_PACKAGE_VERSION_MINOR ${CMAKE_PROJECT_VERSION_MINOR})
-set(CPACK_PACKAGE_VERSION_PATCH ${CMAKE_PROJECT_VERSION_PATCH})
-
-SET (CPACK_DEBIAN_PACKAGE_DEPENDS "libopencv")
-include(CPack)
-endif()
 
 
 if(NOT INSTALL_DIR)
 if(WIN32)
 set(INSTALL_DIR  $ENV{USERPROFILE} ) # or $ENV{HOMEDRIVE}$ENV{HOMEPATH}
 else()
-set(INSTALL_DIR ~/)
+set(INSTALL_DIR /usr/local/bin)
 endif()
 endif()
+
+set (CONFIG_FILES
+ "charm.json"
+ "mesytec.json"
+ "sans1.json"
+ "pos_cal_lut_2016_07_13.txt"
+ )
 
 if(WIN32)
 if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
@@ -98,6 +77,9 @@ endif()
   install(TARGETS ${PROJECT_NAME}
         RUNTIME  DESTINATION ${INSTALL_DIR}
         )
+  install(FILES ${CONFIG_FILES}
+  DESTINATION "$ENV{USERPROFILE}/.CHARMing"
+  )
   install(FILES
     "${CMAKE_CURRENT_BINARY_DIR}/boost_filesystem-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
     "${CMAKE_CURRENT_BINARY_DIR}/boost_thread-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
@@ -134,7 +116,12 @@ else()
  install(TARGETS ${PROJECT_NAME}
         RUNTIME  DESTINATION ${INSTALL_DIR}
         )
+install(FILES ${CONFIG_FILES}
+  DESTINATION /etc/CHARMing
+  )
  install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/charm-sudo.sh"
-    DESTINATION ${INSTALL_DIR})
+    DESTINATION ${INSTALL_DIR}
+    PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+    )
 endif()
 

@@ -12,6 +12,8 @@ set(repository ${Charm_DIR})
 
 set(Boost_USE_STATIC_LIBS ON)
 
+set(ENTANGLE_FILES "")
+
 #foreach(PROJECT_NAME IN LISTS PROJECT4 )
 foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3 PROJECT4)
     message(STATUS "PROJECT_NAME=${PROJECT_NAME}")
@@ -133,6 +135,9 @@ else()
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "")
 endif()
 
+
+
+
 endif()
 
 add_custom_command(
@@ -216,21 +221,49 @@ install(CODE "MESSAGE(\"https://forge.frm2.tum.de/entangle/doc/entangle-master/b
 
 endif()
 
+if(NOT ${PROJECT_NAME} STREQUAL "DebugHelper")
+get_target_property(tmpSUFFIX ${PROJECT_NAME} SUFFIX)
+get_target_property(tmpPREFIX ${PROJECT_NAME} PREFIX)
+
+if(NOT DEFINED tmpPREFIX)
+  set(tmpPREFIX "")
+  elseif( "${tmpPREFIX}" STREQUAL "tmpPREFIX-NOTFOUND")
+  set(tmpPREFIX "")
+  endif()
+
+
+list(APPEND ENTANGLE_FILES
+  ${CMAKE_CURRENT_BINARY_DIR}/${tmpPREFIX}${PROJECT_NAME}${tmpSUFFIX}
+  )
+
+endif()
+
 endforeach()
 
-if(ENTANGLE_ROOT )
- install(
-  FILES
+list(APPEND ENTANGLE_FILES
    ${CMAKE_CURRENT_SOURCE_DIR}/charm.py
-    ${CMAKE_CURRENT_SOURCE_DIR}/mesytec.py
+   ${CMAKE_CURRENT_SOURCE_DIR}/mesytec.py
    ${CMAKE_CURRENT_SOURCE_DIR}/mesytec-replay.py
-    ${CMAKE_CURRENT_SOURCE_DIR}/msmtsystem.py
-    ${CMAKE_CURRENT_SOURCE_DIR}/__init__.py
+   ${CMAKE_CURRENT_SOURCE_DIR}/msmtsystem.py
+   ${CMAKE_CURRENT_SOURCE_DIR}/__init__.py
    ${CMAKE_CURRENT_SOURCE_DIR}/core.py
    ${CMAKE_CURRENT_SOURCE_DIR}/settings.py
    ${CMAKE_CURRENT_SOURCE_DIR}/simulator.py
    ${CMAKE_CURRENT_SOURCE_DIR}/test-replay.py
    ${CMAKE_CURRENT_SOURCE_DIR}/test.py
+)
+set(txt ${ENTANGLE_FILES})
+string (REPLACE ";" "\n" txt "${txt}")
+message(${txt})
+FILE(WRITE ${CMAKE_SOURCE_DIR}/ENTANGLE_FILES ${txt})
+
+
+
+
+if(ENTANGLE_ROOT )
+ install(
+  FILES
+  ${ENTANGLE_FILES}
    DESTINATION ${ENTANGLE_ROOT}/entangle/device/charming
  )
  if(UNIX AND NOT APPLE)

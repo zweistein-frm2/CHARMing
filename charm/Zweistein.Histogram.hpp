@@ -23,7 +23,7 @@ namespace np = boost::python::numpy;
 #include <iostream>
 #include <list>
 #include <vector>
-#include <opencv2/core.hpp>
+#include <opencv2/core/core.hpp>
 #include <opencv2/core/mat.hpp>
 
 #include <boost/geometry.hpp>
