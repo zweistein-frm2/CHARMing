@@ -1,9 +1,6 @@
 [submodule "sigslot"]
 	path = charm/sigslot
 	url = https://github.com/palacaze/sigslot.git
-[submodule "pyboostcvconverter"]
-	path = entangle-charm-mesytec/pyboostcvconverter
-	url = https://github.com/Algomorph/pyboostcvconverter.git
 [submodule "asio-extensions"]
 	path = charm/asio-extensions
 	url = https://github.com/timniederhausen/asio-extensions.git
@@ -22,3 +19,6 @@
 [submodule "boost"]
 	path = boost
 	url = https://github.com/boostorg/boost.git
+[submodule "entangle-charming/pyboostcvconverter"]
+	path = entangle-charming/pyboostcvconverter
+	url = https://github.com/Algomorph/pyboostcvconverter.git
