@@ -58,7 +58,7 @@ namespace Zweistein {
               inidirectory = homepath;
               inidirectory /= ".CHARMing";
 #else
-              //inidirectory = "/etc/CHARMing";
+              inidirectory = "/etc/CHARMing";
 
 #endif
               if (!boost::filesystem::exists(inidirectory)) {
@@ -317,7 +317,7 @@ int main()
 
            auto aa = boost::filesystem::path(psyspath).rbegin();
            std::string f = aa->string();
-           if (boost::algorithm::istarts_with(f, "entangle-")) {
+           if (boost::algorithm::istarts_with(f, "entangle")) {
                entangle_root = psyspath;
                entangle_root /= "entangle";
                std::cout << "Entangle install root set to: " << entangle_root << std::endl;

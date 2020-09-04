@@ -1,2 +1,2 @@
 #!/bin/sh
-docker build -f Dockerfile.ubuntu-18.04.charming -t charming .
+docker build -f Dockerfile.ubuntu8 -t charming-ubuntu18 .

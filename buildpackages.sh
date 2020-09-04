@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 sudo docker rm $(sudo docker ps -qa)
 sudo docker rmi $(sudo docker image ls -qa)
+cd boost
+rm -rf bin.v2
+rm -rf out
+cd ..
+
 currentuser=$USER
 echo $currentluser
 for i in ./Dockerfile.*

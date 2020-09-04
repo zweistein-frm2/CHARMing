@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 chmod +x buildboost.sh
 chmod +x boost/bootstrap.sh
 chmod +x boost/tools/build/bootstrap.sh
