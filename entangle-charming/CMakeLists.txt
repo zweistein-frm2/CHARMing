@@ -9,10 +9,15 @@ set(PROJECT3 charmsystem)
 set(PROJECT4 DebugHelper)
 
 get_filename_component(parentdir ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY )
-message(parentdir=${parentdir})
 
-set(BOOST_PREFIX ${parentdir}/boost/out)
-file(MAKE_DIRECTORY ${BOOST_PREFIX})
+if(DEFINED CHARMING_DIR)
+  set(BOOST_PREFIX ${CHARMING_DIR}/boost/out)
+  set( parentdir ${CHARMING_DIR})
+ else()
+  set(BOOST_PREFIX ${parentdir}/boost/out)
+endif()
+
+message(parentdir=${parentdir})
 
 #set(Boost_DEBUG ON)
 #set(Boost_DETAILED_FAILURE_MSG ON)
@@ -21,7 +26,7 @@ set(Boost_NO_SYSTEM_PATHS ON)
 
 # in ${CMAKE_CURRENT_SOURCE_DIR}/boost/jamroot or in ${CMAKE_CURRENT_SOURCE_DIR}/boost/CMakeLists.txt
 # the actual boost version is contained and can be extracted to set boost_currentversion automatically
-set(boost_currentversion 1.74.0)
+set(boost_currentversion 1.75.0)
 set(BOOST_ROOT ${BOOST_PREFIX})
 if(WIN32)
  set(BOOST_INCLUDEDIR ${BOOST_PREFIX}/include/Boost-${boost_currentversion} )
@@ -31,17 +36,18 @@ set(BOOST_INCLUDEDIR ${BOOST_PREFIX}/include )
 endif()
 set(BOOST_LIBRARYDIR ${BOOST_PREFIX}/lib)
 set(Boost_DIR ${BOOST_PREFIX}/lib/cmake/Boost-${boost_currentversion})
-file(MAKE_DIRECTORY ${Boost_DIR})
+#file(MAKE_DIRECTORY ${Boost_DIR})
 message(BOOST_PREFIX=${BOOST_PREFIX})
 
 set(Charm_DIR ${parentdir}/charm )
 set(repository ${Charm_DIR})
 
-
-set(libuv_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libuv/include)
 set(Boost_USE_STATIC_LIBS ON)
 
 set(ENTANGLE_FILES "")
+list(APPEND ENTANGLE_FILES
+  [device/charming]
+  )
 
 #foreach(PROJECT_NAME IN LISTS PROJECT4 )
 foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3 PROJECT4)
@@ -49,9 +55,12 @@ foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3 PROJECT4)
 
 project(${PROJECT_NAME})
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../libuv ${CMAKE_CURRENT_BINARY_DIR}/libuv_2)
+if(${PROJECT_NAME} STREQUAL ${PROJECT1})
+   add_subdirectory(${parentdir}/libuv ${CMAKE_CURRENT_BINARY_DIR}/libuv)
+
+endif()
 target_compile_options(uv_a PRIVATE $<$<CXX_COMPILER_ID:GNU>:-fPIC>)
-set(libuv_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/libuv/include)
+set(libuv_INCLUDE_DIR ${parentdir}/libuv/include)
 
 add_compile_definitions(ENTANGLE_LOGGER)
 if(WIN32)
@@ -132,7 +141,7 @@ target_compile_options(${PROJECT_NAME} PRIVATE
   $<$<COMPILE_LANGUAGE:CXX>:$<$<CXX_COMPILER_ID:MSVC>:/Od>>
   $<$<COMPILE_LANGUAGE:CXX>:$<$<CXX_COMPILER_ID:MSVC>:/GS>>
  )
-target_include_directories(${PROJECT_NAME} PRIVATE ${libuv_INCLUDE_DIR} )
+#target_include_directories(${PROJECT_NAME} PRIVATE ${libuv_INCLUDE_DIR} )
 #target_link_options(${PROJECT_NAME}   PRIVATE $<$<CXX_COMPILER_ID:GNU>:$<$<CONFIG:RELEASE>:-static-libstdc++> $<$<CONFIG:DEBUG>:-static-libstdc++> > PRIVATE $<$<CXX_COMPILER_ID:GNU>:-static-libgcc> )
 target_link_libraries(${PROJECT_NAME} PRIVATE  ${Python_LIBRARY_RELEASE} ${Boost_LIBRARIES} ${OpenCV_LIBS}  uv_a )
 
@@ -237,14 +246,22 @@ endif()
 
 if(NOT ${PROJECT_NAME} STREQUAL "DebugHelper")
 get_target_property(tmpSUFFIX ${PROJECT_NAME} SUFFIX)
+
+if(WIN32)
+set(tmpSUFFIX ".pyd")
+else()
+set(tmpSUFFIX ".so")
+endif()
+
 get_target_property(tmpPREFIX ${PROJECT_NAME} PREFIX)
 
 if(NOT DEFINED tmpPREFIX)
   set(tmpPREFIX "")
   elseif( "${tmpPREFIX}" STREQUAL "tmpPREFIX-NOTFOUND")
   set(tmpPREFIX "")
-  endif()
+ endif()
 
+ set(tmpPREFIX "") #always , otherwise trouble with cross compile vs for linux
 
 list(APPEND ENTANGLE_FILES
   ${CMAKE_CURRENT_BINARY_DIR}/${tmpPREFIX}${PROJECT_NAME}${tmpSUFFIX}
@@ -255,6 +272,7 @@ endif()
 endforeach()
 
 list(APPEND ENTANGLE_FILES
+   [${CMAKE_CURRENT_SOURCE_DIR}]
    ${CMAKE_CURRENT_SOURCE_DIR}/charm.py
    ${CMAKE_CURRENT_SOURCE_DIR}/mesytec.py
    ${CMAKE_CURRENT_SOURCE_DIR}/mesytec-replay.py
@@ -266,11 +284,18 @@ list(APPEND ENTANGLE_FILES
    ${CMAKE_CURRENT_SOURCE_DIR}/test-replay.py
    ${CMAKE_CURRENT_SOURCE_DIR}/test.py
 )
+
+list(APPEND ENTANGLE_FILES
+   [/etc/entangle/example]
+    ${CMAKE_CURRENT_SOURCE_DIR}/entangle/example/charm-replay.res
+    ${CMAKE_CURRENT_SOURCE_DIR}/entangle/example/charm-SANS1.res
+ )
 set(txt ${ENTANGLE_FILES})
 string (REPLACE ";" "\n" txt "${txt}")
 message(${txt})
-FILE(WRITE ${CMAKE_SOURCE_DIR}/ENTANGLE_FILES ${txt})
-
+#FILE(REMOVE  ${parentdir}/ENTANGLE_FILES)
+FILE(WRITE ${parentdir}/ENTANGLE_FILES ${txt})
+message(written to : ${parentdir}/ENTANGLE_FILES)
 
 
 

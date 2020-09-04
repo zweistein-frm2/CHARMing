@@ -10,17 +10,26 @@ if(MSVC)
 endif()
 
 set(CMAKE_CXX_STANDARD 17)
-
+message(CMAKE_SOURCE_DIR=${CMAKE_SOURCE_DIR})
 file(STRINGS "${CMAKE_SOURCE_DIR}/ENTANGLE_FILES" ENTANGLE_FILES_RC)
 
 set(RESOURCE_FILES "")
 list(LENGTH ENTANGLE_FILES_RC  LL)
 message(LIST_LENGTH="${LL}")
+
 FOREACH(FPATH ${ENTANGLE_FILES_RC})
+ message(${FPATH})
+ string(REGEX MATCH  "[\\[]" isdestdir "${FPATH}")
+ message(isdestdir="${isdestdir}")
+ if("${isdestdir}"  STREQUAL "[")
+   message("is a destdirectory")
+ else()
  get_filename_component(barename ${FPATH} NAME )
   MESSAGE("<<${barename}>>")
-  file(COPY ${FPATH}  DESTINATION ${CMAKE_CURRENT_SOURCE_DIR})
-  list(APPEND RESOURCE_FILES ${barename})
+  file(COPY ${FPATH}  DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/rcfiles)
+  list(APPEND RESOURCE_FILES rcfiles/${barename})
+ endif()
+
 ENDFOREACH()
 
 

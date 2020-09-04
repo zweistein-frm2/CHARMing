@@ -1,0 +1,65 @@
+FROM ubuntu:18.04
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y \
+	apt-transport-https \
+	ca-certificates \
+	apt-utils \
+	gnupg \
+	software-properties-common \
+	wget \
+	git \
+	curl \
+	unzip \
+	tar
+
+
+RUN wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
+
+RUN apt-add-repository 'deb https://apt.kitware.com/ubuntu/ bionic main' && \
+    apt-get update
+
+RUN export TZ=Europe/Berlin    # must be at beginning for unknown reasons,
+RUN apt-get install tzdata     # must be at beginning for unknown reasons,
+
+RUN apt-get install -y cmake
+
+RUN add-apt-repository -y ppa:ubuntu-toolchain-r/test && \
+    apt-get update
+
+RUN apt install -y python3-pip python3-dev && \
+    pip3 install numpy && \
+    ln -s /usr/bin/python3 /usr/bin/python && \
+    apt-get install -y libopencv-dev
+
+# we need python3 otherwise boost will not build its python support
+
+
+RUN apt-get install -y gcc-9 g++-9 && \
+    update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 700 --slave /usr/bin/g++ g++ /usr/bin/g++-7 && \
+    update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 900 --slave /usr/bin/g++ g++ /usr/bin/g++-9
+
+
+ARG projectdir=/CHARMing
+RUN mkdir ${projectdir}
+WORKDIR ${projectdir}
+COPY . .
+WORKDIR /
+
+RUN cd ${projectdir}/boost && rm -rf out
+RUN rm -rf /${projectdir}/out
+RUN cd ${projectdir} && git submodule update --init --recursive
+RUN cd ${projectdir} && chmod +x buildboost.sh && ./buildboost.sh
+
+RUN cd ${projectdir}/entangle-charming && mkdir out && cd out && cmake .. && make
+
+RUN mkdir out && cd out && cmake -B /out -S ${projectdir}  -DINSTALL_DEPS=libopencv-dev
+RUN mkdir package && cd out && make package && mv *.deb /package
+
+
+
+
+
+
+
+

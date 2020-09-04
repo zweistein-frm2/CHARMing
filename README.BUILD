@@ -1,13 +1,13 @@
 Sequence to build and package everything including the installer:
 
-1. cd CHARMing
+1. Build entangle-charming
+   cd CHARMing/entangle-charming
    mkdir out
    cd out
-
-2. Build entangle-charming
    cmake -S ../entangle-charming
 
-1. cd CHARMing
+2. Build CHARMing (includes charm and charm-entangle-install)
+   cd CHARMing
    mkdir out
    cd out
-   cmake ..     #This build the
+   cmake -DINSTALL_DEPS=libopencv-dev ..

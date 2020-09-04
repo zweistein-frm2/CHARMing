@@ -3,7 +3,7 @@
      {
       "name": "Taco102-Ubuntu18.04",
       "generator": "Unix Makefiles",
-      "configurationType": "Debug",
+      "configurationType": "Release",
       "cmakeExecutable": "/snap/cmake/current/bin/cmake",
       "remoteCopySourcesExclusionList": [ ".vs", "out" ],
       "cmakeCommandArgs": "",
@@ -20,13 +20,17 @@
       "remoteCopySourcesMethod": "rsync",
       "addressSanitizerRuntimeFlags": "detect_leaks=0",
       "variables": [
-
+        {
+          "name": "CHARMING_DIR",
+          "value": "/home/alanghof/.vs/charming/0b5fb316-64ed-42bf-9ba0-4036a1465d2f/src",
+          "type": "PATH"
+        }
       ]
     },
     {
       "name": "Taco07-Ubuntu20",
       "generator": "Unix Makefiles",
-      "configurationType": "Debug",
+      "configurationType": "Release",
       "cmakeExecutable": "/snap/cmake/current/bin/cmake",
       "remoteCopySourcesExclusionList": [ ".vs", "out" ],
       "cmakeCommandArgs": "",

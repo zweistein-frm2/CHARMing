@@ -1,6 +1,8 @@
-C:/Users/alanghof/source/repos/CHARMing/out/build/x64-Debug/entangle-charming/mesytecsystem.pyd
-C:/Users/alanghof/source/repos/CHARMing/out/build/x64-Debug/entangle-charming/listmodereplay.pyd
-C:/Users/alanghof/source/repos/CHARMing/out/build/x64-Debug/entangle-charming/charmsystem.pyd
+[device/charming]
+C:/Users/alanghof/source/repos/CHARMing/entangle-charming/out/build/x64-Release/mesytecsystem.pyd
+C:/Users/alanghof/source/repos/CHARMing/entangle-charming/out/build/x64-Release/listmodereplay.pyd
+C:/Users/alanghof/source/repos/CHARMing/entangle-charming/out/build/x64-Release/charmsystem.pyd
+[C:/Users/alanghof/source/repos/CHARMing/entangle-charming]
 C:/Users/alanghof/source/repos/CHARMing/entangle-charming/charm.py
 C:/Users/alanghof/source/repos/CHARMing/entangle-charming/mesytec.py
 C:/Users/alanghof/source/repos/CHARMing/entangle-charming/mesytec-replay.py
@@ -11,3 +13,6 @@ C:/Users/alanghof/source/repos/CHARMing/entangle-charming/settings.py
 C:/Users/alanghof/source/repos/CHARMing/entangle-charming/simulator.py
 C:/Users/alanghof/source/repos/CHARMing/entangle-charming/test-replay.py
 C:/Users/alanghof/source/repos/CHARMing/entangle-charming/test.py
+[/etc/entangle/example]
+C:/Users/alanghof/source/repos/CHARMing/entangle-charming/entangle/example/charm-replay.res
+C:/Users/alanghof/source/repos/CHARMing/entangle-charming/entangle/example/charm-SANS1.res

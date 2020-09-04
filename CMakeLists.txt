@@ -7,6 +7,7 @@ message("use cmake  -DEMULATOR_ONLY=ON   to build mesytec-emulator")
 
 cmake_minimum_required (VERSION 3.11)
 set(BOOST_PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/boost/out)
+
 file(MAKE_DIRECTORY ${BOOST_PREFIX})
 
 #set(Boost_DEBUG ON)
@@ -16,7 +17,7 @@ set(Boost_NO_SYSTEM_PATHS ON)
 
 # in ${CMAKE_CURRENT_SOURCE_DIR}/boost/jamroot or in ${CMAKE_CURRENT_SOURCE_DIR}/boost/CMakeLists.txt
 # the actual boost version is contained and can be extracted to set boost_currentversion automatically
-set(boost_currentversion 1.74.0)
+set(boost_currentversion 1.75.0)
 set(BOOST_ROOT ${BOOST_PREFIX})
 if(WIN32)
  set(BOOST_INCLUDEDIR ${BOOST_PREFIX}/include/Boost-${boost_currentversion} )
@@ -50,7 +51,9 @@ set(repository ${Charm_DIR})
 message(****"repository=" ${repository})
 include(${repository}/version.cmake)
 message(---------> git Date : ${GIT_DATE})
-set(CMAKE_PROJECT_VERSION_MAJOR ${GIT_LATEST_TAG})
+string(REGEX MATCH  "[0-9]" NGIT_LATEST_TAG "${GIT_LATEST_TAG}")
+message(NGIT_LATEST_TAG=${NGIT_LATEST_TAG})
+set(CMAKE_PROJECT_VERSION_MAJOR ${NGIT_LATEST_TAG})
 set(CMAKE_PROJECT_VERSION_MINOR ${GIT_NUMBER_OF_COMMITS_SINCE})
 set(CMAKE_PROJECT_VERSION_PATCH ${GIT_PATCH})
 
@@ -58,7 +61,7 @@ set(CMAKE_PROJECT_VERSION_PATCH ${GIT_PATCH})
 if(${EMULATOR_ONLY} STREQUAL OFF)
 
 add_subdirectory(charm)
-#add_subdirectory(charm-entangle-install)
+add_subdirectory(charm-entangle-install)
 
 
 

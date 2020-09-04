@@ -11,6 +11,7 @@ obj/
 CMakeFiles/
 bin/
 ARM/
+ENTANGLE_FILES
 
 # User-specific files
 *.rsuser

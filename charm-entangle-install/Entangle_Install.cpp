@@ -59,7 +59,7 @@ namespace Zweistein {
               inidirectory /= ".CHARMing";
 #else
               //inidirectory = "/etc/CHARMing";
-              inidirectory = "/home/localadmin/.CHARMing";
+
 #endif
               if (!boost::filesystem::exists(inidirectory)) {
                   boost::filesystem::create_directory(inidirectory);
@@ -299,7 +299,7 @@ int main()
 {
 	try {
         auto fs = cmrc::resources::get_filesystem();
-        std::cout << "Installs  entangle device interface for CHARMing Neutron detector software" << std::endl;
+        std::cout << "Installs  entangle interface for CHARMing Neutron detector software" << std::endl;
         std::string PYTHON = "python";
 #ifndef _WIN32
         int a =geteuid();
@@ -310,6 +310,9 @@ int main()
        std::string cmdline = PYTHON + " " + pythonscript;
        std::vector<std::string> pythonsyspath = Zweistein::RunCmdline(cmdline);
        boost::filesystem::path entangle_root;
+#ifdef _WIN32
+       entangle_root = "C:\\Users\\alanghof\\source\\repos\\entangle\\entangle";
+#endif
        for(auto & psyspath : pythonsyspath) {
 
            auto aa = boost::filesystem::path(psyspath).rbegin();
@@ -322,6 +325,51 @@ int main()
            }
 
        }
+       std::cout << "Using entangle root : " << entangle_root << std::endl;
+       std::string resdir = "rcfiles";
+
+       std::string lastdir="";
+
+       for (auto&& entry : fs.iterate_directory(resdir)) {
+
+           boost::filesystem::path fname(entry.filename().c_str());
+
+           auto file1 = fs.open(resdir+"/"+entry.filename());
+
+           boost::filesystem::path dest = entangle_root;
+           boost::system::error_code ec;
+
+
+           dest /= "device";
+           dest/= "charming";
+
+           if (boost::iequals(fname.extension().string(), ".res")) {
+               dest = Zweistein::UserIniDir();
+           }
+
+           try {
+               boost::filesystem::create_directories(dest);
+               if (!boost::equals(dest.string(), lastdir)) {
+                   std::cout << "[" << dest << "]" << std::endl;
+                   lastdir = dest.string();
+               }
+           }
+           catch (std::exception& ex) {
+               std::cout << ex.what() << std::endl;
+           }
+
+           std::cout << entry.filename() << '\n';
+
+           dest.append(entry.filename());
+           std::string tmp = dest.string();
+           //if (!boost::filesystem::exists(tmp)) {
+           {
+               std::ofstream o(dest.c_str(), std::ofstream::binary);
+               o.write(file1.begin(), file1.size());
+           }
+       }
+
+       /*
         auto p = Zweistein::UserIniDir();
        boost::filesystem::current_path(p);
        std::cout << "cwd=" << boost::filesystem::current_path() << std::endl;
@@ -388,7 +436,7 @@ int main()
 
        script = Zweistein::ResourcePath("charming_install.sh", fs).string();
        Zweistein::RunShellScript(script, bash_sudo);
-
+       */
     }
     catch (boost::exception& e) {
         std::cout << boost::diagnostic_information(e) << std::endl;
@@ -396,7 +444,7 @@ int main()
 		std::cout << "Prerequisite Entangle NOT INSTALLED." <<std::endl;
 		std::cout << "Please install from: "<<std::endl;
 		std::cout << "https://forge.frm2.tum.de/entangle/doc/entangle-master/build/"<<std::endl;
-		
+
     }
 
     boost::filesystem::path p = Zweistein::UserIniDir();

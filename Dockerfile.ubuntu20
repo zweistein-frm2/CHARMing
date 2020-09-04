@@ -1,0 +1,44 @@
+FROM ubuntu:20.04
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y
+
+
+RUN export TZ=Europe/Berlin    # must be at beginning for unknown reasons,
+RUN apt-get install tzdata     # must be at beginning for unknown reasons,
+
+
+RUN apt-get install -y git curl unzip tar && \
+    apt-get install -y python3-pip python3-dev && \
+    pip3 install numpy && \
+ #   ln -s /usr/bin/python3 /usr/bin/python && \
+    apt-get install -y libopencv-dev && \
+	apt-get install -y gcc g++ cmake
+# we need python3 otherwise boost will not build its python support
+
+
+ARG projectdir=/CHARMing
+RUN mkdir ${projectdir}
+WORKDIR ${projectdir}
+COPY . .
+WORKDIR /
+
+RUN cd ${projectdir}/boost && rm -rf out
+RUN rm -rf /${projectdir}/out
+
+RUN cd ${projectdir} && git submodule update --init --recursive
+
+RUN cd ${projectdir} && chmod +x buildboost.sh && ./buildboost.sh
+
+RUN cd ${projectdir}/entangle-charming && mkdir out && cd out && cmake .. && make
+
+RUN mkdir out && cd out && cmake -B /out -S ${projectdir} -DCharm_DIR=${projectdir}/charm -DINSTALL_DEPS=libopencv-dev
+RUN  mkdir package && cd out &&  make package && mv *.deb /package
+
+
+
+
+
+
+
+

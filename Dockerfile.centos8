@@ -1,0 +1,59 @@
+FROM centos:8
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN yum -y update
+
+RUN export TZ=Europe/Berlin    # must be at beginning for unknown reasons,
+RUN yum install tzdata && yum install -y langpacks-en langpacks-de glibc-all-langpacks     # must be at beginning for unknown reasons,
+
+RUN yum install -y epel-release && yum repolist  && \
+     rpm -ivh http://repo.okay.com.mx/centos/8/x86_64/release/okay-release-1-3.el8.noarch.rpm?
+
+
+RUN yum install -y dnf which git curl unzip tar && \
+    yum install -y python3-pip python3-devel && \
+    pip3 install numpy && \
+    ln -s /usr/bin/python3 /usr/bin/python && \
+    dnf install -y opencv
+
+# we need python3 otherwise boost will not build its python support
+
+RUN dnf -y install make cmake gcc-toolset-9-gcc gcc-toolset-9-gcc-c++ gcc-toolset-9-make
+ENV PATH=/opt/rh/gcc-toolset-9/root/usr/bin:$PATH
+RUN dnf install -y  opencv-devel
+
+#RUN yum install -y wget && yum install -y libssl-dev openssl
+#RUN mv /usr/bin/cmake /usr/bin/cmake.3.11.4
+#ARG cmake_ver=3.17.2
+#RUN cd /opt && wget https://github.com/Kitware/CMake/releases/download/v${cmake_ver}/cmake-${cmake_ver}.tar.gz && tar -zxvf ./cmake-${cmake_ver}.tar.gz
+#RUN cd /opt && rm ./cmake-${cmake_ver}.tar.gz
+#RUN cd /opt/cmake-${cmake_ver}  && ./bootstrap
+#RUN cd /opt/cmake-${cmake_ver}  && make
+#RUN cd /opt/cmake-${cmake_ver}  && make install
+
+ARG projectdir=/CHARMing
+RUN mkdir ${projectdir}
+WORKDIR ${projectdir}
+COPY . .
+WORKDIR /
+
+RUN cd ${projectdir}/boost && rm -rf out
+RUN rm -rf /${projectdir}/out
+RUN cd ${projectdir} && git submodule update --init --recursive
+ENV CPLUS_INCLUDE_PATH=/usr/include/python3.6m
+RUN cd ${projectdir} && chmod +x buildboost.sh && ./buildboost.sh
+
+RUN cd ${projectdir}/entangle-charming && mkdir out && cd out && cmake .. && make
+
+RUN mkdir out && cd out && cmake -B /out -S ${projectdir}  -DINSTALL_DEPS=opencv
+RUN  mkdir package && cd out &&  make package && mv *.deb /package
+
+
+
+
+
+
+
+
+
