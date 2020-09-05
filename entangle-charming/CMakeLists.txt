@@ -57,12 +57,13 @@ project(${PROJECT_NAME})
 
 if(${PROJECT_NAME} STREQUAL ${PROJECT1})
    add_subdirectory(${parentdir}/libuv ${CMAKE_CURRENT_BINARY_DIR}/libuv)
-
 endif()
+
 target_compile_options(uv_a PRIVATE $<$<CXX_COMPILER_ID:GNU>:-fPIC>)
-set(libuv_INCLUDE_DIR ${parentdir}/libuv/include)
+set(libuv_INCLUDE_DIR "${parentdir}/libuv/include")
 
 add_compile_definitions(ENTANGLE_LOGGER)
+
 if(WIN32)
     add_compile_definitions(_WIN32_WINNT=0x0601)
   #  set (Python_VERSION_MAJOR 3)
