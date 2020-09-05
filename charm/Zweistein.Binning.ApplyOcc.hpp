@@ -9,7 +9,7 @@
 
 #pragma once
 #include "Zweistein.Binning.hpp"
-#include <opencv2/core.hpp>
+#include <opencv2/core/core.hpp>
 #include <opencv2/core/mat.hpp>
 
 namespace Zweistein {
