@@ -81,12 +81,14 @@ add_compile_definitions(ASIOEXT_USE_BOOST_ASIO)
 
 set(CMAKE_CXX_STANDARD 17)
 
+message("Python ${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}")
 
 #find_package (Python "${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}" EXACT REQUIRED COMPONENTS Interpreter Development NumPy)
 find_package (Python3  REQUIRED COMPONENTS Interpreter Development NumPy)
 
 message(STATUS "Python: version=${Python3_VERSION} interpreter=${Python3_EXECUTABLE}")
-message(STATUS "Include Dirs=${Python_INCLUDE_DIRS} version=${Python_VERSION}")
+message(STATUS "Include Dirs=${Python3_INCLUDE_DIRS}")
+message(STATUS "Sitelib Dirs=${Python3_SITELIB}")
 
 if(NOT ENTANGLE_ROOT)
     if(WIN32)
@@ -306,12 +308,7 @@ if(ENTANGLE_ROOT )
   ${ENTANGLE_FILES}
    DESTINATION ${ENTANGLE_ROOT}/entangle/device/charming
  )
- if(UNIX AND NOT APPLE)
- install(
-  FILES
-   ${CMAKE_CURRENT_SOURCE_DIR}/privileged.sh
-    DESTINATION ${ENTANGLE_ROOT}
- )
+
  endif()
  if(WIN32)
    if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
