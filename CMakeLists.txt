@@ -63,8 +63,6 @@ if(${EMULATOR_ONLY} STREQUAL OFF)
 add_subdirectory(charm)
 add_subdirectory(charm-entangle-install)
 
-
-
 if(UNIX AND NOT APPLE)
 set(CPACK_GENERATOR "DEB")
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Andreas Langhoff") # required

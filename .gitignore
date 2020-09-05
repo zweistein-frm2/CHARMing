@@ -12,7 +12,7 @@ CMakeFiles/
 bin/
 ARM/
 ENTANGLE_FILES
-
+libuv.vcxproj
 # User-specific files
 *.rsuser
 *.suo

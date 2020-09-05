@@ -83,7 +83,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 
 #find_package (Python "${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}" EXACT REQUIRED COMPONENTS Interpreter Development NumPy)
-find_package (Python  REQUIRED COMPONENTS Interpreter Development NumPy)
+find_package (Python3  REQUIRED COMPONENTS Interpreter Development NumPy)
 
 message(STATUS "Python: version=${Python3_VERSION} interpreter=${Python3_EXECUTABLE}")
 message(STATUS "Include Dirs=${Python_INCLUDE_DIRS} version=${Python_VERSION}")

@@ -1,22 +1,63 @@
 ﻿# CMakeList.txt : CMake project for BMesy, include source and define
 # project specific logic here.
 #
-cmake_minimum_required (VERSION 3.14) 
-project(mesytec-emulator)  
-if(MSVC)
-    add_compile_definitions(_WIN32_WINNT=0x0601)
+cmake_minimum_required (VERSION 3.11)
+
+
+
+
+get_filename_component(parentdir ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY )
+
+if(DEFINED CHARMING_DIR)
+  set(BOOST_PREFIX ${CHARMING_DIR}/boost/out)
+  set( parentdir ${CHARMING_DIR})
+ else()
+  set(BOOST_PREFIX ${parentdir}/boost/out)
 endif()
-add_compile_definitions(BOOST_CHRONO_VERSION=2)
-set(CMAKE_CXX_STANDARD 17) 
+
+message(parentdir=${parentdir})
+
+#set(Boost_DEBUG ON)
+#set(Boost_DETAILED_FAILURE_MSG ON)
+#set(Boost_VERBOSE ON)
+set(Boost_NO_SYSTEM_PATHS ON)
+
+# in ${CMAKE_CURRENT_SOURCE_DIR}/boost/jamroot or in ${CMAKE_CURRENT_SOURCE_DIR}/boost/CMakeLists.txt
+# the actual boost version is contained and can be extracted to set boost_currentversion automatically
+set(boost_currentversion 1.75.0)
+set(BOOST_ROOT ${BOOST_PREFIX})
+if(WIN32)
+ set(BOOST_INCLUDEDIR ${BOOST_PREFIX}/include/Boost-${boost_currentversion} )
+else()
+#APPLE or LINUX
+set(BOOST_INCLUDEDIR ${BOOST_PREFIX}/include )
+endif()
+set(BOOST_LIBRARYDIR ${BOOST_PREFIX}/lib)
+set(Boost_DIR ${BOOST_PREFIX}/lib/cmake/Boost-${boost_currentversion})
+#file(MAKE_DIRECTORY ${Boost_DIR})
+message(BOOST_PREFIX=${BOOST_PREFIX})
+
+set(Charm_DIR ${parentdir}/charm )
+set(repository ${Charm_DIR})
 
 set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost 1.71 REQUIRED COMPONENTS  filesystem chrono thread locale) # header only libraries must not be added here
-message(********************Using Boost :${Boost_INCLUDE_DIR}  ******************************)
 
-#find_package(unofficial-libuv CONFIG REQUIRED)
+project(mesytec-emulator)
+if(WIN32)
+    add_compile_definitions(_WIN32_WINNT=0x0601)
+endif()
+
+set(CMAKE_CXX_STANDARD 17)
+
+find_package(Boost 1.71 REQUIRED COMPONENTS filesystem chrono thread  iostreams locale  ${BOOST_PATHS}) # header only libraries must not be added here
+
+set(libuv_INCLUDE_DIR "${parentdir}/libuv/include")
+include_directories("${Boost_INCLUDE_DIRS}" )
 include_directories(${libuv_INCLUDE_DIR})
-include_directories(${Charm_DIR})
 include_directories(${Boost_INCLUDE_DIR})
+include_directories("${Charm_DIR}")
+
+
 add_compile_options($<$<CXX_COMPILER_ID:GNU>:-Wno-narrowing>)
 configure_file( cmake_variables.h.in ${CMAKE_BINARY_DIR}/generated/cmake_variables.h )
 include_directories( ${CMAKE_BINARY_DIR}/generated/ ) # Make sure it can be included...
@@ -57,13 +98,13 @@ endif()
   install(TARGETS ${PROJECT_NAME}
         RUNTIME  DESTINATION ${INSTALL_DIR}
         )
-  install(FILES 
+  install(FILES
     "${CMAKE_CURRENT_BINARY_DIR}/boost_filesystem-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
-    "${CMAKE_CURRENT_BINARY_DIR}/boost_thread-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll" 
-    "${CMAKE_CURRENT_BINARY_DIR}/boost_chrono-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll" 
+    "${CMAKE_CURRENT_BINARY_DIR}/boost_thread-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
+    "${CMAKE_CURRENT_BINARY_DIR}/boost_chrono-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
     "${CMAKE_CURRENT_BINARY_DIR}/boost_locale-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
-   
-    
+
+
        DESTINATION ${INSTALL_DIR}
         )
 	if(${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR} VERSION_LESS "1_73")
@@ -72,11 +113,11 @@ endif()
       "${CMAKE_CURRENT_BINARY_DIR}/boost_date_time-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
     DESTINATION ${INSTALL_DIR}
    )
-   endif()  	
-		
+   endif()
+
 else()
  install(TARGETS ${PROJECT_NAME}
         RUNTIME  DESTINATION ${INSTALL_DIR}
         )
 endif()
- 
+

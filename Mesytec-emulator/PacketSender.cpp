@@ -16,6 +16,7 @@
 #include <boost/exception/all.hpp>
 #include <boost/function.hpp>
 #include <iostream>
+#include "Zweistein.enums.Generator.hpp"
 #include "Mcpd8.DataPacket.hpp"
 #include "Mesytec.RandomData.hpp"
 #include "Zweistein.PrettyBytes.hpp"
@@ -51,7 +52,7 @@ boost::atomic<unsigned short> daq_status = Mcpd8::Status::sync_ok;
 boost::atomic<unsigned short> devid = 0;
 boost::atomic<unsigned short> runid = 0;
 
-Mcpd8::EventDataFormat dataformat = Mcpd8::EventDataFormat::Mpsd8;
+Zweistein::Format::EventData dataformat = Zweistein::Format::EventData::Mpsd8;
 
 boost::atomic<long> requestedEventspersecond = 1; // default value at startup
 int MAX_NEVENTS = 250;
@@ -82,7 +83,7 @@ boost::atomic<bool> retry = true;
 void setRate(long requested) {
 	boost::mutex::scoped_lock lock(coutGuard);
 	std::string df = "MPSD8";
-	if(dataformat == Mcpd8::EventDataFormat::Mdll) df="MDLL";
+	if(dataformat == Zweistein::Format::EventData::Mdll) df="MDLL";
 
 	std::cout << "Hello from Charm-mesytec emulator, requested "<<df<<"  : " << requested << " Events/s" << std::endl;
 	if (requested < 1) {
@@ -98,7 +99,7 @@ void setRate(long requested) {
 		};
 	}
 
-	
+
 
 	if (tmp < 1) {
 		tmp = 1;
@@ -113,7 +114,7 @@ void setRate(long requested) {
 	std::cout << "packages contain " << nevents << " events each." << std::endl;
 	std::cout << "coutevery_npackets=" << coutevery_npackets << std::endl;
 	std::cout << "DataeveryNOnly=" << DataeveryNOnly << std::endl;
-	
+
 }
 
 void start_receive();
@@ -130,7 +131,7 @@ void handle_receive(const boost::system::error_code& error,
 		std::cout << "handle_receive(" << error << "," << bytes_transferred << ")" << " SKIPPED: >sizeof(Mcpd8::CmdPacket)" << std::endl;
 	}
 	else {
-		
+
 			bool sendanswer = true;
 			{
 				boost::mutex::scoped_lock lock(coutGuard);
@@ -143,15 +144,15 @@ void handle_receive(const boost::system::error_code& error,
 				}
 				std::cout <<std::endl << "RECEIVED:" << cp << std::endl;
 			}
-			
+
 			if (cp.cmd!= Mcpd8::Cmd::SETID && (cp.deviceStatusdeviceId >> 8) != devid) {
-					cp.cmd |= (unsigned short) 0x8000; 
+					cp.cmd |= (unsigned short) 0x8000;
 					boost::mutex::scoped_lock lock(coutGuard);
 					std::cout << "device id mismatch: our id= " << devid << std::endl;
 					// following switch will not find any values then
 			}
-			
-			
+
+
 
 			switch (cp.cmd) {
 			case Mcpd8::Cmd::CONTINUE:
@@ -176,7 +177,7 @@ void handle_receive(const boost::system::error_code& error,
 				}
 				cp.Length = Mcpd8::CmdPacket::defaultLength + 1;
 				remote_endpoint = current_remote_endpoint;
-				
+
 				break;
 
 			case Mcpd8::Cmd::SETPROTOCOL:
@@ -272,7 +273,7 @@ void handle_receive(const boost::system::error_code& error,
 				break;
 			}
 
-			
+
 			case Mcpd8::Cmd::SETTHRESH: {
 				assert(cp.data[0] >= 0 && cp.data[0] < N_MPSD8);
 				Module[cp.data[0]].threshold = (unsigned char) cp.data[1];
@@ -367,7 +368,7 @@ void handle_receive(const boost::system::error_code& error,
 			case Mcpd8::Internal_Cmd::READPERIREG:
 			{
 				//cp.data[0] = channel   //mcpsd8 channel (up to 8)
-				
+
 				if (cp.data[0] < 0 || cp.data[0] >= N_MPSD8) {
 					cp.cmd |= 0x8000;
 					break;
@@ -407,7 +408,7 @@ void handle_receive(const boost::system::error_code& error,
 					std::cout << "needs  2 data words as parameter" << std::endl;
 					break;
 				}
-				
+
 				long rate = cp.data[1] << 16 | cp.data[0];
 				setRate(rate);
 				break;
@@ -424,7 +425,7 @@ void handle_receive(const boost::system::error_code& error,
 					std::cout<<"\r"<< boost::chrono::time_fmt(boost::chrono::timezone::local) << boost::chrono::system_clock::now() << " SENDING ANSWER:" << cp << std::endl;
 				}
 			}
-		
+
 	}
 	if(retry==true)start_receive();
 }
@@ -479,7 +480,7 @@ size_t raw_sendto(boost::asio::basic_raw_socket<asio::ip::raw>& sender, const ud
 
 
 void catch_ctrlc(const boost::system::error_code& error, int signal_number) {
-	{	
+	{
 		boost::mutex::scoped_lock lock(coutGuard);
 		std::cout << "handling signal " << signal_number << std::endl;
 	}
@@ -488,9 +489,9 @@ void catch_ctrlc(const boost::system::error_code& error, int signal_number) {
 	//	boost::throw_exception(std::runtime_error("aborted by user"));
 	//	throw std::runtime_error("aborted by user");
 		//throw boost::system::system_error{ boost::system::errc::make_error_code(boost::system::errc::owner_dead) };
-		
+
 	}
-	
+
 }
 
 
@@ -506,7 +507,7 @@ int main(int argc, char* argv[])
 	catch (std::exception& ex) {
 		LOG_ERROR << ex.what() << std::endl;
 	}
-	
+
 	std::string appName = boost::filesystem::basename(argv[0]);
 	PacketSenderParams::ReadIni(appName,"charm");
 	devid = PacketSenderParams::getDevId();
@@ -514,7 +515,7 @@ int main(int argc, char* argv[])
 	boost::array< Mcpd8::DataPacket, 1> dp;
 
 	zeropoint= boost::chrono::steady_clock::now().time_since_epoch();
-	
+
 	if (argc == 1) {
 		boost::mutex::scoped_lock lock(coutGuard);
 		std::cout << "Specify Event Rate per second , 2K -> 2000, 1M->1000000  [MDLL]" << std::endl;
@@ -525,12 +526,12 @@ int main(int argc, char* argv[])
 		requestedEventspersecond = (long)Zweistein::Dehumanize(argv1);
 		//requestedEventspersecond = std::stoi(argv[1]);
 	}
-	
+
 	if (argc == 3) {
 		std::string argv2 = argv[2];
-		if (argv2 == "MDLL") 	dataformat = Mcpd8::EventDataFormat::Mdll;
+		if (argv2 == "MDLL") 	dataformat = Zweistein::Format::EventData::Mdll;
 	}
-			
+
 	{
 		boost::mutex::scoped_lock lock(coutGuard);
 		std::cout << "waiting for START command" << std::endl;
@@ -539,11 +540,11 @@ int main(int argc, char* argv[])
 
 	unsigned short bufnum = 0;
 	int length = 0;
-	
+
 	do{
 		boost::thread_group worker_threads2;
 		try {
-			
+
 			boost::asio::io_service io_service;
 			boost::asio::signal_set signals(io_service, SIGINT, SIGSEGV);
 			//signals.async_wait(boost::bind(&boost::asio::io_service::stop, &io_service));
@@ -605,7 +606,7 @@ int main(int argc, char* argv[])
 			int iloop = 0;
 			int innerloop = 0;
 			int maxdots = 10;
-			
+
 		long long currentcount = 0;
 		long long lastcount = 0;
 		long delaynanos = 0;
@@ -622,28 +623,28 @@ int main(int argc, char* argv[])
 				dp[0].param[k][1] = param[k][1];
 				dp[0].param[k][2] = param[k][2];
 			}
-			
+
 			bool bfilldata = false;
 			if (DataeveryNOnly == 1) bfilldata = true;
 			else if (iloop % (DataeveryNOnly *DataeveryNOnly ) == 0) bfilldata = true;
 
 			if(bfilldata){
 				for (int i = 0; i < nevents; i++) {
-					if(dataformat==Mcpd8::EventDataFormat::Mpsd8)	Zweistein::Random::Mpsd8EventRandomData((unsigned short*)(&dp[0].events[i]), i, maxX);
-					if(dataformat==Mcpd8::EventDataFormat::Mdll) Zweistein::Random::MdllEventRandomData((unsigned short*)(&dp[0].events[i]), i);
+					if(dataformat== Zweistein::Format::EventData::Mpsd8)	Zweistein::Random::Mpsd8EventRandomData((unsigned short*)(&dp[0].events[i]), i, maxX);
+					if(dataformat== Zweistein::Format::EventData::Mdll) Zweistein::Random::MdllEventRandomData((unsigned short*)(&dp[0].events[i]), i);
 				}
 				newcounts = nevents;
 			}
-						
+
 			dp[0].deviceStatusdeviceId = daq_status | (devid << 8); // set to running
 			dp[0].Length = newcounts * 3 + dp[0].headerLength;
-			if (dataformat == Mcpd8::EventDataFormat::Mpsd8) dp[0].Type = Mesy::BufferType::DATA;
-			if (dataformat == Mcpd8::EventDataFormat::Mdll) dp[0].Type = Mesy::BufferType::MDLL;
+			if (dataformat == Zweistein::Format::EventData::Mpsd8) dp[0].Type = Mesy::BufferType::DATA;
+			if (dataformat == Zweistein::Format::EventData::Mdll) dp[0].Type = Mesy::BufferType::MDLL;
 
 			boost::chrono::nanoseconds ns=boost::chrono::steady_clock::now().time_since_epoch();
 			Mcpd8::DataPacket::setTimeStamp(&dp[0].time[0],ns-zeropoint);
-			
-			
+
+
 			if (daq_status&Mcpd8::Status::DAQ_Running) {
 #ifdef _SPOOF_IP
 				//size_t bytessent = raw_sendto(rawsocket, spoofed_endpoint, remote_endpoint, boost::asio::buffer((void*)(&dp[0]), dp[0].Length * sizeof(unsigned short)));
@@ -652,7 +653,7 @@ int main(int argc, char* argv[])
 #endif
 				currentcount += newcounts;
 			}
-			
+
 			if (iloop % (coutevery_npackets*DataeveryNOnly) == 0) {
 				boost::this_thread::sleep_for(boost::chrono::nanoseconds(delaynanos));
 				boost::chrono::duration<double> sec = boost::chrono::system_clock::now() - start;
@@ -667,7 +668,7 @@ int main(int argc, char* argv[])
 					if (delaynanos <= 0) delaynanos = 0;
 				}
 				else delaynanos = 1000L * 1000L * 1000L; // 1 second
-				
+
 				lastcount = currentcount;
 				int dots = innerloop % maxdots;
 				{
@@ -705,11 +706,11 @@ int main(int argc, char* argv[])
 			std::cout << "Ctrl-C handled => exit" << std::endl;
 			break;
 		}
-		
+
 		worker_threads2.interrupt_all();
 		boost::this_thread::sleep_for(boost::chrono::seconds(5));
-		
-		
+
+
 		//return -1;
    }while (retry);
    return 0;
