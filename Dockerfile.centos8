@@ -32,9 +32,12 @@ WORKDIR /
 RUN cd ${projectdir}/boost && rm -rf out
 RUN rm -rf /${projectdir}/out
 RUN cd ${projectdir} && git submodule update --init --recursive
-ENV CPLUS_INCLUDE_PATH=/usr/include/python3.6m
-RUN cd ${projectdir} && chmod +x buildboost.sh && ./buildboost.sh
+
 RUN python3 --version && find /usr -name "pyconfig.h"
+ENV CPLUS_INCLUDE_PATH=/usr/include/python3.6m
+
+RUN cd ${projectdir} && chmod +x buildboost.sh && ./buildboost.sh
+
 RUN cd ${projectdir}/entangle-charming && mkdir out && cd out && cmake .. && make
 
 RUN mkdir out && cd out && cmake -B /out -S ${projectdir}  -DINSTALL_DEPS=opencv

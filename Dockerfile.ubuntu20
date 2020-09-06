@@ -27,9 +27,9 @@ RUN rm -rf /${projectdir}/out
 
 RUN cd ${projectdir} && git submodule update --init --recursive
 
+RUN python3 --version && find /usr -name "pyconfig.h"
 RUN cd ${projectdir} && chmod +x buildboost.sh && ./buildboost.sh
 
-RUN python3 --version && find /usr -name "pyconfig.h"
 RUN cd ${projectdir}/entangle-charming && mkdir out && cd out && cmake .. && make
 
 RUN mkdir out && cd out && cmake -B /out -S ${projectdir}  -DINSTALL_DEPS=libopencv-dev
