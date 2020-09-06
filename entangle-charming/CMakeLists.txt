@@ -72,11 +72,11 @@ foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3 PROJECT4)
 
     target_compile_options(uv_a PRIVATE $<$<CXX_COMPILER_ID:GNU>:-fPIC>)
 
-    add_compile_definitions(ENTANGLE_LOGGER)
+    add_definitions(-DENTANGLE_LOGGER)
     if(WIN32)
-        add_compile_definitions(_WIN32_WINNT=0x0601)
+        add_definitions(-D_WIN32_WINNT=0x0601)
     endif()
-    add_compile_definitions(ASIOEXT_USE_BOOST_ASIO)
+    add_definitions(-DASIOEXT_USE_BOOST_ASIO)
 
     set(CMAKE_CXX_STANDARD 17)
 
