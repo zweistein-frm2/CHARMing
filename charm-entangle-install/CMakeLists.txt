@@ -5,8 +5,8 @@ cmake_minimum_required (VERSION 3.11)
 
 
 project ("charm-entangle-install")
-if(MSVC)
-    add_compile_definitions(_WIN32_WINNT=0x0601)
+if(WIN32)
+    add_definitions(-D_WIN32_WINNT=0x0601)
 endif()
 
 set(CMAKE_CXX_STANDARD 17)
