@@ -12,8 +12,6 @@ RUN yum install -y epel-release && yum repolist  && \
 RUN yum install -y centos-sclo-rh centos-release-scl git  && \
     yum install -y python3-pip python3-devel && \
     pip3 install numpy && \
-    pip3 install scikit-build && \
-    pip3 install opencv-python
     yum install -y opencv
 
 # we need python3 otherwise boost will not build its python support
@@ -42,11 +40,11 @@ RUN cd ${projectdir}/boost && rm -rf out
 RUN rm -rf /${projectdir}/out
 RUN cd ${projectdir} && git submodule update --init --recursive
 
-#ENV CPLUS_INCLUDE_PATH=/usr/include/python3.6m
+ENV CPLUS_INCLUDE_PATH=/usr/include/python3.6m
 RUN cd ${projectdir} && chmod +x buildboost.sh && ./buildboost.sh -sICONV_PATH=/usr/libiconv
 RUN python3 --version && find /usr -name "pyconfig.h"
 
-#RUN cd ${projectdir}/entangle-charming && mkdir out && cd out && cmake .. && make
+RUN cd ${projectdir}/entangle-charming && mkdir out && cd out && cmake .. && make
 RUN mkdir out && cd out  && cmake -B /out -S ${projectdir} -DINSTALL_DEPS=opencv
 RUN  mkdir package && cd out &&  make package && mv *.deb /package
 

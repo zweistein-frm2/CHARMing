@@ -3,7 +3,7 @@
 #
 cmake_minimum_required (VERSION 3.11)
 
-#set(CMAKE_VERBOSE_MAKEFILE ON)
+set(CMAKE_VERBOSE_MAKEFILE ON)
 
 set (Build_Type RELEASE)
 if(DEFINED CMAKE_BUILD_TYPE)
@@ -20,7 +20,6 @@ set(PROJECT2 mesytecsystem)
 set(PROJECT3 listmodereplay)
 set(PROJECT4 charmsystem)
 
-
 get_filename_component(parentdir ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY )
 
 if(DEFINED CHARMING_DIR)
@@ -33,8 +32,8 @@ endif()
 message(parentdir=${parentdir})
 
 #set(Boost_DEBUG ON)
-#set(Boost_DETAILED_FAILURE_MSG ON)
-#set(Boost_VERBOSE ON)
+set(Boost_DETAILED_FAILURE_MSG ON)
+set(Boost_VERBOSE ON)
 set(Boost_NO_SYSTEM_PATHS ON)
 
 # in ${CMAKE_CURRENT_SOURCE_DIR}/boost/jamroot or in ${CMAKE_CURRENT_SOURCE_DIR}/boost/CMakeLists.txt
@@ -107,12 +106,6 @@ foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3 PROJECT4)
     endif()
 
     message(STATUS "ENTANGLE_ROOT=" ${ENTANGLE_ROOT} )
-    message(STATUS "ENTANGLE_RES=" ${ENTANGLE_RES} )
-
-    set(ENTANGLE_ROOT)
-    set(ENTANGLE_RES)
-
-     message(STATUS "ENTANGLE_ROOT=" ${ENTANGLE_ROOT} )
     message(STATUS "ENTANGLE_RES=" ${ENTANGLE_RES} )
 
     find_package(Boost 1.71 REQUIRED COMPONENTS filesystem chrono thread  iostreams  python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}

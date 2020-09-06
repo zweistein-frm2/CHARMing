@@ -11,11 +11,11 @@ endif()
 
  add_compile_definitions(SIMPLE_LOGGER)
 if(MSVC)
-    add_compile_definitions(_WIN32_WINNT=0x0601)
-     add_compile_definitions(WIN32_PRE10OLDSTYLE)
+    add_definitions(-D_WIN32_WINNT=0x0601)
+    add_definitions(-DWIN32_PRE10OLDSTYLE)
 endif()
 
-add_compile_definitions(ASIOEXT_USE_BOOST_ASIO)
+add_definitions(-DASIOEXT_USE_BOOST_ASIO)
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -63,9 +63,11 @@ set (CONFIG_FILES
  )
 
 if(WIN32)
-if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-set(WIN32LIB_SUFFIX d)
-set(BOOSTLIB_DBG -gd)
+if(DEFINED CMAKE_BUILD_TYPE)
+ if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+  set(WIN32LIB_SUFFIX d)
+  set(BOOSTLIB_DBG -gd)
+ endif()
 endif()
   install(TARGETS ${PROJECT_NAME}
         RUNTIME  DESTINATION ${INSTALL_DIR}
