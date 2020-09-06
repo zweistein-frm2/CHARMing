@@ -20,6 +20,11 @@
       "remoteCopySourcesMethod": "rsync",
       "addressSanitizerRuntimeFlags": "detect_leaks=0",
       "variables": [
+        {
+          "name": "ENTANGLE_FILES_DO_NOT_COPY",
+          "value": "True",
+          "type": "STRING"
+        }
 
       ]
     },

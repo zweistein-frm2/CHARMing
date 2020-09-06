@@ -33,7 +33,7 @@ RUN cd ${projectdir} && chmod +x buildboost.sh && ./buildboost.sh
 RUN python3 --version && find /usr -name "pyconfig.h"
 RUN cd ${projectdir}/entangle-charming && mkdir out && cd out && cmake .. && make
 
-RUN mkdir out && cd out && cmake -B /out -S ${projectdir} -DCharm_DIR=${projectdir}/charm -DINSTALL_DEPS=libopencv-dev, python3-opencv
+RUN mkdir out && cd out && cmake -B /out -S ${projectdir} -DCharm_DIR=${projectdir}/charm -DINSTALL_DEPS=libopencv-dev
 RUN  mkdir package && cd out &&  make package && mv *.deb /package
 
 
