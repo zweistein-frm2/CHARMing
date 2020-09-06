@@ -53,7 +53,10 @@ namespace Zweistein {
       boost::filesystem::path inidirectory;
       boost::filesystem::path UserIniDir() {
           if (inidirectory.empty()) {
-#ifdef _WIN32
+#if (!defined(NDEBUG) || defined(_WIN32))
+#if !defined(NDEBUG)
+              std::cout << "Debug build:" << std::endl;
+#endif
               boost::filesystem::path homepath = Zweistein::GetHomePath();
               inidirectory = homepath;
               inidirectory /= ".CHARMing";
@@ -179,6 +182,7 @@ namespace Zweistein {
               std::string line;
 
               while (std::getline(ierr, line) && !line.empty()) {
+                  boost::erase_all(line, "\r");
                   std::cerr << line << std::endl;
                   if (!errpushed) {
                       errpushed = true;
@@ -190,7 +194,7 @@ namespace Zweistein {
 
 
               while (std::getline(is, line) && !line.empty()) {
-                  //std::cout << line << std::endl;
+                  boost::erase_all(line, "\r");
                   data.push_back(line);
                   std::string_view sv(line);
                   if (!expectedlinestart.empty()) {
@@ -313,20 +317,40 @@ int main()
 #ifdef _WIN32
        entangle_root = "C:\\Users\\alanghof\\source\\repos\\entangle\\entangle";
 #endif
-       for(auto & psyspath : pythonsyspath) {
+       int ipath = 0;
+       bool dobreak = false;
+       // remember : with syspath.py we loaded python library path first and syspath(s) second
+       for (auto& psyspath : pythonsyspath) {
+           std::string possibleName[2] = { "entangle","entangle-" };
+           for (int i = 0; i < 2; i++) {
+               boost::filesystem::path p(psyspath);
+               if (!boost::filesystem::is_directory(p)) continue;
+               for (auto& entry : boost::make_iterator_range(boost::filesystem::directory_iterator(p), {})) {
+                  // std::cout << entry << "\n";
+                   std::string f = entry.path().filename().string();
 
-           auto aa = boost::filesystem::path(psyspath).rbegin();
-           std::string f = aa->string();
-           if (boost::algorithm::istarts_with(f, "entangle")) {
-               entangle_root = psyspath;
-               entangle_root /= "entangle";
-               std::cout << "Entangle install root set to: " << entangle_root << std::endl;
-               break;
+                   if (boost::algorithm::istarts_with(f, possibleName[i])) {
+                       entangle_root = psyspath;
+                       entangle_root /= f;
+                       if(i==1) entangle_root /= "entangle"; //only for entangle-5.12.33.egg
+                       std::cout << "Entangle install root set to: " << entangle_root << std::endl;
+                       dobreak = true;
+                       break;
+                   }
+                   if (dobreak) break;
+               }
+               if (dobreak) break;
            }
-
+           if (dobreak) break;
        }
+
        std::cout << "Using entangle root : " << entangle_root << std::endl;
        std::string resdir = "rcfiles";
+
+       std::vector<std::string> res = Zweistein::RunCmdline("pip3 install --user scikit-build");
+       for(std::string s : res) {
+           std::cout << s << std::endl;
+       }
 
        std::string lastdir="";
 
@@ -368,6 +392,10 @@ int main()
                o.write(file1.begin(), file1.size());
            }
        }
+
+
+       // exec: pip3 install --user scikit-build
+       // exec: pip3 install --user opencv-python
 
        /*
         auto p = Zweistein::UserIniDir();

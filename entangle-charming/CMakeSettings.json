@@ -22,7 +22,7 @@
       "variables": [
         {
           "name": "CHARMING_DIR",
-          "value": "/home/alanghof/.vs/charming/0b5fb316-64ed-42bf-9ba0-4036a1465d2f/src",
+          "value": "/home/alanghof/.vs/CHARMing/8b1e3cbe-1b7c-463b-a34c-4df2092ae58b/src",
           "type": "PATH"
         }
       ]
@@ -49,7 +49,7 @@
       "variables": [
         {
           "name": "ENTANGLE_ROOT",
-          "value": "/home/localadmin/entangle",
+          "value": "/home/localadmin/entangle/entangle",
           "type": "PATH"
         }
       ]
@@ -67,7 +67,7 @@
       "variables": [
         {
           "name": "ENTANGLE_ROOT",
-          "value": "C:\\Users\\alanghof\\source\\repos\\entangle",
+          "value": "C:\\Users\\alanghof\\source\\repos\\entangle\\entangle",
           "type": "PATH"
         }
       ]

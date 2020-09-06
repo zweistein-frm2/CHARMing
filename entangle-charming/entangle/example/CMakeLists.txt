@@ -1,15 +1,13 @@
 
 
 cmake_host_system_information(RESULT _host_name QUERY HOSTNAME)
-message(**${_host_name}*********)
+message(STATUS ${_host_name})
 if(NOT DEFINED ID)
 set(ID ${_host_name})
 endif()
 
-cmake_minimum_required (VERSION 3.16)
+cmake_minimum_required (VERSION 3.11)
 
-#project(create_res_files)
-message(***************${ID}**************)
 configure_file( charm-ID-SANS1.res.in charm-${ID}-SANS1.res )
 configure_file( charm-ID-replay.res.in charm-${ID}-replay.res )
 if(ENTANGLE_RES)
