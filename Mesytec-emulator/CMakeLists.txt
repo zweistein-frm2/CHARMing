@@ -44,7 +44,7 @@ set(Boost_USE_STATIC_LIBS ON)
 
 project(mesytec-emulator)
 if(WIN32)
-    add_compile_definitions(_WIN32_WINNT=0x0601)
+    add_defintions(-D_WIN32_WINNT=0x0601)
 endif()
 
 set(CMAKE_CXX_STANDARD 17)

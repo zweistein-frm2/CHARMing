@@ -6,10 +6,12 @@ cmake_minimum_required (VERSION 3.11)
 #set(CMAKE_VERBOSE_MAKEFILE ON)
 
 set (Build_Type RELEASE)
-string(FIND ${CMAKE_BUILD_TYPE} "Release" isreleasebuild)
-message(STATUS ${CMAKE_BUILD_TYPE})
-if(isreleasbuild LESS 0)
-set (Build_Type DEBUG)
+if(DEFINED CMAKE_BUILD_TYPE)
+ string(FIND ${CMAKE_BUILD_TYPE} "Release" isreleasebuild)
+ message(STATUS ${CMAKE_BUILD_TYPE})
+ if(isreleasbuild LESS 0)
+  set (Build_Type DEBUG)
+ endif()
 endif()
 
 message(STATUS ${Build_Type})
@@ -72,11 +74,11 @@ foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3 PROJECT4)
 
     target_compile_options(uv_a PRIVATE $<$<CXX_COMPILER_ID:GNU>:-fPIC>)
 
-    add_compile_definitions(ENTANGLE_LOGGER)
+    add_definitions(-DENTANGLE_LOGGER)
     if(WIN32)
-        add_compile_definitions(_WIN32_WINNT=0x0601)
+        add_definitions(-D_WIN32_WINNT=0x0601)
     endif()
-    add_compile_definitions(ASIOEXT_USE_BOOST_ASIO)
+    add_definitions(-DASIOEXT_USE_BOOST_ASIO)
 
     set(CMAKE_CXX_STANDARD 17)
 
@@ -105,6 +107,12 @@ foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3 PROJECT4)
     endif()
 
     message(STATUS "ENTANGLE_ROOT=" ${ENTANGLE_ROOT} )
+    message(STATUS "ENTANGLE_RES=" ${ENTANGLE_RES} )
+
+    set(ENTANGLE_ROOT)
+    set(ENTANGLE_RES)
+
+     message(STATUS "ENTANGLE_ROOT=" ${ENTANGLE_ROOT} )
     message(STATUS "ENTANGLE_RES=" ${ENTANGLE_RES} )
 
     find_package(Boost 1.71 REQUIRED COMPONENTS filesystem chrono thread  iostreams  python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}
