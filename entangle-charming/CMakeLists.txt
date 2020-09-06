@@ -32,8 +32,8 @@ endif()
 message(parentdir=${parentdir})
 
 #set(Boost_DEBUG ON)
-set(Boost_DETAILED_FAILURE_MSG ON)
-set(Boost_VERBOSE ON)
+#set(Boost_DETAILED_FAILURE_MSG ON)
+#set(Boost_VERBOSE ON)
 set(Boost_NO_SYSTEM_PATHS ON)
 
 # in ${CMAKE_CURRENT_SOURCE_DIR}/boost/jamroot or in ${CMAKE_CURRENT_SOURCE_DIR}/boost/CMakeLists.txt
@@ -111,19 +111,17 @@ foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3 PROJECT4)
     find_package(Boost 1.71 REQUIRED COMPONENTS filesystem chrono thread  iostreams  python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}
                 numpy${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR} locale  ${BOOST_PATHS}) # header only libraries must not be added here
 
-    include_directories("${Boost_INCLUDE_DIRS}" )
+    include_directories(${Python3_INCLUDE_DIRS} ${Python3_NumPy_INCLUDE_DIRS} ${Boost_INCLUDE_DIR} )
 
     find_package(OpenCV REQUIRED)
 
     include_directories(${libuv_INCLUDE_DIR})
-    include_directories(${Boost_INCLUDE_DIR})
-    include_directories(${Python3_INCLUDE_DIRS})
     include_directories(${Charm_DIR})
     include_directories(${Charm_DIR}/asio-extensions/include)
     include_directories(${PacketSender_DIR})
     include_directories(pyboostcvconverter/include)
     # Add source to this project's executable.
-    include_directories(${Python3_NumPy_INCLUDE_DIRS})
+
     set(Boost_python_library Boost_PYTHON${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}_LIBRARY_${Build_Type} )
     set(Boost_numpy_library Boost_NUMPY${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}_LIBRARY_${Build_Type} )
     message(STATUS "Boost_python_library : ${${Boost_python_library}}")

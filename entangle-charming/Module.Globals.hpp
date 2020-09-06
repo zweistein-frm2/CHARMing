@@ -32,15 +32,10 @@ void shutdown() {
 
 }
 
-#if (PY_VERSION_HEX >= 0x03000000)
-
+BOOST_STATIC_ASSERT(PY_VERSION_HEX >= 0x03000000);
 static void* init_ar() {
-#else
-static void init_ar() {
-#endif
     Py_Initialize();
-
     import_array();
-    return NUMPY_IMPORT_ARRAY_RETVAL;
+    return NULL;
 }
 
