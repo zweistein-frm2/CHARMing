@@ -33,7 +33,7 @@
       "generator": "Unix Makefiles",
       "configurationType": "Debug",
       "cmakeExecutable": "/snap/cmake/current/bin/cmake",
-      "remoteCopySourcesExclusionList": [ ".vs", "out" ],
+      "remoteCopySourcesExclusionList": [ ".vs", "out", "ENTANGLE_FILES","charm-entangle-install/rcfiles" ],
       "cmakeCommandArgs": "",
       "buildCommandArgs": "",
       "ctestCommandArgs": "",

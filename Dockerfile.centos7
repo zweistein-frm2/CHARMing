@@ -1,4 +1,4 @@
-FROM centos:7
+dirFROM centos:7
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN yum -y update

@@ -42,6 +42,9 @@ set(Boost_USE_STATIC_LIBS ON)
 find_package(Boost 1.71 REQUIRED COMPONENTS filesystem chrono thread  iostreams  locale ${BOOST_PATHS}) # header only libraries must not be added here
 include_directories("${Boost_INCLUDE_DIRS}" )
 
+#set (THREADS_PREFER_PTHREAD_FLAG ON)
+find_package (Threads REQUIRED)
+
 include_directories(${Charm_DIR})
 # Add source to this project's executable.
 add_executable (${PROJECT_NAME} "Entangle_Install.cpp" "Entangle_Install.h")
@@ -51,6 +54,7 @@ target_link_options(${PROJECT_NAME} PRIVATE $<$<CXX_COMPILER_ID:GNU>:-static> PR
 
 target_link_libraries(${PROJECT_NAME} PRIVATE installer::rc)
 target_link_libraries(${PROJECT_NAME} PRIVATE ${Boost_LIBRARIES})
+target_link_libraries( ${PROJECT_NAME} PRIVATE ${CMAKE_THREAD_LIBS_INIT} )
 # TODO: Add tests and install targets if needed.
 
 
