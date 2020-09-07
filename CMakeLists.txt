@@ -5,7 +5,7 @@ set(EMULATOR_ONLY OFF)
 endif()
 message("use cmake  -DEMULATOR_ONLY=ON   to build mesytec-emulator")
 
-cmake_minimum_required (VERSION 3.11)
+set(boost_currentversion 1.75.0)
 set(BOOST_PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/boost/out)
 
 file(MAKE_DIRECTORY ${BOOST_PREFIX})
@@ -17,7 +17,8 @@ set(Boost_NO_SYSTEM_PATHS ON)
 
 # in ${CMAKE_CURRENT_SOURCE_DIR}/boost/jamroot or in ${CMAKE_CURRENT_SOURCE_DIR}/boost/CMakeLists.txt
 # the actual boost version is contained and can be extracted to set boost_currentversion automatically
-set(boost_currentversion 1.75.0)
+
+
 set(BOOST_ROOT ${BOOST_PREFIX})
 if(WIN32)
  set(BOOST_INCLUDEDIR ${BOOST_PREFIX}/include/Boost-${boost_currentversion} )

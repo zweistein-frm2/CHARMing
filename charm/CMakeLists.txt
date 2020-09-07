@@ -9,7 +9,7 @@ endif()
 
 
 
- add_compile_definitions(SIMPLE_LOGGER)
+ add_definitions(-DSIMPLE_LOGGER)
 if(MSVC)
     add_definitions(-D_WIN32_WINNT=0x0601)
     add_definitions(-DWIN32_PRE10OLDSTYLE)
@@ -23,7 +23,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(Boost_USE_STATIC_LIBS ON)
 
-find_package(Boost 1.71 REQUIRED COMPONENTS filesystem chrono thread program_options iostreams log log_setup locale ${BOOST_PATHS}) # header only libraries must not be added here
+find_package(Boost ${boost_currentversion} REQUIRED COMPONENTS filesystem chrono thread program_options iostreams log log_setup locale ${BOOST_PATHS}) # header only libraries must not be added here
 
 #message(*** is debug==  ${$<$<CONFIG:DEBUG>:-gd>>} ****************)
 

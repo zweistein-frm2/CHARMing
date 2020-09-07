@@ -48,9 +48,8 @@ find_package (Threads REQUIRED)
 include_directories(${Charm_DIR})
 # Add source to this project's executable.
 add_executable (${PROJECT_NAME} "Entangle_Install.cpp" "Entangle_Install.h")
-
+target_compile_options(${PROJECT_NAME} PRIVATE  $<$<CXX_COMPILER_ID:GNU>:-static-libstdc++>)
 target_compile_options(${PROJECT_NAME} PRIVATE  $<$<CXX_COMPILER_ID:GNU>: -Wno-error>)
-target_link_options(${PROJECT_NAME} PRIVATE $<$<CXX_COMPILER_ID:GNU>:-static> PRIVATE $<$<CXX_COMPILER_ID:GNU>:$<$<CONFIG:RELEASE>:-static-libstdc++> $<$<CONFIG:DEBUG>:-static-libstdc++> > PRIVATE $<$<CXX_COMPILER_ID:GNU>:-static-libgcc>  )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE installer::rc)
 target_link_libraries(${PROJECT_NAME} PRIVATE ${Boost_LIBRARIES})

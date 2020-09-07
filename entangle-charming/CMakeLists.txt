@@ -1,7 +1,11 @@
-﻿# CMakeList.txt : CMake project for BMesy, include source and define
-# project specific logic here.
-#
+﻿# CMakeList.txt :
 cmake_minimum_required (VERSION 3.11)
+
+#
+# in ${CMAKE_CURRENT_SOURCE_DIR}/boost/jamroot or in ${CMAKE_CURRENT_SOURCE_DIR}/boost/CMakeLists.txt
+# the actual boost version is contained and can be extracted to set boost_currentversion automatically
+
+set(boost_currentversion 1.75.0)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
@@ -33,12 +37,10 @@ message(parentdir=${parentdir})
 
 #set(Boost_DEBUG ON)
 #set(Boost_DETAILED_FAILURE_MSG ON)
-#set(Boost_VERBOSE ON)
+set(Boost_VERBOSE ON)
 set(Boost_NO_SYSTEM_PATHS ON)
 
-# in ${CMAKE_CURRENT_SOURCE_DIR}/boost/jamroot or in ${CMAKE_CURRENT_SOURCE_DIR}/boost/CMakeLists.txt
-# the actual boost version is contained and can be extracted to set boost_currentversion automatically
-set(boost_currentversion 1.75.0)
+
 set(BOOST_ROOT ${BOOST_PREFIX})
 if(WIN32)
  set(BOOST_INCLUDEDIR ${BOOST_PREFIX}/include/Boost-${boost_currentversion} )
@@ -80,13 +82,20 @@ foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3 PROJECT4)
     add_definitions(-DASIOEXT_USE_BOOST_ASIO)
 
     set(CMAKE_CXX_STANDARD 17)
+    message(STATUS CMAKE_VERSION=${CMAKE_VERSION})
 
+    if(${CMAKE_VERSION}   VERSION_GREATER "3.11.4" )
     find_package (Python3  REQUIRED COMPONENTS Interpreter Development NumPy)
-
+    else()
+    message("ATTENTION OLD CMAKE: ${CMAKE_VERSION}")
+    endif()
     message(STATUS "Python3: version=${Python3_VERSION} interpreter=${Python3_EXECUTABLE}")
     message(STATUS "Include Dirs=${Python3_INCLUDE_DIRS}")
     message(STATUS "Sitelib Dirs=${Python3_SITELIB}")
     message(STATUS "Python3_NumPy_INCLUDE_DIRS = ${Python3_NumPy_INCLUDE_DIRS}")
+    message(STATUS "Python3_VERSION_MAJOR = ${Python3_VERSION_MAJOR}")
+    message(STATUS "Python3_VERSION_MINOR = ${Python3_VERSION_MINOR}")
+    message(STATUS "_Python3_LIBRARY_RELEASE = ${_Python3_LIBRARY_RELEASE}")
     if(NOT ENTANGLE_ROOT)
      if(UNIX)
          execute_process(COMMAND  find ${Python3_SITELIB} -type d -name "entangle"  OUTPUT_VARIABLE ENTANGLE_ROOT ERROR_QUIET)
@@ -108,7 +117,7 @@ foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3 PROJECT4)
     message(STATUS "ENTANGLE_ROOT=" ${ENTANGLE_ROOT} )
     message(STATUS "ENTANGLE_RES=" ${ENTANGLE_RES} )
 
-    find_package(Boost 1.71 REQUIRED COMPONENTS filesystem chrono thread  iostreams  python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}
+    find_package(Boost ${boost_currentversion} REQUIRED COMPONENTS filesystem chrono thread  iostreams  python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}
                 numpy${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR} locale  ${BOOST_PATHS}) # header only libraries must not be added here
 
     include_directories(${Python3_INCLUDE_DIRS} ${Python3_NumPy_INCLUDE_DIRS} ${Boost_INCLUDE_DIR} )
@@ -131,7 +140,7 @@ foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3 PROJECT4)
     if(${PROJECT_NAME} STREQUAL "DebugHelper")
      message(STATUS "add_executable(${PROJECT_NAME})")
      add_executable(${PROJECT_NAME})
-
+     target_compile_options(${PROJECT_NAME} PRIVATE  $<$<CXX_COMPILER_ID:GNU>:-static-libstdc++>)
      target_compile_options(${PROJECT_NAME} PRIVATE  $<$<CXX_COMPILER_ID:GNU>: -Wno-error>)
      target_compile_options(${PROJECT_NAME} PRIVATE
       $<$<COMPILE_LANGUAGE:CXX>:$<$<CXX_COMPILER_ID:MSVC>:/Od>>
@@ -142,6 +151,7 @@ foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3 PROJECT4)
      else()
      message(STATUS "add_library(${PROJECT_NAME} SHARED )")
      add_library(${PROJECT_NAME} SHARED )
+     target_compile_options(${PROJECT_NAME} PRIVATE  $<$<CXX_COMPILER_ID:GNU>:-static-libstdc++>)
      target_link_libraries(${PROJECT_NAME} PRIVATE ${Boost_LIBRARIES} ${OpenCV_LIBS} uv_a  )
      target_link_libraries(${PROJECT_NAME} PRIVATE "${_Python3_LIBRARY_${Build_Type}}" ${${Boost_python_library}} ${${Boost_numpy_library}})
      if(WIN32)

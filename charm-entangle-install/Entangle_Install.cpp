@@ -299,9 +299,14 @@ namespace Zweistein {
 }
 
 
-int main()
+int main(int argc, char* argv[])
 {
 	try {
+        bool b_yes = false;
+        for (int j = 0; j < argc; j++) {
+            if(boost::equals(argv[j],"-y" )) b_yes = true;
+        }
+
         auto fs = cmrc::resources::get_filesystem();
         std::cout << "Installs  entangle interface for CHARMing Neutron detector software" << std::endl;
         std::string PYTHON = "python";
@@ -336,7 +341,7 @@ int main()
                            entangle_root /= "entangle"; //only for entangle-5.12.33.egg
                        }
 
-                       std::cout << "Entangle install root set to: " << entangle_root << std::endl;
+                       std::cout << "Entangle install root found at: " << entangle_root << std::endl;
                        dobreak = true;
                        break;
                    }
@@ -347,7 +352,23 @@ int main()
            if (dobreak) break;
        }
 
+       if (argc > 1) {
+           for (int j = 0; j < argc; j++) {
+               if (!boost::equals(argv[j], "-y")) {
+                   entangle_root = argv[j];
+               }
+           }
+       }
+
        std::cout << "Using entangle root : " << entangle_root << std::endl;
+           if (!b_yes) {
+               std::cout << "Proceed with installation [y/n] ?";
+                   char c;
+                   std::cin >> c;
+
+                   if (c != 'y') exit(0);
+           }
+
        std::string resdir = "rcfiles";
 
        std::vector<std::string> res = Zweistein::RunCmdline("pip3 install --user scikit-build");
