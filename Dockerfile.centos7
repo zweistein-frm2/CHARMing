@@ -46,8 +46,8 @@ RUN cd ${projectdir} && chmod +x buildboost.sh && ./buildboost.sh -sICONV_PATH=/
 
 
 RUN cd ${projectdir}/entangle-charming && mkdir out && cd out && cmake .. && make
-RUN mkdir out && cd out  && cmake -B /out -S ${projectdir} -DINSTALL_DEPS=opencv
-RUN  mkdir package && cd out &&  make package && mv *.deb /package
+#RUN mkdir out && cd out  && cmake -B /out -S ${projectdir} -DINSTALL_DEPS=opencv
+#RUN  mkdir package && cd out &&  make package && mv *.deb /package
 
 
 
