@@ -19,7 +19,7 @@ RUN yum install -y dnf which git curl unzip tar && \
 
 # we need python3 otherwise boost will not build its python support
 
-RUN dnf -y install make cmake gcc-toolset-9-gcc gcc-toolset-9-gcc-c++ gcc-toolset-9-make glibc-static
+RUN dnf -y install glibc-static make cmake gcc-toolset-9-gcc gcc-toolset-9-gcc-c++ gcc-toolset-9-make
 ENV PATH=/opt/rh/gcc-toolset-9/root/usr/bin:$PATH
 RUN dnf install -y  opencv-devel
 
