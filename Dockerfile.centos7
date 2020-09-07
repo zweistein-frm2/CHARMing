@@ -41,8 +41,8 @@ RUN rm -rf /${projectdir}/out
 RUN cd ${projectdir} && git submodule update --init --recursive
 
 RUN python3 --version && find /usr -name "pyconfig.h"
-ENV CPLUS_INCLUDE_PATH=/usr/include/python3.6m
-RUN cd ${projectdir} && chmod +x buildboost.sh && ./buildboost.sh -sICONV_PATH=/usr/libiconv
+#ENV CPLUS_INCLUDE_PATH=/usr/include/python3.6m
+RUN export CPLUS_INCLUDE_PATH=/usr/include/python3.6m && cd ${projectdir} && chmod +x buildboost.sh && ./buildboost.sh -sICONV_PATH=/usr/libiconv
 
 
 RUN cd ${projectdir}/entangle-charming && mkdir out && cd out && cmake .. && make
