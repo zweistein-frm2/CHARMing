@@ -332,7 +332,10 @@ int main()
                    if (boost::algorithm::istarts_with(f, possibleName[i])) {
                        entangle_root = psyspath;
                        entangle_root /= f;
-                       if(i==1) entangle_root /= "entangle"; //only for entangle-5.12.33.egg
+                       if (boost::contains(f, possibleName[1]) ) {
+                           entangle_root /= "entangle"; //only for entangle-5.12.33.egg
+                       }
+
                        std::cout << "Entangle install root set to: " << entangle_root << std::endl;
                        dobreak = true;
                        break;

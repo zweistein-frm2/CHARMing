@@ -18,7 +18,7 @@ do
 
 		mkdir -p distribution/$ext
 		sudo chown root:root distribution/$ext
-		sudo docker build  -m 4g -f ${i##*/} -t charming-${i##*.} .
+		sudo docker build  -m 6g -f ${i##*/} -t charming-${i##*.} .
 		sudo docker create -ti --name dummy charming-${i##*.} bash
 		sudo docker cp dummy:/package distribution/${i##*.}
 		sudo docker rm -f dummy
