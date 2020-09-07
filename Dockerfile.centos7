@@ -1,4 +1,4 @@
-dirFROM centos:7
+FROM centos:7
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN yum -y update
@@ -17,7 +17,7 @@ RUN yum install -y centos-sclo-rh centos-release-scl git  && \
 # we need python3 otherwise boost will not build its python support
 
 RUN yum install -y which git devtoolset-9-gcc devtoolset-9-gcc-c++  make && \
-  yum install -y cmake3 && ln -s /usr/bin/cmake3 /usr/bin/cmake
+  yum install -y cmake3 && ln -s /usr/bin/cmake3 /usr/bin/cmake glibc-static
 ENV PATH=/opt/rh/devtoolset-9/root/usr/bin:$PATH
 
 RUN yum install -y wget dpkg opencv-devel opencv-contrib-devel
@@ -41,13 +41,13 @@ RUN rm -rf /${projectdir}/out
 RUN cd ${projectdir} && git submodule update --init --recursive
 
 RUN python3 --version && find /usr -name "pyconfig.h"
-#ENV CPLUS_INCLUDE_PATH=/usr/include/python3.6m
+
 RUN export CPLUS_INCLUDE_PATH=/usr/include/python3.6m && cd ${projectdir} && chmod +x buildboost.sh && ./buildboost.sh -sICONV_PATH=/usr/libiconv
 
 
 RUN cd ${projectdir}/entangle-charming && mkdir out && cd out && cmake .. && make
-#RUN mkdir out && cd out  && cmake -B /out -S ${projectdir} -DINSTALL_DEPS=opencv
-#RUN  mkdir package && cd out &&  make package && mv *.deb /package
+RUN mkdir out && cd out  && cmake -B /out -S ${projectdir} -DINSTALL_DEPS=opencv
+RUN  mkdir package && cd out &&  make package && mv *.deb /package
 
 
 

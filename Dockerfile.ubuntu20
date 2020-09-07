@@ -12,7 +12,7 @@ RUN apt-get install -y git curl unzip tar && \
     apt-get install -y python3-pip python3-dev && \
     pip3 install numpy && \
     apt-get install -y libopencv-dev && \
-	apt-get install -y gcc g++ cmake
+	apt-get install -y gcc g++ cmake build-essential
 # we need python3 otherwise boost will not build its python support
 
 
@@ -32,8 +32,8 @@ RUN cd ${projectdir} && chmod +x buildboost.sh && ./buildboost.sh
 
 RUN cd ${projectdir}/entangle-charming && mkdir out && cd out && cmake .. && make
 
-#RUN mkdir out && cd out && cmake -B /out -S ${projectdir}  -DINSTALL_DEPS=libopencv-dev
-#RUN  mkdir package && cd out &&  make package && mv *.deb /package
+RUN mkdir out && cd out && cmake -B /out -S ${projectdir}  -DINSTALL_DEPS=libopencv-dev
+RUN  mkdir package && cd out &&  make package && mv *.deb /package
 
 
 

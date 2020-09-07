@@ -465,13 +465,16 @@ function(cmrc_add_resource_library name)
         COMMAND ${CMAKE_COMMAND} -E copy_if_different "${lib_tmp_cpp}" "${libcpp}"
         COMMENT "Generating ${name} resource loader"
         )
+
+    #set (THREADS_PREFER_PTHREAD_FLAG ON)
+    find_package (Threads REQUIRED)
     # Generate the actual static library. Each source file is just a single file
     # with a character array compiled in containing the contents of the
     # corresponding resource file.
     add_library(${name} STATIC ${libcpp})
     set_property(TARGET ${name} PROPERTY CMRC_LIBDIR "${libdir}")
     set_property(TARGET ${name} PROPERTY CMRC_NAMESPACE "${ARG_NAMESPACE}")
-    target_link_libraries(${name} PUBLIC cmrc::base)
+    target_link_libraries(${name} PUBLIC cmrc::base ${CMAKE_THREAD_LIBS_INIT})
     set_property(TARGET ${name} PROPERTY CMRC_IS_RESOURCE_LIBRARY TRUE)
     if(ARG_ALIAS)
         add_library("${ARG_ALIAS}" ALIAS ${name})
