@@ -42,7 +42,7 @@ set(Boost_USE_STATIC_LIBS ON)
 find_package(Boost 1.71 REQUIRED COMPONENTS filesystem chrono thread  iostreams  locale ${BOOST_PATHS}) # header only libraries must not be added here
 include_directories("${Boost_INCLUDE_DIRS}" )
 
-#set (THREADS_PREFER_PTHREAD_FLAG ON)
+set (THREADS_PREFER_PTHREAD_FLAG ON)
 find_package (Threads REQUIRED)
 
 include_directories(${Charm_DIR})

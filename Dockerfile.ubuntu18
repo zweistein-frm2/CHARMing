@@ -29,13 +29,13 @@ RUN add-apt-repository -y ppa:ubuntu-toolchain-r/test && \
 
 RUN apt install -y python3-pip python3-dev && \
     pip3 install numpy && \
-    ln -s /usr/bin/python3 /usr/bin/python && \
+    #ln -s /usr/bin/python3 /usr/bin/python && \
     apt-get install -y libopencv-dev
 
 # we need python3 otherwise boost will not build its python support
 
 
-RUN apt-get install -y gcc-9 g++-9 && \
+RUN apt-get install -y gcc-9 g++-9 build-essential && \
     update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 700 --slave /usr/bin/g++ g++ /usr/bin/g++-7 && \
     update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 900 --slave /usr/bin/g++ g++ /usr/bin/g++-9
 
@@ -57,8 +57,8 @@ RUN cd ${projectdir} && chmod +x buildboost.sh && ./buildboost.sh
 
 RUN cd ${projectdir}/entangle-charming && mkdir out && cd out && cmake .. && make
 
-#RUN mkdir out && cd out && cmake -B /out -S ${projectdir}  -DINSTALL_DEPS=libopencv-dev
-#RUN mkdir package && cd out && make package && mv *.deb /package
+RUN mkdir out && cd out && cmake -B /out -S ${projectdir}  -DINSTALL_DEPS=libopencv-dev
+RUN mkdir package && cd out && make package && mv *.deb /package
 
 
 
