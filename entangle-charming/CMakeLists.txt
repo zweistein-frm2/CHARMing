@@ -160,7 +160,7 @@ foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3 PROJECT4)
       set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "")
      endif()
     endif()
-
+    #set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS " -O3 -DNDEBUG")
     add_custom_command(
         OUTPUT ${repository}/version.cpp
                ${repository}/_version.cpp

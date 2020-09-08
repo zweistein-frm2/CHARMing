@@ -21,17 +21,28 @@ RUN  dnf install -y opencv
 
 # we need python3 otherwise boost will not build its python support
 
-RUN dnf -y install  make cmake gcc-toolset-9-gcc gcc-toolset-9-gcc-c++ gcc-toolset-9-make
+RUN dnf -y install  wget make cmake gcc-toolset-9-gcc gcc-toolset-9-gcc-c++ gcc-toolset-9-make
 ENV PATH=/opt/rh/gcc-toolset-9/root/usr/bin:$PATH
 RUN dnf install -y  opencv-devel
+
+RUN wget https://forensics.cert.org/cert-forensics-tools-release-el8.rpm -O cert-forensics-tools-release*rpm --no-check-certificate  && \
+   rpm -Uvh cert-forensics-tools-release*rpm
+
+
+RUN mv /usr/bin/cmake /usr/bin/cmake.3.11.4
+
+ARG cmake_ver=3.17.2
+RUN cd /opt && wget https://github.com/Kitware/CMake/releases/download/v${cmake_ver}/cmake-${cmake_ver}.tar.gz && tar -zxvf ./cmake-${cmake_ver}.tar.gz
+RUN cd /opt && rm ./cmake-${cmake_ver}.tar.gz
+RUN cd /opt/cmake-${cmake_ver}  && ./bootstrap
+RUN cd /opt/cmake-${cmake_ver}  && make
+RUN cd /opt/cmake-${cmake_ver}  && make install
+
 
 ARG projectdir=/CHARMing
 RUN mkdir ${projectdir}
 WORKDIR ${projectdir}
 COPY . .
-RUN cd  /usr/share/cmake/Modules/ && mkdir FindPython
-RUN cp ${projectdir}/distribution/centos8/Docker/usr/share/cmake/Modules/FindPython3.cmake /usr/share/cmake/Modules/FindPython3.cmake
-RUN cp ${projectdir}/distribution/centos8/Docker/usr/share/cmake/Modules/FindPython/Support.cmake /usr/share/cmake/Modules/FindPython/Support.cmake
 
 WORKDIR /
 
@@ -42,7 +53,7 @@ RUN cd ${projectdir} && git submodule update --init --recursive
 RUN python3 --version && find /usr -name "pyconfig.h"
 ENV CPLUS_INCLUDE_PATH=/usr/include/python3.6m
 
-RUN cd ${projectdir} && chmod +x buildboost.sh && ./buildboost.sh
+RUN cd ${projectdir} && chmod +x buildboost.sh && ./buildboost.sh -sICONV_PATH=/usr/libiconv
 
 RUN cd ${projectdir}/entangle-charming && mkdir out && cd out && \
      cmake  -DPython3_INCLUDE_DIRS=/usr/include/python3.6m && \
@@ -52,6 +63,8 @@ RUN cd ${projectdir}/entangle-charming && mkdir out && cd out && \
            -DPython3_NumPy_INCLUDE_DIRS=/usr/local/lib64/python3.6/site-packages/numpy/core/include && \
            -DPython3_VERSION_MAJOR=3 && -DPython3_VERSION_MINOR=6 && \
            -D_Python3_LIBRARY_RELEASE=/usr/lib64/libpython3.6m.so && \
+           -DBoost_NUMPY36_LIBRARY_RELEASE=/CHARMing/boost/out/lib/libboost_numpy36.a  &&\
+           -DBoost_PYTHON36_LIBRARY_RELEASE=/CHARMing/boost/out/lib/libboost_pytho36.a &&\
            .. && \
      make
 
