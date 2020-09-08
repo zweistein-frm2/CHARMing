@@ -23,7 +23,11 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(Boost_USE_STATIC_LIBS ON)
 
-find_package(Boost ${boost_currentversion} REQUIRED COMPONENTS filesystem chrono thread program_options iostreams log log_setup locale ${BOOST_PATHS}) # header only libraries must not be added here
+ set(bboooosst ${boost_currentversion})
+if(MSVC)
+    set(bboooosst 1.72)
+endif()
+find_package(Boost ${bboooosst} REQUIRED COMPONENTS filesystem chrono thread program_options iostreams log log_setup locale ${BOOST_PATHS}) # header only libraries must not be added here
 
 #message(*** is debug==  ${$<$<CONFIG:DEBUG>:-gd>>} ****************)
 

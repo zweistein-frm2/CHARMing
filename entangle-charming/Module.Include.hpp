@@ -1,8 +1,3 @@
-#define BOOST_BIND_GLOBAL_PLACEHOLDERS
-#define BOOST_ALLOW_DEPRECATED_HEADERS
-
-#include <boost/locale/encoding_utf.hpp>
-#include <string>
 #include <Python.h>
 #include <boost/python.hpp>
 #include <boost/python/tuple.hpp>

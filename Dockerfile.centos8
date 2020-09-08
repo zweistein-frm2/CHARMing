@@ -28,17 +28,6 @@ RUN dnf install -y  opencv-devel
 RUN wget https://forensics.cert.org/cert-forensics-tools-release-el8.rpm -O cert-forensics-tools-release*rpm --no-check-certificate  && \
    rpm -Uvh cert-forensics-tools-release*rpm
 
-
-RUN mv /usr/bin/cmake /usr/bin/cmake.3.11.4
-
-ARG cmake_ver=3.17.2
-RUN cd /opt && wget https://github.com/Kitware/CMake/releases/download/v${cmake_ver}/cmake-${cmake_ver}.tar.gz && tar -zxvf ./cmake-${cmake_ver}.tar.gz
-RUN cd /opt && rm ./cmake-${cmake_ver}.tar.gz
-RUN cd /opt/cmake-${cmake_ver}  && ./bootstrap
-RUN cd /opt/cmake-${cmake_ver}  && make
-RUN cd /opt/cmake-${cmake_ver}  && make install
-
-
 ARG projectdir=/CHARMing
 RUN mkdir ${projectdir}
 WORKDIR ${projectdir}
@@ -54,7 +43,7 @@ RUN python3 --version && find /usr -name "pyconfig.h"
 ENV CPLUS_INCLUDE_PATH=/usr/include/python3.6m
 
 RUN cd ${projectdir} && chmod +x buildboost.sh && ./buildboost.sh -sICONV_PATH=/usr/libiconv
-
+RUN echo " will not compile due to bug in gcc 9.2.1"
 RUN cd ${projectdir}/entangle-charming && mkdir out && cd out && \
      cmake  -DPython3_INCLUDE_DIRS=/usr/include/python3.6m && \
            -DPython3_EXECUTABLE=/usr/bin/python3 && \
@@ -68,8 +57,8 @@ RUN cd ${projectdir}/entangle-charming && mkdir out && cd out && \
            .. && \
      make
 
-#RUN mkdir out && cd out && cmake -B /out -S ${projectdir}  -DINSTALL_DEPS=opencv
-#RUN  mkdir package && cd out &&  make package && mv *.deb /package
+RUN mkdir out && cd out && cmake -B /out -S ${projectdir}  -DINSTALL_DEPS=opencv
+RUN  mkdir package && cd out &&  make package && mv *.deb /package
 
 
 

@@ -11,6 +11,8 @@
 // or project specific include files.
 #ifndef Q_MOC_RUN
 
+#define BOOST_BIND_GLOBAL_PLACEHOLDERS
+#define BOOST_ALLOW_DEPRECATED_HEADERS
 
 #pragma once
 #ifdef WIN32
