@@ -11,6 +11,7 @@
 #include <cmrc/cmrc.hpp>
 #include "Zweistein.HomePath.hpp"
 #include <fstream>
+#include <exception>
 #include <iostream>
 #include <string_view>
 #include <boost/algorithm/string.hpp>
@@ -308,11 +309,12 @@ int main(int argc, char* argv[])
         }
 
         auto fs = cmrc::resources::get_filesystem();
-        std::cout << "Installs  entangle interface for CHARMing Neutron detector software" << std::endl;
+        std::cout << "Installs entangle interface for CHARMing Neutron detector software" << std::endl;
         std::string PYTHON = "python";
+        int userid = 0;
 #ifndef _WIN32
-        int a =geteuid();
-        if (a != 0) std::cout << "must run with sudo privileges.";
+         userid =geteuid();
+         if (userid != 0) std::cout << "You must run with sudo privileges." << std::endl;
         PYTHON = "python3";
 #endif
        std::string pythonscript = Zweistein::ResourcePath("syspath.py", fs).string();
@@ -365,14 +367,20 @@ int main(int argc, char* argv[])
                std::cout << "Proceed with installation [y/n] ?";
                    char c;
                    std::cin >> c;
-
-                   if (c != 'y') exit(0);
+                   if (c != 'y') exit(-1);
+                   std::cout << std::endl;
            }
 
        std::string resdir = "rcfiles";
+       // exec: pip3 install --user scikit-build
+      // exec: pip3 install --user opencv-python
 
        std::vector<std::string> res = Zweistein::RunCmdline("pip3 install --user scikit-build");
        for(std::string s : res) {
+           std::cout << s << std::endl;
+       }
+       res = Zweistein::RunCmdline("pip3 install --user opencv-python");
+       for (std::string s : res) {
            std::cout << s << std::endl;
        }
 
@@ -416,79 +424,7 @@ int main(int argc, char* argv[])
                o.write(file1.begin(), file1.size());
            }
        }
-
-
-       // exec: pip3 install --user scikit-build
-       // exec: pip3 install --user opencv-python
-
-       /*
-        auto p = Zweistein::UserIniDir();
-       boost::filesystem::current_path(p);
-       std::cout << "cwd=" << boost::filesystem::current_path() << std::endl;
-
-       std::vector<std::string> linux_osinfo=Zweistein::RunCmdline("cat /etc/os-release");
-        Zweistein::Linux_Flavour flavour;
-        for (auto& a : linux_osinfo) {
-            std::vector<std::string> kv;
-            boost::split(kv, a, boost::is_any_of("="));
-            if (kv[0] == "ID_LIKE") {
-                if (kv[1] == "debian") flavour = Zweistein::debian;
-                if (kv[1] == "fedora") flavour = Zweistein::redhat;
-                if (kv[1] == "rhel fedora") flavour = Zweistein::redhat;
-                if (kv[1] == "rhel") flavour = Zweistein::redhat;
-            }
-        }
-        std::string installcmd = "apt-get";
-        if (flavour != Zweistein::debian) installcmd = "yum";
-        //"import distutils.sysconfig";
-        //"distutils.sysconfig.get_python_lib(plat_specific = False, standard_lib = False)";
-
-        std::string bash_sudo = Zweistein::ResourcePath("bash.sudo.sh", fs).string();
-
-        Zweistein::Version version = Zweistein::GetProgamVersion("gcc");
-        if (version.Major < 9) {
-            std::string script = Zweistein::ResourcePath("getcompiler.sh",fs).string();
-            Zweistein::RunShellScript(script, bash_sudo);
-
-        }
-
-        version = Zweistein::GetProgamVersion("git");
-        if (version.Major < 2 || version.Major == 2 && version.Minor < 10) {
-            std::string script = Zweistein::ResourcePath("getgit.sh", fs).string();
-            Zweistein::RunShellScript(script, bash_sudo);
-        }
-
-       version = Zweistein::GetProgamVersion("cmake");
-       if (version.Major < 3  || version.Major==3  && version.Minor < 16) {
-
-           std::string script = Zweistein::ResourcePath("getcmake.sh", fs).string();
-           if (flavour == Zweistein::Linux_Flavour::redhat) {
-               // replace apt-get with yum
-               // get centos version
-
-           }
-           Zweistein::RunShellScript(script, bash_sudo);
-       }
-
-       std::string script = Zweistein::ResourcePath("getopencv.sh", fs).string();
-       Zweistein::RunShellScript(script, bash_sudo);
-
-       script = Zweistein::ResourcePath("getboost.sh", fs).string();
-       Zweistein::RunShellScript(script, bash_sudo);
-
-       script = Zweistein::ResourcePath("remrepository.sh", fs).string();
-       Zweistein::RunShellScript(script, bash_sudo);
-
-       script = Zweistein::ResourcePath("getrepository.sh", fs).string();
-
-       Zweistein::Process::exec(script);
-
-       script = Zweistein::ResourcePath("charming_build.sh", fs).string();
-       Zweistein::Process::exec(script);
-
-       script = Zweistein::ResourcePath("charming_install.sh", fs).string();
-       Zweistein::RunShellScript(script, bash_sudo);
-       */
+       if (entangle_root.empty()) throw  std::runtime_error("An error happened!");
     }
     catch (boost::exception& e) {
         std::cout << boost::diagnostic_information(e) << std::endl;
