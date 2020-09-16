@@ -1,0 +1,6 @@
+*.py
+!syspath.py
+*.res
+*.sh
+*.pyd
+*.so

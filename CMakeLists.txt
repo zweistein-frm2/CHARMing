@@ -43,6 +43,8 @@ endif()
 
 
 project(CHARMing)
+set(LIBUV_BUILD_TESTS OFF)
+set(LIBUV_BUILD_BENCH OFF)
 add_subdirectory(libuv)
 target_compile_options(uv_a PRIVATE $<$<CXX_COMPILER_ID:GNU>:-fPIC>)
 set(libuv_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/libuv/include)
@@ -61,9 +63,9 @@ set(CMAKE_PROJECT_VERSION_PATCH ${GIT_PATCH})
 
 if(${EMULATOR_ONLY} STREQUAL OFF)
 
-add_subdirectory(charm)
-add_subdirectory(charm-entangle-install)
-
+#add_subdirectory(charm)
+#add_subdirectory(entangle-install-charming)
+add_subdirectory(entangle-install-isegCC2x)
 if(UNIX AND NOT APPLE)
 set(CPACK_GENERATOR "DEB")
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Andreas Langhoff") # required
@@ -71,7 +73,7 @@ set(CPACK_PACKAGE_VERSION_MAJOR ${CMAKE_PROJECT_VERSION_MAJOR})
 set(CPACK_PACKAGE_VERSION_MINOR ${CMAKE_PROJECT_VERSION_MINOR})
 set(CPACK_PACKAGE_VERSION_PATCH ${CMAKE_PROJECT_VERSION_PATCH})
 
-SET (CPACK_DEBIAN_PACKAGE_DEPENDS ${INSTALL_DEPS})
+#SET (CPACK_DEBIAN_PACKAGE_DEPENDS ${INSTALL_DEPS})
 include(CPack)
 
 else()

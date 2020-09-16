@@ -1,2 +1,0 @@
-global msmtsystem
-msmtsystem = None

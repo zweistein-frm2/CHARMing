@@ -22,3 +22,9 @@
 [submodule "entangle-charming/pyboostcvconverter"]
 	path = entangle-charming/pyboostcvconverter
 	url = https://github.com/Algomorph/pyboostcvconverter.git
+[submodule "entangle-install-charming/toml11"]
+	path = entangle-install-charming/toml11
+	url = https://github.com/ToruNiina/toml11
+[submodule "entangle-install-charming/cmrc"]
+	path = entangle-install-charming/cmrc
+	url = https://github.com/vector-of-bool/cmrc.git
