@@ -23,8 +23,9 @@ int main(int argc, char* argv[])
         boost::filesystem::path  devicedir;
         boost::filesystem::path  resdir;
         entangle_setup(devicedir, resdir, prerequisites, argc, argv);
-
         boost::filesystem::path dest = devicedir;
+
+
         dest /= "iseg";
         try {
             boost::filesystem::create_directories(dest);
@@ -72,7 +73,7 @@ int main(int argc, char* argv[])
                     if (!o.write(file1.begin(), file1.size())) {
                         logmsg = "ERROR writing: ";
                     }
-                    logmsg += p.c_str();
+                    logmsg += p.string();
                     std::cout <<  logmsg << std::endl;
                     Zweistein::install_log.push_back(logmsg);
 

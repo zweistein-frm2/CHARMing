@@ -11,10 +11,8 @@
 # published by the Free Software Foundation;
 
 from entangle import base
-from entangle.core import states, Prop, uint16, Attr,Cmd
-from entangle.core.defs import uint64, int32, boolean, listof
-from entangle.core.errors import InvalidValue, InvalidOperation, \
-    ConfigurationError
+from entangle.core import states, Attr
+from entangle.core.defs import  boolean
 
 import entangle.device.charming.msmtsystem as msmtsystem
 
@@ -38,7 +36,7 @@ class Settings(base.MLZDevice):
         return ''
 
     def read_version(self):
-        ver = super().read_version();
+        ver = super().read_version()
         if not msmtsystem.msmtsystem:
             return ver
         return ver + " "+msmtsystem.msmtsystem.version

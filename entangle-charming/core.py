@@ -12,24 +12,21 @@
 
 
 from entangle import base
-from entangle.core import states, Prop, uint16, Attr,Cmd
-from entangle.core.defs import uint64, int32, boolean, listof
-from entangle.core.states import BUSY, UNKNOWN,FAULT
-from entangle.core.errors import InvalidValue, InvalidOperation, \
-    ConfigurationError
+from entangle.core import states, uint16, Attr
+from entangle.core.defs import uint64
+from entangle.core.states import FAULT
 
-import signal, os
 import numpy as np
-import cv2 as cv
 
-from entangle.device.charming import msmtsystem
+import  entangle.device.charming as charming
+import charming.msmtsystem
 
 class MeasureCounts(base.CounterChannel):
 
     def state(self):
 
-        if msmtsystem.msmtsystem:
-            t = msmtsystem.msmtsystem.status()
+        if charming.msmtsystem.msmtsystem:
+            t = charming.msmtsystem.msmtsystem.status()
             if not(t[2] &2): return (FAULT,t[3])
             #if(t[2] & 1): return (BUSY,t[3])
             _state = base.ImageChannel.state(self)
@@ -41,43 +38,43 @@ class MeasureCounts(base.CounterChannel):
 
 
     def Start(self):
-        if msmtsystem.msmtsystem:
-            msmtsystem.msmtsystem.start()
+        if charming.msmtsystem.msmtsystem:
+            charming.msmtsystem.msmtsystem.start()
 
     def Stop(self):
-        if msmtsystem.msmtsystem:
-            msmtsystem.msmtsystem.stop()
+        if charming.msmtsystem.msmtsystem:
+            charming.msmtsystem.msmtsystem.stop()
 
     def Prepare(self):
         pass
 
     def Resume(self):
-        if msmtsystem.msmtsystem:
-            msmtsystem.msmtsystem.resume()
+        if charming.msmtsystem.msmtsystem:
+            charming.msmtsystem.msmtsystem.resume()
 
     def read_value(self):
-        if msmtsystem.msmtsystem:
-            t = msmtsystem.msmtsystem.status()
+        if charming.msmtsystem.msmtsystem:
+            t = charming.msmtsystem.msmtsystem.status()
             return t[0]
 
     def write_preselection(self, value):
-        if msmtsystem:
-            t = msmtsystem.msmtsystem.status()
-            msmtsystem.msmtsystem.stopafter(value,0)
+        if charming.msmtsystem:
+            t = charming.msmtsystem.msmtsystem.status()
+            charming.msmtsystem.msmtsystem.stopafter(value,0)
 
     def read_version(self):
-        ver = super().read_version();
-        if not msmtsystem.msmtsystem:
+        ver = super().read_version()
+        if not charming.msmtsystem.msmtsystem:
             return ver
-        return ver + " "+msmtsystem.msmtsystem.version
+        return ver + " "+charming.msmtsystem.msmtsystem.version
 
 
 class MeasureTime(base.TimerChannel):
 
 
     def state(self):
-        if msmtsystem.msmtsystem:
-            t = msmtsystem.msmtsystem.status()
+        if charming.msmtsystem.msmtsystem:
+            t = charming.msmtsystem.msmtsystem.status()
             if not(t[2] &2): return (FAULT,t[3])
             #if(t[2] & 1): return (BUSY,t[3])
             _state = base.ImageChannel.state(self)
@@ -87,66 +84,66 @@ class MeasureTime(base.TimerChannel):
             return (_state[0],t[3])
 
     def On(self):
-      if msmtsystem.msmtsystem:
-            msmtsystem.msmtsystem.on()
+        if charming.msmtsystem.msmtsystem:
+            charming.msmtsystem.msmtsystem.on()
     def Off(self):
-      if msmtsystem.msmtsystem:
-            msmtsystem.msmtsystem.off()
+        if charming.msmtsystem.msmtsystem:
+            charming.msmtsystem.msmtsystem.off()
 
     def Start(self):
-        if msmtsystem.msmtsystem:
-            msmtsystem.msmtsystem.start()
+        if charming.msmtsystem.msmtsystem:
+            charming.msmtsystem.msmtsystem.start()
 
     def Stop(self):
-        if msmtsystem.msmtsystem:
-            msmtsystem.msmtsystem.stop()
+        if charming.msmtsystem.msmtsystem:
+            charming.msmtsystem.msmtsystem.stop()
 
     def Prepare(self):
         pass
 
     def Resume(self):
-        if msmtsystem.msmtsystem:
-            msmtsystem.msmtsystem.resume()
+        if charming.msmtsystem.msmtsystem:
+            charming.msmtsystem.msmtsystem.resume()
 
     def read_value(self):
-        if msmtsystem.msmtsystem:
-            t = msmtsystem.msmtsystem.status()
+        if charming.msmtsystem.msmtsystem:
+            t = charming.msmtsystem.msmtsystem.status()
             return t[1]
 
     def write_preselection(self, value):
-        if msmtsystem.msmtsystem:
-             t = msmtsystem.msmtsystem.status()
-             msmtsystem.msmtsystem.stopafter(0,value)
+        if charming.msmtsystem.msmtsystem:
+            #t = msmtsystem.msmtsystem.status()
+            charming.msmtsystem.msmtsystem.stopafter(0,value)
 
     def read_version(self):
-        ver = super().read_version();
-        if not msmtsystem.msmtsystem:
+        ver = super().read_version()
+        if not charming.msmtsystem.msmtsystem:
             return ver
-        return ver + " "+msmtsystem.msmtsystem.version
+        return ver + " "+charming.msmtsystem.msmtsystem.version
 
 
 class Monitor0(base.DiscreteOutput):
     def read_value(self):
-        if msmtsystem.msmtsystem:
-            t = msmtsystem.msmtsystem.monitors_status()
+        if charming.msmtsystem.msmtsystem:
+            t = charming.msmtsystem.msmtsystem.monitors_status()
             return t[0][1]
 
 class Monitor1(base.DiscreteOutput):
     def read_value(self):
-        if msmtsystem.msmtsystem:
-            t = msmtsystem.msmtsystem.monitors_status()
+        if charming.msmtsystem.msmtsystem:
+            t = charming.msmtsystem.msmtsystem.monitors_status()
             return t[1][1]
 
 class Monitor2(base.DiscreteOutput):
     def read_value(self):
-        if msmtsystem.msmtsystem:
-            t = msmtsystem.msmtsystem.monitors_status()
+        if charming.msmtsystem.msmtsystem:
+            t = charming.msmtsystem.msmtsystem.monitors_status()
             return t[2][1]
 
 class Monitor3(base.DiscreteOutput):
     def read_value(self):
-        if msmtsystem.msmtsystem:
-            t = msmtsystem.msmtsystem.monitors_status()
+        if charming.msmtsystem.msmtsystem:
+            t = charming.msmtsystem.msmtsystem.monitors_status()
             return t[3][1]
 
 
@@ -166,7 +163,7 @@ class Histogram(base.ImageChannel):
 
 
     def init(self):
-        self.count  =  0;
+        self.count  =  0
         self.selectedRoi = 0
         self.maxindexroi = 0
         self.mat = np.zeros((1,1,1),dtype = "int32")
@@ -174,7 +171,7 @@ class Histogram(base.ImageChannel):
 
     def Histogram(self):
         if msmtsystem.msmtsystem:
-            self.histogram = msmtsystem.msmtsystem.getHistogram()
+            self.histogram = charming.msmtsystem.msmtsystem.getHistogram()
         else:
             return None
         return self.histogram
@@ -237,9 +234,9 @@ class Histogram(base.ImageChannel):
         return self.mat.flatten()
 
     def read_version(self):
-        ver = super().read_version();
-        if not msmtsystem.msmtsystem:
+        ver = super().read_version()
+        if not charming.msmtsystem.msmtsystem:
             return ver
-        return ver + " "+msmtsystem.msmtsystem.version
+        return ver + " "+charming.msmtsystem.msmtsystem.version
 
 

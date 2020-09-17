@@ -10,22 +10,19 @@
 # and/or modify it under the terms of the GNU General Public License as
 # published by the Free Software Foundation;
 
-import importlib
 from entangle import base
-from entangle.core import states, Prop, uint16, Attr,Cmd
-from entangle.core.defs import uint64, int32, boolean, listof
-from entangle.core.states import BUSY, UNKNOWN,FAULT
-from entangle.core.errors import InvalidValue, InvalidOperation, \
-    ConfigurationError
+from entangle.core import  Cmd
+from entangle.core.defs import  listof
 from entangle.lib.loggers import FdLogMixin
-import signal, os
 
-from entangle.device.charming import charmsystem
-import entangle.device.charming.msmtsystem as msmtsystem
+import entangle.device.charming as charming
+import charming.charmsystem as charmsystem
+import charming.msmtsystem
+import charming.core
 
-from entangle.device.charming.core import *
-from entangle.device.charming.settings import *
-from entangle.device.charming.simulator import *
+import charming.settings
+import charming.simulator
+
 
 class DeviceConnection(FdLogMixin,base.MLZDevice):
     commands = {
@@ -37,28 +34,28 @@ class DeviceConnection(FdLogMixin,base.MLZDevice):
         self.init_fd_log('Charm')
         fd = self.get_log_fd()
         #print("charm.py:DeviceConnection.init("+str(fd)+")")
-        if msmtsystem.msmtsystem is None:
-                msmtsystem.msmtsystem=charmsystem.NeutronMeasurement(fd)
+        if charming.msmtsystem.msmtsystem is None:
+            charming.msmtsystem.msmtsystem=charmsystem.NeutronMeasurement(fd)
 
     #def __del__(self):
         #print("charm.py: DeviceConnection.__del__")
 
     def On(self):
-      if msmtsystem.msmtsystem:
-            msmtsystem.msmtsystem.on()
+        if charming.msmtsystem.msmtsystem:
+            charming.msmtsystem.msmtsystem.on()
 
     def Off(self):
-      if msmtsystem.msmtsystem:
-            msmtsystem.msmtsystem.off()
+        if charming.msmtsystem.msmtsystem:
+            charming.msmtsystem.msmtsystem.off()
 
     def read_version(self):
-        ver = super().read_version();
-        if not msmtsystem.msmtsystem:
+        ver = super().read_version()
+        if not charming.msmtsystem.msmtsystem:
             return ver
-        return ver + " "+msmtsystem.msmtsystem.version
+        return ver + " "+charming.msmtsystem.msmtsystem.version
 
     def Log(self):
-        return msmtsystem.msmtsystem.log()
+        return charming.msmtsystem.msmtsystem.log()
 
 
 

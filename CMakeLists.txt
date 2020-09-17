@@ -63,8 +63,8 @@ set(CMAKE_PROJECT_VERSION_PATCH ${GIT_PATCH})
 
 if(${EMULATOR_ONLY} STREQUAL OFF)
 
-#add_subdirectory(charm)
-#add_subdirectory(entangle-install-charming)
+add_subdirectory(charm)
+add_subdirectory(entangle-install-charming)
 add_subdirectory(entangle-install-isegCC2x)
 if(UNIX AND NOT APPLE)
 set(CPACK_GENERATOR "DEB")

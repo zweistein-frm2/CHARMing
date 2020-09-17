@@ -2,20 +2,16 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>24272b33-b678-45f2-8f45-bd57a6b61180</ProjectGuid>
-    <ProjectHome>
-    </ProjectHome>
-    <StartupFile>test-replay.py</StartupFile>
+    <ProjectGuid>c075b7c5-445f-43bb-a80d-04ed5f5ee856</ProjectGuid>
+    <ProjectHome>.</ProjectHome>
+    <StartupFile>test.py</StartupFile>
     <SearchPath>
     </SearchPath>
-    <WorkingDirectory>../../entangle/entangle/device/charm</WorkingDirectory>
+    <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
-    <Name>PyCharm</Name>
-    <RootNamespace>Charm</RootNamespace>
-    <IsWindowsApplication>False</IsWindowsApplication>
+    <Name>entangle-charming-test</Name>
+    <RootNamespace>entangle-charming-test</RootNamespace>
     <SuppressConfigureTestFrameworkPrompt>true</SuppressConfigureTestFrameworkPrompt>
-    <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <EnableNativeCodeDebugging>True</EnableNativeCodeDebugging>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -26,9 +22,16 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Charm.py" />
+    <Compile Include="charm.py" />
+    <Compile Include="core.py" />
+    <Compile Include="mesytec-replay.py" />
+    <Compile Include="mesytec.py" />
+    <Compile Include="msmtsystem.py" />
+    <Compile Include="settings.py" />
+    <Compile Include="simulator.py" />
     <Compile Include="test-replay.py" />
     <Compile Include="test.py" />
+    <Compile Include="__init__.py" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

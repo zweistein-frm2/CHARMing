@@ -10,21 +10,18 @@
 # and/or modify it under the terms of the GNU General Public License as
 # published by the Free Software Foundation;
 
-import importlib
 from entangle import base
-from entangle.core import states, Prop, uint16, Attr,Cmd
-from entangle.core.defs import uint64, int32, boolean, listof
-from entangle.core.states import BUSY, UNKNOWN,FAULT
-from entangle.core.errors import InvalidValue, InvalidOperation, \
-    ConfigurationError
+from entangle.core import Cmd
+from entangle.core.defs import listof
+
 from entangle.lib.loggers import FdLogMixin
 
-import signal, os
+import entangle.device.charming as charming
 
-from entangle.device.charming import listmodereplay
-import entangle.device.charming.msmtsystem as msmtsystem
+import charming.listmodereplay as listmodereplay
+import charming.msmtsystem
+import charming.core
 
-from entangle.device.charming.core import *
 
 class DeviceConnection(FdLogMixin,base.MLZDevice):
     commands = {
@@ -36,21 +33,21 @@ class DeviceConnection(FdLogMixin,base.MLZDevice):
         self.init_fd_log('Replay')
         fd = self.get_log_fd()
        # print("charm-replay.py:DeviceConnection.init("+str(fd)+")")
-        if msmtsystem.msmtsystem is None:
-                msmtsystem.msmtsystem=listmodereplay.ReplayList(fd)
+        if charming.msmtsystem.msmtsystem is None:
+            charming.msmtsystem.msmtsystem=listmodereplay.ReplayList(fd)
 
 
    # def __del__(self):
    #   print("charm-replay.py: DeviceConnection.__del__")
 
     def read_version(self):
-        ver = super().read_version();
-        if not msmtsystem.msmtsystem:
+        ver = super().read_version()
+        if not charming.msmtsystem.msmtsystem:
             return ver
-        return ver + " "+msmtsystem.msmtsystem.version
+        return ver + " "+charming.msmtsystem.msmtsystem.version
 
     def Log(self):
-        return msmtsystem.msmtsystem.log()
+        return charming.msmtsystem.msmtsystem.log()
 
 class PlayList(base.MLZDevice):
     commands = {
@@ -64,26 +61,26 @@ class PlayList(base.MLZDevice):
 
 
     def RemoveFile(self,file):
-        if msmtsystem.msmtsystem:
-            return msmtsystem.msmtsystem.removefile(file)
+        if charming.msmtsystem.msmtsystem:
+            return charming.msmtsystem.msmtsystem.removefile(file)
         return False
 
     def AddFile(self,file):
-        if msmtsystem.msmtsystem:
-            return msmtsystem.msmtsystem.addfile(file)
+        if charming.msmtsystem.msmtsystem:
+            return charming.msmtsystem.msmtsystem.addfile(file)
         return False
 
     def FilesInDirectory(self,directory):
         print('FilesInDirectory('+str(directory)+')')
 
-        if msmtsystem.msmtsystem:
-            return msmtsystem.msmtsystem.files(directory)
+        if charming.msmtsystem.msmtsystem:
+            return charming.msmtsystem.msmtsystem.files(directory)
 
     def read_version(self):
-        ver = super().read_version();
-        if not msmtsystem.msmtsystem:
+        ver = super().read_version()
+        if not charming.msmtsystem.msmtsystem:
             return ver
-        return ver + "\r\n"+msmtsystem.msmtsystem.version
+        return ver + "\r\n"+charming.msmtsystem.msmtsystem.version
 
 
 

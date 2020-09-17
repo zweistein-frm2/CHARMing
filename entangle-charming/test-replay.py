@@ -11,8 +11,6 @@
 # published by the Free Software Foundation;
 
 import listmodereplay
-import numpy as np
-import cv2 as cv
 import sys
 import time
 

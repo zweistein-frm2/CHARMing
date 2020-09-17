@@ -11,7 +11,7 @@ RUN yum install -y epel-release && yum repolist  && \
      rpm -ivh http://repo.okay.com.mx/centos/8/x86_64/release/okay-release-1-3.el8.noarch.rpm?
 
 
-RUN yum install -y dnf which git curl unzip tar && \
+RUN yum install -y dnf which git curl unzip tar wget && \
     yum install -y python3-pip python3-devel && \
     pip3 install numpy
 
@@ -21,8 +21,18 @@ RUN  dnf install -y opencv
 
 # we need python3 otherwise boost will not build its python support
 
-RUN dnf -y install  wget make cmake gcc-toolset-9-gcc gcc-toolset-9-gcc-c++ gcc-toolset-9-make
-ENV PATH=/opt/rh/gcc-toolset-9/root/usr/bin:$PATH
+   
+RUN dnf  --enablerepo=PowerTools install -y glibc-static
+
+RUN wget https://forensics.cert.org/cert-forensics-tools-release-el8.rpm -O cert-forensics-tools-release*rpm --no-check-certificate  && \
+   rpm -Uvh cert-forensics-tools-release*rpm
+   
+RUN yum -y install bzip2  gcc gcc-c++  zlib-devel diffutils gmp-devel mpfr-devel libmpc-devel make
+
+
+
+#RUN dnf -y install  wget make cmake gcc-toolset-9-gcc gcc-toolset-9-gcc-c++ gcc-toolset-9-make
+#ENV PATH=/opt/rh/gcc-toolset-9/root/usr/bin:$PATH
 RUN dnf install -y  opencv-devel
 
 RUN wget https://forensics.cert.org/cert-forensics-tools-release-el8.rpm -O cert-forensics-tools-release*rpm --no-check-certificate  && \
@@ -34,6 +44,16 @@ WORKDIR ${projectdir}
 COPY . .
 
 WORKDIR /
+
+ARG gcc_wanted=9.3.0
+
+RUN chmod +x ${projectdir}/distribution/centos8/Docker/build_gcc_9.sh && \
+ ${projectdir}/distribution/centos8/Docker/build_gcc_9.sh
+ 
+ENV PATH=/root/opt/gcc-${gcc_wanted}/bin:\$PATH
+ENV LD_LIBRARY_PATH=/root/opt/gcc-${gcc_wanted}/lib:/root/opt/gcc-${gcc_wanted}/lib64:\$LD_LIBRARY_PATH
+ENV MANPATH=/root/opt/gcc-${gcc_wanted}/share/man:\$MANPATH
+ENV INFOPATH=/root/opt/gcc-${gcc_wanted}/share/info:\$INFOPATH
 
 RUN cd ${projectdir}/boost && rm -rf out
 RUN rm -rf /${projectdir}/out

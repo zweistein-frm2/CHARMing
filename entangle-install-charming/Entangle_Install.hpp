@@ -57,7 +57,7 @@ namespace Zweistein {
             inidirectory /= ".CHARMing";
 #else
             inidirectory = "/etc/CHARMing";
-
+            //inidirectory = homepath;
 #endif
             if (!boost::filesystem::exists(inidirectory)) {
                 boost::filesystem::create_directory(inidirectory);
@@ -293,7 +293,9 @@ void entangle_setup(boost::filesystem::path& devicedir, boost::filesystem::path&
     userid = geteuid();
     if (userid != 0) {
         std::cout << "You must run with sudo privileges." << std::endl;
+#if defined(NDEBUG)
         exit(-1);
+#endif
     }
     PYTHON = "python3";
 #endif
@@ -342,9 +344,23 @@ void entangle_setup(boost::filesystem::path& devicedir, boost::filesystem::path&
         }
         if (dobreak) break;
     }
+
+    if (argc > 1) {
+        for (int j = 0; j < argc; j++) {
+            if (!boost::equals(argv[j], "-y")) {
+                entangle_root = argv[j];
+                try { boost::filesystem::create_directories(entangle_root); }
+                catch (std::exception& ex) {
+                    std::cout << ex.what() << std::endl;
+                }
+            }
+        }
+    }
+
+
     devicedir = entangle_root;
     devicedir /= "device";
-    resdir = Zweistein::UserIniDir(); ;
+    resdir = Zweistein::UserIniDir();
 
     try {
         auto data = toml::parse("/etc/entangle/entangle.conf");
@@ -365,13 +381,7 @@ void entangle_setup(boost::filesystem::path& devicedir, boost::filesystem::path&
         std::cout << ex.what() << std::endl;
     }
 
-    if (argc > 1) {
-        for (int j = 0; j < argc; j++) {
-            if (!boost::equals(argv[j], "-y")) {
-                entangle_root = argv[j];
-            }
-        }
-    }
+
 
     std::cout << "Using entangle root : " << entangle_root << std::endl;
     if (!b_yes) {

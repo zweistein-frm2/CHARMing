@@ -19,8 +19,8 @@ def makeRoiWkt( parameter):
 
     wkt="POLYGON(("
     for xy in parameter:
-        for v in xy:
-            wkt+=str(v)
+        for ve in xy:
+            wkt+=str(ve)
             wkt+=" "
         wkt+=","
     wkt=wkt[:-1]
@@ -36,7 +36,7 @@ t= h.update(mat)
 print("h.Size="+str(h.Size))
 print("h.getRoi(0)="+str(h.getRoi(0)))
 detsize=[0,0],[64,1024]
-e=makeRoiWkt(detsize)
+makeRoiWkt(detsize)
 
 
 print(t[0])

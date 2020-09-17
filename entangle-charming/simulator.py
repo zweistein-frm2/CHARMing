@@ -11,12 +11,11 @@
 # published by the Free Software Foundation;
 
 from entangle import base
-from entangle.core import states, Prop, uint16, Attr,Cmd
-from entangle.core.defs import uint64, int32, boolean, listof
-from entangle.core.errors import InvalidValue, InvalidOperation, \
-    ConfigurationError
+from entangle.core import states, Attr
+from entangle.core.defs import  int32
 
-import entangle.device.charming.msmtsystem as msmtsystem
+import entangle.device.charming as charming
+import charming.msmtsystem
 
 
 class Simulator(base.MLZDevice):
@@ -30,8 +29,8 @@ class Simulator(base.MLZDevice):
     }
 
     def read_NucleoRate(self):
-        if msmtsystem.msmtsystem:
-            return msmtsystem.msmtsystem.simulatorRate
+        if charming.msmtsystem.msmtsystem:
+            return charming.msmtsystem.msmtsystem.simulatorRate
 
     def write_NucleoRate(self,value):
         if msmtsystem.msmtsystem:
@@ -41,7 +40,7 @@ class Simulator(base.MLZDevice):
         return 'Events/second'
 
     def read_version(self):
-        ver = super().read_version();
+        ver = super().read_version()
         if not msmtsystem.msmtsystem:
             return ver
         return ver + " "+msmtsystem.msmtsystem.version
