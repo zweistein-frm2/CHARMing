@@ -41,6 +41,7 @@ target_compile_options(${PROJECT_NAME} PRIVATE  $<$<CXX_COMPILER_ID:GNU>: -Wno-e
 target_link_libraries(${PROJECT_NAME} PRIVATE installer::rc)
 target_link_libraries(${PROJECT_NAME} PRIVATE ${Boost_LIBRARIES})
 target_link_libraries( ${PROJECT_NAME} PRIVATE ${CMAKE_THREAD_LIBS_INIT} )
+target_link_libraries(${PROJECT_NAME} PRIVATE  $<$<CXX_COMPILER_ID:GNU>:libstdc++.a>)
 # TODO: Add tests and install targets if needed.
 
 

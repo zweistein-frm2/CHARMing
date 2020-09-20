@@ -11,7 +11,7 @@ RUN yum install -y epel-release && yum repolist  && \
      rpm -ivh http://repo.okay.com.mx/centos/8/x86_64/release/okay-release-1-3.el8.noarch.rpm?
 
 
-RUN yum install -y dnf which git curl unzip tar wget && \
+RUN yum install -y dnf which git curl unzip tar wget dpkg && \
     yum install -y python3-pip python3-devel && \
     pip3 install numpy
 
@@ -27,13 +27,17 @@ RUN wget https://forensics.cert.org/cert-forensics-tools-release-el8.rpm -O cert
    rpm -Uvh cert-forensics-tools-release*rpm
 RUN yum -y install bzip2  gcc gcc-c++  zlib-devel diffutils gmp-devel mpfr-devel libmpc-devel make
 
-
 #RUN dnf -y install  wget make cmake gcc-toolset-9-gcc gcc-toolset-9-gcc-c++ gcc-toolset-9-make
 #ENV PATH=/opt/rh/gcc-toolset-9/root/usr/bin:$PATH
 RUN dnf install -y  opencv-devel
 
-RUN wget https://forensics.cert.org/cert-forensics-tools-release-el8.rpm -O cert-forensics-tools-release*rpm --no-check-certificate  && \
-   rpm -Uvh cert-forensics-tools-release*rpm
+RUN wget -c https://sourceforge.net/projects/alien-pkg-convert/files/release/alien_8.95.tar.xz && \
+    tar xf alien_8.95.tar.xz && \
+	cd alien-8.95 && \
+	dnf install -y perl-ExtUtils-MakeMaker && \
+	yum install -y rpm-build
+	perl Makefile.PL; make; make install
+
 
 ARG projectdir=/CHARMing
 RUN mkdir ${projectdir}
@@ -51,6 +55,12 @@ ENV PATH=/root/opt/gcc-${gcc_wanted}/bin:$PATH
 ENV LD_LIBRARY_PATH=/root/opt/gcc-${gcc_wanted}/lib:/root/opt/gcc-${gcc_wanted}/lib64:\LD_LIBRARY_PATH
 ENV MANPATH=/root/opt/gcc-${gcc_wanted}/share/man:$MANPATH
 ENV INFOPATH=/root/opt/gcc-${gcc_wanted}/share/info:$INFOPATH
+ENV CC=/root/opt/gcc-${gcc_wanted}/bin/gcc
+ENV CXX=/root/opt/gcc-${gcc_wanted}/bin/g++
+RUN yum -y install  cmake
+
+
+
 
 RUN cd ${projectdir}/boost && rm -rf out
 RUN rm -rf /${projectdir}/out
@@ -60,23 +70,21 @@ RUN python3 --version && find /usr -name "pyconfig.h"
 ENV CPLUS_INCLUDE_PATH=/usr/include/python3.6m
 
 RUN cd ${projectdir} && chmod +x buildboost.sh && ./buildboost.sh -sICONV_PATH=/usr/libiconv
-RUN echo " will not compile due to bug in gcc 9.2.1"
+RUN echo " will not compile due to bug in gcc 9.2.1 which is supplied by centos 8 repository"
+RUN echo " gcc > = 9.2.2 is working fine"
 RUN cd ${projectdir}/entangle-charming && mkdir out && cd out && \
-     cmake  -DPython3_INCLUDE_DIRS=/usr/include/python3.6m && \
-           -DPython3_EXECUTABLE=/usr/bin/python3 && \
-           -DPython3_VERSION=3.6.8 && \
-           -DPython3_SITELIB=/usr/lib/python3/dist-packages  && \
-           -DPython3_NumPy_INCLUDE_DIRS=/usr/local/lib64/python3.6/site-packages/numpy/core/include && \
-           -DPython3_VERSION_MAJOR=3 && -DPython3_VERSION_MINOR=6 && \
-           -D_Python3_LIBRARY_RELEASE=/usr/lib64/libpython3.6m.so && \
-           -DBoost_NUMPY36_LIBRARY_RELEASE=/CHARMing/boost/out/lib/libboost_numpy36.a  &&\
-           -DBoost_PYTHON36_LIBRARY_RELEASE=/CHARMing/boost/out/lib/libboost_pytho36.a &&\
-           .. && \
+     cmake  -DPython3_INCLUDE_DIRS=/usr/include/python3.6m -DPython3_EXECUTABLE=/usr/bin/python3 \
+           -DPython3_VERSION=3.6.8 -DPython3_SITELIB=/usr/lib/python3/dist-packages \
+           -DPython3_NumPy_INCLUDE_DIRS=/usr/local/lib64/python3.6/site-packages/numpy/core/include \
+           -DPython3_VERSION_MAJOR=3 -DPython3_VERSION_MINOR=6 -D_Python3_LIBRARY_RELEASE=/usr/lib64/libpython3.6m.so \
+           -DBoost_NUMPY36_LIBRARY_RELEASE=/CHARMing/boost/out/lib/libboost_numpy36.a \
+           -DBoost_PYTHON36_LIBRARY_RELEASE=/CHARMing/boost/out/lib/libboost_python36.a .. && \
      make
 
 RUN mkdir out && cd out && cmake -B /out -S ${projectdir}  -DINSTALL_DEPS=opencv
 RUN  mkdir package && cd out &&  make package && mv *.deb /package
 
+RUN  cd package && alien --to-rpm -c --target=amd64 *.deb
 
 
 
