@@ -23,6 +23,7 @@ do
 		sudo docker cp dummy:/package distribution/${i##*.}
 		sudo docker rm -f dummy
 		sudo find distribution -name '*.deb' -exec bash -c 'mv $0 "${0/Linux/'$ext'}" && cp "distribution/'$ext'/package/"*.deb distribution' {} \;
+		sudo find distribution -name '*.rpm' -exec bash -c 'mv $0 "${0/Linux/'$ext'}" && cp "distribution/'$ext'/package/"*.rpm distribution' {} \;
 		sudo chown $currentuser distribution/*.*
 		printf "\n\n"
     fi

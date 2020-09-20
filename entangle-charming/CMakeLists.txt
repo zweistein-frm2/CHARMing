@@ -158,6 +158,7 @@ endif()
       $<$<COMPILE_LANGUAGE:CXX>:$<$<CXX_COMPILER_ID:MSVC>:/GS>>
      )
      target_link_libraries(${PROJECT_NAME} PRIVATE "${_Python3_LIBRARY_${Build_Type}}" ${Boost_LIBRARIES} ${OpenCV_LIBS}  uv_a )
+     target_link_libraries(${PROJECT_NAME} PRIVATE  $<$<CXX_COMPILER_ID:GNU>:libstdc++.a>)
 
      else()
      message(STATUS "add_library(${PROJECT_NAME} SHARED )")
