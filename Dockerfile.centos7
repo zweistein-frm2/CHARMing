@@ -25,7 +25,7 @@ RUN wget https://forensics.cert.org/cert-forensics-tools-release-el7.rpm && \
     rpm -Uvh cert-forensics-tools-release*rpm && \
 	yum --enablerepo=forensics install -y libiconv-static
 
-RUN yum yum install -y –enablerepo=epel rpmrebuild
+RUN yum install -y rpm-build
 
 ARG projectdir=CHARMing
 RUN mkdir ${projectdir}

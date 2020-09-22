@@ -54,7 +54,7 @@ ENV MANPATH=/root/opt/gcc-${gcc_wanted}/share/man:$MANPATH
 ENV INFOPATH=/root/opt/gcc-${gcc_wanted}/share/info:$INFOPATH
 ENV CC=/root/opt/gcc-${gcc_wanted}/bin/gcc
 ENV CXX=/root/opt/gcc-${gcc_wanted}/bin/g++
-RUN yum -y install  cmake
+RUN yum -y install  cmake rpm-build
 
 
 
