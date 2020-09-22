@@ -27,29 +27,26 @@ RUN wget https://forensics.cert.org/cert-forensics-tools-release-el8.rpm -O cert
    rpm -Uvh cert-forensics-tools-release*rpm
 RUN yum -y install bzip2  gcc gcc-c++  zlib-devel diffutils gmp-devel mpfr-devel libmpc-devel make
 
+
 #RUN dnf -y install  wget make cmake gcc-toolset-9-gcc gcc-toolset-9-gcc-c++ gcc-toolset-9-make
 #ENV PATH=/opt/rh/gcc-toolset-9/root/usr/bin:$PATH
+#RUN echo " will not compile due to bug in gcc 9.2.1 which is supplied by centos 8 repository"
+#RUN echo " gcc > = 9.2.2 is working fine"
+
 RUN dnf install -y  opencv-devel
 
-RUN wget -c https://sourceforge.net/projects/alien-pkg-convert/files/release/alien_8.95.tar.xz && \
-    tar xf alien_8.95.tar.xz && \
-	cd alien-8.95 && \
-	dnf install -y perl-ExtUtils-MakeMaker && \
-	yum install -y rpm-build
-	perl Makefile.PL; make; make install
 
-
-ARG projectdir=/CHARMing
+ARG projectdir=CHARMing
 RUN mkdir ${projectdir}
-WORKDIR ${projectdir}
+WORKDIR /${projectdir}
 COPY . .
-
+RUN cp /${projectdir}/distribution/centos8/Docker/${projectdir}/libuv/CMakeLists.txt /${projectdir}/libuv/CMakeLists.txt
 WORKDIR /
 
 ARG gcc_wanted=9.3.0
 
-RUN chmod +x ${projectdir}/distribution/centos8/Docker/build_gcc_9.sh && \
- ${projectdir}/distribution/centos8/Docker/build_gcc_9.sh
+RUN chmod +x /${projectdir}/distribution/centos8/Docker/build_gcc_9.sh && \
+ /${projectdir}/distribution/centos8/Docker/build_gcc_9.sh
 
 ENV PATH=/root/opt/gcc-${gcc_wanted}/bin:$PATH
 ENV LD_LIBRARY_PATH=/root/opt/gcc-${gcc_wanted}/lib:/root/opt/gcc-${gcc_wanted}/lib64:\LD_LIBRARY_PATH
@@ -62,17 +59,16 @@ RUN yum -y install  cmake
 
 
 
-RUN cd ${projectdir}/boost && rm -rf out
+RUN cd /${projectdir}/boost && rm -rf out
 RUN rm -rf /${projectdir}/out
-RUN cd ${projectdir} && git submodule update --init --recursive
+RUN cd /${projectdir} && git submodule update --init --recursive
 
 RUN python3 --version && find /usr -name "pyconfig.h"
 ENV CPLUS_INCLUDE_PATH=/usr/include/python3.6m
 
-RUN cd ${projectdir} && chmod +x buildboost.sh && ./buildboost.sh -sICONV_PATH=/usr/libiconv
-RUN echo " will not compile due to bug in gcc 9.2.1 which is supplied by centos 8 repository"
-RUN echo " gcc > = 9.2.2 is working fine"
-RUN cd ${projectdir}/entangle-charming && mkdir out && cd out && \
+RUN cd /${projectdir} && chmod +x buildboost.sh && ./buildboost.sh -sICONV_PATH=/usr/libiconv
+
+RUN cd /${projectdir}/entangle-charming && mkdir out && cd out && \
      cmake  -DPython3_INCLUDE_DIRS=/usr/include/python3.6m -DPython3_EXECUTABLE=/usr/bin/python3 \
            -DPython3_VERSION=3.6.8 -DPython3_SITELIB=/usr/lib/python3/dist-packages \
            -DPython3_NumPy_INCLUDE_DIRS=/usr/local/lib64/python3.6/site-packages/numpy/core/include \
@@ -81,10 +77,9 @@ RUN cd ${projectdir}/entangle-charming && mkdir out && cd out && \
            -DBoost_PYTHON36_LIBRARY_RELEASE=/CHARMing/boost/out/lib/libboost_python36.a .. && \
      make
 
-RUN mkdir out && cd out && cmake -B /out -S ${projectdir}  -DINSTALL_DEPS=opencv
-RUN  mkdir package && cd out &&  make package && mv *.deb /package
+RUN mkdir out && cd out && cmake -B /out -S /${projectdir} -DPACK2RPM -DINSTALL_DEPS=opencv
+RUN  mkdir package && cd out &&  make package && mv *.rpm /package
 
-RUN  cd package && alien --to-rpm -c --target=amd64 *.deb
 
 
 

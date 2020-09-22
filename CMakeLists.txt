@@ -3,7 +3,12 @@ cmake_minimum_required (VERSION 3.11)
 if(NOT DEFINED EMULATOR_ONLY)
 set(EMULATOR_ONLY OFF)
 endif()
+
 message("use cmake  -DEMULATOR_ONLY=ON   to build mesytec-emulator")
+
+if(NOT DEFINED PACK2RPM)
+set(PACK2RPM OFF)
+endif()
 
 set(boost_currentversion 1.75.0)
 set(BOOST_PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/boost/out)
@@ -64,16 +69,24 @@ set(CMAKE_PROJECT_VERSION_PATCH ${GIT_PATCH})
 if(${EMULATOR_ONLY} STREQUAL OFF)
 
 add_subdirectory(charm)
-add_subdirectory(entangle-install-charming)
-add_subdirectory(entangle-install-isegCC2x)
+#add_subdirectory(entangle-install-charming)
+#add_subdirectory(entangle-install-isegCC2x)
 if(UNIX AND NOT APPLE)
+if(${PACK2RPM} STREQUAL ON)
+set(CPACK_GENERATOR "RPM")
+set(CPACK_RPM_PACKAGE_REQUIRES ${INSTALL_DEPS})
+else()
 set(CPACK_GENERATOR "DEB")
-set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Andreas Langhoff") # required
+SET (CPACK_DEBIAN_PACKAGE_DEPENDS ${INSTALL_DEPS})
+endif()
+set(CPACK_PACKAGE_CONTACT "andreas.langhoff@frm2.tum.de" ) # required
+set(CPACK_PACKAGE_VENDOR "https://www.frm2.tum.de/startseite/" )
+set (CMAKE_PROJECT_HOMEPAGE_URL "https://www.frm2.tum.de/startseite/")
 set(CPACK_PACKAGE_VERSION_MAJOR ${CMAKE_PROJECT_VERSION_MAJOR})
 set(CPACK_PACKAGE_VERSION_MINOR ${CMAKE_PROJECT_VERSION_MINOR})
 set(CPACK_PACKAGE_VERSION_PATCH ${CMAKE_PROJECT_VERSION_PATCH})
 
-SET (CPACK_DEBIAN_PACKAGE_DEPENDS ${INSTALL_DEPS})
+
 include(CPack)
 
 else()

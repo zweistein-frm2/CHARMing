@@ -1,0 +1,35 @@
+FROM ubuntu:18.04
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y \
+	apt-transport-https \
+	ca-certificates \
+	apt-utils \
+	gnupg \
+	software-properties-common \
+	wget \
+	git \
+	curl \
+	unzip \
+	tar
+
+
+
+RUN export TZ=Europe/Berlin    # must be at beginning for unknown reasons,
+RUN apt-get install tzdata     # must be at beginning for unknown reasons,
+
+
+
+RUN apt install -y python3-pip python3-dev && \
+    pip3 install numpy && \
+    apt-get install -y libopencv-dev
+
+COPY distribution/*.deb .
+
+
+
+
+
+
+
+

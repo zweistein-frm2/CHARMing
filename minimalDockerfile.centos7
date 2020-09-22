@@ -1,0 +1,23 @@
+FROM centos:7
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN yum -y update
+
+RUN export TZ=Europe/Berlin    # must be at beginning for unknown reasons,
+RUN yum install tzdata   # must be at beginning for unknown reasons,
+
+RUN yum install -y epel-release && yum repolist  && \
+     rpm -ivh http://repo.okay.com.mx/centos/7/x86_64/release/okay-release-1-3.el7.noarch.rpm?
+
+RUN yum install -y centos-sclo-rh centos-release-scl git  && \
+    yum install -y python3-pip python3-devel && \
+    pip3 install numpy && \
+    yum install -y opencv
+
+# we need python3 otherwise boost will not build its python support
+
+COPY distribution/centos7/package/*.rpm .
+
+
+
+

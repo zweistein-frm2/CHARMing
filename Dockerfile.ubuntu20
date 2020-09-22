@@ -16,23 +16,25 @@ RUN apt-get install -y git curl unzip tar && \
 # we need python3 otherwise boost will not build its python support
 
 
-ARG projectdir=/CHARMing
+ARG projectdir=CHARMing
 RUN mkdir ${projectdir}
-WORKDIR ${projectdir}
+WORKDIR /${projectdir}
 COPY . .
+
 WORKDIR /
 
-RUN cd ${projectdir}/boost && rm -rf out
+RUN cd /${projectdir}/boost && rm -rf out
 RUN rm -rf /${projectdir}/out
 
-RUN cd ${projectdir} && git submodule update --init --recursive
+RUN cd /${projectdir} && git submodule update --init --recursive
+RUN cp /${projectdir}/distribution/ubuntu20/${projectdir}/libuv/CMakeLists.txt /${projectdir}/libuv/CMakeLists.txt
+# basically we do overwrite the libuv CMakeLists.txt so that libuv is not installed (not needed as we link statically to it
 
-RUN python3 --version && find /usr -name "pyconfig.h"
-RUN cd ${projectdir} && chmod +x buildboost.sh && ./buildboost.sh
+RUN cd /${projectdir} && chmod +x buildboost.sh && ./buildboost.sh
 
-RUN cd ${projectdir}/entangle-charming && mkdir out && cd out && cmake .. && make
+RUN cd /${projectdir}/entangle-charming && mkdir out && cd out && cmake .. && make
 
-RUN mkdir out && cd out && cmake -B /out -S ${projectdir}  -DINSTALL_DEPS=libopencv-dev
+RUN mkdir out && cd out && cmake -B /out -S /${projectdir}  -DINSTALL_DEPS=libopencv-dev
 RUN  mkdir package && cd out &&  make package && mv *.deb /package
 
 
