@@ -28,3 +28,6 @@
 [submodule "entangle-install-charming/cmrc"]
 	path = entangle-install-charming/cmrc
 	url = https://github.com/vector-of-bool/cmrc.git
+[submodule "entangle-install-isegCC2x/iseg"]
+	path = entangle-install-isegCC2x/iseg
+	url = https://github.com/zweistein22/iseg.git
