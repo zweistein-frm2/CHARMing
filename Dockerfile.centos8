@@ -77,7 +77,7 @@ RUN cd /${projectdir}/entangle-charming && mkdir out && cd out && \
            -DBoost_PYTHON36_LIBRARY_RELEASE=/CHARMing/boost/out/lib/libboost_python36.a .. && \
      make
 
-RUN mkdir out && cd out && cmake -B /out -S /${projectdir} -DPACK2RPM -DINSTALL_DEPS=opencv
+RUN mkdir out && cd out && cmake -B /out -S /${projectdir} -DPACK2RPM=ON -DINSTALL_DEPS=opencv
 RUN  mkdir package && cd out &&  make package && mv *.rpm /package
 
 

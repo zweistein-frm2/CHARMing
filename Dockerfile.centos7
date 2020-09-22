@@ -50,7 +50,7 @@ RUN export CPLUS_INCLUDE_PATH=/usr/include/python3.6m && cd ${projectdir} && chm
 
 
 RUN cd /${projectdir}/entangle-charming && mkdir out && cd out && cmake .. && make
-RUN mkdir out && cd out  && cmake -B /out -S /${projectdir} -DPACK2RPM -DINSTALL_DEPS=opencv
+RUN mkdir out && cd out  && cmake -B /out -S /${projectdir} -DPACK2RPM=ON -DINSTALL_DEPS=opencv
 RUN  mkdir package && cd out &&  make package && mv *.rpm /package
 
 
