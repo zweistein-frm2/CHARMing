@@ -40,7 +40,7 @@ ARG projectdir=CHARMing
 RUN mkdir ${projectdir}
 WORKDIR /${projectdir}
 COPY . .
-RUN cp /${projectdir}/distribution/centos8/Docker/${projectdir}/libuv/CMakeLists.txt /${projectdir}/libuv/CMakeLists.txt
+
 WORKDIR /
 
 ARG gcc_wanted=9.3.0
@@ -62,6 +62,8 @@ RUN yum -y install  cmake rpm-build
 RUN cd /${projectdir}/boost && rm -rf out
 RUN rm -rf /${projectdir}/out
 RUN cd /${projectdir} && git submodule update --init --recursive
+
+RUN cp /${projectdir}/distribution/centos8/Docker/${projectdir}/libuv/CMakeLists.txt /${projectdir}/libuv/CMakeLists.txt
 
 RUN python3 --version && find /usr -name "pyconfig.h"
 ENV CPLUS_INCLUDE_PATH=/usr/include/python3.6m

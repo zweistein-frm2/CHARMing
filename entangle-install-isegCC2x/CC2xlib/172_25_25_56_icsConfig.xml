@@ -1,0 +1,528 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes'?>
+<!-- iCS configuration -->
+<icsConfig iCSserial="5230306" lastChangedBy="admin" lastChanged="2020/09/17 09:26:37" iCSversion="2.4.0 20190521_1212">
+    <preferences>
+        <sound>false</sound>
+        <host>
+            <websocket>auto</websocket>
+            <http>auto</http>
+        </host>
+        <!-- Prefered Connection Mode ("HTTP"| "websocket") -->
+        <connectionMode>websocket</connectionMode>
+        <pollingInterval>5</pollingInterval>
+        <performance>1</performance>
+        <debug>false</debug>
+        <camera>
+            <url>USB</url>
+        </camera>
+    </preferences>
+    <hardwareConfig>
+        <device modelCatalog="" type="crate" model="CC24" address="1000" firmwareRelease="04.22" line="0" serial="5230306" id="0-1000" firmwareName="ECH4XA" title="Master">
+            <slot id="0">
+                <device adcSampleRate="50" digitalFilter="64" vUnit="V" title="7800361" cResolution="5" serial="7800361" firmwareName="E08C2" cUnitLCR="µA" line="0" id="0-0" cUnit="µA" cResolutionLCR="5" firmwareRelease="04.73" modelCatalog="EH082030x104" model="EH082030x1040200203" vResolution="5" type="module" address="0">
+                    <channel inom="0.0001" id="0" vnom="3000" polarity="p"/>
+                    <channel inom="0.0001" id="1" vnom="3000" polarity="p"/>
+                    <channel inom="0.0001" id="2" vnom="3000" polarity="p"/>
+                    <channel inom="0.0001" id="3" vnom="3000" polarity="p"/>
+                    <channel inom="0.0001" id="4" vnom="3000" polarity="p"/>
+                    <channel inom="0.0001" id="5" vnom="3000" polarity="p"/>
+                    <channel inom="0.0001" id="6" vnom="3000" polarity="p"/>
+                    <channel inom="0.0001" id="7" vnom="3000" polarity="n"/>
+                    <eventHandling>
+                        <endOfRamp>event</endOfRamp>
+                        <constantVoltage>event</constantVoltage>
+                        <constantCurrent>event</constantCurrent>
+                        <inputError>event</inputError>
+                        <supplyNotGood>event</supplyNotGood>
+                        <temperatureNotGood>event</temperatureNotGood>
+                        <emergency>event</emergency>
+                        <voltageBound>event</voltageBound>
+                        <currentBound>event</currentBound>
+                        <externalInhibit>event</externalInhibit>
+                        <currentTrip>event</currentTrip>
+                        <voltageLimitExceeded>event</voltageLimitExceeded>
+                        <currentLimitExceeded>event</currentLimitExceeded>
+                    </eventHandling>
+                </device>
+            </slot>
+            <slot id="1">
+                <device adcSampleRate="50" digitalFilter="64" vUnit="V" title="7800362" cResolution="4" serial="7800362" firmwareName="E08C2" cUnitLCR="µA" line="0" id="0-1" cUnit="mA" cResolutionLCR="4" firmwareRelease="04.73" modelCatalog="EH082030x104" model="EH082030x1040200203" vResolution="4" type="module" address="1">
+                    <channel inom="0.0001" id="0" vnom="3000" polarity="p"/>
+                    <channel inom="0.0001" id="1" vnom="3000" polarity="p"/>
+                    <channel inom="0.0001" id="2" vnom="3000" polarity="p"/>
+                    <channel inom="0.0001" id="3" vnom="3000" polarity="p"/>
+                    <channel inom="0.0001" id="4" vnom="3000" polarity="p"/>
+                    <channel inom="0.0001" id="5" vnom="3000" polarity="p"/>
+                    <channel inom="0.0001" id="6" vnom="3000" polarity="p"/>
+                    <channel inom="0.0001" id="7" vnom="3000" polarity="n"/>
+                    <eventHandling>
+                        <endOfRamp>event</endOfRamp>
+                        <constantVoltage>event</constantVoltage>
+                        <constantCurrent>event</constantCurrent>
+                        <inputError>event</inputError>
+                        <supplyNotGood>event</supplyNotGood>
+                        <temperatureNotGood>event</temperatureNotGood>
+                        <emergency>event</emergency>
+                        <voltageBound>event</voltageBound>
+                        <currentBound>event</currentBound>
+                        <externalInhibit>event</externalInhibit>
+                        <currentTrip>event</currentTrip>
+                        <voltageLimitExceeded>event</voltageLimitExceeded>
+                        <currentLimitExceeded>event</currentLimitExceeded>
+                    </eventHandling>
+                </device>
+            </slot>
+            <eventHandling>
+                <mainsNotGood/>
+                <supplyNotGood/>
+                <batteryNotGood/>
+                <temperatureNotGood/>
+            </eventHandling>
+        </device>
+    </hardwareConfig>
+    <hardwareDetect version="2.0">
+        <interfaces>
+            <interface type="serial" name="ttymxc0" line="6"/>
+            <interface type="serial" name="ttymxc1" line="6"/>
+            <interface type="serial" name="ttymxc3" line="6"/>
+            <interface type="serial" name="ttymxc4" line="6"/>
+            <interface type="can" name="can1" line="1"/>
+            <interface type="can" name="can0" line="0"/>
+        </interfaces>
+        <device type="crate" modelCatalog="" model="CC24" address="1000" line="0" serial="5230306" firmwareRelease="04.22" id="0-1000" firmwareName="ECH4XA" title="Master">
+            <slot id="0">
+                <device type="module" model="EH082030x1040200203" vResolution="4" adcSampleRate="50" address="0" vUnit="V" cResolutionLCR="4" line="0" serial="7800361" firmwareRelease="04.73" digitalFilter="64" id="0-0" firmwareName="E08C2" cUnitLCR="µA" title="7800361" cUnit="mA" cResolution="4">
+                    <channel inom="0.0001" vnom="3000" id="0" polarity="p"/>
+                    <channel inom="0.0001" vnom="3000" id="1" polarity="p"/>
+                    <channel inom="0.0001" vnom="3000" id="2" polarity="p"/>
+                    <channel inom="0.0001" vnom="3000" id="3" polarity="p"/>
+                    <channel inom="0.0001" vnom="3000" id="4" polarity="p"/>
+                    <channel inom="0.0001" vnom="3000" id="5" polarity="p"/>
+                    <channel inom="0.0001" vnom="3000" id="6" polarity="p"/>
+                    <channel inom="0.0001" vnom="3000" id="7" polarity="n"/>
+                    <eventHandling>
+                        <endOfRamp>event</endOfRamp>
+                        <constantVoltage>event</constantVoltage>
+                        <constantCurrent>event</constantCurrent>
+                        <inputError>event</inputError>
+                        <supplyNotGood>event</supplyNotGood>
+                        <temperatureNotGood>event</temperatureNotGood>
+                        <emergency>event</emergency>
+                        <voltageBound>event</voltageBound>
+                        <currentBound>event</currentBound>
+                        <externalInhibit>event</externalInhibit>
+                        <currentTrip>event</currentTrip>
+                        <voltageLimitExceeded>event</voltageLimitExceeded>
+                        <currentLimitExceeded>event</currentLimitExceeded>
+                    </eventHandling>
+                </device>
+            </slot>
+            <slot id="1">
+                <device type="module" model="EH082030x1040200203" vResolution="4" adcSampleRate="50" address="1" vUnit="V" cResolutionLCR="4" line="0" serial="7800362" firmwareRelease="04.73" digitalFilter="64" id="0-1" firmwareName="E08C2" cUnitLCR="µA" title="7800362" cUnit="mA" cResolution="4">
+                    <channel inom="0.0001" vnom="3000" id="0" polarity="p"/>
+                    <channel inom="0.0001" vnom="3000" id="1" polarity="p"/>
+                    <channel inom="0.0001" vnom="3000" id="2" polarity="p"/>
+                    <channel inom="0.0001" vnom="3000" id="3" polarity="p"/>
+                    <channel inom="0.0001" vnom="3000" id="4" polarity="p"/>
+                    <channel inom="0.0001" vnom="3000" id="5" polarity="p"/>
+                    <channel inom="0.0001" vnom="3000" id="6" polarity="p"/>
+                    <channel inom="0.0001" vnom="3000" id="7" polarity="n"/>
+                    <eventHandling>
+                        <endOfRamp>event</endOfRamp>
+                        <constantVoltage>event</constantVoltage>
+                        <constantCurrent>event</constantCurrent>
+                        <inputError>event</inputError>
+                        <supplyNotGood>event</supplyNotGood>
+                        <temperatureNotGood>event</temperatureNotGood>
+                        <emergency>event</emergency>
+                        <voltageBound>event</voltageBound>
+                        <currentBound>event</currentBound>
+                        <externalInhibit>event</externalInhibit>
+                        <currentTrip>event</currentTrip>
+                        <voltageLimitExceeded>event</voltageLimitExceeded>
+                        <currentLimitExceeded>event</currentLimitExceeded>
+                    </eventHandling>
+                </device>
+            </slot>
+        </device>
+    </hardwareDetect>
+    <ethernet>
+        <dhcp>true</dhcp>
+        <ip>172.25.25.56</ip>
+        <mask>255.255.255.0</mask>
+        <dns/>
+        <gateway/>
+        <ping>true</ping>
+        <upnp>true</upnp>
+        <ntp/>
+    </ethernet>
+    <wifi>
+        <enable>true</enable>
+        <ssid>iseg-iCS2-5230306</ssid>
+        <channel>5</channel>
+        <password>password</password>
+        <ip>192.168.1.1</ip>
+    </wifi>
+    <can>
+        <bitrate line="0">1000</bitrate>
+        <bitrate line="1">1000</bitrate>
+    </can>
+    <serial>
+        <bitrate>9600</bitrate>
+    </serial>
+    <iCSservice>
+        <websocket>
+            <protocol>ws://</protocol>
+            <path>/</path>
+            <port>8080</port>
+            <enable>true</enable>
+        </websocket>
+        <http>
+            <enable>true</enable>
+            <protocol>http://</protocol>
+            <port>81</port>
+        </http>
+    </iCSservice>
+    <epics>
+        <enable>true</enable>
+        <nodePrefix>ISEG:{controllerId}:{deviceId}:{moduleId}:{channelId}</nodePrefix>
+    </epics>
+    <halService>
+        <enable>true</enable>
+        <port>1454</port>
+        <user>user</user>
+        <password>pass</password>
+    </halService>
+    <opc>
+        <enable>false</enable>
+    </opc>
+    <soap>
+        <enable>false</enable>
+    </soap>
+    <hal>
+        <!-- Prefered HAL Loglevel as bitmask
+		LogErrors = 1,				//log CAN bus error messages, loss of communication (Stop)
+		LogInformation = 2,			//log state of initialising, switch on/off live insertion mode
+		LogApiRead = 4,				//log API read accesses (APIRX)
+		LogApiWrite = 8,			//log API write accesses (APITX)
+		LogCanReceive = 32,			//log CAN receice messages (CANRX)
+		LogCanReadRequest = 64,		//log CAN read requests messages (CANRQ)
+		LogCanWriteRequest = 128	//log CAN write request messages (CANTX)
+		-->
+        <logLevel>3</logLevel>
+    </hal>
+    <snmp>
+        <enable>false</enable>
+    </snmp>
+    <!-- mode of ics server ("crate"|"icsmini|display")-->
+    <iCSmode>crate</iCSmode>
+    <channelFolders>
+        <channelFolder id="5cd111bc62728" title="sides">
+            <channel id="0_0_1"/>
+            <channel id="0_0_2"/>
+        </channelFolder>
+        <channelFolder id="5cd1125d29eb3" title="central-lines">
+            <channel id="0_1_4"/>
+            <channel id="0_1_5"/>
+        </channelFolder>
+    </channelFolders>
+    <channelProfiles>
+        <channelProfile id="5f326d2318c53" title="test">
+            <channel id="0_0_0">
+                <item value="1" id="Control.on" unit=""/>
+                <item value="0.00000" id="Control.voltageSet" unit="V"/>
+                <item value="1.00000" id="Control.currentSet" unit="µA"/>
+            </channel>
+            <channel id="0_0_1">
+                <item value="" id="Control.on" unit=""/>
+                <item value="0.00000" id="Control.voltageSet" unit="V"/>
+                <item value="1.00000" id="Control.currentSet" unit="µA"/>
+            </channel>
+            <channel id="0_0_2">
+                <item value="" id="Control.on" unit=""/>
+                <item value="0.00000" id="Control.voltageSet" unit="V"/>
+                <item value="1.00000" id="Control.currentSet" unit="µA"/>
+            </channel>
+            <channel id="0_0_3">
+                <item value="" id="Control.on" unit=""/>
+                <item value="0.00000" id="Control.voltageSet" unit="V"/>
+                <item value="1.00000" id="Control.currentSet" unit="µA"/>
+            </channel>
+            <channel id="0_0_4">
+                <item value="" id="Control.on" unit=""/>
+                <item value="0.00000" id="Control.voltageSet" unit="V"/>
+                <item value="1.00000" id="Control.currentSet" unit="µA"/>
+            </channel>
+            <channel id="0_0_5">
+                <item value="" id="Control.on" unit=""/>
+                <item value="0.00000" id="Control.voltageSet" unit="V"/>
+                <item value="1.00000" id="Control.currentSet" unit="µA"/>
+            </channel>
+            <channel id="0_0_6">
+                <item value="" id="Control.on" unit=""/>
+                <item value="0.00000" id="Control.voltageSet" unit="V"/>
+                <item value="1.00000" id="Control.currentSet" unit="µA"/>
+            </channel>
+            <channel id="0_0_7">
+                <item value="" id="Control.on" unit=""/>
+                <item value="0.00000" id="Control.voltageSet" unit="V"/>
+                <item value="1.00000" id="Control.currentSet" unit="µA"/>
+            </channel>
+        </channelProfile>
+        <channelProfile id="5f329060c8666" title="test_1">
+            <channel id="0_0_0">
+                <item value="1" id="Control.on" unit=""/>
+                <item value="0.00000" id="Control.voltageSet" unit="V"/>
+                <item value="1.00000" id="Control.currentSet" unit="µA"/>
+            </channel>
+            <channel id="0_0_1">
+                <item value="" id="Control.on" unit=""/>
+                <item value="0.00000" id="Control.voltageSet" unit="V"/>
+                <item value="1.00000" id="Control.currentSet" unit="µA"/>
+            </channel>
+            <channel id="0_0_2">
+                <item value="" id="Control.on" unit=""/>
+                <item value="0.00000" id="Control.voltageSet" unit="V"/>
+                <item value="1.00000" id="Control.currentSet" unit="µA"/>
+            </channel>
+            <channel id="0_0_3">
+                <item value="" id="Control.on" unit=""/>
+                <item value="0.00000" id="Control.voltageSet" unit="V"/>
+                <item value="1.00000" id="Control.currentSet" unit="µA"/>
+            </channel>
+            <channel id="0_0_4">
+                <item value="" id="Control.on" unit=""/>
+                <item value="0.00000" id="Control.voltageSet" unit="V"/>
+                <item value="1.00000" id="Control.currentSet" unit="µA"/>
+            </channel>
+            <channel id="0_0_5">
+                <item value="" id="Control.on" unit=""/>
+                <item value="0.00000" id="Control.voltageSet" unit="V"/>
+                <item value="1.00000" id="Control.currentSet" unit="µA"/>
+            </channel>
+            <channel id="0_0_6">
+                <item value="" id="Control.on" unit=""/>
+                <item value="0.00000" id="Control.voltageSet" unit="V"/>
+                <item value="1.00000" id="Control.currentSet" unit="µA"/>
+            </channel>
+            <channel id="0_0_7">
+                <item value="" id="Control.on" unit=""/>
+                <item value="0.00000" id="Control.voltageSet" unit="V"/>
+                <item value="1.00000" id="Control.currentSet" unit="µA"/>
+            </channel>
+            <channel id="0_1_0">
+                <item value="" id="Control.on" unit=""/>
+                <item value="0.0000" id="Control.voltageSet" unit="V"/>
+                <item value="0.0010" id="Control.currentSet" unit="mA"/>
+            </channel>
+            <channel id="0_1_1">
+                <item value="" id="Control.on" unit=""/>
+                <item value="0.0000" id="Control.voltageSet" unit="V"/>
+                <item value="0.0010" id="Control.currentSet" unit="mA"/>
+            </channel>
+            <channel id="0_1_2">
+                <item value="" id="Control.on" unit=""/>
+                <item value="0.0000" id="Control.voltageSet" unit="V"/>
+                <item value="0.0010" id="Control.currentSet" unit="mA"/>
+            </channel>
+            <channel id="0_1_3">
+                <item value="" id="Control.on" unit=""/>
+                <item value="0.0000" id="Control.voltageSet" unit="V"/>
+                <item value="0.0010" id="Control.currentSet" unit="mA"/>
+            </channel>
+            <channel id="0_1_4">
+                <item value="" id="Control.on" unit=""/>
+                <item value="0.0000" id="Control.voltageSet" unit="V"/>
+                <item value="0.0010" id="Control.currentSet" unit="mA"/>
+            </channel>
+            <channel id="0_1_5">
+                <item value="" id="Control.on" unit=""/>
+                <item value="0.0000" id="Control.voltageSet" unit="V"/>
+                <item value="0.0010" id="Control.currentSet" unit="mA"/>
+            </channel>
+            <channel id="0_1_6">
+                <item value="" id="Control.on" unit=""/>
+                <item value="0.0000" id="Control.voltageSet" unit="V"/>
+                <item value="0.0010" id="Control.currentSet" unit="mA"/>
+            </channel>
+            <channel id="0_1_7">
+                <item value="" id="Control.on" unit=""/>
+                <item value="0.0000" id="Control.voltageSet" unit="V"/>
+                <item value="0.0010" id="Control.currentSet" unit="mA"/>
+            </channel>
+        </channelProfile>
+    </channelProfiles>
+    <!-- iCS users and access -->
+    <icsAccess>
+        <!-- Principals (User und Rollen)-->
+        <principals>
+            <!-- Copy Template for new user -->
+            <user id="_NEW_">
+                <name/>
+                <realName/>
+                <passwordHash/>
+            </user>
+            <user id="55004ed5d0f14">
+                <name>admin</name>
+                <realName>Administrator</realName>
+                <passwordHash>d1307e7508c41bbbc2dba18e6bc2732a</passwordHash>
+            </user>
+            <user id="55005e1a49cad">
+                <name>user</name>
+                <realName>user</realName>
+                <passwordHash>d1307e7508c41bbbc2dba18e6bc2732a</passwordHash>
+            </user>
+            <role id="_NEW_">
+                <name/>
+                <users/>
+            </role>
+            <role id="55014eba39f0b">
+                <name>admins</name>
+                <users>
+                    <ref>55004ed5d0f14</ref>
+                </users>
+            </role>
+            <role id="562e4c6b987de">
+                <name>operators</name>
+                <users>
+                    <ref>55004ed5d0f14</ref>
+                    <ref>55005e1a49cad</ref>
+                </users>
+            </role>
+            <role id="56e6b5a88de48">
+                <name>watchers</name>
+                <users>
+                    <ref>55004ed5d0f14</ref>
+                    <ref>55005e1a49cad</ref>
+                </users>
+            </role>
+        </principals>
+        <!-- Access Control List (Zugriffslisten) -->
+        <acl description="deviceAcl">
+            <!-- Template -->
+            <ace id="_NEW_">
+                <name/>
+                <principal/>
+                <grant/>
+                <method/>
+                <!-- Name der Methode -->
+                <path>
+                    <!-- Betroffener Objektpfad -->
+                    <line/>
+                    <address/>
+                    <channel/>
+                </path>
+                <!-- Item -->
+                <item/>
+            </ace>
+            <ace id="1">
+                <name>1</name>
+                <path>
+                    <line>*</line>
+                    <address>*</address>
+                    <channel>*</channel>
+                </path>
+                <item>device_Control.installFirmware</item>
+                <method>*</method>
+                <principal>*</principal>
+                <grant>false</grant>
+            </ace>
+            <ace id="2">
+                <name>2</name>
+                <path>
+                    <line>*</line>
+                    <address>*</address>
+                    <channel>*</channel>
+                </path>
+                <item>device_Control.installFirmware</item>
+                <method>*</method>
+                <principal>role_55014eba39f0b</principal>
+                <grant>true</grant>
+            </ace>
+            <ace id="3">
+                <name>3</name>
+                <path>
+                    <line>*</line>
+                    <address>*</address>
+                    <channel>*</channel>
+                </path>
+                <item>*</item>
+                <method>setItem</method>
+                <principal>role_56e6b5a88de48</principal>
+                <grant>false</grant>
+            </ace>
+            <ace id="4">
+                <name>4</name>
+                <path>
+                    <line>*</line>
+                    <address>*</address>
+                    <channel>*</channel>
+                </path>
+                <item>*</item>
+                <method>setItem</method>
+                <principal>role_562e4c6b987de</principal>
+                <grant>false</grant>
+            </ace>
+            <ace id="5">
+                <name>5</name>
+                <path>
+                    <line>*</line>
+                    <address>*</address>
+                    <channel>*</channel>
+                </path>
+                <item>device_Control.power</item>
+                <method>setItem</method>
+                <principal>role_562e4c6b987de</principal>
+                <grant>true</grant>
+            </ace>
+            <ace id="6">
+                <name>6</name>
+                <path>
+                    <line>*</line>
+                    <address>*</address>
+                    <channel>*</channel>
+                </path>
+                <item>channel_Control.voltageSet</item>
+                <method>setItem</method>
+                <principal>role_562e4c6b987de</principal>
+                <grant>true</grant>
+            </ace>
+            <ace id="7">
+                <name>7</name>
+                <path>
+                    <line>*</line>
+                    <address>*</address>
+                    <channel>*</channel>
+                </path>
+                <item>channel_Control.currentSet</item>
+                <method>setItem</method>
+                <principal>role_562e4c6b987de</principal>
+                <grant>true</grant>
+            </ace>
+            <ace id="8">
+                <name>8</name>
+                <path>
+                    <line>*</line>
+                    <address>*</address>
+                    <channel>*</channel>
+                </path>
+                <item>channel_Control.on</item>
+                <method>setItem</method>
+                <principal>role_562e4c6b987de</principal>
+                <grant>true</grant>
+            </ace>
+            <ace id="9">
+                <name>9</name>
+                <path>
+                    <line>*</line>
+                    <address>*</address>
+                    <channel>*</channel>
+                </path>
+                <item>channel_Control.emergency</item>
+                <method>setItem</method>
+                <principal>role_562e4c6b987de</principal>
+                <grant>true</grant>
+            </ace>
+        </acl>
+    </icsAccess>
+</icsConfig>

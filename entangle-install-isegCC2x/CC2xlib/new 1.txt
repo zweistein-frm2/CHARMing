@@ -1,0 +1,25 @@
+Zum allgemeinen Verständnis bitte erst mal das Kapitel:
+
+CAN_EDCP_Programmers-Guide.pdf, Kapitel 3.3 Operation principle, ab Seite 25 ff durchlesen.
+Control.moduleEventMask
+CAN_EDCP_Programmers-Guide.pdf, Kapitel 3.5.2.7 ModuleEventMask, Seite 75 f
+
+und
+
+CAN_EDCP_Programmers-Guide.pdf, 3.5.5.3 Module events, Seite 114 f
+Control.moduleChannelEventMask
+CAN_EDCP_Programmers-Guide.pdf, Kapitel 3.5.2.11 ModuleEventChannelMask, Seite 78 f
+
+und
+
+CAN_EDCP_Programmers-Guide.pdf, 3.5.5.3 Module events, Seite 114 f
+Setup.digitalFilter
+CAN_EDCP_Programmers-Guide.pdf, Kapitel 3.5.2.28 DigitalFilter Seite 87
+, Control.currentSet
+CAN_EDCP_Programmers-Guide.pdf, 3.5.1.14 Set current/ trip, Seite 58 f
+
+und
+
+CAN_EDCP_Programmers-Guide.pdf, Kapitel 3.5.1.9 Delayed trip time und 3.5.1.10 Delayed trip action, Seite 56
+
+iseg_datasheet_EHS_en.pdf, Kapitel 3.5 Delay

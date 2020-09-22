@@ -44,7 +44,6 @@ ARG projectdir=CHARMing
 RUN mkdir ${projectdir}
 WORKDIR /${projectdir}
 COPY . .
-RUN cp /${projectdir}/distribution/ubuntu18/Docker/${projectdir}/libuv/CMakeLists.txt /${projectdir}/libuv/CMakeLists.txt
 
 WORKDIR /
 
@@ -52,7 +51,7 @@ RUN cd /${projectdir}/boost && rm -rf out
 RUN rm -rf /${projectdir}/out
 RUN cd /${projectdir} && git submodule update --init --recursive
 
-RUN cp /${projectdir}/distribution/ubuntu18/Docker/${projectdir}/libuv/CMakeLists.txt /${projectdir}/libuv/CMakeLists.txt
+RUN cp /${projectdir}/distribution/ubuntu18/${projectdir}/libuv/CMakeLists.txt /${projectdir}/libuv/CMakeLists.txt
 # basically we do overwrite the libuv CMakeLists.txt so that libuv is not installed (not needed as we link statically to it
 
 RUN python3 --version && find /usr -name "pyconfig.h"

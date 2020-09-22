@@ -11,51 +11,61 @@ import asyncio
 import aiohttp
 import websockets
 import json
-from urllib.request import urlopen
-import time
 from concurrent.futures import TimeoutError as ConnectionTimeoutError
 import base64
 import os
 import inspect
 from os.path import expanduser
 
-import entangle.device.iseg.CC2xlib.json_data as json_data
-import entangle.device.iseg.CC2xlib.ping as ping
 from entangle.core import states
 import threading
+
+from entangle.device.iseg import CC2xlib
+from entangle.device.iseg.CC2xlib import json_data
  
+
+instances = []
+
+always_monitored = ['0_1000_','__']
+
 lock = threading.Lock()
 
 sessionid = ''
 websocket = None
-
 itemUpdated = {}
 state = states.UNKNOWN
 
-monitored_channels = []
-
-channelfolders = []
 
 
-
+def StatusJson(channellist)->str:
+    rv = ''
+    tmp = {}
+    lock.acquire()
+    for ch in channellist:
+        if ch in itemUpdated:
+           tmp[ch] = itemUpdated[ch]
+    rv = json.dumps(tmp)
+    lock.release()
+    return rv
 
 async def heartbeat(connection):
     while True:
-            try:
-                await connection.send('ping')
-                await asyncio.sleep(15)
-            except websockets.exceptions.ConnectionClosed:
-                print('Connection with server closed')
-                break
-            except Exception as inst:
-                print(type(inst))    # the exception instance
-                print(inst.args)     # arguments stored in .args
-                print(inst)  
-                break
+        try:
+            await asyncio.sleep(15)
+            await connection.send('ping')
+        except websockets.exceptions.ConnectionClosed:
+            print('Connection with server closed.')
+            break
+        except Exception as inst:
+            print(type(inst))    # the exception instance
+            print(inst.args)     # arguments stored in .args
+            print(inst)  
+            break
             
-    
+v_measure_received = 0    
 async def listen(connection):
-    global sessionid,lock,itemUpdated
+    global sessionid,lock,itemUpdated,websocket,always_monitored,instances
+    global v_measure_received
     while True:
         try :
             response = await connection.recv()
@@ -63,70 +73,133 @@ async def listen(connection):
             dictlist = json.loads(response)
 
             if "d" in dictlist:
-                    data  = dictlist["d"]
-                    if "file" in dictlist:
-                        filename = dictlist["file"]
-                        bytes = base64.b64decode(data)
-                        scriptfile = inspect.getframeinfo(inspect.currentframe()).filename
-                        writeablepath = os.path.dirname(os.path.abspath(scriptfile))
-                        client = connection.remote_address
-                        clientstr = ''
-                        s = str(client[0]).replace('.','_').replace(':','_')
-                        clientstr += s
-                        clientstr += '_'
-                        if not os.access(writeablepath, os.W_OK | os.X_OK):
-                            writeablepath = expanduser("~")
+                data  = dictlist["d"]
+                if "file" in dictlist:
+                    filename = dictlist["file"]
+                    databytes = base64.b64decode(data)
+                    scriptfile = inspect.getframeinfo(inspect.currentframe()).filename
+                    writeablepath = os.path.dirname(os.path.abspath(scriptfile))
+                    client = connection.remote_address
+                    clientstr = ''
+                    s = str(client[0]).replace('.','_').replace(':','_')
+                    clientstr += s
+                    clientstr += '_'
+                    if not os.access(writeablepath, os.W_OK | os.X_OK):
+                        writeablepath = expanduser("~")
                     
-                        fullpath = os.path.join(writeablepath,clientstr+filename)
+                    fullpath = os.path.join(writeablepath,clientstr+filename)
 
-                        with open(fullpath, "wb") as file:
-                            file.write(bytes)
-                            print(fullpath)
-                        continue
+                    with open(fullpath, "wb") as file:
+                        file.write(databytes)
+                        print(fullpath)
+                    continue
 
-            for dict in dictlist:
-                #print(dict)
+            for adict in dictlist:
+                #print(adict)
                 if "trigger" in dictlist:
                     if dictlist["trigger"] == "false":
                         #print(dictlist)
+                        # this is our heartbeat, we don't need to print it
                         pass
                     continue
                 
                 
-                if "t" in dict:
-                       if dict["t"] == "info":
-                           #print(dict)
-                           pass
-                       if dict["t"] == "response":
-                           #print(dict)
-                           pass
-                       if "c" in dict:
-                           contentlist = dict["c"]
-                           for c in contentlist:
-                               lac = json_data.getshortlac(c["d"]["p"])
-                               if lac in monitored_channels:
-                                   print(c["d"])
-                                   command = c["d"]["i"]
-                                   value = c["d"]["v"]
-                                   unit =  c["d"]["u"]
+                if "t" in adict:
+                    if adict["t"] == "info":
+                        #print(adict)
+                        pass
+                    if adict["t"] == "response":
+                        #print(adict)
+                        pass
+                    if "c" in adict:
+                        contentlist = adict["c"]
+                        for c in contentlist:
+                            lac = CC2xlib.json_data.getshortlac(c["d"]["p"])
+                            timestamp = c["d"]["t"]
+                            someinstancesubscribed = 0
+                            lock.acquire()
+                            for inst in instances:
+                                if lac in  inst.channels_handled:
+                                    someinstancesubscribed = 1
+                            lock.release()
+                            if (someinstancesubscribed or (lac in always_monitored)):
+                                command = c["d"]["i"]
+                                if not ( command in ["Status.currentMeasure","Status.heartBeat","System.time","Status.temperature0","Status.temperature1"]): #,"Status.voltageMeasure"]):
+                                    if command == "Status.voltageMeasure":
+                                        v_measure_received = v_measure_received + 1
+                                        if not (v_measure_received % 5) :
+                                            print(c["d"])
+                                    else:
+                                        print(c["d"])
+                                value = c["d"]["v"]
+                                unit =  c["d"]["u"]
+                                vu = {"v":value, "u": unit}
+                                if lac == always_monitored[1]:
+                                    maxconnections = 2
+                                    if (command == "Status.connectedClients" and int(value) > maxconnections):
+                                        print("only "+str(maxconnections)+ " client(s) connection allowed.")
+                                        await connection.close()
+                                    continue
+                                lenrr = 0
+                                ourdict = {}
+                                lock.acquire()
+                                if lac in itemUpdated:
+                                    ourdict = itemUpdated[lac]
+                                # this is a dict again, and that we will update
+                                ourdict[command] = vu
+                                itemUpdated[lac] = ourdict
+                                lock.release()
 
-                                   vu = {"v":value, "u": unit}
-                                  
+                                if lac == always_monitored[0]:
+                                    continue
+                                lock.acquire()
+                                for inst in instances:
+                                    if inst.waitstring :
+                                        if not inst.waitstringmintime:
+                                            inst.waitstringmintime = timestamp
+                                        obj = json.loads(inst.waitstring)
+                                        allrequestedok = True
+                                        for item in obj:
+                                            if item =='GROUP':
+                                                continue
 
-                                   if lac == "__":
-                                       if (command == "Status.connectedClients" and int(value) > 1):
-                                           print("only one client connection allowed.")
-                                           await connection.close()
-                                       continue
-                                   lock.acquire()
+                                            groupnames = obj['GROUP']
+                                            groupname = groupnames[0]
+                                            requestedvalues = obj[item]
+                                            channels = inst.getChannels(groupname)
+                                            k = 0
+                                               
+                                            for ch in channels:
+                                                if ch in itemUpdated:
+                                                    od2 = itemUpdated[ch]
+                                                    if item in od2:
+                                                        v = od2[item]
+                                                        if v['v'].isalpha():
+                                                            if v['v'] != str(requestedvalues[k]):
+                                                                 allrequestedok = False
+                                                        else:
+                                                            if float(v['v']) != float(requestedvalues[k]):
+                                                                 allrequestedok = False
 
-                                   ourdict = {}
-                                   if lac in itemUpdated:
-                                       ourdict = itemUpdated[lac]
-                                   # this is a dict again, and that we will update
-                                   ourdict[command] = vu
-                                   itemUpdated[lac] = ourdict
-                                   lock.release()
+                                                        if (float(timestamp) < float(inst.waitstringmintime)):
+                                                            allrequestedok = False
+                                                    else :
+                                                        allrequestedok = False
+                                                        pass
+                                                else :
+                                                    allrequestedok = False
+                                                    pass
+                                                k = k + 1
+                                        if allrequestedok:
+                                            inst.state= "FINISHED:"+inst.waitstring
+                                            print(inst.state)
+                                            inst.waitstring = ''
+                                            inst.waitstringmintime = ''
+                                lock.release()
+
+                                
+
+
 
                   # fill out our log with the results
         except Exception as inst:
@@ -147,17 +220,17 @@ async def login(address,user,password):
     global state
     try:
         websocket = await asyncio.wait_for(websockets.connect('ws://'+address+':8080'), timeout)
-        cmd = json_data.login(user,password)
+        cmd = CC2xlib.json_data.login(user,password)
         await websocket.send(cmd)
         response = await websocket.recv()
-        dict = json.loads(response)
+        adict = json.loads(response)
         lock.acquire()
-        sessionid = dict["i"]
+        sessionid = adict["i"]
         state = states.ON
         lock.release()
         
         
-    except  ConnectionTimeoutError as e:
+    except  ConnectionTimeoutError:
         print("Connection timeout")
         
         lock.acquire()
@@ -189,21 +262,22 @@ async def getItemsInfo(address):
             print(fullpath)
 
 async def getConfig():
-        global websocket, sessionid
-        cmd = json_data.getConfig(sessionid)
-        await websocket.send(cmd)
+    global websocket, sessionid
+    cmd = CC2xlib.json_data.getConfig(sessionid)
+    await websocket.send(cmd)
                
 
 async def execute_request(requestobjlist):
-        global websocket, sessionid
-        cmd = json_data.request(sessionid, requestobjlist)
-        await websocket.send(cmd)
+    global websocket, sessionid
+    cmd = CC2xlib.json_data.request(sessionid, requestobjlist)
+    await websocket.send(cmd)
+    return True
         
        
 monitored = []
 
-def monitor(address,user,password,loop):
-    global websocket, state
+def monitor(address,user,password):
+    global websocket, state, loop
     asyncio.set_event_loop(loop)
     #ping.ping(address)
     loop.run_until_complete(login(address,user,password))
@@ -213,36 +287,45 @@ def monitor(address,user,password,loop):
     lock.release()
     if tmpstate != states.ON:
         return
-
+    lock.acquire()
     monitored.append(address)
-    
-    #loop.run_until_complete(getItemsInfo(address))
-    #loop.run_until_complete(getConfig())
-
-    future1 = asyncio.ensure_future(heartbeat(websocket))
-    future2 = asyncio.ensure_future(listen(websocket))
-    loop.run_until_complete(asyncio.gather(future1,future2))
-    
+    lock.release()
+    loop.run_until_complete(getItemsInfo(address))
+    loop.run_until_complete(getConfig())
+    try :
+        future1 = asyncio.ensure_future(heartbeat(websocket))
+        future2 = asyncio.ensure_future(listen(websocket))
+        loop.run_until_complete(asyncio.gather(future1,future2))
+    except:
+        pass
+    lock.acquire()
     monitored.remove(address)
+    lock.release()
 
 loop = None
 
 def add_monitor(ipaddress,user,password):
-    global loop, add_monitor_init_done
+    global loop
+    alreadyrunning = False;
+    lmon = 0
+    lock.acquire()
+    lmon = len(monitored)
     if ipaddress in monitored:
+        alreadyrunning = True
+    lock.release()
+    if alreadyrunning: 
         return
-    if len(monitored) :
+    if lmon :
         raise Exception("Unsupported: multiple ip addresses")
     loop = asyncio.get_event_loop()
     
-    t = threading.Thread(target=monitor, args=(ipaddress,user,password,loop,))
+    t = threading.Thread(target=monitor, args=(ipaddress,user,password,))
     t.start()
    
 
 def queue_request(rol):
-    global sessionid, state
+    global sessionid, state, loop
     if len(rol) == 0: return
-   
     sid =''
     tmpstate = states.UNKNOWN
     while sid == '':
@@ -252,11 +335,21 @@ def queue_request(rol):
         lock.release()
         if tmpstate == states.FAULT:
             return # no action
-        
-    
-
     future = asyncio.run_coroutine_threadsafe(execute_request(rol), loop)
-  
+    timeout = 15
+    try :
+        result = future.result(timeout)
+    except asyncio.TimeoutError:
+        print('The coroutine took too long, cancelling the task...')
+        future.cancel()
+    except Exception as exc:
+        print(f'The coroutine raised an exception: {exc!r}')
+    else:
+        return result
+
+
+
+    
     
    
     

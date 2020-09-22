@@ -13,7 +13,6 @@ import sys
 
 def ping(ipaddress):
     retry = 2
-    cc = '-c'+str(retry)
     cmdline = ["ping"]
     if sys.platform.startswith('win32'):
         cmdline.append('-n')
@@ -37,13 +36,13 @@ def ping(ipaddress):
         desired.append(b'%d' % retry + b' received')
         desired.append(b'64 bytes from')
     if(len(error)  != 0):
-        return false;
+        return False
     for l in lines:
         for u in undesired:
             if l.find(u) != -1:
                 return False
         for d in desired:
-             if l.find(d) > -1:
+            if l.find(d) > -1:
                 return True
     return True
 

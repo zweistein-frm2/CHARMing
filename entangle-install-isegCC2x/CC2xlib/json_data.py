@@ -23,7 +23,7 @@ def getshortlac(jsonobj):
 def make_requestobject(command,lac,itemtype,val="",unit=""):
     s = lac.split("_")
     line = ''
-    áddress = ''
+    address = ''
     channel = ''
     if len(s) > 0:
         line = s[0]
@@ -50,7 +50,7 @@ def make_requestobject(command,lac,itemtype,val="",unit=""):
 def checkResponse(_dict):
     for d in _dict:
         if "trigger" in d:
-            if d["trigger"] != "true":
+            if d["trigger"] == "false":
                 raise Exception('trigger', 'not acknolwdged')
       
 
