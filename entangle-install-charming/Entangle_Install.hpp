@@ -48,8 +48,8 @@ namespace Zweistein {
     boost::filesystem::path inidirectory;
     boost::filesystem::path UserIniDir() {
         if (inidirectory.empty()) {
-#if (!defined(NDEBUG) || defined(_WIN32))
-#if !defined(NDEBUG)
+#if (defined(DEBUG) || defined(_WIN32))
+#if defined(DEBUG)
             std::cout << "Debug build:" << std::endl;
 #endif
             boost::filesystem::path homepath = Zweistein::GetHomePath();
@@ -293,7 +293,7 @@ void entangle_setup(boost::filesystem::path& devicedir, boost::filesystem::path&
     userid = geteuid();
     if (userid != 0) {
         std::cout << "You must run with sudo privileges." << std::endl;
-#if defined(NDEBUG)
+#ifndef DEBUG
         exit(-1);
 #endif
     }

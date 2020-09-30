@@ -26,7 +26,7 @@ int main(int argc, char* argv[])
         boost::filesystem::path dest = devicedir;
 
 
-        dest /= "iseg";
+        dest /= "";
         try {
             boost::filesystem::create_directories(dest);
         }

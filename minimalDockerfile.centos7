@@ -16,8 +16,8 @@ RUN yum install -y centos-sclo-rh centos-release-scl git  && \
 
 # we need python3 otherwise boost will not build its python support
 
-COPY distribution/centos7/package/*.rpm .
+COPY distribution/centos7/package/*centos7.rpm ./
 
-
+RUN rpm --install *.rpm
 
 

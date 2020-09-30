@@ -11,9 +11,11 @@ RUN yum install -y epel-release && yum repolist  && \
      rpm -ivh http://repo.okay.com.mx/centos/8/x86_64/release/okay-release-1-3.el8.noarch.rpm?
 
 
-RUN yum install -y dnf which git curl unzip tar wget dpkg && \
+RUN yum install -y dnf && \
     yum install -y python3-pip python3-devel && \
     pip3 install numpy
 
 RUN  dnf install -y opencv
-COPY distribution/centos8/package/*.rpm .
+COPY distribution/centos8/package/*centos8.rpm ./
+
+RUN rpm --install *.rpm

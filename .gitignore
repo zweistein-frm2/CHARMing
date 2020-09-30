@@ -11,8 +11,11 @@ obj/
 CMakeFiles/
 bin/
 ARM/
+
 ENTANGLE_FILES
 libuv.vcxproj
+*.rpm
+*.deb
 # User-specific files
 *.rsuser
 *.suo
