@@ -10,7 +10,7 @@
       "buildCommandArgs": "",
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "linux_x64" ],
-      "remoteMachineName": "taco102",
+      "remoteMachineName": "172.25.2.102",
       "remoteCMakeListsRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/src",
       "remoteBuildRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/build/${name}",
       "remoteInstallRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/install/${name}",
@@ -38,7 +38,7 @@
       "buildCommandArgs": "",
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "linux_x64" ],
-      "remoteMachineName": "taco07",
+      "remoteMachineName": "172.25.2.7",
       "remoteCMakeListsRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/src",
       "remoteBuildRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/build/${name}",
       "remoteInstallRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/install/${name}",
@@ -90,89 +90,6 @@
           "type": "PATH"
         }
       ]
-    },
-
-    {
-      "name": "Raspberrypi4",
-      "generator": "Ninja",
-      "configurationType": "Release",
-      "cmakeExecutable": "/opt/cmake-3.14.7/bin/cmake",
-      "cmakeToolchain": "/vcpkg/scripts/buildsystems/vcpkg.cmake",
-      "remoteCopySourcesExclusionList": [ ".vs", ".git", "out" ],
-      "buildCommandArgs": "",
-      "ctestCommandArgs": "",
-      "inheritEnvironments": [ "linux_arm" ],
-      "remoteMachineName": "-29794628;raspberrypi4 (username=pi, port=22, authentication=Password)",
-      "remoteCMakeListsRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/src",
-      "remoteBuildRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/build/${name}",
-      "remoteInstallRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/install/${name}",
-      "remoteCopySources": true,
-      "rsyncCommandArgs": "-t --delete --delete-excluded",
-      "remoteCopyBuildOutput": false,
-      "remoteCopySourcesMethod": "rsync",
-      "addressSanitizerRuntimeFlags": "detect_leaks=0",
-      "variables": [
-        {
-          "name": "NETWORKCARDINTERFACE",
-          "value": "192.168.168.121",
-          "type": "STRING"
-        }
-      ]
-    },
-    {
-      "name": "Raspberrypi3",
-      "generator": "Ninja",
-      "configurationType": "Release",
-      "cmakeExecutable": "/opt/cmake-3.14.7/bin/cmake",
-      "remoteCopySourcesExclusionList": [ ".vs", ".git", "out" ],
-      "buildCommandArgs": "",
-      "ctestCommandArgs": "",
-      "cmakeToolchain": "/vcpkg/scripts/buildsystems/vcpkg.cmake",
-      "inheritEnvironments": [ "linux_arm" ],
-      "variables": [
-        {
-          "name": "NETWORKCARDINTERFACE",
-          "value": "192.168.168.121",
-          "type": "STRING"
-        }
-      ],
-      "remoteMachineName": "rpi3packetsender",
-      "remoteCMakeListsRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/src",
-      "remoteBuildRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/build/${name}",
-      "remoteInstallRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/install/${name}",
-      "remoteCopySources": true,
-      "rsyncCommandArgs": "-t --delete --delete-excluded",
-      "remoteCopyBuildOutput": false,
-      "remoteCopySourcesMethod": "rsync",
-      "addressSanitizerRuntimeFlags": "detect_leaks=0"
-    },
-    {
-      "name": "172_25_2_137_pi3",
-      "generator": "Ninja",
-      "configurationType": "Release",
-      "cmakeExecutable": "/snap/cmake/current/bin/cmake",
-      "remoteCopySourcesExclusionList": [ ".vs", ".git", "out" ],
-	  "cmakeCommandArgs": "-DEMULATOR_ONLY=ON",
-      "buildCommandArgs": "",
-      "ctestCommandArgs": "",
-      "cmakeToolchain": "",
-      "inheritEnvironments": [ "linux_arm" ],
-      "variables": [
-        {
-          "name": "NETWORKCARDINTERFACE",
-          "value": "192.168.168.123",
-          "type": "STRING"
-        }
-      ],
-      "remoteMachineName": "172.25.2.137",
-      "remoteCMakeListsRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/src",
-      "remoteBuildRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/build/${name}",
-      "remoteInstallRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/install/${name}",
-      "remoteCopySources": true,
-      "rsyncCommandArgs": "-t --delete --delete-excluded",
-      "remoteCopyBuildOutput": false,
-      "remoteCopySourcesMethod": "rsync",
-      "addressSanitizerRuntimeFlags": "detect_leaks=0"
     }
   ]
 }

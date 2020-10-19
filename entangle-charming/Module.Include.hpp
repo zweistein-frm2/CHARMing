@@ -1,3 +1,6 @@
+#define BOOST_NUMPY_STATIC_LIB
+#define BOOST_PYTHON_STATIC_LIB  
+
 #include <Python.h>
 #include <boost/python.hpp>
 #include <boost/python/tuple.hpp>

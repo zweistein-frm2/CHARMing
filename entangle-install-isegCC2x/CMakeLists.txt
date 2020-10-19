@@ -1,4 +1,21 @@
-﻿# CMakeList.txt : CMake project for Boost_Installer, include source and define
+﻿
+execute_process(COMMAND git checkout master
+                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/iseg
+                )
+
+execute_process(COMMAND git pull
+                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/iseg
+                )
+
+execute_process(COMMAND git submodule init
+                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/iseg
+                )
+
+execute_process(COMMAND git submodule update
+                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/iseg
+                )
+
+# CMakeList.txt : CMake project for Boost_Installer, include source and define
 # project specific logic here.
 #
 cmake_minimum_required (VERSION 3.11)
@@ -26,7 +43,7 @@ include(CMakeRC.cmake)
 cmrc_add_resource_library(installer-isegCC2x ALIAS installer::rc NAMESPACE resources ${RESOURCE_FILES})
 set(Boost_USE_STATIC_LIBS ON)
 
-find_package(Boost 1.71 REQUIRED COMPONENTS filesystem chrono thread  iostreams ${BOOST_PATHS}) # header only libraries must not be added here
+find_package(Boost ${boost_currentversion} REQUIRED COMPONENTS filesystem chrono thread  iostreams ${BOOST_PATHS}) # header only libraries must not be added here
 include_directories("${Boost_INCLUDE_DIRS}" )
 include_directories("../entangle-install-charming")
 set (THREADS_PREFER_PTHREAD_FLAG ON)

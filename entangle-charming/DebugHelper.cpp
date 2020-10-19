@@ -9,7 +9,6 @@
  and/or modify it under the terms of the GNU General Public License as
  published by the Free Software Foundation;*/
 
-
 #include <boost/exception/all.hpp>
 #include <boost/system/error_code.hpp>
 #include <boost/exception/error_info.hpp>

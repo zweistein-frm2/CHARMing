@@ -13,6 +13,8 @@ endif()
 if(MSVC)
     add_definitions(-D_WIN32_WINNT=0x0601)
     add_definitions(-DWIN32_PRE10OLDSTYLE)
+    set(OpenCV_DIR "C:\\opencv\\build")
+    set(OpenCV_STATIC ON) # no effect
 endif()
 
 add_definitions(-DASIOEXT_USE_BOOST_ASIO)
@@ -23,11 +25,8 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(Boost_USE_STATIC_LIBS ON)
 
- set(bboooosst ${boost_currentversion})
-if(MSVC)
-    set(bboooosst 1.72)
-endif()
-find_package(Boost ${bboooosst} REQUIRED COMPONENTS filesystem chrono thread program_options iostreams log log_setup locale ${BOOST_PATHS}) # header only libraries must not be added here
+
+find_package(Boost ${boost_currentversion} REQUIRED COMPONENTS filesystem chrono thread program_options iostreams log log_setup locale ${BOOST_PATHS}) # header only libraries must not be added here
 
 #message(*** is debug==  ${$<$<CONFIG:DEBUG>:-gd>>} ****************)
 
@@ -78,6 +77,7 @@ endif()
   install(FILES ${CONFIG_FILES}
   DESTINATION "$ENV{USERPROFILE}/.CHARMing"
   )
+  if(${Boost_VERSION_MAJOR}.${Boost_VERSION_MINOR} VERSION_LESS 1.75)
   install(FILES
     "${CMAKE_CURRENT_BINARY_DIR}/boost_filesystem-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
     "${CMAKE_CURRENT_BINARY_DIR}/boost_thread-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
@@ -92,6 +92,7 @@ endif()
     "${CMAKE_CURRENT_BINARY_DIR}/opencv_core${WIN32LIB_SUFFIX}.dll"
     "${CMAKE_CURRENT_BINARY_DIR}/opencv_imgcodecs${WIN32LIB_SUFFIX}.dll"
     "${CMAKE_CURRENT_BINARY_DIR}/opencv_videoio${WIN32LIB_SUFFIX}.dll"
+    
     "${CMAKE_CURRENT_BINARY_DIR}/bz2${WIN32LIB_SUFFIX}.dll"
     "${CMAKE_CURRENT_BINARY_DIR}/jpeg62.dll"
     "${CMAKE_CURRENT_BINARY_DIR}/libpng16${WIN32LIB_SUFFIX}.dll"
@@ -102,6 +103,12 @@ endif()
     "${CMAKE_CURRENT_BINARY_DIR}/zstd${WIN32LIB_SUFFIX}.dll"
        DESTINATION ${INSTALL_DIR}
         )
+    else()
+    install(FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/opencv_world440${WIN32LIB_SUFFIX}.dll"
+     DESTINATION ${INSTALL_DIR}
+        )
+    endif()
 	if(${Boost_VERSION_MAJOR}.${Boost_VERSION_MINOR} VERSION_LESS 1.73)
    install(
    FILES

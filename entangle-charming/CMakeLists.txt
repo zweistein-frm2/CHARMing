@@ -8,6 +8,7 @@ else()
  message(STATUS "https://bugzilla.redhat.com/show_bug.cgi?id=1853900")
 endif()
 endif()
+
 #
 # in ${CMAKE_CURRENT_SOURCE_DIR}/boost/jamroot or in ${CMAKE_CURRENT_SOURCE_DIR}/boost/CMakeLists.txt
 # the actual boost version is contained and can be extracted to set boost_currentversion automatically
@@ -44,7 +45,7 @@ message(parentdir=${parentdir})
 
 #set(Boost_DEBUG ON)
 #set(Boost_DETAILED_FAILURE_MSG ON)
-set(Boost_VERBOSE ON)
+#set(Boost_VERBOSE ON)
 set(Boost_NO_SYSTEM_PATHS ON)
 
 
@@ -85,6 +86,8 @@ foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3 PROJECT4)
     add_definitions(-DENTANGLE_LOGGER)
     if(WIN32)
         add_definitions(-D_WIN32_WINNT=0x0601)
+        set(OpenCV_DIR "C:\\opencv\\build")
+        set(OpenCV_STATIC ON)  no effect
     endif()
     add_definitions(-DASIOEXT_USE_BOOST_ASIO)
 
@@ -124,11 +127,8 @@ foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3 PROJECT4)
     message(STATUS "ENTANGLE_ROOT=" ${ENTANGLE_ROOT} )
     message(STATUS "ENTANGLE_RES=" ${ENTANGLE_RES} )
 
-    set(bboooosst ${boost_currentversion})
-if(MSVC)
-    set(bboooosst 1.72)
-endif()
-    find_package(Boost ${bboooosst} REQUIRED COMPONENTS filesystem chrono thread  iostreams  python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}
+    
+    find_package(Boost ${boost_currentversion} REQUIRED COMPONENTS filesystem chrono thread  iostreams  python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}
                 numpy${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR} locale  ${BOOST_PATHS}) # header only libraries must not be added here
 
     include_directories(${Python3_INCLUDE_DIRS} ${Python3_NumPy_INCLUDE_DIRS} ${Boost_INCLUDE_DIR} )
