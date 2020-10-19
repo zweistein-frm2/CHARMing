@@ -34,6 +34,8 @@ RUN cd /${projectdir} && chmod +x buildboost.sh && ./buildboost.sh
 
 RUN cd /${projectdir}/entangle-charming && mkdir out && cd out && cmake .. && make
 
+ENV INSTALL_DEPS=libopencv-dev
+
 RUN mkdir out && cd out && cmake -B /out -S /${projectdir}  -DINSTALL_DEPS=libopencv-dev
 RUN  mkdir package && cd out &&  make package && mv *.deb /package
 
