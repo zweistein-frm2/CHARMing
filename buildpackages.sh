@@ -8,7 +8,7 @@ cd ..
 
 currentuser=$USER
 echo $currentluser
-for i in ./Dockerfile.*
+for i in ci/Dockerfile.*
 do
     if [ -f "$i" ];
     then
@@ -18,7 +18,7 @@ do
 
 		mkdir -p distribution/$ext
 		sudo chown root:root distribution/$ext
-		sudo docker build  -m 6g -f ${i##*/} -t charming-${i##*.} .
+		sudo docker build  -m 6g -f ci/${i##*/} -t charming-${i##*.} .
 		sudo docker create -ti --name dummy charming-${i##*.} bash
 		sudo docker cp dummy:/package distribution/${i##*.}
 		sudo docker rm -f dummy

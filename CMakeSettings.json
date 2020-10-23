@@ -1,16 +1,16 @@
 ﻿{
   "configurations": [
      {
-      "name": "Taco102-Ubuntu18.04",
+      "name": "delopc2-Ubuntu18.04",
       "generator": "Unix Makefiles",
       "configurationType": "Debug",
-      "cmakeExecutable": "/snap/cmake/current/bin/cmake",
+      "cmakeExecutable": "/usr/bin/cmake",
       "remoteCopySourcesExclusionList": [ ".vs", "out" ],
       "cmakeCommandArgs": "",
       "buildCommandArgs": "",
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "linux_x64" ],
-      "remoteMachineName": "172.25.2.102",
+      "remoteMachineName": "172.25.25.104",
       "remoteCMakeListsRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/src",
       "remoteBuildRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/build/${name}",
       "remoteInstallRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/install/${name}",

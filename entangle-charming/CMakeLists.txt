@@ -87,7 +87,7 @@ foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3 PROJECT4)
     if(WIN32)
         add_definitions(-D_WIN32_WINNT=0x0601)
         set(OpenCV_DIR "C:\\opencv\\build")
-        set(OpenCV_STATIC ON)  no effect
+        set(OpenCV_STATIC ON)  #no effect
     endif()
     add_definitions(-DASIOEXT_USE_BOOST_ASIO)
 
