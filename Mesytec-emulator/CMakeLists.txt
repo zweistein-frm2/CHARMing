@@ -3,8 +3,7 @@
 #
 cmake_minimum_required (VERSION 3.11)
 
-
-
+set(boost_currentversion 1.75.0)
 
 get_filename_component(parentdir ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY )
 
@@ -42,14 +41,28 @@ set(repository ${Charm_DIR})
 
 set(Boost_USE_STATIC_LIBS ON)
 
-project(mesytec-emulator)
 if(WIN32)
-    add_defintions(-D_WIN32_WINNT=0x0601)
+set(INSTALL_DIR  $ENV{USERPROFILE} ) # or $ENV{HOMEDRIVE}$ENV{HOMEPATH}
+else()
+set(INSTALL_DIR /usr/local/bin)
+endif()
+
+project(mesytec-emulator)
+
+set(LIBUV_BUILD_TESTS OFF)
+set(LIBUV_BUILD_BENCH OFF)
+add_subdirectory(${parentdir}/libuv ${CMAKE_CURRENT_BINARY_DIR}/libuv)
+set(libuv_INCLUDE_DIR "${parentdir}/libuv/include")
+
+target_compile_options(uv_a PRIVATE $<$<CXX_COMPILER_ID:GNU>:-fPIC>)
+
+if(WIN32)
+    add_definitions(-D_WIN32_WINNT=0x0601)
 endif()
 
 set(CMAKE_CXX_STANDARD 17)
 
-find_package(Boost 1.71 REQUIRED COMPONENTS filesystem chrono thread  iostreams locale  ${BOOST_PATHS}) # header only libraries must not be added here
+find_package(Boost 1.75 REQUIRED COMPONENTS filesystem chrono thread  iostreams locale  ${BOOST_PATHS}) # header only libraries must not be added here
 
 set(libuv_INCLUDE_DIR "${parentdir}/libuv/include")
 include_directories("${Boost_INCLUDE_DIRS}" )
@@ -75,49 +88,76 @@ $<$<COMPILE_LANGUAGE:CXX>:$<$<CXX_COMPILER_ID:MSVC>:/EHsc>>
 
 if(UNIX AND NOT APPLE)
 
-set(CPACK_GENERATOR "DEB")
-set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Andreas Langhoff") # required
-set(CPACK_DEBIAN_FILE_NAME DEB-DEFAULT)
-include(CPack)
+    if(DEFINED $ENV{INSTALL_DEPS})
+     set(INSTALL_DEPS $ENV{INSTALL_DEPS})
+     else()
+     set(INSTALL_DEPS '')
+    endif()
 
+    if (DEFINED $ENV{PACK2RPM})
+     set(PACK2RPM $ENV{PACK2RPM})
+     else()
+     set(PACK2RPM OFF)
+    endif()
+
+    if(${PACK2RPM} STREQUAL ON)
+     set(CPACK_GENERATOR "RPM")
+     set(CPACK_RPM_PACKAGE_REQUIRES ${INSTALL_DEPS})
+     else()
+     set(CPACK_GENERATOR "DEB")
+     SET (CPACK_DEBIAN_PACKAGE_DEPENDS ${INSTALL_DEPS})
+    endif()
+    set(CPACK_PACKAGE_CONTACT "andreas.langhoff@frm2.tum.de" ) # required
+    set(CPACK_PACKAGE_VENDOR "https://mlz-garching.de/" )
+    set (CMAKE_PROJECT_HOMEPAGE_URL "https://forge.frm2.tum.de")
+    set(CPACK_PACKAGE_VERSION_MAJOR ${CMAKE_PROJECT_VERSION_MAJOR})
+    set(CPACK_PACKAGE_VERSION_MINOR ${CMAKE_PROJECT_VERSION_MINOR})
+    set(CPACK_PACKAGE_VERSION_PATCH ${CMAKE_PROJECT_VERSION_PATCH})
+
+    if(DEFINED ENV{LINUX_FLAVOUR})
+     set(CPACK_PACKAGE_FILE_NAME ${CMAKE_PROJECT_NAME}-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}-$ENV{LINUX_FLAVOUR})
+    endif()
+    include(CPack)
 endif()
 
 if(NOT INSTALL_DIR)
 if(WIN32)
 set(INSTALL_DIR $ENV{HOMEDRIVE}$ENV{HOMEPATH}) # or $ENV{USERPROFILE}
 else()
-set(INSTALL_DIR ~/)
+set(INSTALL_DIR /usr/local/bin)
 endif()
 endif()
 
 if(WIN32)
-if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-set(WIN32LIB_SUFFIX d)
-set(BOOSTLIB_DBG -gd)
-endif()
-  install(TARGETS ${PROJECT_NAME}
-        RUNTIME  DESTINATION ${INSTALL_DIR}
-        )
-  install(FILES
-    "${CMAKE_CURRENT_BINARY_DIR}/boost_filesystem-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
-    "${CMAKE_CURRENT_BINARY_DIR}/boost_thread-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
-    "${CMAKE_CURRENT_BINARY_DIR}/boost_chrono-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
-    "${CMAKE_CURRENT_BINARY_DIR}/boost_locale-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
-
-
-       DESTINATION ${INSTALL_DIR}
-        )
-	if(${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR} VERSION_LESS "1_73")
-   install(
-   FILES
-      "${CMAKE_CURRENT_BINARY_DIR}/boost_date_time-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
-    DESTINATION ${INSTALL_DIR}
-   )
-   endif()
-
-else()
+ if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+  set(WIN32LIB_SUFFIX d)
+  set(BOOSTLIB_DBG -gd)
+ endif()
  install(TARGETS ${PROJECT_NAME}
-        RUNTIME  DESTINATION ${INSTALL_DIR}
-        )
+            RUNTIME  DESTINATION ${INSTALL_DIR}
+            )
+
+ if(${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR} VERSION_LESS "1_75")
+ # check better, as static linking into exe is preferred. I could get it to work only on boost 1.75, but maybe possible also for older boost
+  install(FILES
+            "${CMAKE_CURRENT_BINARY_DIR}/boost_filesystem-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
+            "${CMAKE_CURRENT_BINARY_DIR}/boost_thread-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
+            "${CMAKE_CURRENT_BINARY_DIR}/boost_chrono-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
+            "${CMAKE_CURRENT_BINARY_DIR}/boost_locale-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
+            DESTINATION ${INSTALL_DIR}
+            )
+ endif()
+ if(${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR} VERSION_LESS "1_73")
+       install(
+       FILES
+          "${CMAKE_CURRENT_BINARY_DIR}/boost_date_time-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
+        DESTINATION ${INSTALL_DIR}
+       )
+       endif()
+
+ else()
+     install(TARGETS ${PROJECT_NAME}
+            RUNTIME  DESTINATION ${INSTALL_DIR}
+            )
 endif()
 

@@ -494,7 +494,7 @@ int main(int argc, char* argv[])
 						worker_threads.create_thread([&ptrmsmtsystem1] {Zweistein::populateHistograms(*ptr_ctx, ptrmsmtsystem1); });
 						worker_threads.create_thread([&ptrmsmtsystem1] {Zweistein::displayHistogram(*ptr_ctx, ptrmsmtsystem1); });
 						boost::function<void()> sendstartcmd = [&ptrmsmtsystem1, &_devlist, &write2disk]() {
-							unsigned long rate = 1100000;
+							unsigned long rate = 1234;
 							try {
 								if (write2disk) worker_threads.create_thread([&ptrmsmtsystem1] {Mesytec::writeListmode(*ptr_ctx, ptrmsmtsystem1); });
 								ptrmsmtsystem1->SendAll(Mcpd8::Cmd::START);

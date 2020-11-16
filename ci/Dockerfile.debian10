@@ -1,0 +1,53 @@
+FROM debian:10
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN echo 'deb http://deb.debian.org/debian testing main' >> /etc/apt/sources.list
+RUN apt update -y
+RUN apt-get install -y libc6 -f -o APT::Immediate-Configure=0
+RUN apt install -qq -y -t testing build-essential
+RUN apt install -y gcc cmake
+
+
+RUN export TZ=Europe/Berlin    # must be at beginning for unknown reasons,
+RUN apt-get install tzdata     # must be at beginning for unknown reasons,
+
+
+RUN apt-get install -y git curl unzip tar && \
+    apt-get install -y python3-pip python3-dev && \
+    pip3 install numpy && \
+    apt-get install -y libopencv-dev
+
+
+ARG projectdir=CHARMing
+RUN mkdir ${projectdir}
+WORKDIR /${projectdir}
+COPY . .
+
+WORKDIR /
+
+RUN cd /${projectdir}/boost && rm -rf out
+RUN rm -rf /${projectdir}/out
+
+RUN cd /${projectdir} && git submodule update --init --recursive
+RUN cp /${projectdir}/distribution/ubuntu20/${projectdir}/libuv/CMakeLists.txt /${projectdir}/libuv/CMakeLists.txt
+# basically we do overwrite the libuv CMakeLists.txt so that libuv is not installed (not needed as we link statically to it
+
+RUN cd /${projectdir} && chmod +x buildboost.sh && ./buildboost.sh
+
+RUN cd /${projectdir}/entangle-charming && mkdir out && cd out && cmake .. && make
+
+ENV INSTALL_DEPS=libopencv-dev
+ENV LINUX_FLAVOUR=debian10
+
+RUN mkdir out && cd out && cmake -B /out -S /${projectdir}
+RUN  mkdir package && cd out &&  make package && mv *.deb /package
+
+RUN apt-get install -y ftp
+RUN cd /${projectdir}/distribution && chmod +x packageout.sh  && chmod +x ftpout.sh  && ./packageout.sh
+
+
+
+
+
+
+

@@ -1,6 +1,6 @@
 ﻿{
   "configurations": [
-     {
+    {
       "name": "delopc2-Ubuntu18.04",
       "generator": "Unix Makefiles",
       "configurationType": "Debug",
@@ -25,34 +25,6 @@
           "value": "True",
           "type": "STRING"
         }
-
-      ]
-    },
-    {
-      "name": "Taco07-Ubuntu20",
-      "generator": "Unix Makefiles",
-      "configurationType": "Debug",
-      "cmakeExecutable": "/snap/cmake/current/bin/cmake",
-      "remoteCopySourcesExclusionList": [ ".vs", "out", "ENTANGLE_FILES","charm-entangle-install/rcfiles" ],
-      "cmakeCommandArgs": "",
-      "buildCommandArgs": "",
-      "ctestCommandArgs": "",
-      "inheritEnvironments": [ "linux_x64" ],
-      "remoteMachineName": "172.25.2.7",
-      "remoteCMakeListsRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/src",
-      "remoteBuildRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/build/${name}",
-      "remoteInstallRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/install/${name}",
-      "remoteCopySources": true,
-      "rsyncCommandArgs": "-t --delete --delete-excluded",
-      "remoteCopyBuildOutput": false,
-      "remoteCopySourcesMethod": "rsync",
-      "addressSanitizerRuntimeFlags": "detect_leaks=0",
-      "variables": [
-        {
-          "name": "ENTANGLE_ROOT",
-          "value": "/home/localadmin/entangle",
-          "type": "PATH"
-        }
       ]
     },
     {
@@ -73,7 +45,7 @@
         }
       ]
     },
-	{
+    {
       "name": "x64-Debug",
       "generator": "Ninja",
       "configurationType": "Debug",

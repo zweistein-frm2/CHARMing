@@ -6,6 +6,7 @@
  ***************************************************************************/
 #include <boost/locale.hpp>
 #include <boost/array.hpp>
+#define  BOOST_CHRONO_VERSION 2
 #include <boost/chrono.hpp>
 #include <boost/asio.hpp>
 #include <boost/filesystem.hpp>
@@ -515,28 +516,34 @@ int main(int argc, char* argv[])
 	boost::array< Mcpd8::DataPacket, 1> dp;
 
 	zeropoint= boost::chrono::steady_clock::now().time_since_epoch();
+	try {
+		if (argc == 1) {
+			boost::mutex::scoped_lock lock(coutGuard);
+			std::cout << "Specify Event Rate per second , 2K -> 2000, 1M->1000000  [MDLL]" << std::endl;
+		}
+		if (argc >= 2) {
+			long long num = 0;
+			std::string argv1(argv[1]);
+			requestedEventspersecond = (long)Zweistein::Dehumanize(argv1);
+			//requestedEventspersecond = std::stoi(argv[1]);
+		}
 
-	if (argc == 1) {
-		boost::mutex::scoped_lock lock(coutGuard);
-		std::cout << "Specify Event Rate per second , 2K -> 2000, 1M->1000000  [MDLL]" << std::endl;
+		if (argc == 3) {
+			std::string argv2 = argv[2];
+			if (argv2 == "MDLL") 	dataformat = Zweistein::Format::EventData::Mdll;
+		}
+
+		{
+			boost::mutex::scoped_lock lock(coutGuard);
+			std::cout << "waiting for START command" << std::endl;
+		}
+		setRate(requestedEventspersecond);
 	}
-	if (argc >= 2) {
-		long long num = 0;
-		std::string argv1(argv[1]);
-		requestedEventspersecond = (long)Zweistein::Dehumanize(argv1);
-		//requestedEventspersecond = std::stoi(argv[1]);
+	catch (std::exception& ex) {
+		LOG_ERROR << ex.what() << std::endl;
+		return -1;
 	}
 
-	if (argc == 3) {
-		std::string argv2 = argv[2];
-		if (argv2 == "MDLL") 	dataformat = Zweistein::Format::EventData::Mdll;
-	}
-
-	{
-		boost::mutex::scoped_lock lock(coutGuard);
-		std::cout << "waiting for START command" << std::endl;
-	}
-	setRate(requestedEventspersecond);
 
 	unsigned short bufnum = 0;
 	int length = 0;
