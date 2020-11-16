@@ -10,8 +10,8 @@ std::string PROJECT_NAME("entangle-install-charming");
 
 
 std::vector<std::string> prerequisites = {
-    "pip3 install --user scikit-build",
-    "pip3 install --user opencv-python"
+    "pip3 install scikit-build",
+    "pip3 install opencv-python"
 };
 
 

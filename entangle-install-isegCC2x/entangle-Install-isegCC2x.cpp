@@ -7,10 +7,10 @@ CMRC_DECLARE(resources);
 std::string PROJECT_NAME("entangle-install-isegcc2x");
 
 std::vector<std::string> prerequisites = {
-    "pip3 install --user asyncio",
-    "pip3 install --user aiohttp",
-    "pip3 install --user websockets",
-    "pip3 install --user toml",
+    "pip3 install asyncio",
+    "pip3 install aiohttp",
+    "pip3 install websockets",
+    "pip3 install toml",
 
 };
 
