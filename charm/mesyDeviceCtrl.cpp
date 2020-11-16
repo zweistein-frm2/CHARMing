@@ -37,6 +37,8 @@
 #include "CounterMonitor.hpp"
 #include "Charm.System.hpp"
 #include "version.h"
+#include "Zweistein.deHumanizeNumber.hpp"
+
 #ifdef _DEBUG
 boost::log::trivial::severity_level SEVERITY_THRESHOLD = boost::log::trivial::trace;
 #else
@@ -85,7 +87,7 @@ int main(int argc, char* argv[])
 
 	boost::shared_ptr <  Mesytec::MesytecSystem> ptrmsmtsystem1 = nullptr;
 
-
+	unsigned long simuratedefault = 1234; // 1234 cts/second
 
 	try
 	{
@@ -107,12 +109,14 @@ int main(int argc, char* argv[])
 		const char *WRITE2DISK="writelistmode";
 		const char* SETUP = "setup";
 		const char* CHARMDEVICE = "charmdevice";
+		const char* SIMRATE = "sim-rate";
 		bool inputfromlistfile = false;
 		bool write2disk = false;
 		bool setupafterconnect = false;
 		bool bmesyteconly = false;
 		po::options_description desc("command line options");
 		int maxNlistmode = 16;// maximal 16 listmode files
+
 		desc.add_options()
 			(HELP, "produces this help message" )
 			(LISTMODE_FILE, po::value< std::vector<std::string> >(),(std::string("file1 [file2] ... [file")+std::to_string(maxNlistmode)+std::string("N]")).c_str())
@@ -120,6 +124,7 @@ int main(int argc, char* argv[])
 			(WRITE2DISK, (std::string("write DataPackets to ")+ Mesytec::writelistmodeFileNameInfo()).c_str())
 			(CHARMDEVICE, (std::string("use charm device protocol. ")).c_str())
 			(SETUP, (std::string("config mesytec device(s): ")+ std::string("set module IP addr")).c_str())
+			(SIMRATE, (std::string("simulator rate [cts/s]")+std::string("(default=") +std::to_string(simuratedefault)+std::string(")")).c_str())
 			;
 		po::positional_options_description positionalOptions;
 		positionalOptions.add(LISTMODE_FILE, maxNlistmode);
@@ -185,6 +190,13 @@ int main(int argc, char* argv[])
 				listmodeinputfiles.push_back(p_argv.string());
 			}
 			std::cout << std::endl;
+		}
+
+		if (vm.count(SIMRATE))
+		{
+			std::string sr = vm[SIMRATE].as<std::string>();
+			simuratedefault = (unsigned long)Zweistein::Dehumanize(sr);
+			std::cout << "SIMRATE=" << simuratedefault << std::endl;
 		}
 
 		if (bmesyteconly) ptrmsmtsystem1 = boost::shared_ptr < Mesytec::MesytecSystem>(new  Mesytec::MesytecSystem());
@@ -493,9 +505,9 @@ int main(int argc, char* argv[])
 						Zweistein::setupHistograms(*ptr_ctx, ptrmsmtsystem1, Mesytec::Config::BINNINGFILE.string());
 						worker_threads.create_thread([&ptrmsmtsystem1] {Zweistein::populateHistograms(*ptr_ctx, ptrmsmtsystem1); });
 						worker_threads.create_thread([&ptrmsmtsystem1] {Zweistein::displayHistogram(*ptr_ctx, ptrmsmtsystem1); });
-						boost::function<void()> sendstartcmd = [&ptrmsmtsystem1, &_devlist, &write2disk]() {
-							unsigned long rate = 1234;
+						boost::function<void()> sendstartcmd = [&ptrmsmtsystem1, &_devlist, &write2disk,&simuratedefault]() {
 							try {
+								unsigned long rate = simuratedefault/_devlist.size();
 								if (write2disk) worker_threads.create_thread([&ptrmsmtsystem1] {Mesytec::writeListmode(*ptr_ctx, ptrmsmtsystem1); });
 								ptrmsmtsystem1->SendAll(Mcpd8::Cmd::START);
 								for (auto& kvp : ptrmsmtsystem1->deviceparam) {

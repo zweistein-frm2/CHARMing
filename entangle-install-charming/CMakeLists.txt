@@ -10,22 +10,22 @@ if(WIN32)
 endif()
 
 set(CMAKE_CXX_STANDARD 17)
-message(CMAKE_SOURCE_DIR=${CMAKE_SOURCE_DIR})
+#message(CMAKE_SOURCE_DIR=${CMAKE_SOURCE_DIR})
 file(STRINGS "${CMAKE_SOURCE_DIR}/ENTANGLE_FILES" ENTANGLE_FILES_RC)
 
 set(RESOURCE_FILES "")
 list(LENGTH ENTANGLE_FILES_RC  LL)
-message(LIST_LENGTH="${LL}")
+#message(LIST_LENGTH="${LL}")
 
 FOREACH(FPATH ${ENTANGLE_FILES_RC})
- message(${FPATH})
+ #message(${FPATH})
  string(REGEX MATCH  "[\\[]" isdestdir "${FPATH}")
- message(isdestdir="${isdestdir}")
+ #message(isdestdir="${isdestdir}")
  if("${isdestdir}"  STREQUAL "[")
-   message("is a destdirectory")
+   #message("is a destdirectory")
  else()
  get_filename_component(barename ${FPATH} NAME )
-  MESSAGE("<<${barename}>>")
+  #MESSAGE("<<${barename}>>")
   if(NOT DEFINED ENTANGLE_FILES_DO_NOT_COPY)
   file(COPY ${FPATH}  DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/rcfiles)
   endif()
@@ -34,14 +34,15 @@ FOREACH(FPATH ${ENTANGLE_FILES_RC})
 
 ENDFOREACH()
 
+message(RESOURCE_FILES=${RESOURCE_FILES})
 
 include(cmrc/CMakeRC.cmake)
 cmrc_add_resource_library(installer-charming ALIAS installer::rc NAMESPACE resources ${RESOURCE_FILES})
 set(Boost_USE_STATIC_LIBS ON)
 
-find_package(Boost 1.71 REQUIRED COMPONENTS filesystem chrono thread  iostreams ${BOOST_PATHS}) # header only libraries must not be added here
+find_package(Boost ${boost_currentversion} REQUIRED COMPONENTS filesystem chrono thread  iostreams ${BOOST_PATHS}) # header only libraries must not be added here
 include_directories("${Boost_INCLUDE_DIRS}" )
-
+include_directories(${Charm_DIR})
 set (THREADS_PREFER_PTHREAD_FLAG ON)
 find_package (Threads REQUIRED)
 #include_directories(${Charm_DIR}) # need this only for Zweistein.HomePath.hpp
