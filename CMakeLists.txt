@@ -7,7 +7,7 @@ set(BOOST_PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/boost/out)
 file(MAKE_DIRECTORY ${BOOST_PREFIX})
 
 #set(Boost_DEBUG ON)
-#set(Boost_DETAILED_FAILURE_MSG ON)
+set(Boost_DETAILED_FAILURE_MSG ON)
 #set(Boost_VERBOSE ON)
 set(Boost_NO_SYSTEM_PATHS ON)
 
@@ -30,7 +30,9 @@ message(BOOST_PREFIX=${BOOST_PREFIX})
 
 
 if(WIN32)
-set(INSTALL_DIR  $ENV{USERPROFILE} ) # or $ENV{HOMEDRIVE}$ENV{HOMEPATH}
+ # or $ENV{HOMEDRIVE}$ENV{HOMEPATH}
+file(TO_CMAKE_PATH $ENV{USERPROFILE} INSTALL_DIR)
+
 else()
 set(INSTALL_DIR /usr/local/bin)
 endif()
@@ -60,6 +62,7 @@ set(CMAKE_PROJECT_VERSION_PATCH ${GIT_PATCH})
 add_subdirectory(charm)
 add_subdirectory(entangle-install-charming)
 add_subdirectory(entangle-install-isegCC2x)
+add_subdirectory(TestBinning)
 if(UNIX AND NOT APPLE)
 if(DEFINED ENV{INSTALL_DEPS})
 set(INSTALL_DEPS $ENV{INSTALL_DEPS})

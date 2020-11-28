@@ -1,0 +1,6 @@
+{
+  "ExcludedItems" : [
+    "boost/",
+    "*.useless_file_ext"
+   ]
+}

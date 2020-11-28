@@ -71,6 +71,8 @@ list(APPEND ENTANGLE_FILES
   [device/charming]
   )
 
+set(ENTANGLE_FILES_DEVICE_CHARMING "")
+
 #foreach(PROJECT_NAME IN LISTS PROJECT1 )
 foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3 PROJECT4)
     message(STATUS "PROJECT_NAME=${PROJECT_NAME}")
@@ -81,12 +83,14 @@ foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3 PROJECT4)
        set(libuv_INCLUDE_DIR "${parentdir}/libuv/include")
     endif()
 
-    target_compile_options(uv_a PRIVATE $<$<CXX_COMPILER_ID:GNU>:-fPIC>)
+    target_compile_options(uv_a PRIVATE $<$<CXX_COMPILER_ID:GNU>:-fpic>)
 
     add_definitions(-DENTANGLE_LOGGER)
+
+    #add_definitions(-DUNICODE -D_UNICODE)
     if(WIN32)
         add_definitions(-D_WIN32_WINNT=0x0601)
-        set(OpenCV_DIR "C:\\opencv\\build")
+         set(OpenCV_DIR "C:\\opencv\\build")
         set(OpenCV_STATIC ON)  #no effect
     endif()
     add_definitions(-DASIOEXT_USE_BOOST_ASIO)
@@ -115,7 +119,7 @@ foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3 PROJECT4)
     if(ENTANGLE_ROOT)
        if(NOT ENTANGLE_RES)
          if(UNIX)
-            set(ENTANGLE_RES /etc/CHARMing)  # if standard install .res should go there (or one could parse /etc/entangle/entangle.conf.dist to know better)
+            set(ENTANGLE_RES /etc/entangle)  # if standard install .res should go there (or one could parse /etc/entangle/entangle.conf.dist to know better)
          else()
           get_filename_component(entangledevroot ${ENTANGLE_ROOT} DIRECTORY )
            set (ENTANGLE_RES ${entangledevroot}/example)
@@ -127,7 +131,7 @@ foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3 PROJECT4)
     message(STATUS "ENTANGLE_ROOT=" ${ENTANGLE_ROOT} )
     message(STATUS "ENTANGLE_RES=" ${ENTANGLE_RES} )
 
-    
+
     find_package(Boost ${boost_currentversion} REQUIRED COMPONENTS filesystem chrono thread  iostreams  python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}
                 numpy${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR} locale  ${BOOST_PATHS}) # header only libraries must not be added here
 
@@ -151,24 +155,24 @@ foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3 PROJECT4)
     if(${PROJECT_NAME} STREQUAL "DebugHelper")
      message(STATUS "add_executable(${PROJECT_NAME})")
      add_executable(${PROJECT_NAME})
-     target_compile_options(${PROJECT_NAME} PRIVATE  $<$<CXX_COMPILER_ID:GNU>:-static-libstdc++>)
      target_compile_options(${PROJECT_NAME} PRIVATE  $<$<CXX_COMPILER_ID:GNU>: -Wno-error>)
+
      target_compile_options(${PROJECT_NAME} PRIVATE
       $<$<COMPILE_LANGUAGE:CXX>:$<$<CXX_COMPILER_ID:MSVC>:/Od>>
       $<$<COMPILE_LANGUAGE:CXX>:$<$<CXX_COMPILER_ID:MSVC>:/GS>>
      )
      target_link_libraries(${PROJECT_NAME} PRIVATE "${_Python3_LIBRARY_${Build_Type}}" ${Boost_LIBRARIES} ${OpenCV_LIBS}  uv_a )
-     target_link_libraries(${PROJECT_NAME} PRIVATE  $<$<CXX_COMPILER_ID:GNU>:libstdc++.a>)
 
-     else()
+    else()
      message(STATUS "add_library(${PROJECT_NAME} SHARED )")
      add_library(${PROJECT_NAME} SHARED )
-     target_compile_options(${PROJECT_NAME} PRIVATE  $<$<CXX_COMPILER_ID:GNU>:-static-libstdc++>)
+
+     target_compile_options(${PROJECT_NAME} PRIVATE $<$<CXX_COMPILER_ID:GNU>:-fpic>)
      target_link_libraries(${PROJECT_NAME} PRIVATE ${Boost_LIBRARIES} ${OpenCV_LIBS} uv_a  )
      target_link_libraries(${PROJECT_NAME} PRIVATE "${_Python3_LIBRARY_${Build_Type}}" ${${Boost_python_library}} ${${Boost_numpy_library}})
-     target_link_libraries(${PROJECT_NAME} PRIVATE  $<$<CXX_COMPILER_ID:GNU>:libstdc++.a>)
-     if(WIN32)
+      if(WIN32)
       set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".pyd")
+      message(${_OpenCV_LIB_PATH})
      else()
       set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "")
      endif()
@@ -192,9 +196,6 @@ foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3 PROJECT4)
             COMMAND ${CMAKE_COMMAND} -E copy
                   ${CMAKE_CURRENT_SOURCE_DIR}/mesytec-replay.py
                   ${CMAKE_CURRENT_BINARY_DIR}/mesytec-replay.py
-             COMMAND ${CMAKE_COMMAND} -E copy
-                  ${CMAKE_CURRENT_SOURCE_DIR}/__init__.py
-                  ${CMAKE_CURRENT_BINARY_DIR}/__init__.py
 
             COMMAND ${CMAKE_COMMAND} -E copy
                   ${CMAKE_CURRENT_SOURCE_DIR}/msmtsystem.py
@@ -242,9 +243,13 @@ foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3 PROJECT4)
 
 
 
-
     if(ENTANGLE_ROOT )
      if(WIN32)
+
+     file(TO_CMAKE_PATH ${_OpenCV_LIB_PATH} ocvcm_path)
+  message("ocvcm_path = ${ocvcm_path}")
+  message("INSTALL_DIR = ${INSTALL_DIR}")
+
      install(
         TARGETS ${PROJECT_NAME}
           RUNTIME DESTINATION ${ENTANGLE_ROOT}/device/charming
@@ -274,7 +279,7 @@ foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3 PROJECT4)
 
      set(tmpPREFIX "") #always , otherwise trouble with cross compile vs for linux
 
-     list(APPEND ENTANGLE_FILES
+     list(APPEND ENTANGLE_FILES_DEVICE_CHARMING
       ${CMAKE_CURRENT_BINARY_DIR}/${tmpPREFIX}${PROJECT_NAME}${tmpSUFFIX}
       )
     endif()
@@ -282,12 +287,11 @@ foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3 PROJECT4)
 endforeach()
 
 
-list(APPEND ENTANGLE_FILES
+list(APPEND ENTANGLE_FILES_DEVICE_CHARMING
    ${CMAKE_CURRENT_SOURCE_DIR}/charm.py
    ${CMAKE_CURRENT_SOURCE_DIR}/mesytec.py
    ${CMAKE_CURRENT_SOURCE_DIR}/mesytec-replay.py
    ${CMAKE_CURRENT_SOURCE_DIR}/msmtsystem.py
-   ${CMAKE_CURRENT_SOURCE_DIR}/__init__.py
    ${CMAKE_CURRENT_SOURCE_DIR}/core.py
    ${CMAKE_CURRENT_SOURCE_DIR}/settings.py
    ${CMAKE_CURRENT_SOURCE_DIR}/simulator.py
@@ -295,11 +299,38 @@ list(APPEND ENTANGLE_FILES
    ${CMAKE_CURRENT_SOURCE_DIR}/test.py
 )
 
-list(APPEND ENTANGLE_FILES
-   [/etc/entangle/example]
-    ${CMAKE_CURRENT_SOURCE_DIR}/entangle/example/charm-replay.res
+list (APPEND ENTANGLE_FILES ${ENTANGLE_FILES_DEVICE_CHARMING})
+
+list(APPEND ENTANGLE_FILES_RES
+   ${CMAKE_CURRENT_SOURCE_DIR}/entangle/example/charm-replay.res
     ${CMAKE_CURRENT_SOURCE_DIR}/entangle/example/charm-SANS1.res
- )
+  )
+
+if(ENTANGLE_ROOT )
+install(
+  FILES
+  ${ENTANGLE_FILES_DEVICE_CHARMING}
+   DESTINATION ${ENTANGLE_ROOT}/device/charming
+  )
+
+  install(
+  FILES
+  ${ENTANGLE_FILES_RES}
+   DESTINATION /etc/entangle
+   OPTIONAL
+  )
+
+
+endif()
+
+
+list(APPEND ENTANGLE_FILES
+[/etc/entangle]
+)
+
+list(APPEND ENTANGLE_FILES ${ENTANGLE_FILES_RES}
+)
+
 set(txt ${ENTANGLE_FILES})
 string (REPLACE ";" "\n" txt "${txt}")
 message(${txt})
@@ -309,17 +340,26 @@ message(STATUS "written to : ${parentdir}/ENTANGLE_FILES")
 
 
 if(ENTANGLE_ROOT )
- install(
-  FILES
-  ${ENTANGLE_FILES}
-   DESTINATION ${ENTANGLE_ROOT}/device/charming
-  )
 
  if(WIN32)
    if(${Build_Type} STREQUAL "DEBUG")
      set(WIN32LIB_SUFFIX d)
      set(BOOSTLIB_DBG -gd)
    endif()
+
+
+    file(TO_CMAKE_PATH ${_OpenCV_LIB_PATH} ocvcm_path)
+  message("ocvcm_path = ${ocvcm_path}")
+  message("INSTALL_DIR = ${INSTALL_DIR}")
+    install(
+    DIRECTORY ${ocvcm_path}/     # / needed, seems a bug in cmake
+    DESTINATION ${ENTANGLE_ROOT}/device/charming
+    FILES_MATCHING
+    PATTERN "*${WIN32LIB_SUFFIX}.dll"
+    )
+
+
+    if(${Boost_VERSION_MAJOR}.${Boost_VERSION_MINOR} VERSION_LESS 1.75)
    install(
     FILES
     "${CMAKE_CURRENT_BINARY_DIR}/boost_filesystem-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
@@ -328,14 +368,11 @@ if(ENTANGLE_ROOT )
     "${CMAKE_CURRENT_BINARY_DIR}/boost_iostreams-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
     "${CMAKE_CURRENT_BINARY_DIR}/boost_numpy${Python_VERSION_MAJOR}${Python_VERSION_MINOR}-vc${MSVC_TOOLSET_VERSION}-mt-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
     "${CMAKE_CURRENT_BINARY_DIR}/boost_python${Python_VERSION_MAJOR}${Python_VERSION_MINOR}-vc${MSVC_TOOLSET_VERSION}-mt-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
-    "${CMAKE_CURRENT_BINARY_DIR}/opencv_core${WIN32LIB_SUFFIX}.dll"
     "${libuv_BINARY_DIR}/uv.dll"
-    "${CMAKE_CURRENT_BINARY_DIR}/bz2${WIN32LIB_SUFFIX}.dll"
-    "${CMAKE_CURRENT_BINARY_DIR}/lzma${WIN32LIB_SUFFIX}.dll"
-    "${CMAKE_CURRENT_BINARY_DIR}/zlib1${WIN32LIB_SUFFIX}.dll"
-    "${CMAKE_CURRENT_BINARY_DIR}/zstd${WIN32LIB_SUFFIX}.dll"
+
     DESTINATION ${ENTANGLE_ROOT}/device/charming
    )
+   endif()
    if(${Boost_VERSION_MAJOR}.${Boost_VERSION_MINOR} VERSION_LESS 1.73)
     message(STATUS "${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}  INSTALL EXTRA")
     install(

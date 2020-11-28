@@ -1,11 +1,12 @@
 ﻿{
   "configurations": [
     {
-      "name": "delopc2-Ubuntu18.04",
+      "name": "delopc2-Ubuntu20",
       "generator": "Unix Makefiles",
       "configurationType": "Debug",
       "cmakeExecutable": "/usr/bin/cmake",
-      "remoteCopySourcesExclusionList": [ ".vs", "out" ],
+      "remoteCopySourcesExclusionList": [ ".vs", "out", "ENTANGLE_FILES" ],
+      "remoteCopyExcludeDirectories": [ "$HOME/.vs/${projectDirName}/${workspaceHash}/src/boost/out", "$HOME/.vs/${projectDirName}/${workspaceHash}/src/boost/bin.v2" ],
       "cmakeCommandArgs": "",
       "buildCommandArgs": "",
       "ctestCommandArgs": "",
@@ -15,7 +16,35 @@
       "remoteBuildRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/build/${name}",
       "remoteInstallRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/install/${name}",
       "remoteCopySources": true,
-      "rsyncCommandArgs": "-t --delete --delete-excluded",
+      "rsyncCommandArgs": "-t --delete",
+      "remoteCopyBuildOutput": false,
+      "remoteCopySourcesMethod": "rsync",
+      "addressSanitizerRuntimeFlags": "detect_leaks=0",
+      "variables": [
+        {
+          "name": "ENTANGLE_FILES_DO_NOT_COPY",
+          "value": "True",
+          "type": "STRING"
+        }
+      ]
+    },
+    {
+      "name": "Taco07-Ubuntu20",
+      "generator": "Unix Makefiles",
+      "configurationType": "Release",
+      "cmakeExecutable": "/snap/cmake/current/bin/cmake",
+      "remoteCopySourcesExclusionList": [ ".vs", "out", "ENTANGLE_FILES" ],
+      "remoteCopyExcludeDirectories": [ "$HOME/.vs/${projectDirName}/${workspaceHash}/src/boost/out", "$HOME/.vs/${projectDirName}/${workspaceHash}/src/boost/bin.v2" ],
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "inheritEnvironments": [ "linux_x64" ],
+      "remoteMachineName": "172.25.2.7",
+      "remoteCMakeListsRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/src",
+      "remoteBuildRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/build/${name}",
+      "remoteInstallRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/install/${name}",
+      "remoteCopySources": true,
+      "rsyncCommandArgs": "-t --delete --exclude 'boost/bin.v2' --exclude 'boost/out'",
       "remoteCopyBuildOutput": false,
       "remoteCopySourcesMethod": "rsync",
       "addressSanitizerRuntimeFlags": "detect_leaks=0",
@@ -39,9 +68,9 @@
       "inheritEnvironments": [ "msvc_x64_x64" ],
       "variables": [
         {
-          "name": "ENTANGLE_ROOT",
-          "value": "C:\\Users\\alanghof\\source\\repos\\entangle",
-          "type": "PATH"
+          "name": "ENTANGLE_FILES_DO_NOT_COPY",
+          "value": "True",
+          "type": "STRING"
         }
       ]
     },
@@ -57,9 +86,9 @@
       "inheritEnvironments": [ "msvc_x64_x64" ],
       "variables": [
         {
-          "name": "ENTANGLE_ROOT",
-          "value": "C:\\Users\\alanghof\\source\\repos\\entangle",
-          "type": "PATH"
+          "name": "ENTANGLE_FILES_DO_NOT_COPY",
+          "value": "True",
+          "type": "STRING"
         }
       ]
     }

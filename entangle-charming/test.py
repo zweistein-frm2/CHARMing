@@ -10,43 +10,68 @@
 # and/or modify it under the terms of the GNU General Public License as
 # published by the Free Software Foundation;
 
+#import debugpy
+#debugpy.listen(('0.0.0.0',5678))
+#debugpy.wait_for_client()
+#breakpoint()
 import mesytecsystem
 import numpy as np
 import cv2 as cv
 import sys
+import time
+import threading
 
-def makeRoiWkt( parameter):
+assert sys.version_info >= (3, 4)
 
-    wkt="POLYGON(("
-    for xy in parameter:
-        for ve in xy:
-            wkt+=str(ve)
-            wkt+=" "
-        wkt+=","
-    wkt=wkt[:-1]
-    wkt+="),())"
 
-o = mesytecsystem.NeutronMeasurement(sys.stdout.fileno())
-v = o.version
-print(v)
-o.start()
-h = o.getHistogram()
+
+seconds = 20
+
+NM = None
+def initMeasurement():
+    global NM, seconds
+    breakpoint()
+    NM = mesytecsystem.NeutronMeasurement(sys.stdout.fileno())
+    v = NM.version
+    print(v)
+    NM.on()
+    time.sleep(4)
+    NM.simulatorRate = 25
+    NM.start()
+    for i in range(0,seconds):
+        time.sleep(1)
+
+
+t = threading.Thread(target=initMeasurement, args=())
+t.start()
+
+time.sleep(7) #should be connected by now
+
+
+h = NM.getHistogram()
 mat = np.zeros((1,1,1),dtype="int32")
-t= h.update(mat)
-print("h.Size="+str(h.Size))
-print("h.getRoi(0)="+str(h.getRoi(0)))
-detsize=[0,0],[64,1024]
-makeRoiWkt(detsize)
+
+for i in range(0,seconds):
+    t= h.update(mat)
+    print("h.Size="+str(h.Size))
+    print("h.getRoi(0)="+str(h.getRoi(0)))
+    print(t[0])
+    histogram = t[1]
+    #print(histogram)
+    img = cv.normalize(np.int32(histogram), None, 0,255, norm_type=cv.NORM_MINMAX, dtype=cv.CV_8U)
+
+    img = cv.resize(img,(256,256))
+    img=cv.applyColorMap(img,cv.COLORMAP_JET)
+
+    if i == 0:
+       cv.namedWindow("Output", cv.WINDOW_NORMAL)
+    cv.imshow("Output", img)
+    cv.waitKey(1000)
 
 
-print(t[0])
-histogram = t[1]
-print(histogram)
-img = cv.normalize(histogram, None, 0,255, norm_type=cv.NORM_MINMAX, dtype=cv.CV_8U)
-img=cv.applyColorMap(img,cv.COLORMAP_JET)
-cv.imshow("Window", img)
-cv.waitKey(0)
 cv.destroyAllWindows()
+NM.stop()
+NM = None
 
 
 

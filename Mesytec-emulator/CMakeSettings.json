@@ -1,7 +1,7 @@
 ﻿{
   "configurations": [
-    {
-      "name": "delopc2-Ubuntu18.04",
+  {
+      "name": "delopc2-Ubuntu20",
       "generator": "Unix Makefiles",
       "configurationType": "Debug",
       "cmakeExecutable": "/usr/bin/cmake",
@@ -24,6 +24,43 @@
           "name": "ENTANGLE_FILES_DO_NOT_COPY",
           "value": "True",
           "type": "STRING"
+        },
+		{
+          "name": "CHARMING_DIR",
+          "value": "/home/localadmin/.vs/CHARMing/8b1e3cbe-1b7c-463b-a34c-4df2092ae58b/src",
+          "type": "PATH"
+        }
+      ]
+    },
+    {
+      "name": "Taco07-Ubuntu20",
+      "generator": "Unix Makefiles",
+      "configurationType": "Debug",
+      "cmakeExecutable": "/snap/cmake/current/bin/cmake",
+      "remoteCopySourcesExclusionList": [ ".vs", "out" ],
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "inheritEnvironments": [ "linux_x64" ],
+      "remoteMachineName": "172.25.2.7",
+      "remoteCMakeListsRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/src",
+      "remoteBuildRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/build/${name}",
+      "remoteInstallRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/install/${name}",
+      "remoteCopySources": true,
+      "rsyncCommandArgs": "-t --delete --delete-excluded",
+      "remoteCopyBuildOutput": false,
+      "remoteCopySourcesMethod": "rsync",
+      "addressSanitizerRuntimeFlags": "detect_leaks=0",
+      "variables": [
+        {
+          "name": "ENTANGLE_FILES_DO_NOT_COPY",
+          "value": "True",
+          "type": "STRING"
+        },
+		 {
+          "name": "CHARMING_DIR",
+          "value": "/home/localadmin/.vs/CHARMing/8b1e3cbe-1b7c-463b-a34c-4df2092ae58b/src",
+          "type": "PATH"
         }
       ]
     },

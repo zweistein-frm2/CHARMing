@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-sudo docker rm $(sudo docker ps -qa)
-sudo docker rmi $(sudo docker image ls -qa)
 cd boost
 rm -rf bin.v2
 rm -rf out
@@ -26,5 +24,8 @@ do
 		sudo find distribution -name '*.rpm' -exec bash -c 'mv $0 "${0/Linux/'$ext'}" && cp "distribution/'$ext'/package/"*.rpm distribution' {} \;
 		sudo chown $currentuser distribution/*.*
 		printf "\n\n"
+		sudo docker rm $(sudo docker ps -qa)
+        sudo docker rmi $(sudo docker image ls -qa)
+
     fi
 done
