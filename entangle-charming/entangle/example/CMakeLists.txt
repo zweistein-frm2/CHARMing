@@ -8,12 +8,12 @@ endif()
 
 
 
-configure_file( charm-ID-SANS1.res.in charm-${ID}-SANS1.res )
-configure_file( charm-ID-replay.res.in charm-${ID}-replay.res )
+configure_file( SANS1-det-ID.res.in SANS1-det-${ID}.res )
+configure_file( mesytec-listmode-ID-replay.res.in mesytec-listmode-${ID}-replay.res )
 if(ENTANGLE_RES)
 install(FILES
- ${CMAKE_CURRENT_BINARY_DIR}/charm-${ID}-SANS1.res
- ${CMAKE_CURRENT_BINARY_DIR}/charm-${ID}-replay.res
+ ${CMAKE_CURRENT_BINARY_DIR}/SANS1-det-${ID}.res
+ ${CMAKE_CURRENT_BINARY_DIR}/mesytec-listmode-${ID}-replay.res
 DESTINATION ${ENTANGLE_RES}
 )
 endif()

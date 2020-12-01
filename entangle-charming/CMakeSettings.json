@@ -82,7 +82,7 @@
     {
       "name": "x64-Release",
       "generator": "Ninja",
-      "configurationType": "RelWithDebInfo",
+      "configurationType": "Release",
       "buildRoot": "${projectDir}\\out\\build\\${name}",
       "installRoot": "${projectDir}\\out\\install\\${name}",
       "cmakeCommandArgs": "",
@@ -110,7 +110,7 @@
       "variables": [
         {
           "name": "ENTANGLE_ROOT",
-          "value": "C:\\Users\\alanghof\\source\\repos\\entangle",
+          "value": "C:\\Users\\alanghof\\source\\repos\\entangle\\entangle",
           "type": "PATH"
         }
       ]
