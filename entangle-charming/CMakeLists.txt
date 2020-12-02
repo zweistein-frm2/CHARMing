@@ -204,6 +204,11 @@ foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3 PROJECT4)
              COMMAND ${CMAKE_COMMAND} -E copy
                   ${CMAKE_CURRENT_SOURCE_DIR}/core.py
                   ${CMAKE_CURRENT_BINARY_DIR}/core.py
+
+             COMMAND ${CMAKE_COMMAND} -E copy
+                  ${CMAKE_CURRENT_SOURCE_DIR}/roimanager.py
+                  ${CMAKE_CURRENT_BINARY_DIR}/roimanager.py
+
              COMMAND ${CMAKE_COMMAND} -E copy
                   ${CMAKE_CURRENT_SOURCE_DIR}/settings.py
                   ${CMAKE_CURRENT_BINARY_DIR}/settings.py
@@ -293,6 +298,7 @@ list(APPEND ENTANGLE_FILES_DEVICE_CHARMING
    ${CMAKE_CURRENT_SOURCE_DIR}/mesytec-replay.py
    ${CMAKE_CURRENT_SOURCE_DIR}/msmtsystem.py
    ${CMAKE_CURRENT_SOURCE_DIR}/core.py
+   ${CMAKE_CURRENT_SOURCE_DIR}/roimananger.py
    ${CMAKE_CURRENT_SOURCE_DIR}/settings.py
    ${CMAKE_CURRENT_SOURCE_DIR}/simulator.py
    ${CMAKE_CURRENT_SOURCE_DIR}/test-replay.py
@@ -302,8 +308,9 @@ list(APPEND ENTANGLE_FILES_DEVICE_CHARMING
 list (APPEND ENTANGLE_FILES ${ENTANGLE_FILES_DEVICE_CHARMING})
 
 list(APPEND ENTANGLE_FILES_RES
-   ${CMAKE_CURRENT_SOURCE_DIR}/entangle/example/charm-replay.res
-    ${CMAKE_CURRENT_SOURCE_DIR}/entangle/example/charm-SANS1.res
+   ${CMAKE_CURRENT_SOURCE_DIR}/entangle/example/mesytec-listmode-replay.res
+    ${CMAKE_CURRENT_SOURCE_DIR}/entangle/example/SANS1-detector.res
+    ${CMAKE_CURRENT_SOURCE_DIR}/entangle/example/ERWIN-detector-small.res
   )
 
 if(ENTANGLE_ROOT )

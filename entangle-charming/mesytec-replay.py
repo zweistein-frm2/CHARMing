@@ -18,9 +18,9 @@ from entangle.lib.loggers import FdLogMixin
 
 import entangle.device.charming as charming
 
-import charming.listmodereplay as listmodereplay
-import charming.msmtsystem
-import charming.core
+import entangle.device.charming.listmodereplay as listmodereplay
+import entangle.device.charming.msmtsystem as msmtsystem
+from  entangle.device.charming.core import *
 
 
 class DeviceConnection(FdLogMixin,base.MLZDevice):

@@ -214,6 +214,23 @@ namespace Zweistein {
 
         }
 #ifdef BOOST_PYTHON_MODULE
+
+        boost::python::list getRoiData(void) {
+            std::vector<RoiData> rdc = std::vector<RoiData>(); // rdc = roi data current
+            {
+                Zweistein::ReadLock r_lock(histogramsLock);
+                for (auto& a : roidata)   rdc.push_back(a);
+            }
+            boost::python::list l;
+            for (auto& r : rdc) {
+                std::stringstream ss_wkt;
+                ss_wkt << boost::geometry::wkt(r.roi);
+                auto t = boost::python::make_tuple(ss_wkt.str(), r.count);
+                l.append(t);
+            }
+            return l;
+        }
+
         boost::python::tuple update(cv::Mat mat) {
             using namespace magic_enum::bitwise_operators; // out-of-the-box bitwise operators for enums.
             std::vector<RoiData> rdc = std::vector<RoiData>(); // rdc = roi data current

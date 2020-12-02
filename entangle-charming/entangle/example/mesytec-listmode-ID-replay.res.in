@@ -1,5 +1,7 @@
 ["test/@ID@-replay/DeviceConnection"]
 type = "charming.mesytec-replay.DeviceConnection"
+["test/ID@-replay/RoiManager"]
+type = "charming.roimanager.RoiManager"
 ["test/@ID@-replay/MeasureCounts"]
 type = "charming.mesytec-replay.MeasureCounts"
 ["test/@ID@-replay/MeasureTime"]

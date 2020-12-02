@@ -15,7 +15,7 @@ from entangle.core import states, Attr
 from entangle.core.defs import  int32
 
 import entangle.device.charming as charming
-import charming.msmtsystem
+import entangle.device.charming.msmtsystem as msmtsystem
 
 
 class Simulator(base.MLZDevice):

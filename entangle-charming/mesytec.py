@@ -18,11 +18,11 @@ from entangle.core.defs import  listof
 from entangle.lib.loggers import FdLogMixin
 
 import entangle.device.charming as charming
-import charming.mesytecsystem as mesytecsystem
-import charming.msmtsystem
-import charming.core
-import charming.setting
-import charming.simulator
+import entangle.device.charming.mesytecsystem as mesytecsystem
+import entangle.device.charming.msmtsystem
+from entangle.device.charming.core import *
+from entangle.device.charming.settings import *
+from entangle.device.charming.simulator import *
 
 
 class DeviceConnection(FdLogMixin,base.MLZDevice):

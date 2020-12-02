@@ -1,7 +1,7 @@
 {
     "MsmtSystem": {
-        "DataHome": "\/Users\/alanghof\/",
-        "BinningFile": "\/Users\/alanghof\/.CHARMing\/pos_cal_lut_2016_07_13.txt",
+        "DataHome": "\/home\/alanghof\/",
+        "BinningFile": "\/home\/alanghof\/.CHARMing\/pos_cal_lut_2016_07_13.txt",
         "MesytecDevice0": {
             "mcpd_ip": "192.168.168.121",
             "mcpd_port": "54321",

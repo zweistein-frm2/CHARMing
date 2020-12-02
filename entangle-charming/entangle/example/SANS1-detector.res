@@ -1,5 +1,7 @@
 ["test/SANS1/DeviceConnection"]
 type = "charming.mesytec.DeviceConnection"
+["test/SANS1/RoiManager"]
+type = "charming.roimanager.RoiManager"
 ["test/SANS1/MeasureCounts"]
 type = "charming.mesytec.MeasureCounts"
 ["test/SANS1/MeasureTime"]

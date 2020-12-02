@@ -154,7 +154,7 @@ namespace Mesytec {
 			oldidnewid.clear();
 			deviceparam.clear();
 
-			LOG_INFO << "MesytecSystem::connect(): " << "io_service.stopped() = " << pio_service->stopped() << std::endl;
+	//		LOG_INFO << "MesytecSystem::connect(): " << "io_service.stopped() = " << pio_service->stopped() << std::endl;
 
 			boost::system::error_code ec ;
 			for(Mcpd8::Parameters& p:_devlist) {

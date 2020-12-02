@@ -440,6 +440,7 @@ BOOST_PYTHON_MODULE(listmodereplay)
         pbcvt::matFromNDArrayBoostConverter();
         class_<Histogram, boost::noncopyable>("Histogram", boost::python::no_init)
             .def("update", &Histogram::update)
+            .def("getRoiData", &Histogram::getRoiData)
             .def("setRoi", &Histogram::setRoi)
             .def("getRoi", &Histogram::getRoi)
             .add_property("Size", &Histogram::getSize)

@@ -19,7 +19,7 @@ from entangle.core.states import FAULT
 import numpy as np
 
 import  entangle.device.charming as charming
-import charming.msmtsystem
+import entangle.device.charming.msmtsystem as msmtsystem
 
 class MeasureCounts(base.CounterChannel):
 

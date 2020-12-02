@@ -1,0 +1,30 @@
+["test/@ID@-sERWIN/DeviceConnection"]
+type = "charming.charm.DeviceConnection"
+["test/@ID@-sERWIN/RoiManager"]
+type = "charming.roimanager.RoiManager"
+["test/@ID@-sERWIN/MeasureCounts"]
+type = "charming.charm.MeasureCounts"
+["test/@ID@-sERWIN/MeasureTime"]
+type = "charming.charm.MeasureTime"
+["test/@ID@-sERWIN/Settings"]
+type = "charming.charm.Settings"
+["test/@ID@-sERWIN/Histogram"]
+type = "charming.charm.Histogram"
+["test/@ID@-sERWIN/Simulator"]
+type = "charming.charm.Simulator"
+["test/@ID@-sERWIN/Monitor0"]
+type = "charming.charm.Monitor0"
+absmin = 0
+absmax = 0x7FFFFFFF
+["test/@ID@-sERWIN/Monitor1"]
+type = "charming.charm.Monitor1"
+absmin = 0
+absmax = 0x7FFFFFFF
+["test/@ID@-sERWIN/Monitor2"]
+type = "charming.charm.Monitor2"
+absmin = 0
+absmax = 0x7FFFFFFF
+["test/@ID@-sERWIN/Monitor3"]
+type = "charming.charm.Monitor3"
+absmin = 0
+absmax = 0x7FFFFFFF
