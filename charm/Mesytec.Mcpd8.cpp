@@ -29,6 +29,7 @@
 #include <boost/dll/runtime_symbol_info.hpp>
 #include <boost/endian/conversion.hpp>
 #include <boost/tokenizer.hpp>
+#include <boost/algorithm/string.hpp>
 #include "Mcpd8.enums.hpp"
 #include <csignal>
 #include <asioext/file.hpp>
@@ -156,6 +157,17 @@ namespace Mesytec {
 
 	//		LOG_INFO << "MesytecSystem::connect(): " << "io_service.stopped() = " << pio_service->stopped() << std::endl;
 
+			std::string classname = typeid(*this).name();
+#ifdef __GNUC__
+			char output[255];
+			size_t len = 255;
+			int status;
+			const char* ptrclearclassname = __cxxabiv1::__cxa_demangle(classname.c_str(), output, &len, &status);
+#else
+			const char* ptrclearclassname = classname.c_str();
+#endif
+
+
 			boost::system::error_code ec ;
 			for(Mcpd8::Parameters& p:_devlist) {
 				Mesytec::DeviceParameter mp;
@@ -193,6 +205,8 @@ namespace Mesytec {
 					LOG_DEBUG << "Local bind " << local_endpoint << " to " << mp.mcpd_endpoint << std::endl;
 				}
 
+
+
 				bool skip = false;
 				mp.datagenerator = p.datagenerator;
 				if (eventdataformat == Zweistein::Format::EventData::Undefined) {
@@ -202,17 +216,8 @@ namespace Mesytec {
 								eventdataformat == Zweistein::Format::EventData::Mdll)
 										&&		typeid(Mesytec::MesytecSystem) == typeid(*this)	))
 					{
-						std::string classname = typeid(*this).name();
 
-#ifdef __GNUC__
-						char output[255];
-						size_t len = 255;
-						int status;
-						const char* p = __cxxabiv1::__cxa_demangle(classname.c_str(), output, &len, &status);
-#else
-						const char *p = classname.c_str();
-#endif
-						LOG_ERROR << MENUMSTR(eventdataformat) << " not handled by  " << p << std::endl;
+						LOG_ERROR << MENUMSTR(eventdataformat) << " not handled by  " << ptrclearclassname << std::endl;
 						eventdataformat = Zweistein::Format::EventData::Undefined;
 						skip = true;
 					}
@@ -388,7 +393,9 @@ namespace Mesytec {
 			boost::chrono::system_clock::time_point tpstarted = getStart();
 			boost::chrono::milliseconds ms = boost::chrono::duration_cast<boost::chrono::milliseconds> (boost::chrono::system_clock::now() - tpstarted);
 			{
-				LOG_INFO << "MESYTECHSYSTEM CONNECTED: +" << ms << std::endl;
+				std::string tmps(ptrclearclassname);
+				boost::algorithm::to_upper(tmps);
+				LOG_INFO << tmps << " CONNECTED: +" << ms << std::endl;
 			}
 			return connected;
 		}

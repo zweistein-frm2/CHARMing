@@ -1,13 +1,11 @@
 ﻿# CMakeList.txt :
 cmake_minimum_required (VERSION 3.11)
 
-if(UNIX)
-if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 9.2.1)
-else()
- message(STATUS " gcc compiler bug.")
- message(STATUS "https://bugzilla.redhat.com/show_bug.cgi?id=1853900")
+if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.2.2)
+  message(STATUS " gcc compiler bug.")
+  message(FATAL_ERROR "https://bugzilla.redhat.com/show_bug.cgi?id=1853900")
 endif()
-endif()
+
 
 #
 # in ${CMAKE_CURRENT_SOURCE_DIR}/boost/jamroot or in ${CMAKE_CURRENT_SOURCE_DIR}/boost/CMakeLists.txt
@@ -79,7 +77,7 @@ foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3 PROJECT4)
     project(${PROJECT_NAME})
 
     if(${PROJECT_NAME} STREQUAL ${PROJECT1})
-       add_subdirectory(${parentdir}/libuv ${CMAKE_CURRENT_BINARY_DIR}/libuv)
+       add_subdirectory(${parentdir}/libuv/  ${CMAKE_CURRENT_BINARY_DIR}/libuv)
        set(libuv_INCLUDE_DIR "${parentdir}/libuv/include")
     endif()
 
@@ -90,9 +88,14 @@ foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3 PROJECT4)
     #add_definitions(-DUNICODE -D_UNICODE)
     if(WIN32)
         add_definitions(-D_WIN32_WINNT=0x0601)
-         set(OpenCV_DIR "C:\\opencv\\build")
-        set(OpenCV_STATIC ON)  #no effect
-    endif()
+        set(OpenCV_DIR ${parentdir}/opencv/out/${CMAKE_BUILD_TYPE}/install)
+     else()
+        set(OpenCV_DIR ${parentdir}/opencv/out/${CMAKE_BUILD_TYPE}/install/lib/cmake/opencv4)
+     endif()
+
+    #set(OpenCV_DIR "C:\\opencv\\build")
+    set(OpenCV_STATIC ON) # no effect
+    message(OpenCV_DIR=${OpenCV_DIR})
     add_definitions(-DASIOEXT_USE_BOOST_ASIO)
 
     set(CMAKE_CXX_STANDARD 17)
@@ -172,7 +175,7 @@ foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3 PROJECT4)
      target_link_libraries(${PROJECT_NAME} PRIVATE "${_Python3_LIBRARY_${Build_Type}}" ${${Boost_python_library}} ${${Boost_numpy_library}})
       if(WIN32)
       set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".pyd")
-      message(${_OpenCV_LIB_PATH})
+
      else()
       set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "")
      endif()
@@ -204,11 +207,6 @@ foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3 PROJECT4)
              COMMAND ${CMAKE_COMMAND} -E copy
                   ${CMAKE_CURRENT_SOURCE_DIR}/core.py
                   ${CMAKE_CURRENT_BINARY_DIR}/core.py
-
-             COMMAND ${CMAKE_COMMAND} -E copy
-                  ${CMAKE_CURRENT_SOURCE_DIR}/roimanager.py
-                  ${CMAKE_CURRENT_BINARY_DIR}/roimanager.py
-
              COMMAND ${CMAKE_COMMAND} -E copy
                   ${CMAKE_CURRENT_SOURCE_DIR}/settings.py
                   ${CMAKE_CURRENT_BINARY_DIR}/settings.py
@@ -250,10 +248,7 @@ foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3 PROJECT4)
 
     if(ENTANGLE_ROOT )
      if(WIN32)
-
-     file(TO_CMAKE_PATH ${_OpenCV_LIB_PATH} ocvcm_path)
-  message("ocvcm_path = ${ocvcm_path}")
-  message("INSTALL_DIR = ${INSTALL_DIR}")
+      message("INSTALL_DIR = ${INSTALL_DIR}")
 
      install(
         TARGETS ${PROJECT_NAME}
@@ -298,7 +293,6 @@ list(APPEND ENTANGLE_FILES_DEVICE_CHARMING
    ${CMAKE_CURRENT_SOURCE_DIR}/mesytec-replay.py
    ${CMAKE_CURRENT_SOURCE_DIR}/msmtsystem.py
    ${CMAKE_CURRENT_SOURCE_DIR}/core.py
-   ${CMAKE_CURRENT_SOURCE_DIR}/roimananger.py
    ${CMAKE_CURRENT_SOURCE_DIR}/settings.py
    ${CMAKE_CURRENT_SOURCE_DIR}/simulator.py
    ${CMAKE_CURRENT_SOURCE_DIR}/test-replay.py
@@ -308,8 +302,8 @@ list(APPEND ENTANGLE_FILES_DEVICE_CHARMING
 list (APPEND ENTANGLE_FILES ${ENTANGLE_FILES_DEVICE_CHARMING})
 
 list(APPEND ENTANGLE_FILES_RES
-   ${CMAKE_CURRENT_SOURCE_DIR}/entangle/example/mesytec-listmode-replay.res
-    ${CMAKE_CURRENT_SOURCE_DIR}/entangle/example/SANS1-detector.res
+   ${CMAKE_CURRENT_SOURCE_DIR}/entangle/example/charm-replay.res
+    ${CMAKE_CURRENT_SOURCE_DIR}/entangle/example/charm-SANS1.res
     ${CMAKE_CURRENT_SOURCE_DIR}/entangle/example/ERWIN-detector-small.res
   )
 
@@ -346,50 +340,6 @@ message(STATUS "written to : ${parentdir}/ENTANGLE_FILES")
 
 
 
-if(ENTANGLE_ROOT )
-
- if(WIN32)
-   if(${Build_Type} STREQUAL "DEBUG")
-     set(WIN32LIB_SUFFIX d)
-     set(BOOSTLIB_DBG -gd)
-   endif()
-
-
-    file(TO_CMAKE_PATH ${_OpenCV_LIB_PATH} ocvcm_path)
-  message("ocvcm_path = ${ocvcm_path}")
-  message("INSTALL_DIR = ${INSTALL_DIR}")
-    install(
-    DIRECTORY ${ocvcm_path}/     # / needed, seems a bug in cmake
-    DESTINATION ${ENTANGLE_ROOT}/device/charming
-    FILES_MATCHING
-    PATTERN "*${WIN32LIB_SUFFIX}.dll"
-    )
-
-
-    if(${Boost_VERSION_MAJOR}.${Boost_VERSION_MINOR} VERSION_LESS 1.75)
-   install(
-    FILES
-    "${CMAKE_CURRENT_BINARY_DIR}/boost_filesystem-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
-    "${CMAKE_CURRENT_BINARY_DIR}/boost_thread-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
-    "${CMAKE_CURRENT_BINARY_DIR}/boost_chrono-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
-    "${CMAKE_CURRENT_BINARY_DIR}/boost_iostreams-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
-    "${CMAKE_CURRENT_BINARY_DIR}/boost_numpy${Python_VERSION_MAJOR}${Python_VERSION_MINOR}-vc${MSVC_TOOLSET_VERSION}-mt-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
-    "${CMAKE_CURRENT_BINARY_DIR}/boost_python${Python_VERSION_MAJOR}${Python_VERSION_MINOR}-vc${MSVC_TOOLSET_VERSION}-mt-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
-    "${libuv_BINARY_DIR}/uv.dll"
-
-    DESTINATION ${ENTANGLE_ROOT}/device/charming
-   )
-   endif()
-   if(${Boost_VERSION_MAJOR}.${Boost_VERSION_MINOR} VERSION_LESS 1.73)
-    message(STATUS "${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}  INSTALL EXTRA")
-    install(
-    FILES
-      "${CMAKE_CURRENT_BINARY_DIR}/boost_date_time-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
-    DESTINATION ${ENTANGLE_ROOT}/device/charming
-    )
-   endif()
- endif()
-endif()
 
 add_subdirectory (entangle)
 

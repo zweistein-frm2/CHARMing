@@ -31,7 +31,7 @@ ARG projectdir=CHARMing
 RUN mkdir ${projectdir}
 WORKDIR /${projectdir}
 COPY . .
-RUN echo '#include <opencv2/contrib/contrib.hpp>' >> /${projectdir}/charm/opencv2/contrib/contrib.hpp
+#RUN echo '#include <opencv2/contrib/contrib.hpp>' >> /${projectdir}/charm/opencv2/contrib/contrib.hpp
 
 RUN cp /${projectdir}/distribution/centos7/Docker/etc/yum.conf /etc/yum.conf
 RUN yum reinstall -y -q glibc-common
@@ -46,10 +46,10 @@ RUN cp /${projectdir}/distribution/centos7/Docker/${projectdir}/libuv/CMakeLists
 # basically we do overwrite the libuv CMakeLists.txt so that libuv is not installed (not needed as we link statically to it
 RUN python3 --version && find /usr -name "pyconfig.h"
 
-RUN export CPLUS_INCLUDE_PATH=/usr/include/python3.6m && cd ${projectdir} && chmod +x buildboost.sh && ./buildboost.sh -sICONV_PATH=/usr/libiconv
+RUN export CPLUS_INCLUDE_PATH=/usr/include/python3.6m && cd ${projectdir} && chmod +x opencv_setup.sh && ./opencv_setup.sh  && chmod +x buildboost.sh && ./buildboost.sh -sICONV_PATH=/usr/libiconv
 
 ENV PACK2RPM=ON
-ENV INSTALL_DEPS=opencv
+#ENV INSTALL_DEPS=opencv
 ENV LINUX_FLAVOUR=centos7
 
 RUN cd /${projectdir}/entangle-charming && mkdir out && cd out && cmake .. && make
