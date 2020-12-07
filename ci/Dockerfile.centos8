@@ -76,7 +76,7 @@ RUN cd /${projectdir}/entangle-charming && mkdir out && cd out && \
      make
 
 ENV PACK2RPM=ON
-#ENV INSTALL_DEPS=opencv
+ENV INSTALL_DEPS=gtk3
 ENV LINUX_FLAVOUR=centos8
 
 RUN mkdir out && cd out && cmake -B /out -S /${projectdir}

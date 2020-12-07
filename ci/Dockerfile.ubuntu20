@@ -34,7 +34,7 @@ RUN cd /${projectdir}  && \
 
 RUN cd /${projectdir}/entangle-charming && mkdir out && cd out && cmake .. && make
 
-#ENV INSTALL_DEPS=libopencv-dev
+ENV INSTALL_DEPS=libgtk-3-0
 ENV LINUX_FLAVOUR=ubuntu20
 
 RUN mkdir out && cd out && cmake -B /out -S /${projectdir}

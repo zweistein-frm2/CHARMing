@@ -15,6 +15,13 @@ set(boost_currentversion 1.75.0)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
+
+if(NOT CMAKE_BUILD_TYPE)
+  message(STATUS "Setting build type to 'Release' as none was specified.")
+  set(CMAKE_BUILD_TYPE "Release" CACHE)
+endif()
+
+
 set (Build_Type RELEASE)
 
 
@@ -87,17 +94,13 @@ foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3 PROJECT4)
 
     add_definitions(-DENTANGLE_LOGGER)
 
-    if(CMAKE_BUILD_TYPE)
-    set(BUILDVARIANT ${CMAKE_BUILD_TYPE})
-    else()
-    set(BUILDVARIANT Release)
-    endif()
+
     #add_definitions(-DUNICODE -D_UNICODE)
     if(WIN32)
         add_definitions(-D_WIN32_WINNT=0x0601)
-        set(OpenCV_DIR ${parentdir}/opencv/out/${BUILDVARIANT}/install)
+        set(OpenCV_DIR ${parentdir}/opencv/out/${CMAKE_BUILD_TYPE}/install)
      else()
-        set(OpenCV_DIR ${parentdir}/opencv/out/${BUILDVARIANT}/install/lib/cmake/opencv4)
+        set(OpenCV_DIR ${parentdir}/opencv/out/${CMAKE_BUILD_TYPE}/install/lib/cmake/opencv4)
      endif()
 
     #set(OpenCV_DIR "C:\\opencv\\build")
