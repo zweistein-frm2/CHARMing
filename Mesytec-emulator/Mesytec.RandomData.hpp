@@ -46,8 +46,7 @@ namespace Zweistein {
 			int width = 8;
 			int height = 8;
 		}
-	
-		
+
 	}
 }
 
@@ -138,10 +137,9 @@ namespace Zweistein {
 
 			data[2] |= (position_y>>3) & 0b1111111;   // y position
 			data[1] |= (position_y & 0b111) << 13;
-			
+
 			data[1] |= x_pos << 3;			// xposition
 
-			
 
 			if (i == 0) start = boost::chrono::high_resolution_clock::now();
 			auto diff = boost::chrono::high_resolution_clock::now() - start;
@@ -153,11 +151,10 @@ namespace Zweistein {
 
 
 			data[0] = data[1] = data[2] = 0;
-			
+
 			unsigned short x_pos = 0;
 			unsigned short position_y = 0;
 			unsigned long l = RandomData(x_pos, position_y, i, Mpsd8_sizeY, maxX);
-			
 
 			unsigned short amplitude = l & 1023L;
 			amplitude = 1;//
@@ -180,8 +177,7 @@ namespace Zweistein {
 			*/
 			unsigned short modid = x_pos / Mpsd8_sizeSLOTS;
 			unsigned short slotid = x_pos % Mpsd8_sizeSLOTS;
-			
-			
+
 			data[1] |= position_y << 3;
 			data[2] |= slotid << 7;
 			data[2] |= modid << 12;
@@ -189,7 +185,6 @@ namespace Zweistein {
 			auto diff = boost::chrono::high_resolution_clock::now() - start;
 			auto nsec = boost::chrono::duration_cast<boost::chrono::nanoseconds>(diff);
 			Mesy::Mpsd8Event::settime19bit(data, nsec);
-			
 		}
 	}
 }

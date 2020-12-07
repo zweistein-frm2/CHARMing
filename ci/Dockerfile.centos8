@@ -15,7 +15,8 @@ RUN yum install -y dnf which git curl unzip tar wget dpkg && \
     yum install -y python3-pip python3-devel && \
     pip3 install numpy
 
-RUN dnf  --enablerepo=PowerTools install -y glibc-static
+RUN dnf  --enablerepo=powertools install -y glibc-static
+RUN  dnf install -y gtk3
 
 RUN wget https://forensics.cert.org/cert-forensics-tools-release-el8.rpm -O cert-forensics-tools-release*rpm --no-check-certificate  && \
    rpm -Uvh cert-forensics-tools-release*rpm
