@@ -68,7 +68,7 @@ RUN cp /${projectdir}/distribution/centos8/Docker/${projectdir}/libuv/CMakeLists
 RUN python3 --version && find /usr -name "pyconfig.h"
 ENV CPLUS_INCLUDE_PATH=/usr/include/python3.6m
 
-RUN cd /${projectdir} && chmod +x buildboost.sh && ./buildboost.sh -sICONV_PATH=/usr/libiconv
+RUN cd /${projectdir} && chmod +x opencv_setup.sh && ./opencv_setup.sh  && chmod +x buildboost.sh && ./buildboost.sh  -sICONV_PATH=/usr/libiconv
 
 RUN cd /${projectdir}/entangle-charming && mkdir out && cd out && \
      cmake  -DPython3_INCLUDE_DIRS=/usr/include/python3.6m -DPython3_EXECUTABLE=/usr/bin/python3 \
@@ -80,7 +80,7 @@ RUN cd /${projectdir}/entangle-charming && mkdir out && cd out && \
      make
 
 ENV PACK2RPM=ON
-ENV INSTALL_DEPS=opencv
+#ENV INSTALL_DEPS=opencv
 ENV LINUX_FLAVOUR=centos8
 
 RUN mkdir out && cd out && cmake -B /out -S /${projectdir}

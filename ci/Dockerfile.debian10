@@ -32,11 +32,11 @@ RUN cd /${projectdir} && git submodule update --init --recursive
 RUN cp /${projectdir}/distribution/ubuntu20/${projectdir}/libuv/CMakeLists.txt /${projectdir}/libuv/CMakeLists.txt
 # basically we do overwrite the libuv CMakeLists.txt so that libuv is not installed (not needed as we link statically to it
 
-RUN cd /${projectdir} && chmod +x buildboost.sh && ./buildboost.sh
+RUN cd /${projectdir} && chmod +x opencv_setup.sh && ./opencv_setup.sh && chmod +x buildboost.sh && ./buildboost.sh
 
 RUN cd /${projectdir}/entangle-charming && mkdir out && cd out && cmake .. && make
 
-ENV INSTALL_DEPS=libopencv-dev
+#ENV INSTALL_DEPS=libopencv-dev
 ENV LINUX_FLAVOUR=debian10
 
 RUN mkdir out && cd out && cmake -B /out -S /${projectdir}

@@ -8,15 +8,20 @@ set(Charm_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 endif()
 
 
+get_filename_component(parentdir ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY )
 
  add_definitions(-DSIMPLE_LOGGER)
 if(MSVC)
     add_definitions(-D_WIN32_WINNT=0x0601)
     add_definitions(-DWIN32_PRE10OLDSTYLE)
-    set(OpenCV_DIR "C:\\opencv\\build")
-    set(OpenCV_STATIC ON) # no effect
+    set(OpenCV_DIR ${parentdir}/opencv/out/${CMAKE_BUILD_TYPE}/install)
+else()
+    set(OpenCV_DIR ${parentdir}/opencv/out/${CMAKE_BUILD_TYPE}/install/lib/cmake/opencv4)
 endif()
+#set(OpenCV_DIR "C:\\opencv\\build")
+set(OpenCV_STATIC ON) # no effect
 
+message(OpenCV_DIR=${OpenCV_DIR})
 add_definitions(-DASIOEXT_USE_BOOST_ASIO)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -56,25 +61,22 @@ endif()
 
 set (CONFIG_FILES
  "charm.json"
+ "erwin.json"
  "mesytec.json"
  "sans1.json"
  "pos_cal_lut_2016_07_13.txt"
  )
 
-if(WIN32)
-if(DEFINED CMAKE_BUILD_TYPE)
- if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-  set(WIN32LIB_SUFFIX d)
-  set(BOOSTLIB_DBG -gd)
- endif()
-endif()
-  install(TARGETS ${PROJECT_NAME}
-        RUNTIME  DESTINATION ${INSTALL_DIR}
+
+ message("INSTALL_DIR = ${INSTALL_DIR}")
+
+install(TARGETS ${PROJECT_NAME}
+        RUNTIME  DESTINATION ${INSTALL_DIR} COMPONENT config
         )
 
 
-
- file(TO_CMAKE_PATH $ENV{USERPROFILE} CINSTDIR)
+if(WIN32)
+  file(TO_CMAKE_PATH $ENV{USERPROFILE} CINSTDIR)
 set(CDESTDIR ${CINSTDIR}/.CHARMing)
 message(${CDESTDIR})
 foreach(CURFILE ${CONFIG_FILES})
@@ -92,70 +94,9 @@ foreach(CURFILE ${CONFIG_FILES})
  )
 endforeach()
 
+ else()
 
-   file(TO_CMAKE_PATH ${_OpenCV_LIB_PATH} ocvcm_path)
-  message("ocvcm_path = ${ocvcm_path}")
-  message("INSTALL_DIR = ${INSTALL_DIR}")
-
-  if(${OpenCV_VERSION} VERSION_LESS 4.3.0)
-
-   install(FILES
-   "${CMAKE_CURRENT_BINARY_DIR}/opencv_highgui${WIN32LIB_SUFFIX}.dll"
-    "${CMAKE_CURRENT_BINARY_DIR}/opencv_imgproc${WIN32LIB_SUFFIX}.dll"
-    "${CMAKE_CURRENT_BINARY_DIR}/opencv_core${WIN32LIB_SUFFIX}.dll"
-    "${CMAKE_CURRENT_BINARY_DIR}/opencv_imgcodecs${WIN32LIB_SUFFIX}.dll"
-    "${CMAKE_CURRENT_BINARY_DIR}/opencv_videoio${WIN32LIB_SUFFIX}.dll"
-    "${CMAKE_CURRENT_BINARY_DIR}/bz2${WIN32LIB_SUFFIX}.dll"
-    "${CMAKE_CURRENT_BINARY_DIR}/jpeg62.dll"
-    "${CMAKE_CURRENT_BINARY_DIR}/libpng16${WIN32LIB_SUFFIX}.dll"
-    "${CMAKE_CURRENT_BINARY_DIR}/lzma${WIN32LIB_SUFFIX}.dll"
-    "${CMAKE_CURRENT_BINARY_DIR}/tiff${WIN32LIB_SUFFIX}.dll"
-    "${CMAKE_CURRENT_BINARY_DIR}/webp${WIN32LIB_SUFFIX}.dll"
-    "${CMAKE_CURRENT_BINARY_DIR}/zlib${WIN32LIB_SUFFIX}1.dll"
-    "${CMAKE_CURRENT_BINARY_DIR}/zstd${WIN32LIB_SUFFIX}.dll"
-      DESTINATION ${INSTALL_DIR}
-   )
-   else()
-
-    install(
-    DIRECTORY ${ocvcm_path}/     # / needed, seems a bug in cmake
-    DESTINATION ${INSTALL_DIR}
-    FILES_MATCHING
-    PATTERN "*${WIN32LIB_SUFFIX}.dll"
-    )
-
-  endif()
-
-  if(${Boost_VERSION_MAJOR}.${Boost_VERSION_MINOR} VERSION_LESS 1.75)
-  install(FILES
-    "${CMAKE_CURRENT_BINARY_DIR}/boost_filesystem-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
-    "${CMAKE_CURRENT_BINARY_DIR}/boost_thread-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
-    "${CMAKE_CURRENT_BINARY_DIR}/boost_chrono-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
-    "${CMAKE_CURRENT_BINARY_DIR}/boost_program_options-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
-    "${CMAKE_CURRENT_BINARY_DIR}/boost_iostreams-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
-    "${CMAKE_CURRENT_BINARY_DIR}/boost_regex-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
-    "${CMAKE_CURRENT_BINARY_DIR}/boost_log-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
-    "${CMAKE_CURRENT_BINARY_DIR}/boost_locale-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
-
-       DESTINATION ${INSTALL_DIR}
-        )
-  endif()
-	if(${Boost_VERSION_MAJOR}.${Boost_VERSION_MINOR} VERSION_LESS 1.73)
-   install(
-   FILES
-      "${CMAKE_CURRENT_BINARY_DIR}/boost_date_time-vc${MSVC_TOOLSET_VERSION}-mt${BOOSTLIB_DBG}-x64-${Boost_VERSION_MAJOR}_${Boost_VERSION_MINOR}.dll"
-    DESTINATION ${INSTALL_DIR}
-   )
-   endif()
-
-else()
- install(TARGETS ${PROJECT_NAME}
-        RUNTIME  DESTINATION ${INSTALL_DIR} COMPONENT config
-        )
-
-
-
-set(CDESTDIR /etc/CHARMing)
+ set(CDESTDIR /etc/CHARMing)
 message(${CDESTDIR})
 foreach(CURFILE ${CONFIG_FILES})
  file(TO_CMAKE_PATH ${CDESTDIR}/${CURFILE} CPATH)
@@ -172,8 +113,6 @@ foreach(CURFILE ${CONFIG_FILES})
 
  )
 endforeach()
-
-
 
  install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/charm-sudo.sh"
     DESTINATION ${INSTALL_DIR}
