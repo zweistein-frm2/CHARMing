@@ -16,3 +16,5 @@ cmake --build . --config Debug --target install
 cd ..
 
 cd ..
+
+cd ..
