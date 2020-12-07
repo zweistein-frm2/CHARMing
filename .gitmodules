@@ -31,3 +31,6 @@
 [submodule "entangle-install-isegCC2x/iseg"]
 	path = entangle-install-isegCC2x/iseg
 	url = https://github.com/zweistein22/iseg.git
+[submodule "opencv"]
+	path = opencv
+	url = https://github.com/opencv/opencv/git
