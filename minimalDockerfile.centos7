@@ -12,7 +12,7 @@ RUN yum install -y epel-release && yum repolist  && \
 RUN yum install -y centos-sclo-rh centos-release-scl git  && \
     yum install -y python3-pip python3-devel && \
     pip3 install numpy && \
-    yum install -y opencv
+    yum install -y gtk3
 
 # we need python3 otherwise boost will not build its python support
 

@@ -12,7 +12,7 @@ get_filename_component(parentdir ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY )
 
 if(NOT CMAKE_BUILD_TYPE)
   message(STATUS "Setting build type to 'Release' as none was specified.")
-  set(CMAKE_BUILD_TYPE "Release" CACHE)
+  set(CMAKE_BUILD_TYPE "Release")
 endif()
 
  add_definitions(-DSIMPLE_LOGGER)
@@ -22,6 +22,9 @@ if(MSVC)
     set(OpenCV_DIR ${parentdir}/opencv/out/${CMAKE_BUILD_TYPE}/install)
 else()
     set(OpenCV_DIR ${parentdir}/opencv/out/${CMAKE_BUILD_TYPE}/install/lib64/cmake/opencv4)
+    if(NOT IS_DIRECTORY ${OpenCV_DIR})
+        set(OpenCV_DIR ${parentdir}/opencv/out/${CMAKE_BUILD_TYPE}/install/lib/cmake/opencv4)
+    endif()
 endif()
 #set(OpenCV_DIR "C:\\opencv\\build")
 set(OpenCV_STATIC ON) # no effect

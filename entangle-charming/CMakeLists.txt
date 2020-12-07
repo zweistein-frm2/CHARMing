@@ -18,7 +18,7 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 
 if(NOT CMAKE_BUILD_TYPE)
   message(STATUS "Setting build type to 'Release' as none was specified.")
-  set(CMAKE_BUILD_TYPE "Release" CACHE)
+  set(CMAKE_BUILD_TYPE "Release")
 endif()
 
 
@@ -100,7 +100,11 @@ foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3 PROJECT4)
         add_definitions(-D_WIN32_WINNT=0x0601)
         set(OpenCV_DIR ${parentdir}/opencv/out/${CMAKE_BUILD_TYPE}/install)
      else()
+
         set(OpenCV_DIR ${parentdir}/opencv/out/${CMAKE_BUILD_TYPE}/install/lib64/cmake/opencv4)
+        if(NOT IS_DIRECTORY ${OpenCV_DIR})
+        set(OpenCV_DIR ${parentdir}/opencv/out/${CMAKE_BUILD_TYPE}/install/lib/cmake/opencv4)
+        endif()
      endif()
 
     #set(OpenCV_DIR "C:\\opencv\\build")
@@ -312,8 +316,8 @@ list(APPEND ENTANGLE_FILES_DEVICE_CHARMING
 list (APPEND ENTANGLE_FILES ${ENTANGLE_FILES_DEVICE_CHARMING})
 
 list(APPEND ENTANGLE_FILES_RES
-   ${CMAKE_CURRENT_SOURCE_DIR}/entangle/example/charm-replay.res
-    ${CMAKE_CURRENT_SOURCE_DIR}/entangle/example/charm-SANS1.res
+   ${CMAKE_CURRENT_SOURCE_DIR}/entangle/example/mesytec-listmode-replay.res
+    ${CMAKE_CURRENT_SOURCE_DIR}/entangle/example/SANS1-detector.res
     ${CMAKE_CURRENT_SOURCE_DIR}/entangle/example/ERWIN-detector-small.res
   )
 
