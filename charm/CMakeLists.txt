@@ -21,7 +21,7 @@ if(MSVC)
     add_definitions(-DWIN32_PRE10OLDSTYLE)
     set(OpenCV_DIR ${parentdir}/opencv/out/${CMAKE_BUILD_TYPE}/install)
 else()
-    set(OpenCV_DIR ${parentdir}/opencv/out/${CMAKE_BUILD_TYPE}/install/lib/cmake/opencv4)
+    set(OpenCV_DIR ${parentdir}/opencv/out/${CMAKE_BUILD_TYPE}/install/lib64/cmake/opencv4)
 endif()
 #set(OpenCV_DIR "C:\\opencv\\build")
 set(OpenCV_STATIC ON) # no effect

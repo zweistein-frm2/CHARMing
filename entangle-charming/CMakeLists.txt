@@ -100,7 +100,7 @@ foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3 PROJECT4)
         add_definitions(-D_WIN32_WINNT=0x0601)
         set(OpenCV_DIR ${parentdir}/opencv/out/${CMAKE_BUILD_TYPE}/install)
      else()
-        set(OpenCV_DIR ${parentdir}/opencv/out/${CMAKE_BUILD_TYPE}/install/lib/cmake/opencv4)
+        set(OpenCV_DIR ${parentdir}/opencv/out/${CMAKE_BUILD_TYPE}/install/lib64/cmake/opencv4)
      endif()
 
     #set(OpenCV_DIR "C:\\opencv\\build")
