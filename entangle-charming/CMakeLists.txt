@@ -16,13 +16,15 @@ set(boost_currentversion 1.75.0)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
 set (Build_Type RELEASE)
+
+
 if(DEFINED CMAKE_BUILD_TYPE)
  string(FIND ${CMAKE_BUILD_TYPE} "Release" isreleasebuild)
  message(STATUS ${CMAKE_BUILD_TYPE})
  if(isreleasbuild LESS 0)
   set (Build_Type DEBUG)
  endif()
-endif()
+ endif()
 
 message(STATUS ${Build_Type})
 set(PROJECT1 DebugHelper)
@@ -85,12 +87,17 @@ foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3 PROJECT4)
 
     add_definitions(-DENTANGLE_LOGGER)
 
+    if(CMAKE_BUILD_TYPE)
+    set(BUILDVARIANT ${CMAKE_BUILD_TYPE})
+    else()
+    set(BUILDVARIANT Release)
+    endif()
     #add_definitions(-DUNICODE -D_UNICODE)
     if(WIN32)
         add_definitions(-D_WIN32_WINNT=0x0601)
-        set(OpenCV_DIR ${parentdir}/opencv/out/${CMAKE_BUILD_TYPE}/install)
+        set(OpenCV_DIR ${parentdir}/opencv/out/${BUILDVARIANT}/install)
      else()
-        set(OpenCV_DIR ${parentdir}/opencv/out/${CMAKE_BUILD_TYPE}/install/lib/cmake/opencv4)
+        set(OpenCV_DIR ${parentdir}/opencv/out/${BUILDVARIANT}/install/lib/cmake/opencv4)
      endif()
 
     #set(OpenCV_DIR "C:\\opencv\\build")

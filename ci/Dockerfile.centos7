@@ -11,16 +11,14 @@ RUN yum install -y epel-release && yum repolist  && \
 
 RUN yum install -y centos-sclo-rh centos-release-scl git  && \
     yum install -y python3-pip python3-devel && \
-    pip3 install numpy # && \
-   # yum install -y opencv
-
-# we need python3 otherwise boost will not build its python support
+    pip3 install numpy && \
+    yum install -y gtk3-devel
 
 RUN yum install -y which git devtoolset-9-gcc devtoolset-9-gcc-c++  make && \
   yum install -y cmake3  glibc-static && ln -s /usr/bin/cmake3 /usr/bin/cmake
 ENV PATH=/opt/rh/devtoolset-9/root/usr/bin:$PATH
 
-RUN yum install -y wget dpkg #off opencv-devel opencv-contrib-devel
+RUN yum install -y wget dpkg
 RUN wget https://forensics.cert.org/cert-forensics-tools-release-el7.rpm && \
     rpm -Uvh cert-forensics-tools-release*rpm && \
 	yum --enablerepo=forensics install -y libiconv-static
@@ -31,7 +29,6 @@ ARG projectdir=CHARMing
 RUN mkdir ${projectdir}
 WORKDIR /${projectdir}
 COPY . .
-#RUN echo '#include <opencv2/contrib/contrib.hpp>' >> /${projectdir}/charm/opencv2/contrib/contrib.hpp
 
 RUN cp /${projectdir}/distribution/centos7/Docker/etc/yum.conf /etc/yum.conf
 RUN yum reinstall -y -q glibc-common
@@ -44,12 +41,14 @@ RUN cd /${projectdir} && git submodule update --init --recursive
 
 RUN cp /${projectdir}/distribution/centos7/Docker/${projectdir}/libuv/CMakeLists.txt /${projectdir}/libuv/CMakeLists.txt
 # basically we do overwrite the libuv CMakeLists.txt so that libuv is not installed (not needed as we link statically to it
-RUN python3 --version && find /usr -name "pyconfig.h"
+#RUN python3 --version && find /usr -name "pyconfig.h"
 
-RUN export CPLUS_INCLUDE_PATH=/usr/include/python3.6m && cd ${projectdir} && chmod +x opencv_setup.sh && ./opencv_setup.sh  && chmod +x buildboost.sh && ./buildboost.sh -sICONV_PATH=/usr/libiconv
+RUN export CPLUS_INCLUDE_PATH=/usr/include/python3.6m && cd ${projectdir} && \
+    chmod +x opencv_setup.sh && ./opencv_setup.sh && \
+    chmod +x buildboost.sh && ./buildboost.sh -sICONV_PATH=/usr/libiconv
 
 ENV PACK2RPM=ON
-#ENV INSTALL_DEPS=opencv
+ENV INSTALL_DEPS=gtk3-devel
 ENV LINUX_FLAVOUR=centos7
 
 RUN cd /${projectdir}/entangle-charming && mkdir out && cd out && cmake .. && make

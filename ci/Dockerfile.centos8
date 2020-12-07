@@ -17,12 +17,6 @@ RUN yum install -y dnf which git curl unzip tar wget dpkg && \
 
 RUN dnf  --enablerepo=PowerTools install -y glibc-static
 
-RUN  dnf install -y opencv
-
-# we need python3 otherwise boost will not build its python support
-
-RUN dnf  --enablerepo=PowerTools install -y glibc-static
-
 RUN wget https://forensics.cert.org/cert-forensics-tools-release-el8.rpm -O cert-forensics-tools-release*rpm --no-check-certificate  && \
    rpm -Uvh cert-forensics-tools-release*rpm
 RUN yum -y install bzip2  gcc gcc-c++  zlib-devel diffutils gmp-devel mpfr-devel libmpc-devel make
@@ -33,7 +27,7 @@ RUN yum -y install bzip2  gcc gcc-c++  zlib-devel diffutils gmp-devel mpfr-devel
 #RUN echo " will not compile due to bug in gcc 9.2.1 which is supplied by centos 8 repository"
 #RUN echo " gcc > = 9.2.2 is working fine"
 
-RUN dnf install -y  opencv-devel
+RUN dnf install -y  gtk3-devel
 
 
 ARG projectdir=CHARMing
@@ -68,7 +62,9 @@ RUN cp /${projectdir}/distribution/centos8/Docker/${projectdir}/libuv/CMakeLists
 RUN python3 --version && find /usr -name "pyconfig.h"
 ENV CPLUS_INCLUDE_PATH=/usr/include/python3.6m
 
-RUN cd /${projectdir} && chmod +x opencv_setup.sh && ./opencv_setup.sh  && chmod +x buildboost.sh && ./buildboost.sh  -sICONV_PATH=/usr/libiconv
+RUN cd /${projectdir} && \
+    chmod +x opencv_setup.sh && ./opencv_setup.sh  && \
+    chmod +x buildboost.sh && ./buildboost.sh  -sICONV_PATH=/usr/libiconv
 
 RUN cd /${projectdir}/entangle-charming && mkdir out && cd out && \
      cmake  -DPython3_INCLUDE_DIRS=/usr/include/python3.6m -DPython3_EXECUTABLE=/usr/bin/python3 \

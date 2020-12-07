@@ -11,10 +11,8 @@ RUN apt-get install tzdata     # must be at beginning for unknown reasons,
 RUN apt-get install -y git curl unzip tar && \
     apt-get install -y python3-pip python3-dev && \
     pip3 install numpy && \
-    apt-get install -y libopencv-dev && \
+    apt-get install -y libgtk-3-dev && \
 	apt-get install -y gcc g++ cmake build-essential
-# we need python3 otherwise boost will not build its python support
-
 
 ARG projectdir=CHARMing
 RUN mkdir ${projectdir}
@@ -30,7 +28,9 @@ RUN cd /${projectdir} && git submodule update --init --recursive
 RUN cp /${projectdir}/distribution/ubuntu20/${projectdir}/libuv/CMakeLists.txt /${projectdir}/libuv/CMakeLists.txt
 # basically we do overwrite the libuv CMakeLists.txt so that libuv is not installed (not needed as we link statically to it
 
-RUN cd /${projectdir}  && chmod +x opencv_setup.sh && ./opencv_setup.sh && chmod +x buildboost.sh && ./buildboost.sh
+RUN cd /${projectdir}  && \
+    chmod +x opencv_setup.sh && ./opencv_setup.sh && \
+    chmod +x buildboost.sh && ./buildboost.sh
 
 RUN cd /${projectdir}/entangle-charming && mkdir out && cd out && cmake .. && make
 

@@ -10,13 +10,19 @@ endif()
 
 get_filename_component(parentdir ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY )
 
+if(CMAKE_BUILD_TYPE)
+    set(BUILDVARIANT ${CMAKE_BUILD_TYPE})
+    else()
+    set(BUILDVARIANT Release)
+    endif()
+
  add_definitions(-DSIMPLE_LOGGER)
 if(MSVC)
     add_definitions(-D_WIN32_WINNT=0x0601)
     add_definitions(-DWIN32_PRE10OLDSTYLE)
-    set(OpenCV_DIR ${parentdir}/opencv/out/${CMAKE_BUILD_TYPE}/install)
+    set(OpenCV_DIR ${parentdir}/opencv/out/${BUILDVARIANT}/install)
 else()
-    set(OpenCV_DIR ${parentdir}/opencv/out/${CMAKE_BUILD_TYPE}/install/lib/cmake/opencv4)
+    set(OpenCV_DIR ${parentdir}/opencv/out/${BUILDVARIANT}/install/lib/cmake/opencv4)
 endif()
 #set(OpenCV_DIR "C:\\opencv\\build")
 set(OpenCV_STATIC ON) # no effect

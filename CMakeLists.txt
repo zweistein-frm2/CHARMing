@@ -44,7 +44,7 @@ project(CHARMing)
 set(LIBUV_BUILD_TESTS OFF)
 set(LIBUV_BUILD_BENCH OFF)
 add_subdirectory(libuv)
-target_compile_options(uv_a PRIVATE $<$<CXX_COMPILER_ID:GNU>:-fPIC>)
+target_compile_options(uv_a PRIVATE $<$<CXX_COMPILER_ID:GNU>:-fpic>)
 set(libuv_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/libuv/include)
 set(Charm_DIR ${CMAKE_SOURCE_DIR}/charm)
 
