@@ -59,9 +59,7 @@ set(CMAKE_PROJECT_VERSION_MINOR ${GIT_NUMBER_OF_COMMITS_SINCE})
 set(CMAKE_PROJECT_VERSION_PATCH ${GIT_PATCH})
 
 
-add_subdirectory(charm)
-add_subdirectory(entangle-install-charming)
-add_subdirectory(entangle-install-isegCC2x)
+
 #add_subdirectory(TestBinning)
 if(UNIX AND NOT APPLE)
 if(DEFINED ENV{INSTALL_DEPS})
@@ -84,6 +82,11 @@ if(DEFINED INSTALL_DEPS)
 set(CPACK_DEBIAN_PACKAGE_DEPENDS ${INSTALL_DEPS})
 endif()
 endif()
+
+add_subdirectory(charm)
+add_subdirectory(entangle-install-charming)
+add_subdirectory(entangle-install-isegCC2x)
+
 set(CPACK_PACKAGE_CONTACT "andreas.langhoff@frm2.tum.de" ) # required
 set(CPACK_PACKAGE_VENDOR "https://mlz-garching.de/" )
 set (CMAKE_PROJECT_HOMEPAGE_URL "https://forge.frm2.tum.de")

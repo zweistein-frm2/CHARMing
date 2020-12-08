@@ -1,6 +1,8 @@
 *
 !*/
 !*.*
+!postinst
+!prerm
 parts/
 prime/
 stage/

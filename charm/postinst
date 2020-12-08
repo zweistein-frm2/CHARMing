@@ -1,0 +1,25 @@
+#!/bin/bash
+echo "Hello"
+
+for i in /etc/CHARMing/examples/*.*
+do
+    if [ -f "$i" ];
+    then
+        printf "Filename: %s\n" "${i##*/}" # longest prefix removal
+
+		FILE=/etc/CHARMing/"${i##*/}"
+		if [ -f "$FILE" ];
+		then
+		    echo "$FILE exists. Not changed."
+
+		else
+		    echo "$FILE does not exist."
+			printf "$i"
+			printf "$FILE"
+			cp "$i" "$FILE"
+		fi
+
+    fi
+done
+
+
