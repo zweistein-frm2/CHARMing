@@ -15,7 +15,7 @@
 
 
 std::string PROJECT_NAME("CHARMing");
-std::string CONFIG_FILE("charm");
+std::string CONFIG_FILE("charmsystem");
 namespace p = boost::python;
 namespace np = boost::python::numpy;
 using boost::asio::ip::udp;

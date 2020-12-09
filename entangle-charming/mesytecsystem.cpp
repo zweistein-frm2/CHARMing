@@ -20,7 +20,7 @@
 
 
 std::string PROJECT_NAME("CHARMing");
-std::string CONFIG_FILE("mesytec");
+std::string CONFIG_FILE("mesytecsystem");
 namespace p = boost::python;
 namespace np = boost::python::numpy;
 using boost::asio::ip::udp;

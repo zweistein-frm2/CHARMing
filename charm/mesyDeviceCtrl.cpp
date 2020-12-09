@@ -45,7 +45,7 @@ boost::log::trivial::severity_level SEVERITY_THRESHOLD = boost::log::trivial::tr
 boost::log::trivial::severity_level SEVERITY_THRESHOLD = boost::log::trivial::info;
 #endif
 std::string PROJECT_NAME("CHARMing");
-std::string CONFIG_FILE("charm"); // or "mesytec"
+std::string CONFIG_FILE("charmsystem"); // or "mesytecsystem"
 using boost::asio::ip::udp;
 
 

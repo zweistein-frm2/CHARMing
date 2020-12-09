@@ -1,25 +1,21 @@
 #!/bin/bash
-echo "Hello"
 
-for i in /etc/CHARMing/examples/*.*
-do
-    if [ -f "$i" ];
-    then
-        printf "Filename: %s\n" "${i##*/}" # longest prefix removal
+echo "Charming detector connection configuration."
 
-		FILE=/etc/CHARMing/"${i##*/}"
-		if [ -f "$FILE" ];
-		then
-		    echo "$FILE exists. Not changed."
+FILE=/etc/CHARMing/charmsystem.json
 
-		else
-		    echo "$FILE does not exist."
-			printf "$i"
-			printf "$FILE"
-			cp "$i" "$FILE"
-		fi
+if [ -f $FILE ] || [ -f /etc/CHARMing/mesytecsystem.json ];
+then
+  printf "Keeping existing configuration.\n"
+else
+  cp /etc/CHARMing/examples/erwin.json  $FILE
+  if [ $? -ne 0 ]
+  then
+    printf "\n"
+  else
+    printf "creating configuration $FILE \n"
+  fi
 
-    fi
-done
+fi
 
 

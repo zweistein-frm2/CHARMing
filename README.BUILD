@@ -1,5 +1,8 @@
 Sequence to build and package everything including the installer:
 
+0. Prerequisites:
+   Run ./initrepository.sh
+
 1. Build entangle-charming
    cd CHARMing/entangle-charming
    mkdir out
