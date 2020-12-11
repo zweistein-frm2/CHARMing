@@ -68,7 +68,7 @@ endif()
 endif()
 
 set (CONFIG_FILES
- "erwin.json"
+ "erwin-small.json"
  "sans1.json"
  "pos_cal_lut_2016_07_13.txt"
  )
