@@ -14,6 +14,7 @@
 #include <boost/exception/error_info.hpp>
 #include <errno.h>
 #include <stdio.h>
+#include <opencv2/core/mat.hpp>
 #ifndef WIN32
 #if defined(__cplusplus)
 extern "C"
@@ -28,7 +29,7 @@ extern "C"
 
 #endif
 
-#include "mesytecsystem.cpp"
+#include "charmsystem.cpp"
 
 bool retry = true;
 void catch_ctrlc(const boost::system::error_code& error, int signal_number) {
@@ -51,13 +52,23 @@ int main(int argc, char* argv[])
 	boost::asio::signal_set signals(*ptr_ctx, SIGINT, SIGSEGV);
 	//signals.async_wait(boost::bind(&boost::asio::io_service::stop, &io_service));
 	signals.async_wait(&catch_ctrlc);
+	cv::Mat mat =cv::Mat_<int32_t>::zeros(2,2);
+
 	boost::shared_ptr < NeutronMeasurement> pNM ;
 	try {
 		pNM.reset( new NeutronMeasurement(STDOUT_FILENO));
 		pNM->on();
-		boost::this_thread::sleep_for(boost::chrono::milliseconds(8000));
+		boost::this_thread::sleep_for(boost::chrono::milliseconds(3000));
+		pNM->stop();
+		pNM->start();
+		boost::this_thread::sleep_for(boost::chrono::milliseconds(3000));
+		Histogram* pH = pNM->getHistogram();
+		pH->charm_update(mat);
+
+		boost::this_thread::sleep_for(boost::chrono::milliseconds(5000));
 		pNM->off();
 		boost::this_thread::sleep_for(boost::chrono::milliseconds(2000));
+
 
 
 

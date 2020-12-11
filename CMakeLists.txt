@@ -31,13 +31,10 @@ message(BOOST_PREFIX=${BOOST_PREFIX})
 
 if(WIN32)
  # or $ENV{HOMEDRIVE}$ENV{HOMEPATH}
-file(TO_CMAKE_PATH $ENV{USERPROFILE} INSTALL_DIR)
-
-else()
-set(INSTALL_DIR /usr/local/bin)
-endif()
-
-
+ file(TO_CMAKE_PATH $ENV{USERPROFILE} INSTALL_DIR)
+ else()
+  set(INSTALL_DIR /usr/local/bin)
+ endif()
 
 
 project(CHARMing)
@@ -58,34 +55,37 @@ set(CMAKE_PROJECT_VERSION_MAJOR ${NGIT_LATEST_TAG})
 set(CMAKE_PROJECT_VERSION_MINOR ${GIT_NUMBER_OF_COMMITS_SINCE})
 set(CMAKE_PROJECT_VERSION_PATCH ${GIT_PATCH})
 
-
-
 #add_subdirectory(TestBinning)
-if(UNIX AND NOT APPLE)
+
 if(DEFINED ENV{INSTALL_DEPS})
-set(INSTALL_DEPS $ENV{INSTALL_DEPS})
-endif()
+ set(INSTALL_DEPS $ENV{INSTALL_DEPS})
+ endif()
 
 if (DEFINED ENV{PACK2RPM})
- set(PACK2RPM $ENV{PACK2RPM})
-else()
- set(PACK2RPM OFF)
-endif()
-if(${PACK2RPM} STREQUAL ON)
-set(CPACK_GENERATOR "RPM")
-if(DEFINED INSTALL_DEPS)
-set(CPACK_RPM_PACKAGE_REQUIRES ${INSTALL_DEPS})
-endif()
-else()
-set(CPACK_GENERATOR "DEB")
-if(DEFINED INSTALL_DEPS)
-set(CPACK_DEBIAN_PACKAGE_DEPENDS ${INSTALL_DEPS})
-endif()
-endif()
+  set(PACK2RPM $ENV{PACK2RPM})
+ else()
+  set(PACK2RPM OFF)
+ endif()
 
-add_subdirectory(charm)
-add_subdirectory(entangle-install-charming)
-add_subdirectory(entangle-install-isegCC2x)
+if(${PACK2RPM} STREQUAL ON)
+ set(CPACK_GENERATOR "RPM")
+ if(DEFINED INSTALL_DEPS)
+  set(CPACK_RPM_PACKAGE_REQUIRES ${INSTALL_DEPS})
+  endif()
+ else()
+   set(CPACK_GENERATOR "DEB")
+    if(DEFINED INSTALL_DEPS)
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS ${INSTALL_DEPS})
+   endif()
+ endif()
+
+if(DEFINED ENV{LINUX_FLAVOUR})
+ set(CPACK_PACKAGE_FILE_NAME ${CMAKE_PROJECT_NAME}-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}-$ENV{LINUX_FLAVOUR})
+ endif()
+
+ if(WIN32)
+  set(CPACK_GENERATOR "NSIS")
+ endif()
 
 set(CPACK_PACKAGE_CONTACT "andreas.langhoff@frm2.tum.de" ) # required
 set(CPACK_PACKAGE_VENDOR "https://mlz-garching.de/" )
@@ -93,13 +93,9 @@ set (CMAKE_PROJECT_HOMEPAGE_URL "https://forge.frm2.tum.de")
 set(CPACK_PACKAGE_VERSION_MAJOR ${CMAKE_PROJECT_VERSION_MAJOR})
 set(CPACK_PACKAGE_VERSION_MINOR ${CMAKE_PROJECT_VERSION_MINOR})
 set(CPACK_PACKAGE_VERSION_PATCH ${CMAKE_PROJECT_VERSION_PATCH})
-if(DEFINED ENV{LINUX_FLAVOUR})
-set(CPACK_PACKAGE_FILE_NAME ${CMAKE_PROJECT_NAME}-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}-$ENV{LINUX_FLAVOUR})
-endif()
+
+add_subdirectory(charm)
+add_subdirectory(entangle-install-charming)
+add_subdirectory(entangle-install-isegCC2x)
 
 include(CPack)
-
-else()
-
-
-endif()

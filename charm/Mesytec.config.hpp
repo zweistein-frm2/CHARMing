@@ -142,9 +142,9 @@ namespace Mesytec {
 					std::stringstream ss2;
 					ss2 << oursystem << punkt << charmdevice << n << punkt;
 					std::string s3 = ss2.str();
-					if (n == 0) p1.charm_port = root.get<unsigned short>(s3 + "charm_port", Charm::Parameters::defaultUdpPort);
-					else p1.charm_port = root.get<unsigned short>(s3 + "charm_port", Charm::Parameters::defaultUdpPort);
-					root.put<unsigned short>(s3 + "charm_port", p1.charm_port);
+					if (n == 0) p1.n_charm_units = root.get<unsigned short>(s3 + "n_charm_units", Charm::Parameters::default_n_charm_units);
+					else p1.n_charm_units = root.get<unsigned short>(s3 + "n_charm_units", Charm::Parameters::default_n_charm_units);
+					root.put<unsigned short>(s3 + "n_charm_units", p1.n_charm_units);
 
 					bool bcanpushback = true;
 

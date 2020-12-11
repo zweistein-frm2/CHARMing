@@ -9,6 +9,7 @@ class PacketSenderParams {
     static std::string fullpathfilename;
     const static std::string mesytecdevice;
     const static std::string devid;
+    const static std::string n_charm_units;
     const static std::string punkt;
 public:
     static void ReadIni(std::string appName, std::string projectname) {
@@ -30,11 +31,16 @@ public:
         return root.get<unsigned char>(mesytecdevice + punkt + devid, 0);
 
     }
+    static unsigned char get_n_charm_units() {
+        return root.get<unsigned char>(mesytecdevice + punkt + n_charm_units, 2);
+
+    }
     static void setDevId(unsigned char newdevid) {
         root.put<unsigned char>(mesytecdevice + punkt + devid, newdevid);
         boost::property_tree::write_json(fullpathfilename, root);
     }
 };
+const std::string PacketSenderParams::n_charm_units = "n_charm_units";
 const std::string PacketSenderParams::devid = "devid";
 const std::string PacketSenderParams::punkt = ".";
 const std::string PacketSenderParams::mesytecdevice = "MesytecDevice";

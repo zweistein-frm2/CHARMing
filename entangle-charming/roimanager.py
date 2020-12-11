@@ -18,14 +18,14 @@ class CmdProcessor(object):
 
     def Write(self, msg:str)->uint32:
         self.lastcmd = msg.rstrip()
-        print('CmdProcessor.Write('+self.lastcmd + ')')
+        #print('CmdProcessor.Write('+self.lastcmd + ')')
 
         tok = self.lastcmd.split(':')
         if not tok:
             return 0
         if len(tok) < 2:
             return 0
-        print("tok[0]="+str(tok[0]))
+        #print("tok[0]="+str(tok[0]))
         if tok[0].startswith('ROI'):
             istr = tok[0][3:].strip()
             if not istr:
@@ -38,7 +38,7 @@ class CmdProcessor(object):
         return len(msg)
 
     def ReadLine(self):
-        print('CmdProcessor.ReadLine() lastcmd == ' + self.lastcmd)
+        #print('CmdProcessor.ReadLine() lastcmd == ' + self.lastcmd)
         if not self.lastcmd:
             return ''
         if self.lastcmd == '?':
@@ -76,7 +76,7 @@ class RoiManager(CmdProcessor,base.StringIO):
         if msmtsystem.msmtsystem:
             #print(write_roi)
             roilist = self.get_roidata()
-            if len(roilist) > selecteditem:
+            if len(roilist) > selecteditem + 1:
                 print("index "+str(selecteditem) + " above maximum")
                 return None
             if len(roilist) == selecteditem:

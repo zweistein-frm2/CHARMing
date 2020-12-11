@@ -15,7 +15,7 @@
 
 
 std::string PROJECT_NAME("CHARMing");
-std::string CONFIG_FILE("charmsystem");
+std::string CONFIG_FILE("charmsystem"); // .json
 namespace p = boost::python;
 namespace np = boost::python::numpy;
 using boost::asio::ip::udp;
@@ -37,6 +37,9 @@ struct StartMsmtParameters {
 #include "Module.NeutronMeasurement.hpp"
 #include "Module.legacy_api_guard.hpp"
 
+
+
+
 BOOST_PYTHON_MODULE(charmsystem)
 {
 
@@ -52,11 +55,12 @@ BOOST_PYTHON_MODULE(charmsystem)
             pbcvt::matToNDArrayBoostConverter>();
         pbcvt::matFromNDArrayBoostConverter();
         class_<Histogram, boost::noncopyable>("Histogram", boost::python::no_init)
-            .def("update", &Histogram::update)
-            .def("getRoiData", &Histogram::getRoiData)
-            .def("setRoi", &Histogram::setRoi)
-            .def("getRoi", &Histogram::getRoi)
-            .add_property("Size", &Histogram::getSize)
+            .def("update", &Histogram::charm_update)
+            .def("getRoiData", &Histogram::charm_getRoiData)
+            .def("setRoi", &Histogram::charm_setRoi)
+            .def("getRoi", &Histogram::charm_getRoi)
+            .add_property("Size", &Histogram::charm_getSize)
+            .add_property("nextRAW", &Histogram::get_nextRAW, &Histogram::set_nextRAW)
             ;
         class_< NeutronMeasurement>("NeutronMeasurement", init<long>())
             .add_property("writelistmode", &NeutronMeasurement::get_writelistmode, &NeutronMeasurement::set_writelistmode)
@@ -71,7 +75,7 @@ BOOST_PYTHON_MODULE(charmsystem)
             .def("stop", &NeutronMeasurement::stop)
             .def("on", &NeutronMeasurement::on)
             .def("off", &NeutronMeasurement::off)
-            .def("getHistogram", &NeutronMeasurement::getHistogram, return_internal_reference<1, with_custodian_and_ward_postcall<1, 0>>())
+            .def("getHistogram", &NeutronMeasurement::getHistogram, NeutronMeasurements_overloads(args("index")=0) [ return_internal_reference<1, with_custodian_and_ward_postcall<1, 0>>()])
             ;
 
         import("atexit").attr("register")(make_function(&::release_guard));

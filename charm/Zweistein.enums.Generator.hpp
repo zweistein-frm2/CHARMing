@@ -15,8 +15,7 @@ namespace Zweistein {
 		enum EventData {
 			Undefined = 0,
 			Mpsd8 = 1,
-			Mdll = 2,
-			Charm = 3
+			Mdll = 2
 		};
 	}
 

@@ -10,6 +10,11 @@
  published by the Free Software Foundation;*/
 
 #pragma once
+
+#ifdef __GNUC__
+#include <cxxabi.h>
+#endif
+
 #include <boost/function.hpp>
 #include <boost/chrono.hpp>
 #include <boost/shared_ptr.hpp>
@@ -40,6 +45,22 @@ namespace Zweistein {
 	void displayHistogram(boost::asio::io_service& io_service, boost::shared_ptr<Zweistein::XYDetectorSystem> pmsmtsystem1) {
 		boost::this_thread::sleep_for(boost::chrono::milliseconds(200));
 
+		std::string classname = typeid(*pmsmtsystem1).name();
+#ifdef __GNUC__
+		char output[255];
+		size_t len = 255;
+		int status;
+		const char* ptrclearclassname = __cxxabiv1::__cxa_demangle(classname.c_str(), output, &len, &status);
+#else
+		const char* ptrclearclassname = classname.c_str();
+#endif
+		bool ischarm = false;
+		static double shrinkraw = 1.0;
+		if (std::string("class Charm::CharmSystem") == std::string(ptrclearclassname)) { // we don't want header dipendency, hence class name check at runtime only
+			ischarm = true;
+			shrinkraw = 0.25; // reduce from 1024 to 256
+		}
+
 		// cv::Mat is row, column which corresponds to y, x !!!!
 		auto imageUpdate = [](cv::Mat& image, cv::Mat& binnedimage) {
 			using namespace magic_enum::bitwise_operators; // out-of-the-box bitwise operators for all enums.
@@ -48,7 +69,8 @@ namespace Zweistein {
 				BINNED=2
 			};
 			static cv::Mat binned_occ_corrected;
-
+			static cv::Mat raw_shrinked;
+			static cv::Mat raw_float;
 			HISTYPE htype = HISTYPE::RAW|HISTYPE::BINNED;
 
 			histogram_setup_status hss = Zweistein::setup_status;
@@ -66,10 +88,29 @@ namespace Zweistein {
 
 			if ((bool)(htype & HISTYPE::RAW)) {
 				Zweistein::ReadLock r_lock(histogramsLock);
-				double minVal, maxVal;
-				cv::Point minLoc, maxLoc;
-				cv::minMaxLoc(histograms[0].histogram, &minVal, &maxVal, &minLoc, &maxLoc);
-				histograms[0].histogram.convertTo(image, CV_8U, maxVal != 0 ? 255.0 / maxVal : 0, 0);
+
+				if (shrinkraw != 1) {
+
+					histograms[0].histogram.convertTo(raw_float, CV_32F);
+
+					if (raw_shrinked.cols < 2) {
+						raw_shrinked = cv::Mat_<float>::zeros(histograms[0].histogram.size[0] * shrinkraw, histograms[0].histogram.size[1] * shrinkraw);
+					}
+					else {
+						raw_shrinked.resize(histograms[0].histogram.size[0] * shrinkraw, histograms[0].histogram.size[1] * shrinkraw);
+					}
+					cv::resize(raw_float, raw_shrinked, raw_shrinked.size(),0,0,cv::INTER_AREA);
+					double minVal, maxVal;
+					cv::Point minLoc, maxLoc;
+					cv::minMaxLoc(raw_shrinked, &minVal, &maxVal, &minLoc, &maxLoc);
+					raw_shrinked.convertTo(image, CV_8U, maxVal != 0 ? 255.0 / maxVal : 0, 0);
+				}
+				else {
+					double minVal, maxVal;
+				    cv::Point minLoc, maxLoc;
+				    cv::minMaxLoc(histograms[0].histogram, &minVal, &maxVal, &minLoc, &maxLoc);
+				    histograms[0].histogram.convertTo(image, CV_8U, maxVal != 0 ? 255.0 / maxVal : 0, 0);
+			   }
 			}
 		};
 		boost::function<void()> display = [ &io_service, &imageUpdate]() {

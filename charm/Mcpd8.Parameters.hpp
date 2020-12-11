@@ -21,7 +21,7 @@ namespace Mcpd8 {
 		std::string mcpd_ip;
 		std::string data_host;
 		unsigned short mcpd_port;
-		unsigned short charm_port;
+		unsigned short n_charm_units;
 		unsigned char mcpd_id;
 		std::string counterADC[8];
 		std::string moduleparam[8];
@@ -36,7 +36,7 @@ namespace Mcpd8 {
 
 namespace Charm {
 	struct Parameters {
-		static const unsigned short defaultUdpPort;
+		static const unsigned short default_n_charm_units;
 	};
 
 

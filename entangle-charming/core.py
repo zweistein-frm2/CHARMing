@@ -21,6 +21,7 @@ import numpy as np
 import  entangle.device.charming as charming
 import entangle.device.charming.msmtsystem as msmtsystem
 
+
 class MeasureCounts(base.CounterChannel):
 
     def state(self):
@@ -147,7 +148,7 @@ class Monitor3(base.DiscreteOutput):
             return t[3][1]
 
 
-class Histogram(base.ImageChannel):
+class HistogramBase(base.ImageChannel):
 
     attributes = {
          'CountsInRoi': Attr(uint64, 'counts in Roi',dims = 0,writable=False,memorized = False,unit=None),
@@ -170,11 +171,8 @@ class Histogram(base.ImageChannel):
         self.histogram = None
 
     def Histogram(self):
-        if msmtsystem.msmtsystem:
-            self.histogram = charming.msmtsystem.msmtsystem.getHistogram()
-        else:
-            return None
-        return self.histogram
+        raise NotImplementedError()
+
 
     def read_CountsInRoi(self):
         return uint64(self.count)
@@ -238,5 +236,50 @@ class Histogram(base.ImageChannel):
         if not charming.msmtsystem.msmtsystem:
             return ver
         return ver + " "+charming.msmtsystem.msmtsystem.version
+
+
+class Histogram(HistogramBase):
+
+   def Histogram(self):
+        if msmtsystem.msmtsystem:
+            self.histogram = charming.msmtsystem.msmtsystem.getHistogram()
+        else:
+            return None
+        return self.histogram
+
+
+class HistogramRaw(HistogramBase):
+
+   def Histogram(self):
+       RAWHISTOGRAM = 1
+       if msmtsystem.msmtsystem:
+            self.histogram = charming.msmtsystem.msmtsystem.getHistogram(RAWHISTOGRAM)
+       else:
+           return None
+       return self.histogram
+
+   def read_value(self):
+       self.Histogram().nextRAW = True
+       return super().read_value()
+
+   def read_detectorSize(self):
+       self.Histogram().nextRAW = True
+       return super().read_detectorSize()
+
+   def read_RoiWKT(self):
+       #print("read_RoiWKT("+str(self.selectedRoi)+")")
+       self.Histogram().nextRAW = True
+       return super().read_RoiWKT()
+
+
+   def write_RoiWKT(self,value):
+       self.Histogram().nextRAW = True
+       return super().write_RoiWKT(value)
+
+
+
+
+
+
 
 

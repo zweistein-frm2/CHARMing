@@ -408,9 +408,11 @@ struct ReplayList {
             Mesytec::listmode::whatnext = Mesytec::listmode::continue_reading;
         }
 
-        Histogram* getHistogram() {
+        Histogram* getHistogram(int index = 0) {
             using namespace magic_enum::bitwise_operators; // out-of-the-box bitwise operators for enums.
-            //LOG_INFO << "getHistogram()" << std::endl;
+            //LOG_DEBUG << "getHistogram()" << std::endl;
+            if (index < 0 || index>1) index = 0;
+            if (index == 1) return &histograms[0];
             Zweistein::histogram_setup_status hss = Zweistein::setup_status;
             if (magic_enum::enum_integer(hss & Zweistein::histogram_setup_status::has_binning)) {
                 return &histograms[1];
@@ -418,9 +420,10 @@ struct ReplayList {
             return &histograms[0];
         }
 
+
     };
 
-
+    BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ReplayList_overloads, getHistogram, 0, 1)
 #include "Module.legacy_api_guard.hpp"
 
 
@@ -458,7 +461,7 @@ BOOST_PYTHON_MODULE(listmodereplay)
             .def("monitors_status", &ReplayList::monitors_status)
             .def("log", &ReplayList::log)
             .def("stop", &ReplayList::stop)
-            .def("getHistogram", &ReplayList::getHistogram, return_internal_reference<1, with_custodian_and_ward_postcall<1, 0>>())
+            .def("getHistogram", &ReplayList::getHistogram, ReplayList_overloads(args("index") = 0)[return_internal_reference<1, with_custodian_and_ward_postcall<1, 0>>()])
             ;
 
         import("atexit").attr("register")(make_function(&::release_guard));

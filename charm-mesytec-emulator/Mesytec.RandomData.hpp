@@ -15,6 +15,7 @@
 #include <magic_enum/include/magic_enum.hpp>
 #include <random>
 #include "Mesytec.hpp"
+#include "Charm.hpp"
 //#include <opencv2/core.hpp>
 //#include <opencv2/core/mat.hpp>
 //#include <opencv2/imgcodecs.hpp>
@@ -62,11 +63,10 @@ namespace Zweistein {
 			x = y; y = z; z = w;
 			return w = w ^ (w >> 19) ^ (t ^ (t >> 8));
 		}
-#ifdef FORBINNING
-		std::string message("\x03 Gr\x81\xe1\x65");
-#else
+
 		std::string message("\x03 Gr\x81\xe1\x65 von Zweistein \x0e \x0e");
-#endif
+
+
 		int counter = 0;
 		long ncalls = 0;
 		namespace ourfont = Zweistein::Font::_8x14_horizontal_LSB_1;
@@ -131,11 +131,39 @@ namespace Zweistein {
 
 			data[2] |= amplitude << 7;  //amplitude
 
-			if (position_y >= 960) {
+			if (position_y >= Mdll_sizeY) {
 				std::cout <<"position_y="<< position_y << std::endl;
 			}
 
 			data[2] |= (position_y>>3) & 0b1111111;   // y position
+			data[1] |= (position_y & 0b111) << 13;
+
+			data[1] |= x_pos << 3;			// xposition
+
+
+			if (i == 0) start = boost::chrono::high_resolution_clock::now();
+			auto diff = boost::chrono::high_resolution_clock::now() - start;
+			auto nsec = boost::chrono::duration_cast<boost::chrono::nanoseconds>(diff);
+			Mesy::Mpsd8Event::settime19bit(data, nsec);
+		}
+
+		void CharmMdllEventRandomData(unsigned short data[3], int i) {
+			data[0] = data[1] = data[2] = 0;
+
+			unsigned short x_pos = 0;
+			unsigned short position_y = 0;
+			unsigned long l = RandomData(x_pos, position_y, i, Charm_sizeY, Charm_sizeX);
+
+			unsigned short amplitude = l & 0b11111111;
+			amplitude = 1;//
+
+			data[2] |= amplitude << 7;  //amplitude
+
+			if (position_y >= Charm_sizeY) {
+				std::cout << "position_y=" << position_y << std::endl;
+			}
+
+			data[2] |= (position_y >> 3) & 0b1111111;   // y position
 			data[1] |= (position_y & 0b111) << 13;
 
 			data[1] |= x_pos << 3;			// xposition

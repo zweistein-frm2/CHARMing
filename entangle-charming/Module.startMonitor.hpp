@@ -174,7 +174,8 @@ void startMonitor(boost::shared_ptr < MSMTSYSTEM> ptrmsmtsystem1, boost::shared_
 
                 {
                     Zweistein::WriteLock w_lock(Entangle::cbLock);
-                    std::cout << ss1.str();
+// IF YOU WANT TO DISPLAY CURRENT STATUS ON SCREEN UNCOMMENT below
+                    //std::cout << ss1.str();
                 }
                 lastcount = currentcount;
 #ifndef _WIN32

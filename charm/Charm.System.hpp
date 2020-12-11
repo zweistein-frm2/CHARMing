@@ -18,28 +18,13 @@ namespace Charm {
 	public:
 		int icharmid;
 		CharmSystem():icharmid(0) {};
-		void start_receive_charm() {
 
-			deviceparam.at(icharmid).socket->async_receive_from(boost::asio::buffer(charm_buf), deviceparam.at(icharmid).charm_cmd_endpoint, boost::bind(&CharmSystem::handle__charm_receive, this,
-				boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
-		}
 
-		void handle__charm_receive(const boost::system::error_code& error,
-			std::size_t bytes_transferred) {
-			LOG_DEBUG << "handle__charm_receive(" << error.message() << " ,bytes_transferred=" << bytes_transferred << std::endl;
-			for (int i = 0; i < bytes_transferred; i++) {
-				LOG_DEBUG << std::hex << charm_buf[i] << " ";
-				if (i % 8 == 0) LOG_DEBUG << std::endl;
-			}
-			LOG_DEBUG << std::dec << std::endl;
-			start_receive_charm();
-		}
+
 		bool singleModuleXYSize(Zweistein::Format::EventData eventdataformat, unsigned short& x, unsigned short& y) {
-			bool rv = Mesytec::MesytecSystem::singleModuleXYSize(eventdataformat,x,y);
-			if(rv) return rv;
 
 			switch (eventdataformat) {
-			  case Zweistein::Format::EventData::Charm:
+			case Zweistein::Format::EventData::Mdll:
 				x = (unsigned short)Charm_sizeX;
 				y = (unsigned short)Charm_sizeY;
 				return true;
@@ -55,50 +40,28 @@ namespace Charm {
 						icharmid = key;
 					}
 				}
+
+				for (int n = 1; n <= deviceparam[0].n_charm_units; n++) {
+					auto tmp = deviceparam[0];
+					tmp.offset = (n - 1) * Charm_sizeX;
+					deviceparam.insert(std::pair<const unsigned char, Mesytec::DeviceParameter>(n, tmp));
+				}
+
+
+
      			return rv;
 		}
 
-		void Send(std::pair<const unsigned char, Mesytec::DeviceParameter>& kvp, Mcpd8::Internal_Cmd cmd, unsigned long param = 0) {
-			Mcpd8::CmdPacket cmdpacket;
-			Mcpd8::CmdPacket response;
-			cmdpacket.cmd = cmd;
-			switch (cmd) {
-			case Mcpd8::Internal_Cmd::CHARMPATTERNGENERATOR:
-			{
-				char cmdbytes[] = { '\x06','\x00','\x06','\x00','\x04','\x00','\x01','\x00','\x00','\x8a','\x00','\x00' };
-				if (param == 1) cmdbytes[10] = '\x01';
-				size_t bytessent = kvp.second.socket->send_to(boost::asio::buffer(cmdbytes), kvp.second.charm_cmd_endpoint);
-
-			}
-			break;
-			case Mcpd8::Internal_Cmd::CHARMSETEVENTRATE:
-			{
-				char cmdbytes[] = { '\x06','\x00','\x06','\x00','\x04','\x00','\x02','\x00','\x30','\x8a','\x00','\x00' };
-				unsigned short data = (unsigned short)(50 * 1000000 / (param));
-
-				if (data <= 2) {
-					using namespace magic_enum::ostream_operators;
-					auto cmd_2 = magic_enum::enum_cast<Mcpd8::Internal_Cmd>(cmdpacket.cmd);
-					std::stringstream ss1;
-					ss1 << cmd_2 << ":data must be >2";
-					LOG_WARNING << ss1.str() << std::endl;
-					break;
-				}
-				short* sp = (short*)&cmdbytes[10];
-				*sp = data;
-				size_t bytessent = kvp.second.socket->send_to(boost::asio::buffer(cmdbytes), kvp.second.charm_cmd_endpoint);
-				simulatordatarate = param;
-			}
-			break;
-			default:
-				Mesytec::MesytecSystem::Send(kvp, cmd, param);
-			}
-		}
 
 		inline void analyzebuffer(Mcpd8::DataPacket& datapacket) {
 
 			unsigned char id = Mcpd8::DataPacket::getId(datapacket.deviceStatusdeviceId);
-			auto& params = deviceparam[id];
+			if (id == 0) {
+				LOG_ERROR << "id == 0 " << std::endl;
+
+			}
+			// id is now offset , id = 1  offsetx 0, id =2 => offsetx = 1024
+			auto& params = deviceparam[1]; // always 0
 			unsigned short numevents = datapacket.numEvents();
 			boost::chrono::nanoseconds headertime = Mcpd8::DataPacket::timeStamp(datapacket.time);
 			unsigned short neutrons = 0;
@@ -128,14 +91,12 @@ namespace Charm {
 				}
 				params.lastbufnum = datapacket.Number;
 				for (int i = 0; i < numevents; i++) {
-					Zweistein::Event Ev = Zweistein::Event(Charm::CharmEvent::fromMpsd8(&datapacket.events[i]), headertime, params.offset, params.module_id);
+					Zweistein::Event Ev = Zweistein::Event(Charm::CharmEvent::fromMpsd8(&datapacket.events[i]), headertime, deviceparam[id].offset, params.module_id);
 					PushNeutronEventOnly_HandleOther(Ev);
 				}
 				break;
 			}
 		}
-		boost::array< unsigned char, 64> charm_buf;
-
 	};
 
 }

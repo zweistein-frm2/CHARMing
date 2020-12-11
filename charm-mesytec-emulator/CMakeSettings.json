@@ -35,7 +35,7 @@
     {
       "name": "Taco07-Ubuntu20",
       "generator": "Unix Makefiles",
-      "configurationType": "Debug",
+      "configurationType": "Release",
       "cmakeExecutable": "/snap/cmake/current/bin/cmake",
       "remoteCopySourcesExclusionList": [ ".vs", "out" ],
       "cmakeCommandArgs": "",
@@ -67,7 +67,7 @@
     {
       "name": "x64-Release",
       "generator": "Ninja",
-      "configurationType": "RelWithDebInfo",
+      "configurationType": "Release",
       "buildRoot": "${projectDir}\\out\\build\\${name}",
       "installRoot": "${projectDir}\\out\\install\\${name}",
       "cmakeCommandArgs": "",

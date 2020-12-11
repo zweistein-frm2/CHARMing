@@ -94,6 +94,8 @@ namespace Mesytec {
 		cmd_errorcode internalerror;
 
 		Zweistein::Format::EventData eventdataformat;
+		bool ismesy = true;   // we distinguish between Mesytec and Charm devices. Mesytec is parent to Charm.
+
 
 		virtual bool singleModuleXYSize(Zweistein::Format::EventData eventdataformat, unsigned short& x, unsigned short& y) {
 			switch (eventdataformat) {

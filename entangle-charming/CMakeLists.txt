@@ -98,7 +98,11 @@ foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3 PROJECT4)
     #add_definitions(-DUNICODE -D_UNICODE)
     if(WIN32)
         add_definitions(-D_WIN32_WINNT=0x0601)
-        set(OpenCV_DIR ${parentdir}/opencv/out/${CMAKE_BUILD_TYPE}/install)
+        set(opencvbuildtype  ${CMAKE_BUILD_TYPE})
+        if(${opencvbuildtype}  STREQUAL "RelWithDebInfo")
+          set(opencvbuildtype "Release")
+        endif()
+        set(OpenCV_DIR ${parentdir}/opencv/out/${opencvbuildtype}/install)
      else()
 
         set(OpenCV_DIR ${parentdir}/opencv/out/${CMAKE_BUILD_TYPE}/install/lib64/cmake/opencv4)
@@ -318,10 +322,15 @@ list (APPEND ENTANGLE_FILES ${ENTANGLE_FILES_DEVICE_CHARMING})
 list(APPEND ENTANGLE_FILES_RES
    ${CMAKE_CURRENT_SOURCE_DIR}/entangle/example/mesytec-listmode-replay.res
     ${CMAKE_CURRENT_SOURCE_DIR}/entangle/example/SANS1-detector.res
-    ${CMAKE_CURRENT_SOURCE_DIR}/entangle/example/ERWIN-detector-small.res
+    ${CMAKE_CURRENT_SOURCE_DIR}/entangle/example/ERWIN-detector.res
   )
 
+
+
+
+
 if(ENTANGLE_ROOT )
+
 install(
   FILES
   ${ENTANGLE_FILES_DEVICE_CHARMING}
@@ -331,7 +340,7 @@ install(
   install(
   FILES
   ${ENTANGLE_FILES_RES}
-   DESTINATION /etc/entangle
+   DESTINATION ${ENTANGLE_RES}
    OPTIONAL
   )
 

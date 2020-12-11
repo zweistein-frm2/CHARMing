@@ -35,7 +35,7 @@ class DeviceConnection(FdLogMixin,base.MLZDevice):
         #print("charm.py:DeviceConnection.init("+str(fd)+")")
         if charming.msmtsystem.msmtsystem is None:
             charming.msmtsystem.msmtsystem=charmsystem.NeutronMeasurement(fd)
-
+            self.On()
     #def __del__(self):
         #print("charm.py: DeviceConnection.__del__")
 

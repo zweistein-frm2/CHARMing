@@ -1,0 +1,16 @@
+["test/ERWIN-detector-@ID@/DeviceConnection"]
+type = "charming.charm.DeviceConnection"
+["test/ERWIN-detector-@ID@/RoiManager"]
+type = "charming.roimanager.RoiManager"
+["test/ERWIN-detector-@ID@/MeasureCounts"]
+type = "charming.charm.MeasureCounts"
+["test/ERWIN-detector-@ID@/MeasureTime"]
+type = "charming.charm.MeasureTime"
+["test/ERWIN-detector-@ID@/Settings"]
+type = "charming.charm.Settings"
+["test/ERWIN-detector-@ID@/Histogram"]
+type = "charming.charm.Histogram"
+["test/ERWIN-detector-@ID@/Simulator"]
+type = "charming.charm.Simulator"
+["test/ERWIN-detector-@ID@/HistogramRaw"]
+type = "charming.charm.HistogramRaw"

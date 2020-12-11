@@ -46,6 +46,9 @@ boost::log::trivial::severity_level SEVERITY_THRESHOLD = boost::log::trivial::in
 #endif
 std::string PROJECT_NAME("CHARMing");
 std::string CONFIG_FILE("charmsystem"); // or "mesytecsystem"
+
+bool defaulttocharm = true;
+
 using boost::asio::ip::udp;
 
 
@@ -153,13 +156,14 @@ int main(int argc, char* argv[])
 		conflicting_options(vm, LISTMODE_FILE, SETUP);
 		conflicting_options(vm, WRITE2DISK, SETUP);
 		po::notify(vm);
-		if (vm.count(CHARMDEVICE)) {
+
+		if (vm.count(CHARMDEVICE) || defaulttocharm) {
 			bmesyteconly = false;
-			CONFIG_FILE = "charm";
+
 		}
 		else {
 			bmesyteconly = true;
-			CONFIG_FILE = "mesytec";
+			CONFIG_FILE = "mesytecsystem";
 		}
 
 		if (vm.count(WRITE2DISK)) write2disk = true;

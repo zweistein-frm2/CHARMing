@@ -34,6 +34,7 @@
 #include "Mcpd8.enums.hpp"
 #include "PacketSender.Params.hpp"
 #include "CounterMonitor.hpp"
+#include <random>
 
 using boost::asio::ip::udp;
 boost::mutex coutGuard;
@@ -48,7 +49,8 @@ udp::endpoint listen_endpoint;
 
 boost::chrono::nanoseconds zeropoint = boost::chrono::nanoseconds::zero();
 
-
+bool ischarm = false;
+unsigned char n_charm_units = 0;
 boost::atomic<unsigned short> daq_status = Mcpd8::Status::sync_ok;
 boost::atomic<unsigned short> devid = 0;
 boost::atomic<unsigned short> runid = 0;
@@ -512,6 +514,7 @@ int main(int argc, char* argv[])
 	std::string appName = boost::filesystem::basename(argv[0]);
 	PacketSenderParams::ReadIni(appName,"charm");
 	devid = PacketSenderParams::getDevId();
+	n_charm_units = PacketSenderParams::get_n_charm_units();
 	const unsigned short port = 54321;
 	boost::array< Mcpd8::DataPacket, 1> dp;
 
@@ -519,7 +522,7 @@ int main(int argc, char* argv[])
 	try {
 		if (argc == 1) {
 			boost::mutex::scoped_lock lock(coutGuard);
-			std::cout << "Specify Event Rate per second , 2K -> 2000, 1M->1000000  [MDLL]" << std::endl;
+			std::cout << "Specify Event Rate per second , 2K -> 2000, 1M->1000000  [MDLL, CHARMDLL]" << std::endl;
 		}
 		if (argc >= 2) {
 			long long num = 0;
@@ -530,8 +533,21 @@ int main(int argc, char* argv[])
 
 		if (argc == 3) {
 			std::string argv2 = argv[2];
-			if (argv2 == "MDLL") 	dataformat = Zweistein::Format::EventData::Mdll;
+			if (argv2 == "MDLL") {
+				dataformat = Zweistein::Format::EventData::Mdll;
+				binfactor = 1;
+				std::cout << "MDLL requested" << std::endl;
+			}
+			if (argv2 == "CHARMMDLL") {
+				dataformat = Zweistein::Format::EventData::Mdll;
+				ischarm = true;
+				binfactor = 1;
+				std::cout << "CHARM MDLL requested" << std::endl;
+			}
+
 		}
+
+		if (binfactor == 8)  Zweistein::Random::message = "\x03 Gr\x81\xe1\x65"; // small message better
 
 		{
 			boost::mutex::scoped_lock lock(coutGuard);
@@ -551,6 +567,10 @@ int main(int argc, char* argv[])
 	do{
 		boost::thread_group worker_threads2;
 		try {
+
+			std::random_device rd;
+			std::mt19937 mt(rd());
+			std::uniform_int_distribution<unsigned int> dist(1, n_charm_units);
 
 			boost::asio::io_service io_service;
 			boost::asio::signal_set signals(io_service, SIGINT, SIGSEGV);
@@ -638,12 +658,22 @@ int main(int argc, char* argv[])
 			if(bfilldata){
 				for (int i = 0; i < nevents; i++) {
 					if(dataformat== Zweistein::Format::EventData::Mpsd8)	Zweistein::Random::Mpsd8EventRandomData((unsigned short*)(&dp[0].events[i]), i, maxX);
-					if(dataformat== Zweistein::Format::EventData::Mdll) Zweistein::Random::MdllEventRandomData((unsigned short*)(&dp[0].events[i]), i);
+					if (dataformat == Zweistein::Format::EventData::Mdll) {
+						ischarm? Zweistein::Random::CharmMdllEventRandomData((unsigned short*)(&dp[0].events[i]), i):
+						                                  Zweistein::Random::MdllEventRandomData((unsigned short*)(&dp[0].events[i]), i);
+					}
 				}
 				newcounts = nevents;
 			}
 
-			dp[0].deviceStatusdeviceId = daq_status | (devid << 8); // set to running
+			if (ischarm) {
+				// we never send data with devid 0
+				unsigned short rs = dist(mt); // should be from 1 to n_charm_units
+				dp[0].deviceStatusdeviceId = daq_status | (rs << 8); // set to running
+
+			}
+			else dp[0].deviceStatusdeviceId = daq_status | (devid << 8); // set to running
+
 			dp[0].Length = newcounts * 3 + dp[0].headerLength;
 			if (dataformat == Zweistein::Format::EventData::Mpsd8) dp[0].Type = Mesy::BufferType::DATA;
 			if (dataformat == Zweistein::Format::EventData::Mdll) dp[0].Type = Mesy::BufferType::MDLL;

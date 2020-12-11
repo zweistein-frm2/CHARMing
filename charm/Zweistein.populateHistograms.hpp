@@ -108,7 +108,7 @@ namespace Zweistein {
 			}
 
 			if(readfileproblem){
-				int newy = maxY / 8;
+				int newy = maxY / 4;
 				Zweistein::Binning::GenerateSimple(newy, maxY, maxX);
 				std::stringstream ss;
 				ss << std::endl << "Zweistein::Binning::GenerateSimple(" << newy << "," << maxY << "," << maxX << ") ";
@@ -229,12 +229,14 @@ namespace Zweistein {
 
 					// this is our raw histograms[0]
 					point_type p(ev.X, ev.Y);
-					histograms[0].histogram.at<int32_t>(p.y(), p.x()) += 1;
-
-					if (boost::geometry::covered_by(p, histograms[0].roidata[0].roi)) {
-						auto size = histograms[0].histogram.size;
-						histograms[0].roidata[0].count += 1;
+					histograms[0].histogram.at<int32_t>(p.y(), p.x()) += ev.Amplitude;
+					for (auto& r : histograms[0].roidata) {
+						if (boost::geometry::covered_by(p, r.roi)) {
+							auto size = histograms[0].histogram.size;
+							r.count += ev.Amplitude;
+						}
 					}
+
 					if (magic_enum::enum_integer(hss & histogram_setup_status::has_binning)) {
 						// this is our binned histograms[1]
 						if (ev.Y >= binningMaxY) continue; // skip it
@@ -244,9 +246,9 @@ namespace Zweistein {
 
 						point_type pb(ev.X, binnedY);
 						for (auto& r : histograms[1].roidata) {
-							histograms[1].histogram.at<int32_t>(pb.y(), pb.x()) += 1;
+							histograms[1].histogram.at<int32_t>(pb.y(), pb.x()) += ev.Amplitude;
 							if (boost::geometry::covered_by(pb, r.roi)) {
-								r.count += 1;
+								r.count += ev.Amplitude;
 							}
 						}
 

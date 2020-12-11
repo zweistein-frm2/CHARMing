@@ -166,7 +166,7 @@ namespace Mesytec {
 #else
 			const char* ptrclearclassname = classname.c_str();
 #endif
-
+			ismesy = typeid(Mesytec::MesytecSystem) == typeid(*this);
 
 			boost::system::error_code ec ;
 			for(Mcpd8::Parameters& p:_devlist) {
@@ -212,9 +212,8 @@ namespace Mesytec {
 				if (eventdataformat == Zweistein::Format::EventData::Undefined) {
 					eventdataformat = p.eventdataformat;
 
-					if (!((eventdataformat == Zweistein::Format::EventData::Mpsd8 ||
-								eventdataformat == Zweistein::Format::EventData::Mdll)
-										&&		typeid(Mesytec::MesytecSystem) == typeid(*this)	))
+
+					if (eventdataformat == Zweistein::Format::EventData::Mpsd8  && (!ismesy))
 					{
 
 						LOG_ERROR << MENUMSTR(eventdataformat) << " not handled by  " << ptrclearclassname << std::endl;
@@ -234,7 +233,13 @@ namespace Mesytec {
 				mp.lastbufnum = 0;
 
 				if (mp.datagenerator == Zweistein::DataGenerator::Charm || mp.datagenerator == Zweistein::DataGenerator::CharmSimulator) {
-					mp.charm_cmd_endpoint = udp::endpoint(boost::asio::ip::address::from_string(p.mcpd_ip), p.charm_port);
+					mp.n_charm_units = p.n_charm_units;
+
+					if (p.mcpd_id != 0) {
+						LOG_ERROR << "mcpd_id != 0. => skipping " << MENUMSTR(mp.datagenerator) << " " << mp.mcpd_endpoint.address().to_string() << std::endl;
+						skip = true;
+
+					}
 				}
 				if (!skip) {
 					mp.offset = evdata.widthX;
@@ -247,7 +252,9 @@ namespace Mesytec {
 					}
 					else {
 						evdata.widthY = y;
-						evdata.widthX += x;
+
+						if(!ismesy) evdata.widthX += x * mp.n_charm_units;
+						else evdata.widthX += x;
 					}
 
 				}
@@ -265,22 +272,29 @@ namespace Mesytec {
 					}
 			}
 
-			for (auto& kvp : deviceparam) {
-				Send(kvp, Mcpd8::Cmd::SETID, kvp.first); // set ids for Mcpd8 devices
-			}
-
-			for (auto& onid : oldidnewid) {
-				auto it= deviceparam.find(onid.second);
-				if (it != deviceparam.end()) {
-					LOG_INFO << (it->second.mcpd_endpoint.address()).to_string() << " SETID: NEW ID=" << (int)onid.second << " (OLD ID=" <<(int)onid.first << ")"<< std::endl;
-				}
-				else {
-					LOG_ERROR << __FILE__ <<":"<<__LINE__ << std::endl;
+			if (ismesy) {
+				for (auto& kvp : deviceparam) {
+					Send(kvp, Mcpd8::Cmd::SETID, kvp.first); // set ids for Mcpd8 devices
 				}
 
+				for (auto& onid : oldidnewid) {
+					auto it = deviceparam.find(onid.second);
+					if (it != deviceparam.end()) {
+						LOG_INFO << (it->second.mcpd_endpoint.address()).to_string() << " SETID: NEW ID=" << (int)onid.second << " (OLD ID=" << (int)onid.first << ")" << std::endl;
+					}
+					else {
+						LOG_ERROR << __FILE__ << ":" << __LINE__ << std::endl;
+					}
+
+				}
 			}
 
 			for (  auto &kvp: deviceparam) {
+
+				if (!ismesy) {
+					if (kvp.first > 0) continue;  // CharmDevice must be on id 0
+				}
+
 				Send(kvp, Mcpd8::Internal_Cmd::GETVER); //
 				Send(kvp, Mcpd8::Internal_Cmd::READID);
 				Send(kvp, Mcpd8::Cmd::GETPARAMETERS);
@@ -372,11 +386,14 @@ namespace Mesytec {
 				}
 			}
 			for (auto& kvp : deviceparam) {
+				if (!ismesy) {
+					if (kvp.first > 0) continue;  // CharmDevice must be on id 0
+				}
 				Send(kvp, Mcpd8::Cmd::SETCLOCK, Mesy::TimePoint::ZERO);
 			}
 			int ndevices = (int) deviceparam.size();
-			if (ndevices > 1) {
-				// so we have to set Master / slave
+			if (ndevices > 1 && ismesy) {
+				// so we have to set Master / slave  , only for Mesytec , never for Charm
 				int i = 0;
 				for (auto& kvp : deviceparam) {
 					unsigned short sync_bus_termination_off = 1;
@@ -389,6 +406,7 @@ namespace Mesytec {
 					i++;
 				}
 			}
+
 			connected = true;
 			boost::chrono::system_clock::time_point tpstarted = getStart();
 			boost::chrono::milliseconds ms = boost::chrono::duration_cast<boost::chrono::milliseconds> (boost::chrono::system_clock::now() - tpstarted);
@@ -401,6 +419,11 @@ namespace Mesytec {
 		}
 
 		void MesytecSystem::Send(std::pair<const unsigned char, Mesytec::DeviceParameter> &kvp,Mcpd8::Internal_Cmd cmd, unsigned long param) {
+
+			if (!ismesy) {
+				if (kvp.first > 0) return;  // CharmDevice must be on id 0
+			}
+
 			Mcpd8::CmdPacket cmdpacket;
 			Mcpd8::CmdPacket response;
 			cmdpacket.cmd = cmd;
@@ -511,6 +534,10 @@ namespace Mesytec {
 			}
 		}
 		void MesytecSystem::Send(std::pair<const unsigned char, Mesytec::DeviceParameter>& kvp,Mcpd8::Cmd cmd,unsigned long lparam) {
+
+			if (!ismesy) {
+				if (kvp.first > 0) return;  // CharmDevice must be on id 0
+			}
 
 			unsigned short param = (unsigned short)lparam;
 			unsigned short param1 = (unsigned short)(lparam >> 16);

@@ -25,7 +25,7 @@ namespace  Mesytec {
 		boost::chrono::system_clock::time_point lastmissed_time;
 		boost::chrono::nanoseconds starttime;
 		udp::endpoint mcpd_endpoint;
-		udp::endpoint charm_cmd_endpoint;
+		unsigned short n_charm_units;
 		udp::socket *socket;
 		boost::asio::io_service::strand* pstrand;
 		bool bNewSocket;

@@ -81,8 +81,8 @@ BOOST_PYTHON_MODULE(mesytecsystem)
             .def("stop", &NeutronMeasurement::stop)
             .def("on", &NeutronMeasurement::on)
             .def("off", &NeutronMeasurement::off)
-            .def("getHistogram", &NeutronMeasurement::getHistogram, return_internal_reference<1, with_custodian_and_ward_postcall<1, 0>>())
-            ;
+            .def("getHistogram", &NeutronMeasurement::getHistogram, NeutronMeasurements_overloads(args("index") = 0)[return_internal_reference<1, with_custodian_and_ward_postcall<1, 0>>()])
+      ;
 
         import("atexit").attr("register")(make_function(&::release_guard));
 

@@ -16,5 +16,5 @@ namespace Mcpd8 {
 }
 
 namespace Charm {
-	const unsigned short Parameters::defaultUdpPort = 54340;
+	const unsigned short Parameters::default_n_charm_units = 0;
 }

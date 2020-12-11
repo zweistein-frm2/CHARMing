@@ -69,7 +69,7 @@ namespace Zweistein {
 			type = charmev->ID();
 			nanoseconds = charmev->TIMESTAMP() + headertime;
 			Amplitude = charmev->AMPLITUDE();
-			Y = Mdll_sizeY - charmev->YPOSITION() - 1;
+			Y = Charm_sizeY - charmev->YPOSITION() - 1;
 			X = offsetX + charmev->XPOSITION();
 
 

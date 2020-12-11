@@ -47,7 +47,7 @@ else()
 set(INSTALL_DIR /usr/local/bin)
 endif()
 
-project(mesytec-emulator)
+project(charm-mesytec-emulator)
 
 set(LIBUV_BUILD_TESTS OFF)
 set(LIBUV_BUILD_BENCH OFF)
