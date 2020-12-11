@@ -78,7 +78,7 @@ namespace Zweistein {
     struct Histogram {
         std::vector<RoiData> roidata;
         cv::Mat histogram;
-
+        bool nextRAW;
         Histogram():roidata(std::vector<RoiData>()) {
                 RoiData rd;
                 roidata.push_back(rd);
@@ -384,7 +384,7 @@ namespace Zweistein {
         cv::Mat raw_shrinked;
         cv::Mat shrinked_int32;
 
-        bool nextRAW;
+
 
         bool get_nextRAW() {
             return nextRAW;

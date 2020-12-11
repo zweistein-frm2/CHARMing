@@ -289,101 +289,103 @@ namespace Mesytec {
 				}
 			}
 
-			for (  auto &kvp: deviceparam) {
+			for (auto& kvp : deviceparam) {
 
 				if (!ismesy) {
 					if (kvp.first > 0) continue;  // CharmDevice must be on id 0
 				}
 
 				Send(kvp, Mcpd8::Internal_Cmd::GETVER); //
-				Send(kvp, Mcpd8::Internal_Cmd::READID);
-				Send(kvp, Mcpd8::Cmd::GETPARAMETERS);
-				for (int c = 0; c < 8; c++) {  // SETCELL
-					std::string ca = kvp.second.counterADC[c];
-					if (!ca.empty()) {
-						Mcpd8::CmdPacket  cmdpacket;
-						cmdpacket.cmd= Mcpd8::Cmd::SETCELL;
-						cmdpacket.Length = Mcpd8::CmdPacket::defaultLength + 3;
+				if (ismesy) { // charm device does not support this
+					Send(kvp, Mcpd8::Internal_Cmd::READID);
+					Send(kvp, Mcpd8::Cmd::GETPARAMETERS);
+					for (int c = 0; c < 8; c++) {  // SETCELL
+						std::string ca = kvp.second.counterADC[c];
+						if (!ca.empty()) {
+							Mcpd8::CmdPacket  cmdpacket;
+							cmdpacket.cmd = Mcpd8::Cmd::SETCELL;
+							cmdpacket.Length = Mcpd8::CmdPacket::defaultLength + 3;
 
-						typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
-						tokenizer tok{ca };
-						cmdpacket.data[0] = c;
-						int n = 1;
-						for (tokenizer::iterator it = tok.begin(); it != tok.end(); ++it) {
-							cmdpacket.data[n] = std::atoi((*it).c_str());
-							if (++n >= 3) break;
-						}
-						try {
-							Mcpd8::CmdPacket::Send(kvp.second.socket, cmdpacket, kvp.second.mcpd_endpoint);
-						}
-						catch (Mesytec::cmd_error& x) {
-							if (int const* mi = boost::get_error_info<Mesytec::my_info>(x)) {
-								auto  my_code = magic_enum::enum_cast<Mesytec::cmd_errorcode>(*mi);
-								if (my_code.has_value()) {
-									auto c1_name = magic_enum::enum_name(my_code.value());
-									LOG_ERROR << c1_name << std::endl;
-								}
+							typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
+							tokenizer tok{ ca };
+							cmdpacket.data[0] = c;
+							int n = 1;
+							for (tokenizer::iterator it = tok.begin(); it != tok.end(); ++it) {
+								cmdpacket.data[n] = std::atoi((*it).c_str());
+								if (++n >= 3) break;
 							}
-						}
-						catch (boost::exception& e) {
-							LOG_ERROR << boost::diagnostic_information(e) << std::endl;
-						}
-					}
-				}
-				for (int m = 0; m < 8; m++) {  // SETMPSDGAIN SETMPSDTHRES
-					std::string ca = kvp.second.moduleparam[m];
-					if (!ca.empty()) {
-						typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
-						tokenizer tok{ ca };
-						int n = 1;
-						for (tokenizer::iterator it = tok.begin(); it != tok.end(); ++it) {
-							if (n == 0) {
-								unsigned short thres=std::atoi((*it).c_str());
-								long param = thres << 16 | (unsigned short)m;
-									Send(kvp, Mcpd8::Cmd::SETTHRESH, param);
+							try {
+								Mcpd8::CmdPacket::Send(kvp.second.socket, cmdpacket, kvp.second.mcpd_endpoint);
 							}
-							else {
-								Mcpd8::CmdPacket  cmdpacket;
-								cmdpacket.cmd = Mcpd8::Cmd::SETGAIN_MPSD;
-								cmdpacket.Length = Mcpd8::CmdPacket::defaultLength + 3;
-								cmdpacket.data[0] = m;
-								cmdpacket.data[1] = n - 1;
-								cmdpacket.data[2] = std::atoi((*it).c_str());
-								try {
-									Mcpd8::CmdPacket::Send(kvp.second.socket, cmdpacket, kvp.second.mcpd_endpoint);
-								}
-								catch (Mesytec::cmd_error& x) {
-									if (int const* mi = boost::get_error_info<Mesytec::my_info>(x)) {
-										auto  my_code = magic_enum::enum_cast<Mesytec::cmd_errorcode>(*mi);
-										if (my_code.has_value()) {
-											auto c1_name = magic_enum::enum_name(my_code.value());
-											LOG_ERROR << c1_name << std::endl;
-										}
+							catch (Mesytec::cmd_error& x) {
+								if (int const* mi = boost::get_error_info<Mesytec::my_info>(x)) {
+									auto  my_code = magic_enum::enum_cast<Mesytec::cmd_errorcode>(*mi);
+									if (my_code.has_value()) {
+										auto c1_name = magic_enum::enum_name(my_code.value());
+										LOG_ERROR << c1_name << std::endl;
 									}
 								}
-								catch (boost::exception& e) {
-									LOG_ERROR << boost::diagnostic_information(e) << std::endl;
+							}
+							catch (boost::exception& e) {
+								LOG_ERROR << boost::diagnostic_information(e) << std::endl;
+							}
+						}
+					}
+					for (int m = 0; m < 8; m++) {  // SETMPSDGAIN SETMPSDTHRES
+						std::string ca = kvp.second.moduleparam[m];
+						if (!ca.empty()) {
+							typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
+							tokenizer tok{ ca };
+							int n = 1;
+							for (tokenizer::iterator it = tok.begin(); it != tok.end(); ++it) {
+								if (n == 0) {
+									unsigned short thres = std::atoi((*it).c_str());
+									long param = thres << 16 | (unsigned short)m;
+									Send(kvp, Mcpd8::Cmd::SETTHRESH, param);
+								}
+								else {
+									Mcpd8::CmdPacket  cmdpacket;
+									cmdpacket.cmd = Mcpd8::Cmd::SETGAIN_MPSD;
+									cmdpacket.Length = Mcpd8::CmdPacket::defaultLength + 3;
+									cmdpacket.data[0] = m;
+									cmdpacket.data[1] = n - 1;
+									cmdpacket.data[2] = std::atoi((*it).c_str());
+									try {
+										Mcpd8::CmdPacket::Send(kvp.second.socket, cmdpacket, kvp.second.mcpd_endpoint);
+									}
+									catch (Mesytec::cmd_error& x) {
+										if (int const* mi = boost::get_error_info<Mesytec::my_info>(x)) {
+											auto  my_code = magic_enum::enum_cast<Mesytec::cmd_errorcode>(*mi);
+											if (my_code.has_value()) {
+												auto c1_name = magic_enum::enum_name(my_code.value());
+												LOG_ERROR << c1_name << std::endl;
+											}
+										}
+									}
+									catch (boost::exception& e) {
+										LOG_ERROR << boost::diagnostic_information(e) << std::endl;
+									}
+
+
 								}
 
-
+								if (++n >= 8) break;
 							}
 
-							if (++n >= 8) break;
-						}
-
-					}
-				}
-				if (kvp.second.datagenerator == Zweistein::DataGenerator::Mcpd8 || kvp.second.datagenerator == Zweistein::DataGenerator::NucleoSimulator) {
-					for (int i = 0; i < Mpsd8_sizeSLOTS; i++) {
-						if (kvp.second.module_id[i] == Mesy::ModuleId::MPSD8P) {
-							Send(kvp, Mcpd8::Cmd::GETMPSD8PLUSPARAMETERS, i);
-						}
-						if (kvp.second.firmware_major > 10) {}
-						if (kvp.second.module_id[i] == Mesy::ModuleId::MPSD8 || kvp.second.module_id[i] == Mesy::ModuleId::MPSD8OLD) {
-							Send(kvp, Mcpd8::Internal_Cmd::READPERIREG, i);
 						}
 					}
-				}
+					if (kvp.second.datagenerator == Zweistein::DataGenerator::Mcpd8 || kvp.second.datagenerator == Zweistein::DataGenerator::NucleoSimulator) {
+						for (int i = 0; i < Mpsd8_sizeSLOTS; i++) {
+							if (kvp.second.module_id[i] == Mesy::ModuleId::MPSD8P) {
+								Send(kvp, Mcpd8::Cmd::GETMPSD8PLUSPARAMETERS, i);
+							}
+							if (kvp.second.firmware_major > 10) {}
+							if (kvp.second.module_id[i] == Mesy::ModuleId::MPSD8 || kvp.second.module_id[i] == Mesy::ModuleId::MPSD8OLD) {
+								Send(kvp, Mcpd8::Internal_Cmd::READPERIREG, i);
+							}
+						}
+					}
+			    }
 			}
 			for (auto& kvp : deviceparam) {
 				if (!ismesy) {

@@ -9,6 +9,7 @@
  and/or modify it under the terms of the GNU General Public License v3
  as published by the Free Software Foundation;*/
 
+#include <boost/dll/runtime_symbol_info.hpp>
 
 void startMonitor(boost::shared_ptr < MSMTSYSTEM> ptrmsmtsystem1, boost::shared_ptr <StartMsmtParameters> ptrStartParameters) {
     startMonitorRunning = true;
@@ -19,6 +20,15 @@ void startMonitor(boost::shared_ptr < MSMTSYSTEM> ptrmsmtsystem1, boost::shared_
     LOG_INFO << "Using config file:" << Zweistein::Config::inipath << " " << std::endl;
     ptr_ctx.reset(new boost::asio::io_context);
     ptrmsmtsystem1->pio_service = & *ptr_ctx;
+
+    bool interactive = false;
+
+    //boost::filesystem::path exe = boost::dll::program_location();
+
+    //LOG_INFO << exe.string() << std::endl;
+
+
+
 
     boost::asio::signal_set signals(*ptr_ctx, SIGINT, SIGTERM);
     signals.async_wait(boost::bind(&boost::asio::io_service::stop, & *ptr_ctx));
@@ -175,7 +185,7 @@ void startMonitor(boost::shared_ptr < MSMTSYSTEM> ptrmsmtsystem1, boost::shared_
                 {
                     Zweistein::WriteLock w_lock(Entangle::cbLock);
 // IF YOU WANT TO DISPLAY CURRENT STATUS ON SCREEN UNCOMMENT below
-                    //std::cout << ss1.str();
+                    if(!interactive) std::cout << ss1.str();
                 }
                 lastcount = currentcount;
 #ifndef _WIN32

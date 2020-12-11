@@ -10,6 +10,9 @@
  as published by the Free Software Foundation;*/
 
 #pragma once
+#ifdef __GNUC__
+#include <cxxabi.h>
+#endif
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/chrono.hpp>
@@ -41,10 +44,31 @@ namespace Zweistein {
 		unsigned short maxX = pmsmtsystem1->evdata.widthX;
 		unsigned short maxY = pmsmtsystem1->evdata.widthY;
 
+
+
+
 		if (maxX == 0 || maxY == 0) {
 			LOG_ERROR << __FILE__ << " : " << __LINE__ << " maxX=" << maxX << ", maxY=" << maxY << std::endl;
 			return;
 		}
+
+
+		std::string classname = typeid(*pmsmtsystem1).name();
+#ifdef __GNUC__
+		char output[255];
+		size_t len = 255;
+		int status;
+		const char* ptrclearclassname = __cxxabiv1::__cxa_demangle(classname.c_str(), output, &len, &status);
+#else
+		const char* ptrclearclassname = classname.c_str();
+#endif
+		bool ischarm = false;
+		static double shrinkraw = 1.0;
+		if (std::string("class Charm::CharmSystem") == std::string(ptrclearclassname)) { // we don't want header dipendency, hence class name check at runtime only
+			ischarm = true;
+		}
+
+
 
 		//LOG_DEBUG << "pmsmtsystem1->data.widthX=" << maxX << ", pmsmtsystem1->data.widthY=" << maxY << std::endl;
 		int left = 0;
@@ -57,6 +81,14 @@ namespace Zweistein {
 		}
 		histogram_setup_status hss = setup_status;
 		setup_status = hss | histogram_setup_status::histogram0_resized;
+		if (ischarm) {
+			if (!binningfile1.empty() || binningfile1.length() != 0) {
+				LOG_ERROR << "skipped: " << binningfile1 << std::endl;
+				LOG_ERROR << classname << " does not support Binning files." << std::endl;
+				binningfile1 = "";
+			}
+
+		}
 
 		if (!binningfile1.empty() || binningfile1.length() != 0) {
 			bool readfileproblem = true;
