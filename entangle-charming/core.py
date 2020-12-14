@@ -186,6 +186,9 @@ class HistogramBase(base.ImageChannel):
     def read_detectorSize(self):
         return self.Histogram().Size
 
+    def read_roiSize(self):
+        return self.read_detectorSize()
+
     def read_RoiWKT(self):
         #print("read_RoiWKT("+str(self.selectedRoi)+")")
         wkt = self.Histogram().getRoi(self.selectedRoi)

@@ -538,7 +538,7 @@ int main(int argc, char* argv[])
 				binfactor = 1;
 				std::cout << "MDLL requested" << std::endl;
 			}
-			if (argv2 == "CHARMMDLL") {
+			if (argv2 == "CHARMDLL") {
 				dataformat = Zweistein::Format::EventData::Mdll;
 				ischarm = true;
 				binfactor = 1;
