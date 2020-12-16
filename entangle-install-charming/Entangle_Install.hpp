@@ -1,4 +1,6 @@
 #define BOOST_PROCESS_WINDOWS_USE_NAMED_PIPE
+#define BOOST_BIND_GLOBAL_PLACEHOLDERS
+
 #include <boost/process.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/exception/all.hpp>

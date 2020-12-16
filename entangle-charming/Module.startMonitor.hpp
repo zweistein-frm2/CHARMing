@@ -108,7 +108,7 @@ void startMonitor(boost::shared_ptr < MSMTSYSTEM> ptrmsmtsystem1, boost::shared_
             if (!ok) LOG_ERROR << " cannot push Zweistein::Event::Reset()" << std::endl;
             ptrmsmtsystem1->closeConnection();
             if (!ptr_ctx->stopped()) { ptr_ctx->stop(); }
-            LOG_INFO << "exiting connection..." << "io_context.stopped() = " << ptr_ctx->stopped() << std::endl;
+            LOG_INFO << "exiting connection..." << " io_context.stopped() = " << ptr_ctx->stopped() << std::endl;
             cancelrequested = false;
 
 
@@ -206,6 +206,6 @@ void startMonitor(boost::shared_ptr < MSMTSYSTEM> ptrmsmtsystem1, boost::shared_
     worker_threads.join_all();
     startMonitorRunning = false;
 
-    LOG_DEBUG << std::endl << "startMonitor() exiting..." << "io_context.stopped() = " << ptr_ctx->stopped() << std::endl;
-    // io_service.restart();
+    LOG_DEBUG << std::endl << "startMonitor() exiting..." << std::endl;
+
 }
