@@ -123,25 +123,25 @@ class MeasureTime(base.TimerChannel):
         return ver + " "+charming.msmtsystem.msmtsystem.version
 
 
-class Monitor0(base.DiscreteOutput):
+class Monitor0(base.CounterChannel):
     def read_value(self):
         if charming.msmtsystem.msmtsystem:
             t = charming.msmtsystem.msmtsystem.monitors_status()
             return t[0][1]
 
-class Monitor1(base.DiscreteOutput):
+class Monitor1(base.CounterChannel):
     def read_value(self):
         if charming.msmtsystem.msmtsystem:
             t = charming.msmtsystem.msmtsystem.monitors_status()
             return t[1][1]
 
-class Monitor2(base.DiscreteOutput):
+class Monitor2(base.CounterChannel):
     def read_value(self):
         if charming.msmtsystem.msmtsystem:
             t = charming.msmtsystem.msmtsystem.monitors_status()
             return t[2][1]
 
-class Monitor3(base.DiscreteOutput):
+class Monitor3(base.CounterChannel):
     def read_value(self):
         if charming.msmtsystem.msmtsystem:
             t = charming.msmtsystem.msmtsystem.monitors_status()

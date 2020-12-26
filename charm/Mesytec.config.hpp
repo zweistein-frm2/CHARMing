@@ -38,10 +38,15 @@ namespace Mesytec {
 				std::string charmdevice = "CharmDevice";
 				std::string punkt = ".";
 				std::string mcpd_ip = "mcpd_ip";
+				std::string mcpd_port = "mcpd_port";
+				std::string mcpd_id = "mcpd_id";
+				std::string data_host = "data_host";
 				std::string datahome = "DataHome";
 				std::string binningfile = "BinningFile";
 				std::string counteradc="CounterADC";
 				std::string modulethresgains = "Threshold_and_Gains";
+
+				std::string n_charm_units = "n_charm_units";
 				const int maxModule = 8;
 				const int maxCounter = 8;
 				const int MaxDevices = 4;
@@ -64,17 +69,17 @@ namespace Mesytec {
 					else p1.mcpd_ip = root.get<std::string>(s2 + mcpd_ip);
 					root.put<std::string>(s2 + mcpd_ip, p1.mcpd_ip);
 
-					if (n == 0) p1.mcpd_port = root.get<unsigned short>(s2 + "mcpd_port", Mcpd8::Parameters::defaultUdpPort);
-					else p1.mcpd_port = root.get<unsigned short>(s2 + "mcpd_port");
-					root.put<unsigned short>(s2 + "mcpd_port", p1.mcpd_port);
+					if (n == 0) p1.mcpd_port = root.get<unsigned short>(s2 + mcpd_port, Mcpd8::Parameters::defaultUdpPort);
+					else p1.mcpd_port = root.get<unsigned short>(s2 + mcpd_port);
+					root.put<unsigned short>(s2 + mcpd_port, p1.mcpd_port);
 
-					if (n == 0) p1.mcpd_id = root.get<unsigned char>(s2 + "mcpd_id", Mcpd8::Parameters::defaultmcpd_id);
-					else p1.mcpd_id = root.get<unsigned char>(s2 + "mcpd_id");
-					root.put<unsigned char>(s2 + "mcpd_id", p1.mcpd_id);
+					if (n == 0) p1.mcpd_id = root.get<unsigned char>(s2 + mcpd_id, Mcpd8::Parameters::defaultmcpd_id);
+					else p1.mcpd_id = root.get<unsigned char>(s2 + mcpd_id);
+					root.put<unsigned char>(s2 + mcpd_id, p1.mcpd_id);
 
-					if (n == 0) p1.data_host = root.get<std::string>(s2 + "data_host", "0.0.0.0");
-					else p1.data_host = root.get<std::string>(s2 + "data_host");
-					root.put<std::string>(s2 + "data_host", p1.data_host);
+					if (n == 0) p1.data_host = root.get<std::string>(s2 + data_host, "0.0.0.0");
+					else p1.data_host = root.get<std::string>(s2 + data_host);
+					root.put<std::string>(s2 + data_host, p1.data_host);
 
 
 					std::string savednetworkcard;

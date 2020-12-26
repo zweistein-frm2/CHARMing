@@ -18,6 +18,12 @@ import entangle.device.charming.msmtsystem as msmtsystem
 
 __ALL__ = ['writelistmode']
 
+
+# IMPROVE:
+# values t write expect python format f.e. True  while values returned are in json format (hence true)
+# should become more consistent,
+# maybe enough to fix the true ->True case? numbers should be ok.
+
 # we must implement the attribute and member functions in class Settings
 # for exampe :
 # class Settings(CmdProcessor,base.StringIO):
@@ -32,6 +38,7 @@ class CmdProcessor(object):
 
     def read_availableChars(self):
         return -1
+
 
     def Write(self, msg:str)->uint32:
         self.lastcmd = msg.rstrip()
