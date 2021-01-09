@@ -1,6 +1,8 @@
 cmake_minimum_required (VERSION 3.11)
 #set(CMAKE_VERBOSE_MAKEFILE ON)
 
+include(init.cmake)
+
 set(boost_currentversion 1.75.0)
 set(BOOST_PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/boost/out)
 

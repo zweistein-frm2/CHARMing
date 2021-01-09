@@ -5,9 +5,12 @@
 	   .
 	   |\       Copyright (C) 2019 - 2020 by Andreas Langhoff
 	 _/]_\_                            <andreas.langhoff@frm2.tum.de>
- ~~~"~~~~~^~~   This program is free software; you can redistribute it
+ ~~~"~~~~~^~~   This program is free software;
+ original site:  https://github.com/zweistein-frm2/CHARMing
+ you can redistribute it
  and/or modify it under the terms of the GNU General Public License v3
- as published by the Free Software Foundation;*/
+ as published by the Free Software Foundation;
+ */
 
 #pragma once
 #ifdef __GNUC__
@@ -261,11 +264,12 @@ namespace Zweistein {
 
 					// this is our raw histograms[0]
 					point_type p(ev.X, ev.Y);
-					histograms[0].histogram.at<int32_t>(p.y(), p.x()) += ev.Amplitude;
+					histograms[0].histogram.at<HISTOGRAMTYPE>(p.y(), p.x()) += ev.Amplitude;
 					for (auto& r : histograms[0].roidata) {
 						if (boost::geometry::covered_by(p, r.roi)) {
 							auto size = histograms[0].histogram.size;
 							r.count += ev.Amplitude;
+
 						}
 					}
 
@@ -278,9 +282,10 @@ namespace Zweistein {
 
 						point_type pb(ev.X, binnedY);
 						for (auto& r : histograms[1].roidata) {
-							histograms[1].histogram.at<int32_t>(pb.y(), pb.x()) += ev.Amplitude;
+							histograms[1].histogram.at<HISTOGRAMTYPE>(pb.y(), pb.x()) += ev.Amplitude;
 							if (boost::geometry::covered_by(pb, r.roi)) {
 								r.count += ev.Amplitude;
+
 							}
 						}
 

@@ -4,3 +4,5 @@ chmod +x opencv_setup.sh
 ./opencv_setup.sh
 chmod +x buildboost.sh
 ./buildboost.sh
+
+echo 'OK' >> REPOSITORY_INIT_OK

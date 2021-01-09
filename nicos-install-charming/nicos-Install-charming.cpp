@@ -1,10 +1,10 @@
 ﻿// Boost_Installer.cpp : Defines the entry point for the application.
 //
 #include <cmrc/cmrc.hpp>
-#include "Entangle_Install.hpp"
+#include "Nicos_Install.hpp"
 
 CMRC_DECLARE(resources);
-std::string PROJECT_NAME("entangle-install-isegcc2x");
+std::string PROJECT_NAME("nicos-install-charming");
 
 std::vector<std::string> prerequisites = {
     "pip3 install asyncio",
@@ -19,7 +19,8 @@ int main(int argc, char* argv[])
 {
     try {
         auto fs = cmrc::resources::get_filesystem();
-        std::cout << "Installs entangle interface for isegCC2x HV Powersupply." << std::endl;
+        std::cout << "Installs charming support for Nicos." << std::endl;
+        std::cout << "charming supports Mesytec and Charm detector hardware" << std::endl;
         boost::filesystem::path  devicedir;
         boost::filesystem::path  resdir;
         entangle_setup(devicedir, resdir, prerequisites, argc, argv);
@@ -87,7 +88,7 @@ int main(int argc, char* argv[])
     catch (boost::exception& e) {
         std::cout << boost::diagnostic_information(e) << std::endl;
         Zweistein::install_log.push_back(boost::diagnostic_information(e));
-        std::cout << "Prerequisite Entangle NOT INSTALLED." << std::endl;
+        std::cout << "Prerequisite Nicos NOT INSTALLED." << std::endl;
         std::cout << "Please install from: " << std::endl;
         std::cout << "https://forge.frm2.tum.de/entangle/doc/entangle-master/build/" << std::endl;
 

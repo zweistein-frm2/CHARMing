@@ -10,6 +10,7 @@
 # and/or modify it under the terms of the GNU General Public License as
 # published by the Free Software Foundation;
 
+# useful for mixed mode debugging (Python and C++)
 #import debugpy
 #debugpy.listen(('0.0.0.0',5678))
 #debugpy.wait_for_client()
@@ -30,7 +31,7 @@ seconds = 20
 NM = None
 def initMeasurement():
     global NM, seconds
-    breakpoint()
+    #breakpoint()
     NM = mesytecsystem.NeutronMeasurement(sys.stdout.fileno())
     v = NM.version
     print(v)

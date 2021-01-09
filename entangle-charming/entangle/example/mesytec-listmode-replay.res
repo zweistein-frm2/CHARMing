@@ -1,28 +1,28 @@
-["test/replay/DeviceConnection"]
+["test/ERWIN-replay/DeviceConnection"]
 type = "charming.mesytec-replay.DeviceConnection"
-["test/replay/RoiManager"]
+["test/ERWIN-replay/RoiManager"]
 type = "charming.roimanager.RoiManager"
-["test/replay/MeasureCounts"]
+["test/ERWIN-replay/MeasureCounts"]
 type = "charming.mesytec-replay.MeasureCounts"
-["test/replay/MeasureTime"]
+["test/ERWIN-replay/MeasureTime"]
 type = "charming.mesytec-replay.MeasureTime"
-["test/replay/PlayList"]
+["test/ERWIN-replay/PlayList"]
 type = "charming.mesytec-replay.PlayList"
-["test/replay/Histogram"]
+["test/ERWIN-replay/Histogram"]
 type = "charming.mesytec-replay.Histogram"
-["test/replay/Monitor0"]
+["test/ERWIN-replay/Monitor0"]
 type = "charming.mesytec-replay.Monitor0"
 absmin = 0
 absmax = 0x7FFFFFFF
-["test/replay/Monitor1"]
+["test/ERWIN-replay/Monitor1"]
 type = "charming.mesytec-replay.Monitor1"
 absmin = 0
 absmax = 0x7FFFFFFF
-["test/replay/Monitor2"]
+["test/ERWIN-replay/Monitor2"]
 type = "charming.mesytec-replay.Monitor2"
 absmin = 0
 absmax = 0x7FFFFFFF
-["test/replay/Monitor3"]
+["test/ERWIN-replay/Monitor3"]
 type = "charming.mesytec-replay.Monitor3"
 absmin = 0
 absmax = 0x7FFFFFFF

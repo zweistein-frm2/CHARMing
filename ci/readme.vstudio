@@ -1,0 +1,31 @@
+You can cross compile your cmake based project connecting to a real linux machine or also by
+connecting to a virtual docker image.
+
+Prerequisite: https://docs.docker.com/docker-for-windows/install/
+
+Example:
+	First: change directory one level up to CHARMing.
+	
+    for centos7:
+
+    docker build  -t vs-centos7 -f ci/vsdockerfile.centos7 .
+    docker run -p 5001:22 -tid -t vs-centos7
+    -> centos7 ssh listening on port 5001
+
+    for ubuntu18:
+
+    docker build -t vs-ubuntu18 -f ci/vsdockerfile.ubuntu18 .  // only once
+    docker run -p 5000:22 -i -t vs-ubuntu18 /bin/bash
+    (if you have shared a local directory in
+     docker-> settings then you can access the container from the host
+     with this command:
+      docker run -p 5000:22 -i -v C:/Users/alanghof/source/ubuntu18:/root/.vs -t vs-ubuntu18 /bin/bash
+     )
+
+    this will start a docker container with an ssh server listening on port 5000
+    In Visual Studio -> Tools ->Options->Cross Platform -> Connection Manager connect to
+    localhost port 5000 with root/root.
+
+    This will cross compile your code on the ubuntu18 docker container
+
+

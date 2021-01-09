@@ -84,7 +84,7 @@ public:
     void stopafter(uint64 counts, double seconds) {
         ptrStartParameters->MaxCount = counts;
         ptrStartParameters->DurationSeconds = seconds;
-        LOG_INFO << "NeutronMeasurement.stopafter(" << counts << ", " << seconds << ")" << std::endl;
+        LOG_INFO << "NeutronMeasurement.stopafter(" << counts << " cts, " << seconds << " seconds)" << std::endl;
     }
 
     boost::python::list log() {

@@ -5,9 +5,10 @@
        .
        |\       Copyright (C) 2019 - 2020 by Andreas Langhoff
      _/]_\_                            <andreas.langhoff@frm2.tum.de>
- ~~~"~~~~~^~~   This program is free software; you can redistribute it
- and/or modify it under the terms of the GNU General Public License as
- published by the Free Software Foundation;*/
+ ~~~"~~~~~^~~   This program is free software;
+ original site: https://github.com/zweistein-frm2/CHARMing
+ you can redistribute it and/or modify it under the terms of the GNU
+ General Public License as published by the Free Software Foundation;*/
 
 #pragma once
 #ifdef BOOST_PYTHON_MODULE
@@ -16,9 +17,9 @@
 #include <boost/python/numpy.hpp>
 namespace p = boost::python;
 namespace np = boost::python::numpy;
-
-
 #endif
+#define HISTOGRAMTYPE float  // or  int32_t
+
 
 #include <iostream>
 #include <list>
@@ -89,7 +90,7 @@ namespace Zweistein {
         }
         void resize(int rows, int cols) {
 
-            histogram = cv::Mat_<int32_t>::zeros(rows,cols);
+            histogram = cv::Mat_<HISTOGRAMTYPE>::zeros(rows,cols);
 
         }
 
@@ -380,7 +381,6 @@ namespace Zweistein {
 
         }
 
-        cv::Mat raw_float;
         cv::Mat raw_shrinked;
         cv::Mat shrinked_int32;
 
@@ -406,22 +406,29 @@ namespace Zweistein {
                 Zweistein::ReadLock r_lock(histogramsLock);
                 for (auto& a : roidata)   rdc.push_back(a);
                 {
-                    histogram.convertTo(raw_float, CV_32F);
-                    cv::resize(raw_float, raw_shrinked, cv::Size(0, 0), shrinkraw, shrinkraw, cv::INTER_AREA);
+                    cv::Size dsize = histogram.size();
+                    dsize.height = (int) ( dsize.height * shrinkraw);
+                    dsize.width = (int) (dsize.width * shrinkraw);
+                    cv::resize(histogram, raw_shrinked, dsize,0,0, cv::INTER_AREA);
                     if(shrinked_int32.cols<2) shrinked_int32 = cv::Mat_<int32_t>::zeros(4, 4);
-                    shrinked_int32.resize(histogram.size[0] * shrinkraw, histogram.size[1] * shrinkraw);
+                    shrinked_int32.resize((int)(histogram.size[0] * shrinkraw), (int)(histogram.size[1] * shrinkraw));
 
 
-                    //double minVal, maxVal;
-                    //cv::Point minLoc, maxLoc;
-                    //cv::minMaxLoc(raw_float, &minVal, &maxVal, &minLoc, &maxLoc);
-                    //LOG_INFO << "raw_float " << "min:" << minVal << " ,max:" << maxVal << std::endl;
-                    //cv::minMaxLoc(raw_shrinked, &minVal, &maxVal, &minLoc, &maxLoc);
-                    //LOG_INFO << "raw_shrinked " << "min:" << minVal << " ,max:" << maxVal << std::endl;
+                    double minVal, maxVal;
+                    cv::Point minLoc, maxLoc;
+                    cv::minMaxLoc(histogram, &minVal, &maxVal, &minLoc, &maxLoc);
+
+
+                    double minVals, maxVals;
+                    cv::Point minLocs, maxLocs;
+                    cv::minMaxLoc(raw_shrinked, &minVals, &maxVals, &minLocs, &maxLocs);
+
+                    LOG_INFO<<std::endl << "histogram " << histogram.size << " min:" << minVal << "(" << minLoc << ")" << " ,max:" << maxVal << "(" << maxLoc << ")" << std::endl
+                          << "raw_shrinked " << raw_shrinked.size << " min:" << minVals << "(" << minLocs << ")" << " ,max:" << maxVals << "(" << maxLocs << ")"
+                        << std::endl;
+
                     raw_shrinked.convertTo(shrinked_int32, CV_32S);
 
-                    //cv::minMaxLoc(shrinked_int32, &minVal, &maxVal, &minLoc, &maxLoc);
-                    //LOG_INFO << "shrinked_int32 " << "min:" << minVal << " ,max:" << maxVal << std::endl;
 
                     shrinked_int32.copyTo(mat);
                 }
@@ -434,7 +441,7 @@ namespace Zweistein {
                 std::stringstream ss_wkt;
                 ss_wkt << boost::geometry::wkt(r.roi);
                 std::string wktout = polygon_scaled(ss_wkt.str(),shrinkraw);
-                auto t = boost::python::make_tuple(wktout, r.count);
+                auto t = boost::python::make_tuple(wktout,(unsigned long) (r.count*shrinkraw*shrinkraw));  // counts are relative to scaled image
                 l.append(t);
             }
 
@@ -455,8 +462,8 @@ namespace Zweistein {
             {
 
                 Zweistein::ReadLock r_lock(histogramsLock);
-                width = histogram.cols * shrinkraw;
-                height = histogram.rows * shrinkraw;
+                width = (int) ( histogram.cols * shrinkraw);
+                height = (int) (histogram.rows * shrinkraw);
             }
             return boost::python::make_tuple(width, height);
 
@@ -476,7 +483,7 @@ namespace Zweistein {
                 std::stringstream ss_wkt;
                 ss_wkt << boost::geometry::wkt(r.roi);
                 std::string tmp = polygon_scaled(ss_wkt.str(), shrinkraw);
-                auto t = boost::python::make_tuple(tmp, r.count);
+                auto t = boost::python::make_tuple(tmp, (unsigned long) (r.count *shrinkraw*shrinkraw));
                 l.append(t);
             }
             return l;

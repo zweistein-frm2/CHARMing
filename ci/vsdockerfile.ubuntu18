@@ -1,0 +1,71 @@
+FROM ubuntu:18.04
+
+LABEL description="Container for use with Visual Studio"
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y \
+	apt-transport-https \
+	ca-certificates \
+	apt-utils \
+	gnupg \
+	software-properties-common \
+	wget \
+	git \
+	curl \
+	unzip \
+	tar
+
+
+RUN wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
+
+RUN apt-add-repository 'deb https://apt.kitware.com/ubuntu/ bionic main' && \
+    apt-get update
+
+RUN export TZ=Europe/Berlin    # must be at beginning for unknown reasons,
+RUN apt-get install tzdata     # must be at beginning for unknown reasons,
+
+RUN apt-get install -y cmake rsync zip openssh-server
+
+RUN add-apt-repository -y ppa:ubuntu-toolchain-r/test && \
+    apt-get update
+
+RUN apt install -y python3-pip python3-dev && \
+    pip3 install numpy && \
+    #ln -s /usr/bin/python3 /usr/bin/python && \
+    apt-get install -y libgtk-3-dev
+
+# we need python3 otherwise boost will not build its python support
+
+
+RUN apt-get install -y gcc-9 g++-9 build-essential && \
+    update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 700 --slave /usr/bin/g++ g++ /usr/bin/g++-7 && \
+    update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 900 --slave /usr/bin/g++ g++ /usr/bin/g++-9
+
+
+RUN mkdir -p /var/run/sshd
+
+RUN mkdir -p /root && cd /root && mkdir -p /.vs
+
+RUN echo 'PasswordAuthentication yes' >> /etc/ssh/sshd_config && \
+    echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config && \
+    ssh-keygen -A  && \
+	echo 'root:root' | chpasswd
+
+EXPOSE 22
+
+RUN echo '#!/bin/bash' >> entrypoint.sh && \
+    echo 'set -m' >> entrypoint.sh && \
+    echo '$1 &'  >> entrypoint.sh && \
+    echo 'service ssh start' >> entrypoint.sh && \
+    echo 'fg %1'  >> entrypoint.sh && \
+    chmod +x entrypoint.sh
+
+
+ENTRYPOINT ["/entrypoint.sh"]
+
+
+
+
+
+
+

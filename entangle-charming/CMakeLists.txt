@@ -50,6 +50,7 @@ endif()
 
 message(parentdir=${parentdir})
 
+include(${parentdir}/init.cmake)
 #set(Boost_DEBUG ON)
 #set(Boost_DETAILED_FAILURE_MSG ON)
 #set(Boost_VERBOSE ON)
@@ -225,6 +226,11 @@ foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3 PROJECT4)
              COMMAND ${CMAKE_COMMAND} -E copy
                   ${CMAKE_CURRENT_SOURCE_DIR}/core.py
                   ${CMAKE_CURRENT_BINARY_DIR}/core.py
+
+              COMMAND ${CMAKE_COMMAND} -E copy
+                  ${CMAKE_CURRENT_SOURCE_DIR}/roimanager.py
+                  ${CMAKE_CURRENT_BINARY_DIR}/roimanager.py
+
              COMMAND ${CMAKE_COMMAND} -E copy
                   ${CMAKE_CURRENT_SOURCE_DIR}/settings.py
                   ${CMAKE_CURRENT_BINARY_DIR}/settings.py
@@ -311,6 +317,7 @@ list(APPEND ENTANGLE_FILES_DEVICE_CHARMING
    ${CMAKE_CURRENT_SOURCE_DIR}/mesytec-replay.py
    ${CMAKE_CURRENT_SOURCE_DIR}/msmtsystem.py
    ${CMAKE_CURRENT_SOURCE_DIR}/core.py
+   ${CMAKE_CURRENT_SOURCE_DIR}/roimanager.py
    ${CMAKE_CURRENT_SOURCE_DIR}/settings.py
    ${CMAKE_CURRENT_SOURCE_DIR}/simulator.py
    ${CMAKE_CURRENT_SOURCE_DIR}/test-replay.py

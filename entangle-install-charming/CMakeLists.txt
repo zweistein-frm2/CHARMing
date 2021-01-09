@@ -9,9 +9,13 @@ if(WIN32)
     add_definitions(-D_WIN32_WINNT=0x0601)
 endif()
 
+get_filename_component(parentdir ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY )
+
+if(EXISTS "${parentdir}/ENTANGLE_FILES")
+
 set(CMAKE_CXX_STANDARD 17)
-message(CMAKE_CURRENT_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR})
-file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/../ENTANGLE_FILES" ENTANGLE_FILES_RC)
+
+file(STRINGS "${parentdir}/ENTANGLE_FILES" ENTANGLE_FILES_RC)
 
 set(RESOURCE_FILES "")
 list(LENGTH ENTANGLE_FILES_RC  LL)
@@ -72,3 +76,11 @@ install(TARGETS ${PROJECT_NAME}
     DESTINATION "${INSTALL_DIR}"
     RUNTIME DESTINATION  "${INSTALL_DIR}"
     )
+
+
+else()
+ message(WARNING "${parentdir}/ENTANGLE_FILES does not exist.\n"
+   "please build entangle-charming to generate ENTANGLE_FILES\n"
+   "${PROJECT_NAME} not build.")
+
+endif()

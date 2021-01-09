@@ -87,11 +87,12 @@ namespace Charm {
 
 				}
 				for (int c = 0; c < COUNTER_MONITOR_COUNT; c++) {
-					CounterMonitor[c] += (unsigned long long) datapacket.param[c][0] + ((unsigned long long) datapacket.param[c][1]) << 16 + ((unsigned long long) datapacket.param[c][2]) << 32;
+					CounterMonitor[c] += (unsigned long long) datapacket.param[c][0] + (((unsigned long long) datapacket.param[c][1]) << 16) + (((unsigned long long) datapacket.param[c][2]) << 32);
 				}
 				params.lastbufnum = datapacket.Number;
 				for (int i = 0; i < numevents; i++) {
 					Zweistein::Event Ev = Zweistein::Event(Charm::CharmEvent::fromMpsd8(&datapacket.events[i]), headertime, deviceparam[id].offset, params.module_id);
+					Ev.Amplitude = 16;  // as might be resized from 4x4 to 1 pixel then event count is at least 1
 					PushNeutronEventOnly_HandleOther(Ev);
 				}
 				break;

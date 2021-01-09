@@ -14,8 +14,8 @@
 #include "Mesytec.Mcpd8.hpp"
 #include "Mesytec.config.hpp"
 #include "Mesytec.listmode.write.hpp"
-
 #include "Module.Globals.hpp"
+
 std::string PROJECT_NAME("CHARMing");
 namespace p = boost::python;
 namespace np = boost::python::numpy;
@@ -264,6 +264,9 @@ struct ReplayList {
 
             boost::python::list l;
             if (directory.empty()) return l;
+
+            boost::replace_all(directory, "\\\\", "\\");
+            boost::replace_all(directory, "\\", "/");
             LOG_INFO << "files(" << directory << ")" << std::endl;
 
             try {
@@ -286,8 +289,12 @@ struct ReplayList {
                     for (auto& entry : boost::make_iterator_range(boost::filesystem::directory_iterator(mdat_path), {}))
 
                          if (entry.path().extension() == LISTMODEEXTENSION) {
-                            LOG_DEBUG << __FILE__ << " : " << __LINE__ << " append " << entry.path().string() << std::endl;
-                            l.append(entry.path().string());
+                            std::string file = entry.path().string();
+                            LOG_DEBUG << __FILE__ << " : " << __LINE__ << " append " << file << std::endl;
+                            boost::replace_all(file, "\\\\", "\\");
+                            boost::replace_all(file, "\\", "/");
+                            LOG_INFO << file  <<"("<< file.length() <<")"<< std::endl;
+                            l.append(file);
                         }
                 }
 
@@ -303,43 +310,50 @@ struct ReplayList {
 
 
         boost::python::list addfile(std::string file) {
-            LOG_INFO <<"addfile("<< file << ")" << std::endl;
 
-            boost::python::list l;
-            {
-                boost::mutex::scoped_lock lock(ptrStartParameters->playlistGuard);
+            if (!file.empty()) {
+                boost::replace_all(file, "\\\\", "\\");
+                boost::replace_all(file, "\\", "/");
 
-                try {
-                    bool duplicate = false;
-                    for (auto& s : ptrStartParameters->playlist) {
-                        if (s == file) {
-                            duplicate = true;
-                          //  LOG_INFO << s << " == " << file << std::endl;
+                LOG_INFO << "addfile(" << file << ")" << std::endl;
+                {
+                    boost::mutex::scoped_lock lock(ptrStartParameters->playlistGuard);
+
+                    try {
+                        bool duplicate = false;
+                        for (auto& s : ptrStartParameters->playlist) {
+                            if (s == file) {
+                                duplicate = true;
+                                //  LOG_INFO << s << " == " << file << std::endl;
+                            }
+                            // else LOG_INFO << s << " != " << file << std::endl;
+
                         }
-                       // else LOG_INFO << s << " != " << file << std::endl;
-
-                    }
-                    if (!duplicate) {
-                        if (!boost::filesystem::exists(file)) {
-                            LOG_WARNING << "Not found: " << file << std::endl;
-                        }
-                        else {
-                            boost::filesystem::path p(file);
-                            if (p.extension() != LISTMODEEXTENSION) {
-                                LOG_WARNING << "File not added to playlist (wrong extension !=" << LISTMODEEXTENSION << ") : " << file << std::endl;
+                        if (!duplicate) {
+                            if (!boost::filesystem::exists(file)) {
+                                LOG_WARNING << "Not found: " << file << std::endl;
                             }
                             else {
-                                ptrStartParameters->playlist.push_back(file);
-                                LOG_INFO << file << " added to playlist" << std::endl;
+                                boost::filesystem::path p(file);
+                                if (p.extension() != LISTMODEEXTENSION) {
+                                    LOG_WARNING << "File not added to playlist (wrong extension !=" << LISTMODEEXTENSION << ") : " << file << std::endl;
+                                }
+                                else {
+                                    ptrStartParameters->playlist.push_back(file);
+                                    LOG_INFO << file << " added to playlist" << std::endl;
+                                }
+
                             }
-
                         }
-
+                        else LOG_WARNING << "File not added to playlist" << "(duplicate)" << " : " << file << std::endl;
                     }
-                    else LOG_WARNING << "File not added to playlist" << "(duplicate)" << " : " << file << std::endl;
-
+                    catch (boost::exception& e) { LOG_ERROR << boost::diagnostic_information(e) << std::endl; }
                 }
-                catch (boost::exception& e) { LOG_ERROR << boost::diagnostic_information(e) << std::endl; }
+            }
+            boost::python::list l;
+
+            {
+                boost::mutex::scoped_lock lock(ptrStartParameters->playlistGuard);
                 //LOG_INFO << "list:" << std::endl;
                 for (auto& s : ptrStartParameters->playlist) {
                     l.append(s);
@@ -349,11 +363,12 @@ struct ReplayList {
 
             }
             return l;
-
         }
 
         boost::python::list removefile(std::string file) {
             LOG_INFO << "removefile(" << file << ")" << std::endl;
+            boost::replace_all(file, "\\\\", "\\");
+            boost::replace_all(file, "\\", "/");
 
             boost::python::list l;
             {

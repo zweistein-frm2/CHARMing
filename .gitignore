@@ -11,7 +11,7 @@ obj/
 CMakeFiles/
 bin/
 ARM/
-
+REPOSITORY_INIT_OK
 ENTANGLE_FILES
 libuv.vcxproj
 *.rpm

@@ -15,6 +15,7 @@ from entangle import base
 from entangle.core import states, Attr
 from entangle.core import states, Prop, Attr, Cmd, pair, listof, uint32, boolean
 import entangle.device.charming.msmtsystem as msmtsystem
+import ctypes
 
 __ALL__ = ['writelistmode']
 
@@ -37,9 +38,9 @@ class CmdProcessor(object):
         return len(__ALL__)
 
     def read_availableChars(self):
-        return -1
-
-
+        rv = ctypes.c_ulong(-1)
+        return rv.value
+  
     def Write(self, msg:str)->uint32:
         self.lastcmd = msg.rstrip()
         #print('CmdProcessor.Write('+self.lastcmd + ')')

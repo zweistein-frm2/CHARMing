@@ -3,6 +3,7 @@ from entangle import base
 from entangle.core import states, Prop, Attr, Cmd, pair, listof, uint32, boolean
 
 import entangle.device.charming.msmtsystem as msmtsystem
+import ctypes
 
 
 class CmdProcessor(object):
@@ -14,7 +15,8 @@ class CmdProcessor(object):
         return len(roilist)
 
     def read_availableChars(self):
-        return -1
+        rv = ctypes.c_ulong(-1)
+        return rv.value
 
     def Write(self, msg:str)->uint32:
         self.lastcmd = msg.rstrip()
@@ -65,6 +67,24 @@ class RoiManager(CmdProcessor,base.StringIO):
 
     def init(self):
         pass
+
+    def state(self):
+        _state = base.StringIO.state(self)
+        roil =  self.get_roidata()
+        msg = ''
+
+        if roil:
+            msg += '['
+            i = 0
+            for tup in roil:
+                if i:
+                  msg += ','
+                msg += tup[0]
+                i = i + 1
+            msg += ']'
+
+
+        return (_state[0],msg)
 
     def get_roidata(self):
         if not msmtsystem.msmtsystem:

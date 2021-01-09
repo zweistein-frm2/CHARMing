@@ -70,7 +70,9 @@ namespace Zweistein {
 			};
 			static cv::Mat binned_occ_corrected;
 			static cv::Mat raw_shrinked;
-			static cv::Mat raw_float;
+
+//			static cv::Mat raw_float; // HISTOGRAMTYPE dipendend
+
 			HISTYPE htype = HISTYPE::RAW|HISTYPE::BINNED;
 
 			histogram_setup_status hss = Zweistein::setup_status;
@@ -90,8 +92,7 @@ namespace Zweistein {
 				Zweistein::ReadLock r_lock(histogramsLock);
 
 				if (shrinkraw != 1) {
-
-					histograms[0].histogram.convertTo(raw_float, CV_32F);
+//					histograms[0].histogram.convertTo(raw_float, CV_32F); // HISTOGRAMTYPE dipendend
 
 					if (raw_shrinked.cols < 2) {
 						raw_shrinked = cv::Mat_<float>::zeros(histograms[0].histogram.size[0] * shrinkraw, histograms[0].histogram.size[1] * shrinkraw);
@@ -99,7 +100,10 @@ namespace Zweistein {
 					else {
 						raw_shrinked.resize(histograms[0].histogram.size[0] * shrinkraw, histograms[0].histogram.size[1] * shrinkraw);
 					}
-					cv::resize(raw_float, raw_shrinked, raw_shrinked.size(),0,0,cv::INTER_AREA);
+
+ //				    cv::resize(raw_float, raw_shrinked, raw_shrinked.size(),0,0,cv::INTER_AREA); // HISTOGRAMTYPE dipendend
+    				cv::resize(histograms[0].histogram, raw_shrinked, raw_shrinked.size(), 0, 0, cv::INTER_AREA); // HISTOGRAMTYPE dipendend
+
 					double minVal, maxVal;
 					cv::Point minLoc, maxLoc;
 					cv::minMaxLoc(raw_shrinked, &minVal, &maxVal, &minLoc, &maxLoc);
