@@ -135,13 +135,18 @@ class PlayList(CmdProcessor,base.StringIO):
             Cmd('return directory list of .mdat files.', str, listof(str), '', ''),
     }
 
+    def init(self):
+       files = self.FilesInDirectory("~")
+       for f in files:
+           self.AddFile(f)
+
     def state(self):
         _state = base.StringIO.state(self)
         roil =  self.AddFile('')
         msg = ''
 
         if roil:
-            return json.dumps(roil)
+            return (_state[0],json.dumps(roil))
             #msg += '['
             #i = 0
             #for tup in roil:

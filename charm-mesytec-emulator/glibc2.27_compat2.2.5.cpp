@@ -1,4 +1,6 @@
 #ifndef WIN32
+
+#ifdef LINUX_FLAVOUR_UBUNTU18
 // this code works to compile on linux with glibc < = 2.27 and will then use compatibility down to 2.2.5
 // will not work with glibc_2_28 which has other global symbols (statx) that are difficult to replace
 
@@ -78,4 +80,6 @@ targets do not support hidden references to IFUNC symbols.  */
 #endif
 
 #endif
+#endif
+
 

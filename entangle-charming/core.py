@@ -24,6 +24,9 @@ import entangle.device.charming.msmtsystem as msmtsystem
 
 class MeasureCounts(base.CounterChannel):
 
+    def init(self):
+        self.preselected_value = 0
+
     def state(self):
 
         if charming.msmtsystem.msmtsystem:
@@ -62,6 +65,10 @@ class MeasureCounts(base.CounterChannel):
         if charming.msmtsystem:
             t = charming.msmtsystem.msmtsystem.status()
             charming.msmtsystem.msmtsystem.stopafter(value,0)
+            self.preselected_value = value
+
+    def read_preselection(self):
+        return self.preselected_value
 
     def read_version(self):
         ver = super().read_version()
@@ -72,6 +79,8 @@ class MeasureCounts(base.CounterChannel):
 
 class MeasureTime(base.TimerChannel):
 
+    def init(self):
+        self.preselected_value = 0
 
     def state(self):
         if charming.msmtsystem.msmtsystem:
@@ -115,6 +124,10 @@ class MeasureTime(base.TimerChannel):
         if charming.msmtsystem.msmtsystem:
             #t = msmtsystem.msmtsystem.status()
             charming.msmtsystem.msmtsystem.stopafter(0,value)
+            self.preselected_value = value
+
+    def read_preselection(self):
+        return self.preselected_value
 
     def read_version(self):
         ver = super().read_version()

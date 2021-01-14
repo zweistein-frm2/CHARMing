@@ -512,7 +512,7 @@ int main(int argc, char* argv[])
 	}
 
 	std::string appName = boost::filesystem::basename(argv[0]);
-	PacketSenderParams::ReadIni(appName,"charm");
+	PacketSenderParams::ReadIni(appName,"CHARMing");
 	devid = PacketSenderParams::getDevId();
 	n_charm_units = PacketSenderParams::get_n_charm_units();
 	const unsigned short port = 54321;

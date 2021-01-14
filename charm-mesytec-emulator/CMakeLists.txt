@@ -3,6 +3,13 @@
 #
 cmake_minimum_required (VERSION 3.11)
 
+execute_process(COMMAND lsb_release -cs
+    OUTPUT_VARIABLE RELEASE_CODENAME
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+   ERROR_QUIET
+)
+
+
 set(boost_currentversion 1.75.0)
 
 get_filename_component(parentdir ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY )
@@ -75,10 +82,16 @@ configure_file( cmake_variables.h.in ${CMAKE_BINARY_DIR}/generated/cmake_variabl
 include_directories( ${CMAKE_BINARY_DIR}/generated/ ) # Make sure it can be included...
 add_executable (${PROJECT_NAME} "PacketSender.cpp"  ${Charm_DIR}/Mcpd8.CmdPacket.cpp ${Charm_DIR}/Mesyec.Mpsd8.cpp "glibc2.27_compat2.2.5.cpp")
 
-target_link_options(${PROJECT_NAME} PRIVATE $<$<CXX_COMPILER_ID:GNU>:-Wl,--wrap=glob>)
+if("${RELEASE_CODENAME}" STREQUAL "bionic")
+   message(STATUS 'ubuntu 18 - bionic')
+   add_definitions(-DLINUX_FLAVOUR_UBUNTU18)
+   target_link_options(${PROJECT_NAME} PRIVATE $<$<CXX_COMPILER_ID:GNU>:-Wl,--wrap=glob>)
+endif()
+
+
 
 target_link_libraries(${PROJECT_NAME} PRIVATE  ${Boost_LIBRARIES} uv_a ) # libstdc++.a libm.a libc.a
-target_link_options(${PROJECT_NAME} PRIVATE $<$<CXX_COMPILER_ID:GNU>:$<$<CONFIG:RELEASE>:-static-libstdc++> $<$<CONFIG:DEBUG>:-static-libstdc++> > PRIVATE $<$<CXX_COMPILER_ID:GNU>:-static-libgcc>  )
+target_link_options(${PROJECT_NAME} PRIVATE $<$<CXX_COMPILER_ID:GNU>:-static-libstdc++>  PRIVATE $<$<CXX_COMPILER_ID:GNU>:-static-libgcc>  )
 
 
 # TODO: Add tests and install targets if needed.

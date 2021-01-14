@@ -66,6 +66,8 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
                                 for (int i = 0; i < COUNTER_MONITOR_COUNT; i++) CounterMonitor[i] = 0;
 
                                 LOG_INFO << "data.evntcount = 0, Monitors=0" << std::endl;
+                                ptrmsmtsystem1->daq_running = true;
+
                                 boost::mutex::scoped_lock lock(ptrStartParameters->playlistGuard);
 
                                 LOG_INFO << __FILE__ << " : " << __LINE__ << lec << std::endl;
@@ -81,12 +83,14 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
                                 break;
                             }
                             else {
+                                ptrmsmtsystem1->daq_running = false;
                                 char clessidra[8] = { '|', '/' , '-', '\\', '|', '/', '-', '\\' };
                                 std::cout << "\r  waiting for action " << clessidra[l%8];
                                 l++;
                                 boost::this_thread::sleep_for(boost::chrono::milliseconds(300));
                             }
                         }
+
 
 
                         for (std::string& fname : listmodeinputfiles) {
@@ -119,6 +123,7 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
                                 boost::function<void(Mcpd8::DataPacket&)> abfunc = boost::bind(&Mesytec::MesytecSystem::analyzebuffer, ptrmsmtsystem1, boost::placeholders::_1);
                                 boost::shared_ptr <Mesytec::listmode::Read> ptrRead = boost::shared_ptr < Mesytec::listmode::Read>(new Mesytec::listmode::Read(abfunc, ptrmsmtsystem1->data, ptrmsmtsystem1->deviceparam));
                                 // pointer to obj needed otherwise exceptions are not propagated properly
+
                                 ptrRead->file(fname, *ptr_ctx);
                                 while (ptrmsmtsystem1->evdata.evntqueue.read_available()); // wait unitl queue consumed
 
@@ -136,10 +141,10 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
                             catch (std::exception& e) {
                                 LOG_ERROR << e.what() << std::endl;
                             }
+
                         }
                         using namespace magic_enum::ostream_operators;
                         Mesytec::listmode::whatnext = Mesytec::listmode::wait_reading;
-
                         Mesytec::listmode::action ac = Mesytec::listmode::whatnext;
 
                         LOG_INFO << " all done: " << ac << std::endl;
@@ -167,15 +172,22 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
             boost::chrono::system_clock::time_point tps = ptrmsmtsystem1->getStart();
             boost::chrono::duration<double> secs = boost::chrono::system_clock::now() - tps;
             boost::chrono::duration<double> Maxsecs(ptrStartParameters->DurationSeconds);
+            bool running = ptrmsmtsystem1->daq_running;
+            if (running) {
+                bool sendstop = false;
+                if (maxcount != 0 && currcount > maxcount) {
+                    LOG_INFO << "stopped by counter maxval:" << currcount << ">max:" << maxcount << std::endl;
+                    sendstop = true;
+                }
+                if (secs >= Maxsecs && Maxsecs != boost::chrono::duration<double>::zero()) {
+                    LOG_INFO << "stopped by timer:" << secs << "> max:" << Maxsecs << std::endl;
+                    sendstop = true;
+                }
 
-            bool sendstop = false;
-            if (maxcount != 0 && currcount > maxcount) {
-                LOG_INFO << "stopped by counter maxval:" << currcount << ">max:" << maxcount << std::endl;
-                sendstop = true;
-            }
-            if (secs >= Maxsecs && Maxsecs != boost::chrono::duration<double>::zero()) {
-                LOG_INFO << "stopped by timer:" << secs << "> max:" << Maxsecs << std::endl;
-                sendstop = true;
+                if (sendstop) {
+                    Mesytec::listmode::whatnext = Mesytec::listmode::action::wait_reading;
+                    ptrmsmtsystem1->daq_running = false;
+                }
             }
             boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
             std::chrono::milliseconds maxblocking(100);
@@ -252,10 +264,15 @@ struct ReplayList {
             boost::chrono::duration<double> secs = boost::chrono::system_clock::now() - tps;
             long long count = ptrmsmtsystem1->evdata.evntcount;
             unsigned short tmp = ptrmsmtsystem1->data.last_deviceStatusdeviceId;
+            bool running = ptrmsmtsystem1->daq_running;
+            if (running) {
+                //LOG_INFO << "Running" << std::endl;
+                tmp |= Mcpd8::Status::DAQ_Running;
+            }
             unsigned char devstatus = Mcpd8::DataPacket::getStatus(tmp);
             std::string msg = Mcpd8::DataPacket::deviceStatus(devstatus);
-           // LOG_INFO << "started:"<<tps<<", now="<< boost::chrono::system_clock::now()<< ":"<<secs<<std::endl;
-           // LOG_INFO <<"count="<<count<<", elapsed="<<secs << ",devstatus=" << (int)devstatus << ", " << msg<<std::endl;
+            //LOG_INFO << "started:"<<tps<<", now="<< boost::chrono::system_clock::now()<< ":"<<secs<<std::endl;
+            //LOG_INFO <<"count="<<count<<", elapsed="<<secs << ",devstatus=" << (int)devstatus << ", " << msg<<std::endl;
             return boost::python::make_tuple(count, secs.count(), devstatus,msg);
 
         }
@@ -417,9 +434,11 @@ struct ReplayList {
         void stop() {
             LOG_INFO << "ReplayList::stop()" << std::endl;
             Mesytec::listmode::whatnext = Mesytec::listmode::wait_reading;
+            ptrmsmtsystem1->daq_running = false;
         }
         void resume() {
             LOG_INFO << "ReplayList::resume()" << std::endl;
+            ptrmsmtsystem1->daq_running = true;
             Mesytec::listmode::whatnext = Mesytec::listmode::continue_reading;
         }
 
