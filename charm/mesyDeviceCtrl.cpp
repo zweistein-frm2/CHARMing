@@ -90,7 +90,7 @@ int main(int argc, char* argv[])
 
 	boost::shared_ptr <  Mesytec::MesytecSystem> ptrmsmtsystem1 = nullptr;
 
-	unsigned long simuratedefault = 1234; // 1234 cts/second
+	unsigned long simuratedefault = 7; // 7 cts/second
 
 	try
 	{
@@ -111,7 +111,7 @@ int main(int argc, char* argv[])
 		const char *CONFIG="config-file";
 		const char *WRITE2DISK="writelistmode";
 		const char* SETUP = "setup";
-		const char* CHARMDEVICE = "charmdevice";
+		const char* MESYTECDEVICE = "mesytecdevice";
 		const char* SIMRATE = "sim-rate";
 		bool inputfromlistfile = false;
 		bool write2disk = false;
@@ -125,7 +125,7 @@ int main(int argc, char* argv[])
 			(LISTMODE_FILE, po::value< std::vector<std::string> >(),(std::string("file1 [file2] ... [file")+std::to_string(maxNlistmode)+std::string("N]")).c_str())
 			(CONFIG, po::value< std::string>(), (std::string("alternative config file[.json], must be in ")+ inidirectory.string()).c_str())
 			(WRITE2DISK, (std::string("write DataPackets to ")+ Mesytec::writelistmodeFileNameInfo()).c_str())
-			(CHARMDEVICE, (std::string("use charm device protocol. ")).c_str())
+			(MESYTECDEVICE, (std::string("use mesytec device protocol. ")).c_str())
 			(SETUP, (std::string("config mesytec device(s): ")+ std::string("set module IP addr")).c_str())
 			(SIMRATE, (std::string("simulator rate [cts/s]")+std::string("(default=") +std::to_string(simuratedefault)+std::string(")")).c_str())
 			;
@@ -157,15 +157,15 @@ int main(int argc, char* argv[])
 		conflicting_options(vm, WRITE2DISK, SETUP);
 		po::notify(vm);
 
-		if (vm.count(CHARMDEVICE) || defaulttocharm) {
-			bmesyteconly = false;
+		if (defaulttocharm) bmesyteconly = false;
+		else bmesyteconly = true;
 
-		}
-		else {
-			bmesyteconly = true;
-			CONFIG_FILE = "mesytecsystem";
-		}
+		if(vm.count(MESYTECDEVICE)) bmesyteconly = true;
 
+		if(bmesyteconly ) CONFIG_FILE = "mesytecsystem";
+
+		if (bmesyteconly) std::cout << "using MESYTEC device protocol" << std::endl;
+		else std::cout << "using CHARM device  protocol" << std::endl;
 		if (vm.count(WRITE2DISK)) write2disk = true;
 		if (vm.count(SETUP)) setupafterconnect = true;
 		if (vm.count(CONFIG)) {

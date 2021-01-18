@@ -3,7 +3,6 @@
 #
 cmake_minimum_required (VERSION 3.11)
 
-
 project ("entangle-install-charming")
 if(WIN32)
     add_definitions(-D_WIN32_WINNT=0x0601)

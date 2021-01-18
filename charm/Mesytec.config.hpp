@@ -102,12 +102,28 @@ namespace Mesytec {
 						std::string m3 = std::string(a3.data(), a3.size());
 						std::string enum_tmp = root.get<std::string>(s2 + "eventdataformat", m3);
 						auto a = magic_enum::enum_cast<Zweistein::Format::EventData>(enum_tmp);
-						p1.eventdataformat = a.value();
+						if (!a) {
+							std::cout << "option not found : possible values are ";
+							constexpr auto & names = magic_enum::enum_names<Zweistein::Format::EventData>();
+							for (const auto& n : names) std::cout << " " << n;
+							std::cout << std::endl;
+							rv = false;
+							continue;
+						}
+						else p1.eventdataformat = a.value();
 					}
 					else {
 						std::string enum_tmp = root.get<std::string>(s2 + "eventdataformat");
 						auto a = magic_enum::enum_cast<Zweistein::Format::EventData>(enum_tmp);
-						p1.eventdataformat = a.value();
+						if (!a) {
+							std::cout << "option not found : possible values are ";
+							constexpr auto& names = magic_enum::enum_names<Zweistein::Format::EventData>();
+							for (const auto& n : names) std::cout << " " << n;
+							std::cout << std::endl;
+							rv = false;
+							continue;
+						}
+						else p1.eventdataformat = a.value();
 					}
 					auto a4 = magic_enum::enum_name(p1.eventdataformat);
 					std::string m4 = std::string(a4.data(), a4.size());
@@ -118,12 +134,28 @@ namespace Mesytec {
 						std::string m5 = std::string(a5.data(), a5.size());
 						std::string enum_tmp = root.get<std::string>(s2 + "datagenerator", m5);
 						auto a = magic_enum::enum_cast<Zweistein::DataGenerator>(enum_tmp);
-						p1.datagenerator = a.value();
+						if (!a) {
+							std::cout << "option not found : possible values are ";
+							constexpr auto& names = magic_enum::enum_names<Zweistein::DataGenerator>();
+							for (const auto& n : names) std::cout << " " << n;
+							std::cout << std::endl;
+							rv = false;
+							continue;
+						}
+						else p1.datagenerator = a.value();
 					}
 					else {
 						std::string enum_tmp = root.get<std::string>(s2 + "datagenerator");
 						auto a = magic_enum::enum_cast<Zweistein::DataGenerator>(enum_tmp);
-						p1.datagenerator = a.value();
+						if (!a) {
+							std::cout << "option not found : possible values are ";
+							constexpr auto& names = magic_enum::enum_names<Zweistein::DataGenerator>();
+							for (const auto& n : names) std::cout << " " << n;
+							std::cout << std::endl;
+							rv = false;
+							continue;
+						}
+						else p1.datagenerator = a.value();
 					}
 					auto a6 = magic_enum::enum_name(p1.datagenerator);
 					std::string m6 = std::string(a6.data(), a6.size());

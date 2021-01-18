@@ -20,6 +20,11 @@ execute_process(COMMAND git submodule update
 #
 cmake_minimum_required (VERSION 3.11)
 
+execute_process(COMMAND lsb_release -cs
+    OUTPUT_VARIABLE RELEASE_CODENAME
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+   ERROR_QUIET
+)
 
 project ("entangle-install-isegCC2x")
 if(WIN32)
@@ -51,8 +56,16 @@ find_package (Threads REQUIRED)
 
 include_directories(${Charm_DIR})
 # Add source to this project's executable.
-add_executable (${PROJECT_NAME} "entangle-Install-isegCC2x.cpp" )
+add_executable (${PROJECT_NAME} "entangle-Install-isegCC2x.cpp"  "glibc2.27_compat2.2.5.cpp")
+
+if("${RELEASE_CODENAME}" STREQUAL "bionic")
+   message(STATUS 'ubuntu 18 - bionic')
+   add_definitions(-DLINUX_FLAVOUR_UBUNTU18)
+   target_link_options(${PROJECT_NAME} PRIVATE $<$<CXX_COMPILER_ID:GNU>:-Wl,--wrap=glob>)
+endif()
+
 target_compile_options(${PROJECT_NAME} PRIVATE  $<$<CXX_COMPILER_ID:GNU>: -Wno-error>)
+
 
 target_link_libraries(${PROJECT_NAME} PRIVATE installer::rc2)
 target_link_libraries(${PROJECT_NAME} PRIVATE ${Boost_LIBRARIES})
