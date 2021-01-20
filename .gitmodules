@@ -1,21 +1,8 @@
-[submodule "sigslot"]
-	path = charm/sigslot
-	url = https://github.com/palacaze/sigslot.git
-[submodule "asio-extensions"]
-	path = charm/asio-extensions
-	url = https://github.com/timniederhausen/asio-extensions.git
-[submodule "libdl"]
-	path = charm/libdl
-	url = https://github.com/GaloisInc/libdl.git
+
 [submodule "libuv"]
 	path = libuv
 	url = https://github.com/libuv/libuv.git
-[submodule "magic_enum"]
-	path = charm/magic_enum
-	url = https://github.com/Neargye/magic_enum.git
-[submodule "charm/cvui"]
-	path = charm/cvui
-	url = https://github.com/Dovyski/cvui.git
+
 [submodule "boost"]
 	path = boost
 	url = https://github.com/boostorg/boost.git
@@ -34,3 +21,18 @@
 [submodule "opencv"]
 	path = opencv
 	url = https://github.com/opencv/opencv.git
+[submodule "charm/magic_enum"]
+	path = charm/magic_enum
+	url = https://github.com/Neargye/magic_enum.git
+[submodule "charm/sigslot"]
+	path = charm/sigslot
+	url = https://github.com/palacaze/sigslot.git
+[submodule "charm/asio-extensions"]
+	path = charm/asio-extensions
+	url = https://github.com/timniederhausen/asio-extensions.git
+[submodule "charm/libdl"]
+	path = charm/libdl
+	url = https://github.com/GaloisInc/libdl.git
+[submodule "charm/cvui"]
+	path = charm/cvui
+	url = https://github.com/Dovyski/cvui.git
