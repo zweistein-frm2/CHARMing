@@ -11,6 +11,7 @@ class PacketSenderParams {
     const static std::string devid;
     const static std::string n_charm_units;
     const static std::string punkt;
+    const static std::string port;
 public:
     static void ReadIni(std::string appName, std::string projectname) {
         boost::filesystem::path homepath = Zweistein::GetHomePath();
@@ -31,6 +32,10 @@ public:
         return root.get<unsigned char>(mesytecdevice + punkt + devid, 0);
 
     }
+    static unsigned short get_port() {
+        return root.get<unsigned short>(mesytecdevice + punkt + port, 54321);
+
+    }
     static unsigned char get_n_charm_units() {
         return root.get<unsigned char>(mesytecdevice + punkt + n_charm_units, 2);
 
@@ -42,6 +47,7 @@ public:
 };
 const std::string PacketSenderParams::n_charm_units = "n_charm_units";
 const std::string PacketSenderParams::devid = "devid";
+const std::string PacketSenderParams::port = "port";
 const std::string PacketSenderParams::punkt = ".";
 const std::string PacketSenderParams::mesytecdevice = "MesytecDevice";
 boost::property_tree::ptree PacketSenderParams::root;

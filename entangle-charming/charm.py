@@ -17,16 +17,17 @@ from entangle.lib.loggers import FdLogMixin
 
 import entangle.device.charming as charming
 import entangle.device.charming.charmsystem as charmsystem
-import entangle.device.charming.msmtsystem as msmtsystem
+
+# pylint: disable=wildcard-import
 from entangle.device.charming.core import *
 from entangle.device.charming.settings import *
 from entangle.device.charming.simulator import *
 
 
-class DeviceConnection(FdLogMixin,base.MLZDevice):
+class DeviceConnection(FdLogMixin, base.MLZDevice):
     commands = {
          'Log':
-            Cmd('latest log messages.',None, listof(str), '', ''),
+            Cmd('latest log messages.', None, listof(str), '', ''),
     }
 
     def init(self):
@@ -34,7 +35,7 @@ class DeviceConnection(FdLogMixin,base.MLZDevice):
         fd = self.get_log_fd()
         #print("charm.py:DeviceConnection.init("+str(fd)+")")
         if charming.msmtsystem.msmtsystem is None:
-            charming.msmtsystem.msmtsystem=charmsystem.NeutronMeasurement(fd)
+            charming.msmtsystem.msmtsystem = charmsystem.NeutronMeasurement(fd)
             self.On()
     #def __del__(self):
         #print("charm.py: DeviceConnection.__del__")
@@ -55,6 +56,3 @@ class DeviceConnection(FdLogMixin,base.MLZDevice):
 
     def Log(self):
         return charming.msmtsystem.msmtsystem.log()
-
-
-

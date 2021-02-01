@@ -515,7 +515,7 @@ int main(int argc, char* argv[])
 	PacketSenderParams::ReadIni(appName,"CHARMing");
 	devid = PacketSenderParams::getDevId();
 	n_charm_units = PacketSenderParams::get_n_charm_units();
-	const unsigned short port = 54321;
+	const unsigned short port = PacketSenderParams::get_port();
 	boost::array< Mcpd8::DataPacket, 1> dp;
 
 	zeropoint= boost::chrono::steady_clock::now().time_since_epoch();

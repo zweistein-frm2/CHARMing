@@ -10,12 +10,13 @@
 # and/or modify it under the terms of the GNU General Public License as
 # published by the Free Software Foundation;
 import json
+import ctypes
+# pylint: disable=unused-import
 import copy
 from entangle import base
-from entangle.core import states, Attr
-from entangle.core import states, Prop, Attr, Cmd, pair, listof, uint32, boolean
+from entangle.core import states, Attr, uint32, boolean
 import entangle.device.charming.msmtsystem as msmtsystem
-import ctypes
+
 
 __ALL__ = ['writelistmode']
 
@@ -40,8 +41,8 @@ class CmdProcessor(object):
     def read_availableChars(self):
         rv = ctypes.c_ulong(-1)
         return rv.value
-  
-    def Write(self, msg:str)->uint32:
+
+    def Write(self, msg: str)->uint32:
         self.lastcmd = msg.rstrip()
         #print('CmdProcessor.Write('+self.lastcmd + ')')
 
@@ -81,45 +82,48 @@ class CmdProcessor(object):
         tok = tmp.split(':')
         # if tok[0] is a number then it is the index to the setting we want to read out
         #otherwise it is the setting
-        try :
+        try:
             if len(tok[0]) <= 2:  # 0 to 99
-                index =  int(tok[0])
+                index = int(tok[0])
+                # pylint: disable=chained-comparison
                 if index >= 0 and index < len(__ALL__):
                     tok[0] = __ALL__[index]
+        # pylint: disable=bare-except
         except:
             pass
 
         for setting in __ALL__:
-            if tok[0] ==setting:
-                 r_str = 'self.read_'+setting+'()'
-                 try:
-                     rv = {}
-                     value = eval(r_str)
-                     rv[setting] = value
-                     return json.dumps(rv)
-                 except Exception as inst:
-                     print(type(inst))    # the exception instance
-                     print(inst.args)     # arguments stored in .args
-                     print(inst)          # __str__ allows args to be printed directly,
+            if tok[0] == setting:
+                r_str = 'self.read_'+setting+'()'
+                try:
+                    rv = {}
+                    value = eval(r_str)
+                    rv[setting] = value
+                    return json.dumps(rv)
+                except Exception as inst:
+                    print(type(inst))    # the exception instance
+                    print(inst.args)     # arguments stored in .args
+                    print(inst)          # __str__ allows args to be printed directly,
 
         return ''
 
-class Settings(CmdProcessor,base.StringIO):
+class Settings(CmdProcessor, base.StringIO):
     attributes = {
         __ALL__[0]:
-            Attr(boolean,'write mesytec listmode to file',
-                 writable=True,memorized=False,  disallowed_read=(states.INIT, states.UNKNOWN,),
-                 disallowed_write=( states.OFF, states.INIT, states.UNKNOWN,)),
+            Attr(boolean, 'write mesytec listmode to file',
+                 writable=True, memorized=False, disallowed_read=(states.INIT, states.UNKNOWN,),
+                 disallowed_write=(states.OFF, states.INIT, states.UNKNOWN,)),
     }
 
+    # pylint: disable=inconsistent-return-statements
     def read_writelistmode(self):
         if msmtsystem.msmtsystem:
             return msmtsystem.msmtsystem.writelistmode
-
-    def write_writelistmode(self,value):
+    # pylint: disable=inconsistent-return-statements
+    def write_writelistmode(self, value):
         print('write_writelistmode')
         if msmtsystem.msmtsystem:
-            msmtsystem.msmtsystem.writelistmode=value
+            msmtsystem.msmtsystem.writelistmode = value
 
     def get_writelistmode_unit(self):
         return ''

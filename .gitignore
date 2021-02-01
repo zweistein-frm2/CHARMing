@@ -5,6 +5,8 @@
 
 !*.*
 out/
+opencv/out/
+boost/out/
 .vs/
 x64/
 obj/

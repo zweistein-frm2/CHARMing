@@ -23,18 +23,18 @@ class Simulator(base.MLZDevice):
 
     attributes = {
         'NucleoRate':
-            Attr(int32,'simulator data rate',
-                 writable=True,memorized=False,  disallowed_read=(states.INIT, states.UNKNOWN,),
-                 disallowed_write=( states.OFF, states.INIT, states.UNKNOWN,)),
+            Attr(int32, 'simulator data rate',
+                 writable=True, memorized=False, disallowed_read=(states.INIT, states.UNKNOWN,),
+                 disallowed_write=(states.OFF, states.INIT, states.UNKNOWN,)),
     }
-
+    # pylint: disable=inconsistent-return-statements
     def read_NucleoRate(self):
         if charming.msmtsystem.msmtsystem:
             return charming.msmtsystem.msmtsystem.simulatorRate
-
-    def write_NucleoRate(self,value):
+    # pylint: disable=inconsistent-return-statements
+    def write_NucleoRate(self, value):
         if msmtsystem.msmtsystem:
-            msmtsystem.msmtsystem.simulatorRate=value
+            msmtsystem.msmtsystem.simulatorRate = value
 
     def get_NucleoRate_unit(self):
         return 'Events/second'
@@ -44,5 +44,3 @@ class Simulator(base.MLZDevice):
         if not msmtsystem.msmtsystem:
             return ver
         return ver + " "+msmtsystem.msmtsystem.version
-
-

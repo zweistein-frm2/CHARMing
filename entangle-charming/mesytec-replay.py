@@ -10,23 +10,25 @@
 # and/or modify it under the terms of the GNU General Public License as
 # published by the Free Software Foundation;
 
+import ctypes
+import json
+
 from entangle import base
-from entangle.core import states, Prop, Attr, Cmd, pair, listof, uint32, boolean
+from entangle.core import Cmd, listof, uint32
 
 from entangle.lib.loggers import FdLogMixin
 
 import entangle.device.charming as charming
 
 import entangle.device.charming.listmodereplay as listmodereplay
-import entangle.device.charming.msmtsystem as msmtsystem
+# pylint: disable=wildcard-import
 from  entangle.device.charming.core import *
-import ctypes
-import json
 
-class DeviceConnection(FdLogMixin,base.MLZDevice):
+
+class DeviceConnection(FdLogMixin, base.MLZDevice):
     commands = {
          'Log':
-            Cmd('latest log messages.',None, listof(str), '', ''),
+            Cmd('latest log messages.', None, listof(str), '', ''),
 
     }
     def init(self):
@@ -34,7 +36,7 @@ class DeviceConnection(FdLogMixin,base.MLZDevice):
         fd = self.get_log_fd()
        # print("charm-replay.py:DeviceConnection.init("+str(fd)+")")
         if charming.msmtsystem.msmtsystem is None:
-            charming.msmtsystem.msmtsystem=listmodereplay.ReplayList(fd)
+            charming.msmtsystem.msmtsystem = listmodereplay.ReplayList(fd)
 
 
    # def __del__(self):
@@ -49,7 +51,7 @@ class DeviceConnection(FdLogMixin,base.MLZDevice):
     def Log(self):
         return charming.msmtsystem.msmtsystem.log()
 
-__ALL__ = ['RemoveFile','AddFile','FilesInDirectory']
+__ALL__ = ['RemoveFile', 'AddFile', 'FilesInDirectory']
 
 #call format is 'functionName:[arg1,arg2,...,argn]'
 #return is a json string
@@ -67,7 +69,7 @@ class CmdProcessor(object):
         rv = ctypes.c_ulong(-1)
         return rv.value
 
-    def Write(self, msg:str)->uint32:
+    def Write(self, msg: str)->uint32:
         self.lastcmd = msg.rstrip()
         self.funcstr = ''
         #print('CmdProcessor.Write('+self.lastcmd + ')\n')
@@ -79,7 +81,7 @@ class CmdProcessor(object):
             return 0
         #print("tok[0]="+str(tok[0]))
         for cmd in __ALL__:
-            if tok[0] ==  cmd:
+            if tok[0] == cmd:
                 roi = self.lastcmd[len(tok[0])+1:]
                 if roi:
                     args = json.loads(roi)
@@ -89,12 +91,13 @@ class CmdProcessor(object):
                     for a in args:
                         if i > 0:
                             self.funcstr += ','
+                        # pylint: disable=unidiomatic-typecheck
                         if type(a) == type(""):
                             print("is a str")
-                            self.funcstr +="\""
+                            self.funcstr += "\""
                         self.funcstr += str(a)
                         if type(a) == type(""):
-                            self.funcstr +="\""
+                            self.funcstr += "\""
                         i = i + 1
                     self.funcstr += ')'
                     return len(msg)
@@ -103,7 +106,6 @@ class CmdProcessor(object):
         self.lastcmd = ''
         raise Exception("cmd : "+tok[0] + " not found.")
 
-        return len(msg)
 
     def ReadLine(self):
         print('CmdProcessor.ReadLine() lastcmd == ' + self.lastcmd)
@@ -125,10 +127,10 @@ class CmdProcessor(object):
                 print(inst)          # __str__ allows args to be printed directly,
         return ''
 
-class PlayList(CmdProcessor,base.StringIO):
+class PlayList(CmdProcessor, base.StringIO):
     commands = {
          'RemoveFile':
-            Cmd('remove file from playlist.',str, listof(str), '', ''),
+            Cmd('remove file from playlist.', str, listof(str), '', ''),
           'AddFile':
             Cmd('add file to playlist.', str, listof(str), '', ''),
           'FilesInDirectory':
@@ -136,17 +138,17 @@ class PlayList(CmdProcessor,base.StringIO):
     }
 
     def init(self):
-       files = self.FilesInDirectory("~")
-       for f in files:
-           self.AddFile(f)
+        files = self.FilesInDirectory("~")
+        for f in files:
+            self.AddFile(f)
 
     def state(self):
         _state = base.StringIO.state(self)
-        roil =  self.AddFile('')
+        roil = self.AddFile('')
         msg = ''
 
         if roil:
-            return (_state[0],json.dumps(roil))
+            return (_state[0], json.dumps(roil))
             #msg += '['
             #i = 0
             #for tup in roil:
@@ -157,20 +159,20 @@ class PlayList(CmdProcessor,base.StringIO):
             #msg += ']'
 
 
-        return (_state[0],msg)
+        return (_state[0], msg)
 
-    def RemoveFile(self,file):
+    def RemoveFile(self, file):
         if charming.msmtsystem.msmtsystem:
             return charming.msmtsystem.msmtsystem.removefile(file)
         return False
 
-    def AddFile(self,file):
+    def AddFile(self, file):
         #print("\n\rAddFile("+str(file)+")")
         if charming.msmtsystem.msmtsystem:
             return charming.msmtsystem.msmtsystem.addfile(file)
         return False
 
-    def FilesInDirectory(self,directory):
+    def FilesInDirectory(self, directory):
         #print('FilesInDirectory('+str(directory)+')')
         if charming.msmtsystem.msmtsystem:
             files = charming.msmtsystem.msmtsystem.files(directory)
@@ -183,9 +185,3 @@ class PlayList(CmdProcessor,base.StringIO):
         if not charming.msmtsystem.msmtsystem:
             return ver
         return ver + "\r\n"+charming.msmtsystem.msmtsystem.version
-
-
-
-
-
-
