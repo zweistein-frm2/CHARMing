@@ -174,16 +174,19 @@ foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3 PROJECT4)
     message(STATUS "Boost_numpy_library : ${${Boost_numpy_library}}")
     message(STATUS "_Python3_LIBRARY_RELEASE= ${_Python3_LIBRARY_${Build_Type}}")
 
+   message(STATUS "CMAKE_INTDIR=${CMAKE_INTDIR}")
+
     if(${PROJECT_NAME} STREQUAL "DebugHelper")
      message(STATUS "add_executable(${PROJECT_NAME})")
      add_executable(${PROJECT_NAME})
+
      target_compile_options(${PROJECT_NAME} PRIVATE  $<$<CXX_COMPILER_ID:GNU>: -Wno-error>)
 
      target_compile_options(${PROJECT_NAME} PRIVATE
       $<$<COMPILE_LANGUAGE:CXX>:$<$<CXX_COMPILER_ID:MSVC>:/Od>>
       $<$<COMPILE_LANGUAGE:CXX>:$<$<CXX_COMPILER_ID:MSVC>:/GS>>
      )
-     target_link_libraries(${PROJECT_NAME} PRIVATE "${_Python3_LIBRARY_${Build_Type}}" ${Boost_LIBRARIES} ${OpenCV_LIBS}  uv_a )
+     target_link_libraries (${PROJECT_NAME} PRIVATE "${_Python3_LIBRARY_${Build_Type}}" ${Boost_LIBRARIES} ${OpenCV_LIBS}  uv_a )
 
     else()
      message(STATUS "add_library(${PROJECT_NAME} SHARED )")
@@ -194,7 +197,7 @@ foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3 PROJECT4)
      target_link_libraries(${PROJECT_NAME} PRIVATE "${_Python3_LIBRARY_${Build_Type}}" ${${Boost_python_library}} ${${Boost_numpy_library}})
       if(WIN32)
       set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".pyd")
-
+      set( CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_BINARY_DIR} )
      else()
       set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "")
      endif()

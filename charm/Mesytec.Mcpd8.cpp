@@ -948,7 +948,7 @@ namespace Mesytec {
 					}
 				}
 				for (int c = 0; c < COUNTER_MONITOR_COUNT; c++) {
-					CounterMonitor[c] += (unsigned long long) datapacket.param[c][0] + ((unsigned long long) datapacket.param[c][1]) << 16 + ((unsigned long long)datapacket.param[c][2]) << 32;
+					CounterMonitor[c] += (unsigned long long) datapacket.param[c][0] + (((unsigned long long) datapacket.param[c][1]) << 16) + (((unsigned long long)datapacket.param[c][2]) << 32);
 				}
 				params.lastbufnum = datapacket.Number;
 				for (int i = 0; i < numevents; i++) {
@@ -972,7 +972,7 @@ namespace Mesytec {
 
 				}
 				for (int c = 0; c < COUNTER_MONITOR_COUNT; c++) {
-					CounterMonitor[c] += (unsigned long long) datapacket.param[c][0] + ((unsigned long long) datapacket.param[c][1]) << 16 + ((unsigned long long)datapacket.param[c][2]) << 32;
+					CounterMonitor[c] += (unsigned long long) datapacket.param[c][0] + (((unsigned long long) datapacket.param[c][1]) << 16) + (((unsigned long long)datapacket.param[c][2]) << 32);
 				}
 				params.lastbufnum = datapacket.Number;
 				for (int i = 0; i < numevents; i++) {

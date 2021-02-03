@@ -23,8 +23,8 @@ import numpy as np
 import cv2 as cv
 
 
-import mesytecsystem
-
+import charmsystem as currentsystem
+#import mesytecsystem as currentsystem
 assert sys.version_info >= (3, 4)
 
 
@@ -36,7 +36,7 @@ NM = None
 def initMeasurement():
     global NM, seconds
     #breakpoint()
-    NM = mesytecsystem.NeutronMeasurement(sys.stdout.fileno())
+    NM = currentsystem.NeutronMeasurement(sys.stdout.fileno())
     v = NM.version
     print(v)
     NM.on()

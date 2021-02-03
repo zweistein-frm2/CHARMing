@@ -18,7 +18,7 @@ from entangle.core.states import FAULT
 
 
 
-import  entangle.device.charming as charming
+#import  entangle.device.charming as charming
 import entangle.device.charming.msmtsystem as msmtsystem
 
 
@@ -29,8 +29,8 @@ class MeasureCounts(base.CounterChannel):
     # pylint: disable=inconsistent-return-statements
     def state(self):
 
-        if charming.msmtsystem.msmtsystem:
-            t = charming.msmtsystem.msmtsystem.status()
+        if msmtsystem.msmtsystem:
+            t = msmtsystem.msmtsystem.status()
             if not t[2] &2:
                 return (FAULT, t[3])
             #if(t[2] & 1): return (BUSY,t[3])
@@ -43,29 +43,29 @@ class MeasureCounts(base.CounterChannel):
 
 
     def Start(self):
-        if charming.msmtsystem.msmtsystem:
-            charming.msmtsystem.msmtsystem.start()
+        if msmtsystem.msmtsystem:
+            msmtsystem.msmtsystem.start()
 
     def Stop(self):
-        if charming.msmtsystem.msmtsystem:
-            charming.msmtsystem.msmtsystem.stop()
+        if msmtsystem.msmtsystem:
+            msmtsystem.msmtsystem.stop()
 
     def Prepare(self):
         pass
 
     def Resume(self):
-        if charming.msmtsystem.msmtsystem:
-            charming.msmtsystem.msmtsystem.resume()
+        if msmtsystem.msmtsystem:
+            msmtsystem.msmtsystem.resume()
     # pylint: disable=inconsistent-return-statements
     def read_value(self):
-        if charming.msmtsystem.msmtsystem:
-            t = charming.msmtsystem.msmtsystem.status()
+        if msmtsystem.msmtsystem:
+            t = msmtsystem.msmtsystem.status()
             return t[0]
     # pylint: disable=unused-variable
     def write_preselection(self, value):
-        if charming.msmtsystem:
-            t = charming.msmtsystem.msmtsystem.status()
-            charming.msmtsystem.msmtsystem.stopafter(value, 0)
+        if msmtsystem:
+            t = msmtsystem.msmtsystem.status()
+            msmtsystem.msmtsystem.stopafter(value, 0)
             self.preselected_value = value
 
     def read_preselection(self):
@@ -73,9 +73,9 @@ class MeasureCounts(base.CounterChannel):
 
     def read_version(self):
         ver = super().read_version()
-        if not charming.msmtsystem.msmtsystem:
+        if not msmtsystem.msmtsystem:
             return ver
-        return ver + " "+charming.msmtsystem.msmtsystem.version
+        return ver + " "+msmtsystem.msmtsystem.version
 
 
 class MeasureTime(base.TimerChannel):
@@ -84,8 +84,8 @@ class MeasureTime(base.TimerChannel):
         self.preselected_value = 0
     # pylint: disable=inconsistent-return-statements
     def state(self):
-        if charming.msmtsystem.msmtsystem:
-            t = charming.msmtsystem.msmtsystem.status()
+        if msmtsystem.msmtsystem:
+            t = msmtsystem.msmtsystem.status()
             if not t[2] &2:
                 return (FAULT, t[3])
             #if(t[2] & 1): return (BUSY,t[3])
@@ -96,36 +96,36 @@ class MeasureTime(base.TimerChannel):
             return (_state[0], t[3])
 
     def On(self):
-        if charming.msmtsystem.msmtsystem:
-            charming.msmtsystem.msmtsystem.on()
+        if msmtsystem.msmtsystem:
+            msmtsystem.msmtsystem.on()
     def Off(self):
-        if charming.msmtsystem.msmtsystem:
-            charming.msmtsystem.msmtsystem.off()
+        if msmtsystem.msmtsystem:
+            msmtsystem.msmtsystem.off()
 
     def Start(self):
-        if charming.msmtsystem.msmtsystem:
-            charming.msmtsystem.msmtsystem.start()
+        if msmtsystem.msmtsystem:
+            msmtsystem.msmtsystem.start()
 
     def Stop(self):
-        if charming.msmtsystem.msmtsystem:
-            charming.msmtsystem.msmtsystem.stop()
+        if msmtsystem.msmtsystem:
+            msmtsystem.msmtsystem.stop()
 
     def Prepare(self):
         pass
     # pylint: disable=inconsistent-return-statements
     def Resume(self):
-        if charming.msmtsystem.msmtsystem:
-            charming.msmtsystem.msmtsystem.resume()
+        if msmtsystem.msmtsystem:
+            msmtsystem.msmtsystem.resume()
     # pylint: disable=inconsistent-return-statements
     def read_value(self):
-        if charming.msmtsystem.msmtsystem:
-            t = charming.msmtsystem.msmtsystem.status()
+        if msmtsystem.msmtsystem:
+            t = msmtsystem.msmtsystem.status()
             return t[1]
 
     def write_preselection(self, value):
-        if charming.msmtsystem.msmtsystem:
+        if msmtsystem.msmtsystem:
             #t = msmtsystem.msmtsystem.status()
-            charming.msmtsystem.msmtsystem.stopafter(0, value)
+            msmtsystem.msmtsystem.stopafter(0, value)
             self.preselected_value = value
 
     def read_preselection(self):
@@ -133,37 +133,37 @@ class MeasureTime(base.TimerChannel):
 
     def read_version(self):
         ver = super().read_version()
-        if not charming.msmtsystem.msmtsystem:
+        if not msmtsystem.msmtsystem:
             return ver
-        return ver + " "+charming.msmtsystem.msmtsystem.version
+        return ver + " "+msmtsystem.msmtsystem.version
 
 
 class Monitor0(base.CounterChannel):
     # pylint: disable=inconsistent-return-statements
     def read_value(self):
-        if charming.msmtsystem.msmtsystem:
-            t = charming.msmtsystem.msmtsystem.monitors_status()
+        if msmtsystem.msmtsystem:
+            t = msmtsystem.msmtsystem.monitors_status()
             return t[0][1]
 
 class Monitor1(base.CounterChannel):
     # pylint: disable=inconsistent-return-statements
     def read_value(self):
-        if charming.msmtsystem.msmtsystem:
-            t = charming.msmtsystem.msmtsystem.monitors_status()
+        if msmtsystem.msmtsystem:
+            t = msmtsystem.msmtsystem.monitors_status()
             return t[1][1]
 
 class Monitor2(base.CounterChannel):
     # pylint: disable=inconsistent-return-statements
     def read_value(self):
-        if charming.msmtsystem.msmtsystem:
-            t = charming.msmtsystem.msmtsystem.monitors_status()
+        if msmtsystem.msmtsystem:
+            t = msmtsystem.msmtsystem.monitors_status()
             return t[2][1]
 
 class Monitor3(base.CounterChannel):
     # pylint: disable=inconsistent-return-statements
     def read_value(self):
-        if charming.msmtsystem.msmtsystem:
-            t = charming.msmtsystem.msmtsystem.monitors_status()
+        if msmtsystem.msmtsystem:
+            t = msmtsystem.msmtsystem.monitors_status()
             return t[3][1]
 
 class HistogramBase(base.ImageChannel):
@@ -254,16 +254,16 @@ class HistogramBase(base.ImageChannel):
 
     def read_version(self):
         ver = super().read_version()
-        if not charming.msmtsystem.msmtsystem:
+        if not msmtsystem.msmtsystem:
             return ver
-        return ver + " "+charming.msmtsystem.msmtsystem.version
+        return ver + " "+msmtsystem.msmtsystem.version
 
 
 class Histogram(HistogramBase):
 
     def Histogram(self):
         if msmtsystem.msmtsystem:
-            self.histogram = charming.msmtsystem.msmtsystem.getHistogram()
+            self.histogram = msmtsystem.msmtsystem.getHistogram()
         else:
             return None
         return self.histogram
@@ -274,7 +274,7 @@ class HistogramRaw(HistogramBase):
     def Histogram(self):
         RAWHISTOGRAM = 1
         if msmtsystem.msmtsystem:
-            self.histogram = charming.msmtsystem.msmtsystem.getHistogram(RAWHISTOGRAM)
+            self.histogram = msmtsystem.msmtsystem.getHistogram(RAWHISTOGRAM)
         else:
             return None
         return self.histogram

@@ -14,7 +14,6 @@ from entangle import base
 from entangle.core import states, Attr
 from entangle.core.defs import  int32
 
-import entangle.device.charming as charming
 import entangle.device.charming.msmtsystem as msmtsystem
 
 
@@ -29,8 +28,8 @@ class Simulator(base.MLZDevice):
     }
     # pylint: disable=inconsistent-return-statements
     def read_NucleoRate(self):
-        if charming.msmtsystem.msmtsystem:
-            return charming.msmtsystem.msmtsystem.simulatorRate
+        if msmtsystem.msmtsystem:
+            return msmtsystem.msmtsystem.simulatorRate
     # pylint: disable=inconsistent-return-statements
     def write_NucleoRate(self, value):
         if msmtsystem.msmtsystem:

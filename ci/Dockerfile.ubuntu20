@@ -24,15 +24,13 @@ WORKDIR /
 RUN cd /${projectdir}/boost && rm -rf out
 RUN rm -rf /${projectdir}/out
 
-RUN cd /${projectdir} && git submodule update --init --recursive
 RUN cp /${projectdir}/distribution/ubuntu20/${projectdir}/libuv/CMakeLists.txt /${projectdir}/libuv/CMakeLists.txt
 # basically we do overwrite the libuv CMakeLists.txt so that libuv is not installed (not needed as we link statically to it
 
 RUN cd /${projectdir}  && \
-    chmod +x opencv_setup.sh && ./opencv_setup.sh && \
-    chmod +x buildboost.sh && ./buildboost.sh
+    chmod +x initrepository.sh && ./initrepository.sh
 
-RUN cd /${projectdir}/entangle-charming && mkdir out && cd out && cmake .. && make
+RUN cd /${projectdir}/entangle-charming  && rm -rf out && mkdir out && cd out && cmake .. && make
 
 ENV INSTALL_DEPS=libgtk-3-0
 ENV LINUX_FLAVOUR=ubuntu20

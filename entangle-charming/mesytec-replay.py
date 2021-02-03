@@ -18,8 +18,6 @@ from entangle.core import Cmd, listof, uint32
 
 from entangle.lib.loggers import FdLogMixin
 
-import entangle.device.charming as charming
-
 import entangle.device.charming.listmodereplay as listmodereplay
 # pylint: disable=wildcard-import
 from  entangle.device.charming.core import *
@@ -35,8 +33,8 @@ class DeviceConnection(FdLogMixin, base.MLZDevice):
         self.init_fd_log('Replay')
         fd = self.get_log_fd()
        # print("charm-replay.py:DeviceConnection.init("+str(fd)+")")
-        if charming.msmtsystem.msmtsystem is None:
-            charming.msmtsystem.msmtsystem = listmodereplay.ReplayList(fd)
+        if msmtsystem.msmtsystem is None:
+            msmtsystem.msmtsystem = listmodereplay.ReplayList(fd)
 
 
    # def __del__(self):
@@ -44,12 +42,12 @@ class DeviceConnection(FdLogMixin, base.MLZDevice):
 
     def read_version(self):
         ver = super().read_version()
-        if not charming.msmtsystem.msmtsystem:
+        if not msmtsystem.msmtsystem:
             return ver
-        return ver + " "+charming.msmtsystem.msmtsystem.version
+        return ver + " " + msmtsystem.msmtsystem.version
 
     def Log(self):
-        return charming.msmtsystem.msmtsystem.log()
+        return msmtsystem.msmtsystem.log()
 
 __ALL__ = ['RemoveFile', 'AddFile', 'FilesInDirectory']
 
@@ -162,26 +160,26 @@ class PlayList(CmdProcessor, base.StringIO):
         return (_state[0], msg)
 
     def RemoveFile(self, file):
-        if charming.msmtsystem.msmtsystem:
-            return charming.msmtsystem.msmtsystem.removefile(file)
+        if msmtsystem.msmtsystem:
+            return msmtsystem.msmtsystem.removefile(file)
         return False
 
     def AddFile(self, file):
         #print("\n\rAddFile("+str(file)+")")
-        if charming.msmtsystem.msmtsystem:
-            return charming.msmtsystem.msmtsystem.addfile(file)
+        if msmtsystem.msmtsystem:
+            return msmtsystem.msmtsystem.addfile(file)
         return False
 
     def FilesInDirectory(self, directory):
         #print('FilesInDirectory('+str(directory)+')')
-        if charming.msmtsystem.msmtsystem:
-            files = charming.msmtsystem.msmtsystem.files(directory)
+        if msmtsystem.msmtsystem:
+            files = msmtsystem.msmtsystem.files(directory)
             return files
         return False
 
 
     def read_version(self):
         ver = super().read_version()
-        if not charming.msmtsystem.msmtsystem:
+        if not msmtsystem.msmtsystem:
             return ver
-        return ver + "\r\n"+charming.msmtsystem.msmtsystem.version
+        return ver + "\r\n" + msmtsystem.msmtsystem.version
