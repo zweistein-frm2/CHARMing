@@ -4,13 +4,12 @@
 #include "Nicos_Install.hpp"
 
 CMRC_DECLARE(resources);
-std::string PROJECT_NAME("nicos-install-charming");
+std::string PROJECT_NAME("nicos-install-erwin_charming");
 
 std::vector<std::string> prerequisites = {
-    "pip3 install asyncio",
-    "pip3 install aiohttp",
-    "pip3 install websockets",
-    "pip3 install toml",
+	"pip3 install numpy --upgrade",
+    "pip3 install scikit-build",
+    "pip3 install opencv-python",
 
 };
 
@@ -21,13 +20,13 @@ int main(int argc, char* argv[])
         auto fs = cmrc::resources::get_filesystem();
         std::cout << "Installs charming support for Nicos." << std::endl;
         std::cout << "charming supports Mesytec and Charm detector hardware" << std::endl;
-        boost::filesystem::path  devicedir;
-        boost::filesystem::path  resdir;
-        entangle_setup(devicedir, resdir, prerequisites, argc, argv);
-        boost::filesystem::path dest = devicedir;
+        std::cout << "[nicos_root] [-y]" << std::endl;
+        boost::filesystem::path  nicosroot;
+        nicos_setup(nicosroot, prerequisites, argc, argv);
+        boost::filesystem::path dest = nicosroot;
 
+        dest /= "nicos_mlz";
 
-        dest /= "";
         try {
             boost::filesystem::create_directories(dest);
         }
@@ -37,28 +36,29 @@ int main(int argc, char* argv[])
 
         boost::filesystem::path relpath;
 
-        boost::function<void(std::string)> t = [&fs,&t,&dest,&resdir, &relpath](std::string root) {
+        boost::function<void(std::string)> t = [&fs,&t,&dest, &relpath](std::string root) {
+
             for (auto&& entry : fs.iterate_directory(root)) {
                 if (entry.is_directory()) {
 
                     boost::filesystem::path orig = relpath.string();
                     relpath /= entry.filename();
+                    relpath = relpath.generic_path();
                     t(relpath.string());
-                    relpath = orig.string();
+                    relpath = orig;
 
                 }
                 else {
                     auto file1 = fs.open(relpath.string() + "/" + entry.filename());
                     boost::filesystem::path fname(entry.filename().c_str());
+                    fname = fname.generic_path();
+                    boost::filesystem::path p = dest;
 
-                    boost::filesystem::path p = dest.string();
 
-                    if (boost::iequals(fname.extension().string(), ".res")) {
-                        p = resdir.string();
-                    }
 
 
                     p /= relpath.string();
+                    p = p.generic_path();
                     std::cout << p << std::endl;
 
                     try { boost::filesystem::create_directories(p); }
@@ -67,13 +67,20 @@ int main(int argc, char* argv[])
                     }
 
                     p.append(entry.filename());
-
+                    p = p.generic_path();
                     std::ofstream o(p.c_str(), std::ofstream::binary);
 
                     std::string logmsg = "written: ";
                     if (!o.write(file1.begin(), file1.size())) {
                         logmsg = "ERROR writing: ";
                     }
+#ifndef WIN32
+                    if (boost::iequals(p.extension().string(), ".sh")) {
+                        std::string cmdline = "chmod +x " + p.string();
+                        Zweistein::RunCmdline(cmdline);
+                        Zweistein::RunCmdline(p.string());
+                    }
+#endif
                     logmsg += p.string();
                     std::cout <<  logmsg << std::endl;
                     Zweistein::install_log.push_back(logmsg);
@@ -83,14 +90,14 @@ int main(int argc, char* argv[])
             }
         };
         t("");
-        if (devicedir.empty()) throw  std::runtime_error("Entangle device dir not found.");
+        if (nicosroot.empty()) throw  std::runtime_error("Nicos root dir not found.");
     }
     catch (boost::exception& e) {
         std::cout << boost::diagnostic_information(e) << std::endl;
         Zweistein::install_log.push_back(boost::diagnostic_information(e));
         std::cout << "Prerequisite Nicos NOT INSTALLED." << std::endl;
         std::cout << "Please install from: " << std::endl;
-        std::cout << "https://forge.frm2.tum.de/entangle/doc/entangle-master/build/" << std::endl;
+        std::cout << "https://nicos-controls.org/" << std::endl;
 
     }
 

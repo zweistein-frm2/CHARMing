@@ -284,7 +284,7 @@ namespace Zweistein {
 }
 
 
-void nicos_setup(boost::filesystem::path& devicedir, boost::filesystem::path& resdir, std::vector<std::string>& prerequisites, int argc, char* argv[]) {
+void nicos_setup(boost::filesystem::path& nicos_root, std::vector<std::string>& prerequisites, int argc, char* argv[]) {
 
     std::string PYTHON = "python";
 
@@ -299,24 +299,42 @@ void nicos_setup(boost::filesystem::path& devicedir, boost::filesystem::path& re
     }
     PYTHON = "python3";
 #endif
-    bool b_yes = false;
-    for (int j = 0; j < argc; j++) {
-        if (boost::equals(argv[j], "-y")) b_yes = true;
+
+     bool b_yes = false;
+    int iyes = -1;
+    for (int j = 1; j < argc; j++) {
+        if (boost::equals(argv[j], "-y")) {
+            b_yes = true;
+            iyes = j;
+        }
+        else {
+            nicos_root = argv[j];
+        }
     }
+
+    if (argc > (b_yes?3:2)) {
+        std::cout << "too many arguments." << std::endl;
+        exit(-1);
+    }
+
+
+
 
     std::string pythoncmd = R"(import sys;from distutils.sysconfig import get_python_lib;print(get_python_lib());print('\n'.join(sys.path)))";
     std::string cmdline = PYTHON + " -c " + "\"" + pythoncmd + "\"";
     std::vector<std::string> pythonsyspath = Zweistein::RunCmdline(cmdline);
-    boost::filesystem::path nicos_root;
-#ifdef _WIN32
-    nicos_root = "C:\\Users\\alanghof\\source\\repos\\nicos";
+    if (!nicos_root.empty()) {
+        pythonsyspath.insert(pythonsyspath.begin(),nicos_root.string());
+    }
+#ifndef WIN32
+    pythonsyspath.insert(pythonsyspath.begin(), "/opt/nicos");
 #endif
     int ipath = 0;
     bool dobreak = false;
     // remember : with syspath.py we loaded python library path first and syspath(s) second
     for (auto& psyspath : pythonsyspath) {
-        std::string possibleName[2] = { "nicos","nicos-" };
-        for (int i = 0; i < 2; i++) {
+        std::string possibleName[1] = { "nicos"};
+        for (int i = 0; i < 1; i++) {
             boost::filesystem::path p(psyspath);
             if (!boost::filesystem::is_directory(p)) continue;
             for (auto& entry : boost::make_iterator_range(boost::filesystem::directory_iterator(p), {})) {
@@ -325,15 +343,10 @@ void nicos_setup(boost::filesystem::path& devicedir, boost::filesystem::path& re
 
                 if (boost::algorithm::istarts_with(f, possibleName[i])) {
                     nicos_root = psyspath;
-                    nicos_root /= f;
-                    if (boost::contains(f, possibleName[1])) {
-                        nicos_root /= "entangle"; //only for entangle-5.12.33.egg
-                    }
-
-                    boost::filesystem::path pdevice = nicos_root;
-                    pdevice /= "device";
-                    if (boost::filesystem::exists(pdevice) && boost::filesystem::is_directory(pdevice)) {
-                        std::cout << "Entangle install root found at: " << nicos_root << std::endl;
+                    boost::filesystem::path conf = nicos_root;
+                    conf.append("nicos.conf");
+                    if (boost::filesystem::exists(conf) && !boost::filesystem::is_directory(conf)) {
+                        std::cout << "Nicos install root found at: " << nicos_root << std::endl;
                         dobreak = true;
                         break;
                     }
@@ -345,33 +358,20 @@ void nicos_setup(boost::filesystem::path& devicedir, boost::filesystem::path& re
         if (dobreak) break;
     }
 
-    if (argc > 1) {
-        for (int j = 0; j < argc; j++) {
-            if (!boost::equals(argv[j], "-y")) {
-                nicos_root = argv[j];
-                try { boost::filesystem::create_directories(nicos_root); }
-                catch (std::exception& ex) {
-                    std::cout << ex.what() << std::endl;
-                }
-            }
-        }
-    }
 
-
-    devicedir = nicos_root;
-    devicedir /= "device";
-    resdir = Zweistein::UserIniDir();
+    boost::filesystem::path nicosconf = nicos_root;
+    nicosconf.append("nicos.conf");
 
     try {
-        auto data = toml::parse("/etc/entangle/entangle.conf");
-        const auto& rdir = toml::find<std::string>(data, "entangle", "resdir");
+        auto data = toml::parse(nicosconf.string());
+        const auto& rdir = toml::find<std::string>(data, "nicos", "pid_path");
         if (!rdir.empty()) {
-            resdir = rdir;
+            std::cout<< rdir << std::endl;
         }
         try {
-            const auto& devdir = toml::find<std::string>(data, "devicedirs", "system");
+            const auto& devdir = toml::find<std::string>(data, "nicos", "logging_path");
             if (!devdir.empty()) {
-                devicedir = devdir;
+                std::cout << devdir << std::endl;
             }
         }
         catch(std::exception& ex) {}

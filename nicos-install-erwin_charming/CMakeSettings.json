@@ -1,0 +1,48 @@
+﻿{
+  "configurations": [
+    {
+      "name": "x64-Debug",
+      "generator": "Ninja",
+      "configurationType": "Debug",
+      "inheritEnvironments": [ "msvc_x64_x64" ],
+      "buildRoot": "${projectDir}\\out\\build\\${name}",
+      "installRoot": "${projectDir}\\out\\install\\${name}",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": ""
+    },
+    {
+      "name": "ubuntu18",
+      "generator": "Unix Makefiles",
+      "configurationType": "Release",
+      "cmakeExecutable": "/usr/bin/cmake",
+      "remoteCopySourcesExclusionList": [ ".vs", "out", "ENTANGLE_FILES", "REPOSITORY_INIT_OK" ],
+      "remoteCopyExcludeDirectories": [ "$HOME/.vs/${projectDirName}/${workspaceHash}/src/boost/out", "$HOME/.vs/${projectDirName}/${workspaceHash}/src/boost/bin.v2" ],
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "inheritEnvironments": [ "linux_x64" ],
+      "remoteMachineName": "-1871243087;localhost (username=root, port=5000, authentication=Password)",
+      "remoteCMakeListsRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/src",
+      "remoteBuildRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/build/${name}",
+      "remoteInstallRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/install/${name}",
+      "remoteCopySources": true,
+      "rsyncCommandArgs": "-t --delete --exclude 'boost/bin.v2' --exclude 'boost/out'",
+      "remoteCopyBuildOutput": false,
+      "remoteCopySourcesMethod": "rsync",
+      "addressSanitizerRuntimeFlags": "detect_leaks=0",
+      "variables": [
+        {
+          "name": "ENTANGLE_FILES_DO_NOT_COPY",
+          "value": "True",
+          "type": "STRING"
+        },
+        {
+          "name": "CHARMING_DIR",
+          "value": "/root/.vs/CHARMing/8b1e3cbe-1b7c-463b-a34c-4df2092ae58b/src",
+          "type": "PATH"
+        }
+      ]
+    }
+  ]
+}

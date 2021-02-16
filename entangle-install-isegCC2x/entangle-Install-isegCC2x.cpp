@@ -42,6 +42,7 @@ int main(int argc, char* argv[])
 
                     boost::filesystem::path orig = relpath.string();
                     relpath /= entry.filename();
+					relpath = relpath.generic_path();
                     t(relpath.string());
                     relpath = orig.string();
 
@@ -58,6 +59,7 @@ int main(int argc, char* argv[])
 
 
                     p /= relpath.string();
+					p = p.generic_path();
                     std::cout << p << std::endl;
 
                     try { boost::filesystem::create_directories(p); }

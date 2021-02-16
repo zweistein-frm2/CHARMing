@@ -35,8 +35,7 @@ class CmdProcessor(object):
             itr = int(istr)
 
         roi = self.lastcmd[len(tok[0])+1:]
-        if roi:
-            self.write_roi(roi,itr)
+        self.write_roi(roi,itr)
         return len(msg)
 
     def ReadLine(self):

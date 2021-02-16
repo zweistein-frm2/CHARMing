@@ -20,3 +20,15 @@ by default this will install a globally available "entangle-server" command. Nee
 
 it is possible to define complex transition scenarios,  for example ramp up channel 1 to 100V, wait until reached, then ramp up group Anodes (for example channels 4,5,7) to 50V. See Alanspecs_11Sept2020.pdf . Some examples are given in the .res files in the CC2xlib/example subdirectory.
 The IntelligentPowersupply features can be controlled via its StringIO interface 
+
+## half manual installation (also for Windows)
+
+1. Identify [entangle] directory.  This is the directory with a device subdirectory.
+2. Python3 is needed and must be in the path.
+3. Run entangle-Install-isegCC2x [entangle]           (run .exe on Windows)
+
+## fully manual installation:
+
+1. Copy all files in the entangle/device/iseg  subdirectory of your entangle installation
+2. Install needed pip3 packages (asyncio, aiohttp, websockets, toml)
+3. Copy .res from CC2xlib/example  to your .res directory, edit parameters and then launch entangle server

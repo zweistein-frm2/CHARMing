@@ -42,6 +42,7 @@ int main(int argc, char* argv[])
                dest = resdir;
            }
            try {
+			   dest = dest.generic_path();
                boost::filesystem::create_directories(dest);
                if (!boost::equals(dest.string(), lastdir)) {
                    std::cout << "[" << dest << "]" << std::endl;
@@ -55,6 +56,7 @@ int main(int argc, char* argv[])
            std::cout << entry.filename() << '\n';
 
            dest.append(entry.filename());
+		   dest = dest.generic_path();
            std::string tmp = dest.string();
            //if (!boost::filesystem::exists(tmp)) {
            {
