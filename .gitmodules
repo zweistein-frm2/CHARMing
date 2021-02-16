@@ -39,3 +39,6 @@
 [submodule "nicos-install-erwin_charming/erwin_charming"]
 	path = nicos-install-erwin_charming/erwin_charming
 	url = https://github.com/zweistein22/erwin_charming.git
+[submodule "nicos-install-erwin_charming/toml11"]
+	path = nicos-install-erwin_charming/toml11
+	url = https://github.com/ToruNiina/toml11.git
