@@ -36,3 +36,6 @@
 [submodule "charm/cvui"]
 	path = charm/cvui
 	url = https://github.com/Dovyski/cvui.git
+[submodule "nicos-install-erwin_charming/erwin_charming"]
+	path = nicos-install-erwin_charming/erwin_charming
+	url = https://github.com/zweistein22/erwin_charming.git
