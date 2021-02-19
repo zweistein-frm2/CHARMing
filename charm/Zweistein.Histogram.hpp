@@ -94,6 +94,14 @@ namespace Zweistein {
 
         }
 
+        void clear() {
+            LOG_INFO << "Histogram::clear()" << std::endl;
+            cv::Size dsize = histogram.size();
+            resize(dsize.height, dsize.width);
+            for (auto& rd : roidata) {
+                rd.count = 0;
+            }
+        }
 
 
         std::string getRoi(int index) {

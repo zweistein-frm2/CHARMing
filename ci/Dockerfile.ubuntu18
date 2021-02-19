@@ -71,6 +71,9 @@ RUN mkdir package && cd out && make package && mv *.deb /package
 RUN apt-get install -y ftp
 RUN cd /${projectdir}/distribution && chmod +x packageout.sh  && chmod +x ftpout.sh  && ./packageout.sh
 
+RUN cd /${projectdir}/nicos-install-erwin_charming  && chmod +x ftpout.sh && rm -rf out && mkdir out && cd out && cmake .. && make
+RUN cd /${projectdir}/nicos-install-erwin_charming/out && ../ftpout.sh nicos-install-erwin_charming x86_64
+
 
 
 

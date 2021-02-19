@@ -106,14 +106,14 @@ class CmdProcessor(object):
 
 
     def ReadLine(self):
-        print('CmdProcessor.ReadLine() lastcmd == ' + self.lastcmd)
+        #print('CmdProcessor.ReadLine() lastcmd == ' + self.lastcmd)
         if not self.lastcmd:
             return ''
         if self.lastcmd == '?':
             return self._state[1]
 
         if self.funcstr:
-            print('CmdProcessor.ReadLine() funcstr == ' + self.funcstr)
+            #print('CmdProcessor.ReadLine() funcstr == ' + self.funcstr)
             try:
                 value = eval(self.funcstr)
                 print(value)
@@ -136,6 +136,7 @@ class PlayList(CmdProcessor, base.StringIO):
     }
 
     def init(self):
+        print("PlayList::init")
         files = self.FilesInDirectory("~")
         for f in files:
             self.AddFile(f)
@@ -162,20 +163,20 @@ class PlayList(CmdProcessor, base.StringIO):
     def RemoveFile(self, file):
         if msmtsystem.msmtsystem:
             return msmtsystem.msmtsystem.removefile(file)
-        return False
+        return []
 
     def AddFile(self, file):
         #print("\n\rAddFile("+str(file)+")")
         if msmtsystem.msmtsystem:
             return msmtsystem.msmtsystem.addfile(file)
-        return False
+        return []
 
     def FilesInDirectory(self, directory):
         #print('FilesInDirectory('+str(directory)+')')
         if msmtsystem.msmtsystem:
             files = msmtsystem.msmtsystem.files(directory)
             return files
-        return False
+        return []
 
 
     def read_version(self):

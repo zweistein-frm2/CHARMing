@@ -32,6 +32,8 @@ struct StartMsmtParameters {
     std::list<std::string> playlist;
     boost::mutex playlistGuard;
     boost::atomic<int> monitorbusy;
+    boost::atomic<unsigned long long> CurrentCounts;
+    boost::atomic<double> SecondsAcquiring;
 };
 
 void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, boost::shared_ptr <StartMsmtParameters> ptrStartParameters ) {
@@ -178,10 +180,13 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
                 if (maxcount != 0 && currcount > maxcount) {
                     LOG_INFO << "stopped by counter maxval:" << currcount << ">max:" << maxcount << std::endl;
                     sendstop = true;
+                    //ptrStartParameters->MaxCount = 0; // we disarm it
                 }
                 if (secs >= Maxsecs && Maxsecs != boost::chrono::duration<double>::zero()) {
                     LOG_INFO << "stopped by timer:" << secs << "> max:" << Maxsecs << std::endl;
                     sendstop = true;
+                    //ptrStartParameters->DurationSeconds = 0;
+
                 }
 
                 if (sendstop) {
@@ -205,6 +210,8 @@ struct ReplayList {
 
         boost::shared_ptr<StartMsmtParameters> ptrStartParameters;
         boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1;
+       
+
         ReplayList(long loghandle):ptrStartParameters(boost::shared_ptr < StartMsmtParameters>(new StartMsmtParameters())),
             ptrmsmtsystem1(boost::shared_ptr < Mesytec::MesytecSystem>(new Mesytec::MesytecSystem()))
         {
@@ -229,6 +236,9 @@ struct ReplayList {
         }
 
         void stopafter(uint64 counts, double seconds) {
+            ptrmsmtsystem1->evdata.evntcount = 0;
+            auto now = boost::chrono::system_clock::now();
+            ptrmsmtsystem1->setStart(now);
             ptrStartParameters->MaxCount = counts;
             ptrStartParameters->DurationSeconds = seconds;
             LOG_INFO << "ReplayList.stopafter(" << counts << ", " << seconds << ")" << std::endl;
@@ -256,6 +266,15 @@ struct ReplayList {
                 l2.append(t);
             }
             return l2;
+        }
+
+        void clear_monitor(int i) {
+
+            if (i < 0 || i >= COUNTER_MONITOR_COUNT) {
+                LOG_INFO << "clear_monitor: i (" << i << ") outside range." << std::endl;
+                return;
+            }
+            CounterMonitor[i] = 0;
         }
 
         boost::python::tuple status() {
@@ -407,6 +426,18 @@ struct ReplayList {
             ss << PROJECT_NAME << " : " << git_latest_tag << "." << GIT_NUMBER_OF_COMMITS_SINCE << "."<< GIT_REV <<"_"<< GIT_DATE;
             return ss.str();
         }
+
+        void clear_counter() {
+            LOG_INFO << "ReplayList::clear_counter() " << std::endl;
+            ptrmsmtsystem1->evdata.evntcount = 0;
+        }
+
+        void clear_timer() {
+            LOG_INFO << "ReplayList::clear_timer() " << std::endl;
+            auto now = boost::chrono::system_clock::now();
+            ptrmsmtsystem1->setStart(now);
+        }
+
         void start() {
             using namespace magic_enum::ostream_operators;
             // we have to start from beginning of playlist
@@ -480,7 +511,9 @@ BOOST_PYTHON_MODULE(listmodereplay)
             .def("getRoiData", &Histogram::getRoiData)
             .def("setRoi", &Histogram::setRoi)
             .def("getRoi", &Histogram::getRoi)
+            .def("clear", &Histogram::clear)
             .add_property("Size", &Histogram::getSize)
+            .add_property("nextRAW", &Histogram::get_nextRAW, &Histogram::set_nextRAW)
             ;
         class_< ReplayList>("ReplayList",init<long>())
             .add_property("speedmultiplier", &ReplayList::get_speedmultiplier, &ReplayList::set_speedmultiplier)
@@ -488,11 +521,14 @@ BOOST_PYTHON_MODULE(listmodereplay)
             .def("addfile", &ReplayList::addfile)
             .def("removefile", &ReplayList::removefile)
             .def("files", &ReplayList::files)
+            .def("clear_counter", &ReplayList::clear_counter)
+            .def("clear_timer", &ReplayList::clear_timer)
             .def("stopafter", &ReplayList::stopafter)
             .def("start", &ReplayList::start)
             .def("resume", &ReplayList::resume)
             .def("status", &ReplayList::status)
             .def("monitors_status", &ReplayList::monitors_status)
+            .def("clear_monitor", &ReplayList::clear_monitor)
             .def("log", &ReplayList::log)
             .def("stop", &ReplayList::stop)
             .def("getHistogram", &ReplayList::getHistogram, ReplayList_overloads(args("index") = 0)[return_internal_reference<1, with_custodian_and_ward_postcall<1, 0>>()])

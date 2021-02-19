@@ -390,6 +390,16 @@ void nicos_setup(boost::filesystem::path& nicos_root, std::vector<std::string>& 
         std::cin >> c;
         if (c != 'y') exit(-1);
         std::cout << std::endl;
+
+#ifndef WIN32
+        std::string cmdline = "chmod go+rx " + nicos_root.string();
+        std::vector<std::string> result = Zweistein::RunCmdline(cmdline);
+        for (auto& a : result) if (a.find("stderr")) {
+            std::cout << a << std::endl;
+        }
+#endif
+
+
     }
 
 

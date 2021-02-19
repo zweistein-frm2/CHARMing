@@ -41,6 +41,10 @@ class MeasureCounts(base.CounterChannel):
             return (_state[0], t[3])
 
 
+    def Clear(self):
+        print("Core.MeasureCounts.Clear")
+        if msmtsystem.msmtsystem:
+            msmtsystem.msmtsystem.clear_counter()
 
     def Start(self):
         if msmtsystem.msmtsystem:
@@ -102,6 +106,11 @@ class MeasureTime(base.TimerChannel):
         if msmtsystem.msmtsystem:
             msmtsystem.msmtsystem.off()
 
+    def Clear(self):
+        print("Core.MeasureTime.Clear")
+        if msmtsystem.msmtsystem:
+            msmtsystem.msmtsystem.clear_timer()
+
     def Start(self):
         if msmtsystem.msmtsystem:
             msmtsystem.msmtsystem.start()
@@ -144,6 +153,9 @@ class Monitor0(base.CounterChannel):
         if msmtsystem.msmtsystem:
             t = msmtsystem.msmtsystem.monitors_status()
             return t[0][1]
+    def Clear(self):
+        if msmtsystem.msmtsystem:
+            msmtsystem.msmtsystem.clear_monitor(0)
 
 class Monitor1(base.CounterChannel):
     # pylint: disable=inconsistent-return-statements
@@ -151,6 +163,9 @@ class Monitor1(base.CounterChannel):
         if msmtsystem.msmtsystem:
             t = msmtsystem.msmtsystem.monitors_status()
             return t[1][1]
+    def Clear(self):
+        if msmtsystem.msmtsystem:
+            msmtsystem.msmtsystem.clear_monitor(1)
 
 class Monitor2(base.CounterChannel):
     # pylint: disable=inconsistent-return-statements
@@ -158,6 +173,9 @@ class Monitor2(base.CounterChannel):
         if msmtsystem.msmtsystem:
             t = msmtsystem.msmtsystem.monitors_status()
             return t[2][1]
+    def Clear(self):
+        if msmtsystem.msmtsystem:
+            msmtsystem.msmtsystem.clear_monitor(2)
 
 class Monitor3(base.CounterChannel):
     # pylint: disable=inconsistent-return-statements
@@ -165,6 +183,9 @@ class Monitor3(base.CounterChannel):
         if msmtsystem.msmtsystem:
             t = msmtsystem.msmtsystem.monitors_status()
             return t[3][1]
+    def Clear(self):
+        if msmtsystem.msmtsystem:
+            msmtsystem.msmtsystem.clear_monitor(3)
 
 class HistogramBase(base.ImageChannel):
 
@@ -199,7 +220,8 @@ class HistogramBase(base.ImageChannel):
         return 'cts'
 
     def Clear(self):
-        return
+         return self.Histogram().clear()
+        
 
     def read_detectorSize(self):
         return self.Histogram().Size

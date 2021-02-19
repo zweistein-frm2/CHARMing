@@ -81,6 +81,17 @@ public:
         }
     }
 
+    void clear_counter() {
+        LOG_INFO << "NeutronMeasurement::clear_counter() " << std::endl;
+        ptrmsmtsystem1->evdata.evntcount = 0;
+    }
+
+    void clear_timer() {
+        LOG_INFO << "NeutronMeasurement::clear_timer() " << std::endl;
+        auto now = boost::chrono::system_clock::now();
+        ptrmsmtsystem1->setStart(now);
+    }
+
     void stopafter(uint64 counts, double seconds) {
         ptrStartParameters->MaxCount = counts;
         ptrStartParameters->DurationSeconds = seconds;
@@ -102,6 +113,16 @@ public:
         }
         return l;
     }
+
+    void clear_monitor(int i) {
+
+        if (i < 0 || i >= COUNTER_MONITOR_COUNT) {
+            LOG_INFO << "clear_monitor: i (" << i << ") outside range." << std::endl;
+            return;
+        }
+        CounterMonitor[i] = 0;
+    }
+
     boost::python::list monitors_status() {
         boost::python::list l2;
         for (int i = 0; i < COUNTER_MONITOR_COUNT; i++) {

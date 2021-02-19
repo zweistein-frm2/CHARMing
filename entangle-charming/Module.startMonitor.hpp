@@ -149,12 +149,13 @@ void startMonitor(boost::shared_ptr < MSMTSYSTEM> ptrmsmtsystem1, boost::shared_
                 if (maxcount != 0 && currcount > maxcount) {
                     LOG_INFO << "stopped by counter maxval:" << currcount << ">max:" << maxcount << std::endl;
                     sendstop = true;
+                    //ptrStartParameters->MaxCount = 0;
                 }
                 if (secs >= Maxsecs && Maxsecs != boost::chrono::duration<double>::zero()) {
 
                     LOG_INFO << "stopped by timer:" << secs << "> max:" << Maxsecs << std::endl;
-
                     sendstop = true;
+                    //ptrStartParameters->DurationSeconds = 0;
 
                 }
 
