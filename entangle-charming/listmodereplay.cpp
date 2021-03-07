@@ -445,7 +445,6 @@ struct ReplayList {
             ptrmsmtsystem1->setStart(now);
             Mesytec::listmode::action ac = Mesytec::listmode::whatnext;
             LOG_INFO << "ReplayList::start() " << ac << std::endl;
-            Mesytec::listmode::action action= Mesytec::listmode::whatnext;
 
             // so we stop an angoing reading.
             if (ptrStartParameters->monitorbusy) {

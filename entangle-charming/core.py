@@ -220,6 +220,7 @@ class HistogramBase(base.ImageChannel):
         return 'cts'
 
     def Clear(self):
+         self.count = 0
          return self.Histogram().clear()
         
 
