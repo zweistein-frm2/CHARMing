@@ -133,11 +133,26 @@ public:
         return l2;
     }
     boost::python::tuple status() {
-        boost::chrono::duration<double> secs = boost::chrono::system_clock::now() - ptrmsmtsystem1->getStart();
+        boost::chrono::duration<double> secs;
+        boost::chrono::system_clock::time_point tps = ptrmsmtsystem1->getStart();
         long long count = ptrmsmtsystem1->evdata.evntcount;
         unsigned short tmp = ptrmsmtsystem1->data.last_deviceStatusdeviceId;
         unsigned char devstatus = Mcpd8::DataPacket::getStatus(tmp);
         std::string msg = Mcpd8::DataPacket::deviceStatus(devstatus);
+
+
+        bool running = ptrmsmtsystem1->daq_running;
+
+        if (running) {
+            //LOG_INFO << "Running" << std::endl;
+                secs = boost::chrono::system_clock::now() - tps ;
+        }
+        else {
+            boost::chrono::system_clock::time_point tpe = ptrmsmtsystem1->stopped;
+            secs = tpe - tps;
+        }
+
+
         if (!cmderror.empty()) {
             return boost::python::make_tuple(count, secs.count(), devstatus, msg,cmderror);
         }

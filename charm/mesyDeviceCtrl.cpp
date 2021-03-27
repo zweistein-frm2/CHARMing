@@ -252,6 +252,8 @@ int main(int argc, char* argv[])
 						try {
 							boost::function<void(Mcpd8::DataPacket&)> abfunc = boost::bind(&Mesytec::MesytecSystem::analyzebuffer, ref(ptrmsmtsystem1), boost::placeholders::_1);
 							boost::shared_ptr <Mesytec::listmode::Read> ptrRead = boost::shared_ptr < Mesytec::listmode::Read>(new Mesytec::listmode::Read(abfunc, ptrmsmtsystem1->data, ptrmsmtsystem1->deviceparam));
+							auto now = boost::chrono::system_clock::now();
+							ptrmsmtsystem1->setStart(now);
 							ptrRead->file(fname, *ptr_ctx);
 							while (ptrmsmtsystem1->evdata.evntqueue.read_available()); // wait unitl queue consumed
 							// pointer to obj needed otherwise exceptions are not propagated properly
@@ -361,6 +363,41 @@ int main(int argc, char* argv[])
 			worker_threads.create_thread([&ptrmsmtsystem1] {Zweistein::populateHistograms(*ptr_ctx, ptrmsmtsystem1); });
 			worker_threads.create_thread([&ptrmsmtsystem1] {Zweistein::displayHistogram(*ptr_ctx, ptrmsmtsystem1); });
 			// nothing to do really,
+
+
+			boost::function<void()> progressmonitor = [&ptrmsmtsystem1]() {
+					int l = 0;
+					char clessidra[8] = { '|', '/' , '-', '\\', '|', '/', '-', '\\' };
+					long long lastcount = 0;
+					boost::chrono::nanoseconds elap_ns_last = boost::chrono::nanoseconds(0);
+					while(!ptr_ctx->stopped()) {
+						boost::this_thread::sleep_for(boost::chrono::milliseconds(300));
+						boost::chrono::system_clock::time_point tps(ptrmsmtsystem1->getStart());
+						boost::chrono::nanoseconds elap_ns = ptrmsmtsystem1->data.elapsed;
+						boost::chrono::duration<double> sec = elap_ns- elap_ns_last;
+						boost::chrono::duration<double> total_running = elap_ns;
+
+						boost::chrono::nanoseconds real_elap_ns = boost::chrono::duration_cast<boost::chrono::nanoseconds>(boost::chrono::system_clock::now() - tps);
+
+						double replayspeedmultiplier = (real_elap_ns.count() != 0) ? ((double)elap_ns.count())/((double)real_elap_ns.count()) : 1;
+						long long currentcount = ptrmsmtsystem1->evdata.evntcount;
+						double evtspersecond = sec.count() != 0 ? (double)(currentcount - lastcount) / sec.count() : 0;
+						{
+							boost::mutex::scoped_lock lock(coutGuard);
+							std::cout << "\r" << clessidra[l++ % 8] << " " << std::setprecision(0) << std::fixed << evtspersecond <<
+								" Events/s, (" << Zweistein::PrettyBytes((size_t)(evtspersecond * sizeof(Mesy::Mpsd8Event))) <<
+								 "/s)\t" << Mcpd8::DataPacket::deviceStatus(ptrmsmtsystem1->data.last_deviceStatusdeviceId) <<
+								" elapsed:" << total_running << " Replay speed Multiplier: "<< std::setprecision(1) << std::fixed << replayspeedmultiplier << "      ";// << std::endl;
+#ifndef _WIN32
+							std::cout << std::flush;
+#endif
+						}
+						lastcount = currentcount;
+						elap_ns_last = elap_ns;
+					}
+			};
+			auto pt2 = new boost::thread(boost::bind(progressmonitor));
+			worker_threads.add_thread(pt2);
 			while (!ptr_ctx->stopped()) {
 				boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
 				ptr_ctx->run_one();

@@ -180,12 +180,12 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
                 if (maxcount != 0 && currcount > maxcount) {
                     LOG_INFO << "stopped by counter maxval:" << currcount << ">max:" << maxcount << std::endl;
                     sendstop = true;
-                    //ptrStartParameters->MaxCount = 0; // we disarm it
+                    ptrStartParameters->MaxCount = 0; // we disarm it
                 }
                 if (secs >= Maxsecs && Maxsecs != boost::chrono::duration<double>::zero()) {
                     LOG_INFO << "stopped by timer:" << secs << "> max:" << Maxsecs << std::endl;
                     sendstop = true;
-                    //ptrStartParameters->DurationSeconds = 0;
+                    ptrStartParameters->DurationSeconds = 0; // we disarm it
 
                 }
 
@@ -210,7 +210,7 @@ struct ReplayList {
 
         boost::shared_ptr<StartMsmtParameters> ptrStartParameters;
         boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1;
-       
+
 
         ReplayList(long loghandle):ptrStartParameters(boost::shared_ptr < StartMsmtParameters>(new StartMsmtParameters())),
             ptrmsmtsystem1(boost::shared_ptr < Mesytec::MesytecSystem>(new Mesytec::MesytecSystem()))
@@ -280,19 +280,22 @@ struct ReplayList {
         boost::python::tuple status() {
 
             boost::chrono::system_clock::time_point tps=ptrmsmtsystem1->getStart();
-            boost::chrono::duration<double> secs = boost::chrono::system_clock::now() - tps;
+
             long long count = ptrmsmtsystem1->evdata.evntcount;
             unsigned short tmp = ptrmsmtsystem1->data.last_deviceStatusdeviceId;
             bool running = ptrmsmtsystem1->daq_running;
+
             if (running) {
                 //LOG_INFO << "Running" << std::endl;
                 tmp |= Mcpd8::Status::DAQ_Running;
             }
+            boost::chrono::nanoseconds elap_ns = ptrmsmtsystem1->data.elapsed;
+            boost::chrono::duration<double> sec = elap_ns;
             unsigned char devstatus = Mcpd8::DataPacket::getStatus(tmp);
             std::string msg = Mcpd8::DataPacket::deviceStatus(devstatus);
             //LOG_INFO << "started:"<<tps<<", now="<< boost::chrono::system_clock::now()<< ":"<<secs<<std::endl;
             //LOG_INFO <<"count="<<count<<", elapsed="<<secs << ",devstatus=" << (int)devstatus << ", " << msg<<std::endl;
-            return boost::python::make_tuple(count, secs.count(), devstatus,msg);
+            return boost::python::make_tuple(count, sec.count(), devstatus,msg);
 
         }
         std::string LISTMODEEXTENSION = ".mdat";
@@ -462,9 +465,29 @@ struct ReplayList {
             Mesytec::listmode::whatnext = Mesytec::listmode::start_reading;
         }
         void stop() {
+            boost::chrono::system_clock::time_point tpstarted = ptrmsmtsystem1->getStart();
+            boost::chrono::duration<double> elapsed = boost::chrono::system_clock::now() - tpstarted;
+            //std::cout << elapsed << std::endl;
+
+            if ( elapsed.count() <= 0.5) {
+                // strange NICOS problem, NICOS sends stop() directly after start ( I suspect threading order bug there)
+              //  LOG_INFO << "SKIPPED : ReplayList::stop() ,  stop must be send not before 0.5 seconds after start." << std::endl;
+              //  return;
+             // no longer neeed, change in : sans1_charming/devices/detector.py
+             //                  by implementing doStart() adn doStop() probably threading order changed and all is working fine
+             //   class CharmTimerChannel(TimerChannel) :
+             //   def doStart(self) :
+             //       super().doStart()
+
+             //       def doStop(self) :
+             //       super.doStop()
+
+
+            }
             LOG_INFO << "ReplayList::stop()" << std::endl;
             Mesytec::listmode::whatnext = Mesytec::listmode::wait_reading;
             ptrmsmtsystem1->daq_running = false;
+
         }
         void resume() {
             LOG_INFO << "ReplayList::resume()" << std::endl;

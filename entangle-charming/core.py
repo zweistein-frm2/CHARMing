@@ -221,8 +221,9 @@ class HistogramBase(base.ImageChannel):
 
     def Clear(self):
          self.count = 0
-         return self.Histogram().clear()
-        
+         self.selectedRoi = 0
+         self.Histogram().clear()
+         self.Histogram().update(self.mat)
 
     def read_detectorSize(self):
         return self.Histogram().Size
@@ -273,7 +274,15 @@ class HistogramBase(base.ImageChannel):
         #print(t[0][self.selectedRoi]);  #should be pair wkt/counts
         self.count = t[0][self.selectedRoi][1]
         #t[2] is list of Monitors
-        return self.mat.flatten()
+        rv = self.mat.flatten()
+        #maxn = 500000
+        #if rv.size > maxn:
+        #    print("Size of the array: ", rv.size)
+        #    print("truncated to : ", maxn)
+        #    return rv[:maxn]
+
+        return rv
+
 
     def read_version(self):
         ver = super().read_version()

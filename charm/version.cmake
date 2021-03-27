@@ -23,10 +23,18 @@ if ("${GIT_REV}" STREQUAL "")
     set(GIT_DATE "")
     set(GIT_PATCH "")
 else()
+if(WIN32)
     execute_process(
+        COMMAND  git diff --quiet --exit-code
+         WORKING_DIRECTORY ${repository}
+        OUTPUT_VARIABLE GIT_DIFF)
+else()
+ execute_process(
         COMMAND bash -c "git diff --quiet --exit-code || echo +"
          WORKING_DIRECTORY ${repository}
         OUTPUT_VARIABLE GIT_DIFF)
+endif()
+
     execute_process(
         COMMAND git describe --exact-match --tags
          WORKING_DIRECTORY ${repository}

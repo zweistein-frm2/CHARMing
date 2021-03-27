@@ -43,7 +43,20 @@
 
 namespace Zweistein {
 	void displayHistogram(boost::asio::io_service& io_service, boost::shared_ptr<Zweistein::XYDetectorSystem> pmsmtsystem1) {
-		boost::this_thread::sleep_for(boost::chrono::milliseconds(200));
+		using namespace magic_enum::bitwise_operators; // out-of-the-box bitwise operators for enums.
+		int iloop = 20;
+		int waiteach = 300;
+		int il = 0;
+		for (il = 0; il < iloop; il++) {
+			boost::this_thread::sleep_for(boost::chrono::milliseconds(waiteach));
+			histogram_setup_status hss = Zweistein::setup_status;
+			if (magic_enum::enum_integer(hss & histogram_setup_status::done)) break;
+		}
+
+		if (il >= iloop) {
+			LOG_ERROR << "displayHistogram() : histogram_setup_status ! done after "<< il * waiteach << "milliseconds"  << std::endl;
+
+		}
 
 		std::string classname = typeid(*pmsmtsystem1).name();
 #ifdef __GNUC__
@@ -140,7 +153,9 @@ namespace Zweistein {
 					bbinningwindow = true;
 				}
 				cvui::init(windows[0]);
-				if(bbinningwindow) cvui::watch(windows[1]);
+				if (bbinningwindow) {
+					cvui::watch(windows[1]);
+				}
 
 			}
 
@@ -176,7 +191,7 @@ namespace Zweistein {
 				}
 				if (!binnedimage.empty() &&binnedimage.rows>1) {
 
-					if (bshow) {
+					if (bshow ) {
 						cvui::context(windows[1]);
 						if(!bbinningwindow) {
 							cv::namedWindow(windows[1]);

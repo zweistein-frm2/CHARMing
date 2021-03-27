@@ -72,6 +72,8 @@ message(STATUS "BOOST_PREFIX=${BOOST_PREFIX}")
 set(Charm_DIR ${parentdir}/charm )
 set(repository ${Charm_DIR})
 
+include(${repository}/version.cmake)
+
 set(Boost_USE_STATIC_LIBS ON)
 
 set(ENTANGLE_FILES "")

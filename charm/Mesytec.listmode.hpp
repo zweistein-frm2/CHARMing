@@ -74,19 +74,23 @@ namespace Mesytec {
 
 			boost::chrono::system_clock::time_point tp_start;
 			boost::chrono::nanoseconds start;
+			boost::chrono::nanoseconds start_since_wait;
 			boost::function<void(Mcpd8::DataPacket &)>  ab;
 
 
 			void listmoderead_analyzebuffer(const boost::system::error_code& error,
 				std::size_t bytes_transferred, Mcpd8::DataPacket& datapacket) {
+
 				if (listmoderead_first!=0) {
 
 
 					start = Mcpd8::DataPacket::timeStamp(datapacket.time);
+					start_since_wait = start;
 					tp_start = boost::chrono::system_clock::now();
 					unsigned char id = Mcpd8::DataPacket::getId(datapacket.deviceStatusdeviceId);
 
 					if (listmoderead_first.test(id)) {
+						data.elapsed = boost::chrono::nanoseconds(0);
 						auto& params = deviceparam[id];
 						params.lastbufnum = datapacket.Number - 1;
 						int i = 0;
@@ -103,13 +107,15 @@ namespace Mesytec {
 				//LOG_DEBUG << (id==1?"                           ":"")<<"datapacket.Number=" << datapacket.Number << std::endl;
 				ab.operator()(datapacket);
 
+				boost::chrono::nanoseconds elapsed = boost::chrono::duration_cast<boost::chrono::nanoseconds>(Mcpd8::DataPacket::timeStamp(&datapacket.time[0]) - start);
+				data.elapsed = elapsed;
 
-				boost::chrono::milliseconds elapsed = boost::chrono::duration_cast<boost::chrono::milliseconds>(Mcpd8::DataPacket::timeStamp(&datapacket.time[0]) - start);
-				if (elapsed.count() > 300) {
-					int replayspeedmultiplier = 1;
-					start = Mcpd8::DataPacket::timeStamp(datapacket.time);
+				boost::chrono::milliseconds elapsed_ms = boost::chrono::duration_cast<boost::chrono::milliseconds>(Mcpd8::DataPacket::timeStamp(&datapacket.time[0]) - start_since_wait);
+				if (elapsed_ms.count() > 300) {
+					int replayspeedmultiplier = 4;
+					start_since_wait = Mcpd8::DataPacket::timeStamp(datapacket.time);
 					boost::chrono::milliseconds ms = boost::chrono::duration_cast<boost::chrono::milliseconds>(boost::chrono::system_clock::now() - tp_start);
-					boost::chrono::milliseconds towait = elapsed/ replayspeedmultiplier - ms;
+					boost::chrono::milliseconds towait = elapsed_ms/ replayspeedmultiplier - ms;
 					if (towait.count() > 0) {
 						boost::this_thread::sleep_for(boost::chrono::milliseconds(towait));
 					}
@@ -408,7 +414,8 @@ namespace Mesytec {
 						total_bytes_processed += bytes_read;
 					} while (!ec);
 					{
-						LOG_INFO << fname << ": " << total_bytes_processed << " bytes processed  (" << data_packets_found << " data packets)" << std::endl;
+						LOG_INFO << std::endl;
+						LOG_INFO  << fname << ": " << total_bytes_processed << " bytes processed  (" << data_packets_found << " data packets)" << std::endl;
 						if (never_headerfound) LOG_ERROR << "never_headerfound=" << std::boolalpha << never_headerfound << " " << std::endl;
 						if (never_closing_sigfound) LOG_ERROR << "never_closing_sigfound=" << std::boolalpha << never_closing_sigfound << " " << std::endl;
 					}

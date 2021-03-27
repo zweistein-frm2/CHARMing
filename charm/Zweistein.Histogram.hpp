@@ -363,13 +363,18 @@ namespace Zweistein {
 
 
            boost::python::list l;
-
+           std::string info="[";
            for (auto & r : rdc) {
                std::stringstream ss_wkt;
                ss_wkt << boost::geometry::wkt(r.roi);
                auto t=boost::python::make_tuple(ss_wkt.str(),r.count);
+               info.append( "(" + ss_wkt.str() + ":" + std::to_string(r.count) + "),");
                l.append(t);
            }
+           info.append("]");
+
+           LOG_INFO << std::endl << "histogram.update " << histogram.size << info << std::endl;
+
            return boost::python::make_tuple(l, mat);
         }
 
