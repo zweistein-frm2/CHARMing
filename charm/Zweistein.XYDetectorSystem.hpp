@@ -18,6 +18,7 @@ namespace Zweistein {
 		boost::atomic<bool> connected;
 		boost::atomic<long> simulatordatarate;
 		boost::atomic<bool> daq_running;
+
 	private:
 		boost::atomic<boost::chrono::system_clock::time_point> started;
 	public:

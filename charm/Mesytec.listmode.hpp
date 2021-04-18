@@ -82,8 +82,6 @@ namespace Mesytec {
 				std::size_t bytes_transferred, Mcpd8::DataPacket& datapacket) {
 
 				if (listmoderead_first!=0) {
-
-
 					start = Mcpd8::DataPacket::timeStamp(datapacket.time);
 					start_since_wait = start;
 					tp_start = boost::chrono::system_clock::now();
@@ -112,7 +110,7 @@ namespace Mesytec {
 
 				boost::chrono::milliseconds elapsed_ms = boost::chrono::duration_cast<boost::chrono::milliseconds>(Mcpd8::DataPacket::timeStamp(&datapacket.time[0]) - start_since_wait);
 				if (elapsed_ms.count() > 300) {
-					int replayspeedmultiplier = 4;
+					int replayspeedmultiplier = data.replayspeedmultifier;
 					start_since_wait = Mcpd8::DataPacket::timeStamp(datapacket.time);
 					boost::chrono::milliseconds ms = boost::chrono::duration_cast<boost::chrono::milliseconds>(boost::chrono::system_clock::now() - tp_start);
 					boost::chrono::milliseconds towait = elapsed_ms/ replayspeedmultiplier - ms;

@@ -17,6 +17,7 @@ namespace Mcpd8 {
 
 		boost::atomic<unsigned short> last_deviceStatusdeviceId = Mcpd8::Status::sync_ok;
 		boost::atomic<long long> listmodepacketcount = 0;
+		boost::atomic<int> replayspeedmultifier = 1;
 		boost::atomic<boost::chrono::nanoseconds> elapsed = boost::chrono::nanoseconds(0);
 		static const int LISTMODEWRITEQUEUESIZE = 50000;
 		boost::lockfree::spsc_queue<DataPacket, boost::lockfree::capacity<LISTMODEWRITEQUEUESIZE>> listmodequeue;

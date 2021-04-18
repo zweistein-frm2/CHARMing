@@ -229,10 +229,10 @@ struct ReplayList {
         }
 
         int get_speedmultiplier() {
-            return ptrStartParameters->speedmultiplier;
+            return  ptrmsmtsystem1->data.replayspeedmultifier;
         }
         void set_speedmultiplier(int val) {
-            ptrStartParameters->speedmultiplier = val;
+            ptrmsmtsystem1->data.replayspeedmultifier = val;
         }
 
         void stopafter(uint64 counts, double seconds) {

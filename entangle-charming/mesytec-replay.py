@@ -51,6 +51,8 @@ class DeviceConnection(FdLogMixin, base.MLZDevice):
 
 __ALL__ = ['RemoveFile', 'AddFile', 'FilesInDirectory']
 
+__ALL_ATTRIB__ = ['speedmultiplier']
+
 #call format is 'functionName:[arg1,arg2,...,argn]'
 #return is a json string
 
@@ -78,6 +80,26 @@ class CmdProcessor(object):
         if len(tok) < 2:
             return 0
         #print("tok[0]="+str(tok[0]))
+
+
+
+
+        for setting in __ALL_ATTRIB__:
+          if tok[0] == setting:
+              value = self.lastcmd[len(setting)+1:].strip()
+              #now we generate a member function signature of the form
+              # write_setting(self,value)
+              f_str = 'self.write_'+setting
+              try:
+                  tmpvalue = eval(value)
+                  eval(f_str)(tmpvalue)
+              except Exception as inst:
+                  print(type(inst))    # the exception instance
+                  print(inst.args)     # arguments stored in .args
+                  print(inst)          # __str__ allows args to be printed directly,
+                            # but may be overridden in exception subclasses
+              return len(msg)
+
         for cmd in __ALL__:
             if tok[0] == cmd:
                 roi = self.lastcmd[len(tok[0])+1:]
@@ -112,6 +134,35 @@ class CmdProcessor(object):
         if self.lastcmd == '?':
             return self._state[1]
 
+        tmp = self.lastcmd.rstrip()
+        tok = tmp.split(':')
+        # if tok[0] is a number then it is the index to the setting we want to read out
+        #otherwise it is the setting
+        try:
+            if len(tok[0]) <= 2:  # 0 to 99
+                index = int(tok[0])
+                # pylint: disable=chained-comparison
+                if index >= 0 and index < len(__ALL__):
+                    tok[0] = __ALL_ATTRIB___[index]
+        # pylint: disable=bare-except
+        except:
+            pass
+
+
+        for setting in __ALL_ATTRIB__:
+            if tok[0] == setting:
+                r_str = 'self.read_'+setting+'()'
+                try:
+                    rv = {}
+                    value = eval(r_str)
+                    rv[setting] = value
+                    return json.dumps(rv)
+                except Exception as inst:
+                    print(type(inst))    # the exception instance
+                    print(inst.args)     # arguments stored in .args
+                    print(inst)          # __str__ allows args to be printed directly,
+
+
         if self.funcstr:
             #print('CmdProcessor.ReadLine() funcstr == ' + self.funcstr)
             try:
@@ -127,12 +178,19 @@ class CmdProcessor(object):
 
 class PlayList(CmdProcessor, base.StringIO):
     commands = {
-         'RemoveFile':
+         __ALL__[0]:
             Cmd('remove file from playlist.', str, listof(str), '', ''),
-          'AddFile':
+          __ALL__[1]:
             Cmd('add file to playlist.', str, listof(str), '', ''),
-          'FilesInDirectory':
+          __ALL__[2]:
             Cmd('return directory list of .mdat files.', str, listof(str), '', ''),
+    }
+
+    attributes = {
+        __ALL_ATTRIB__[0]:
+            Attr(int, 'replay speedmultiplier',
+                 writable=True, memorized=False, disallowed_read=(states.INIT, states.UNKNOWN,),
+                 disallowed_write=(states.OFF, states.INIT, states.UNKNOWN,)),
     }
 
     def init(self):
@@ -184,3 +242,16 @@ class PlayList(CmdProcessor, base.StringIO):
         if not msmtsystem.msmtsystem:
             return ver
         return ver + "\r\n" + msmtsystem.msmtsystem.version
+
+        # pylint: disable=inconsistent-return-statements
+    def read_speedmultiplier(self):
+        if msmtsystem.msmtsystem:
+            return msmtsystem.msmtsystem.speedmultiplier
+    # pylint: disable=inconsistent-return-statements
+    def write_speedmultiplier(self, value):
+        print('write_writelistmode')
+        if msmtsystem.msmtsystem:
+            msmtsystem.msmtsystem.speedmultiplier = value
+
+    def get_speedmultiplier_unit(self):
+        return ''
