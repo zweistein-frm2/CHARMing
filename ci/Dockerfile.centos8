@@ -7,20 +7,20 @@ RUN yum -y update
 RUN export TZ=Europe/Berlin    # must be at beginning for unknown reasons,
 RUN yum install tzdata && yum install -y langpacks-en langpacks-de glibc-all-langpacks     # must be at beginning for unknown reasons,
 
-RUN yum install -y epel-release && yum repolist  && \
+RUN yum install -y epel-release --nogpgcheck && yum repolist --nogpgcheck  && \
      rpm -ivh http://repo.okay.com.mx/centos/8/x86_64/release/okay-release-1-3.el8.noarch.rpm?
 
 
-RUN yum install -y dnf which git curl unzip tar wget dpkg && \
-    yum install -y python3-pip python3-devel && \
+RUN yum install -y dnf which git curl unzip tar wget dpkg  && \
+    yum install -y python3-pip python3-devel --nogpgcheck && \
     pip3 install numpy
 
-RUN dnf  --enablerepo=powertools install -y glibc-static
-RUN  dnf install -y gtk3
+RUN dnf  --enablerepo=powertools install -y glibc-static --nogpgcheck
+RUN  dnf install -y gtk3 --nogpgcheck
 
 RUN wget https://forensics.cert.org/cert-forensics-tools-release-el8.rpm -O cert-forensics-tools-release*rpm --no-check-certificate  && \
    rpm -Uvh cert-forensics-tools-release*rpm
-RUN yum -y install bzip2  gcc gcc-c++  zlib-devel diffutils gmp-devel mpfr-devel libmpc-devel make
+RUN yum -y install bzip2  gcc gcc-c++  zlib-devel diffutils gmp-devel mpfr-devel libmpc-devel make --nogpgcheck 
 
 
 #RUN dnf -y install  wget make cmake gcc-toolset-9-gcc gcc-toolset-9-gcc-c++ gcc-toolset-9-make
@@ -28,7 +28,7 @@ RUN yum -y install bzip2  gcc gcc-c++  zlib-devel diffutils gmp-devel mpfr-devel
 #RUN echo " will not compile due to bug in gcc 9.2.1 which is supplied by centos 8 repository"
 #RUN echo " gcc > = 9.2.2 is working fine"
 
-RUN dnf install -y  gtk3-devel
+RUN dnf install -y  gtk3-devel --nogpgcheck
 
 
 ARG projectdir=CHARMing
