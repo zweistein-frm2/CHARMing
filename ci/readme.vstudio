@@ -1,5 +1,5 @@
 You can cross compile your cmake based project connecting to a real linux machine or also by
-connecting to a virtual docker image.
+connecting to a virtual docker image running docker on windows.
 
 Prerequisite: https://docs.docker.com/docker-for-windows/install/
 

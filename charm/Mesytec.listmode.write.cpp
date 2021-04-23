@@ -87,14 +87,23 @@ namespace Mesytec {
 		 }
 
 		 std::filesystem::resize_file(tmppath.string(), byteswritten);
-
+		 try {
+			  using namespace boost::filesystem;
+			  permissions(tmppath, add_perms | owner_write | group_write | others_write | others_read | owner_read);
+		 }
+		 catch (std::exception& e) { // exception expected, //std::cout << boost::diagnostic_information(e);
+			 LOG_ERROR << e.what() << " changing permissions." << std::endl;
+		 }
 		 boost::filesystem::path jsonpath(tmppath.string() + ".json");
 
 		 try {
 			 boost::property_tree::write_json(jsonpath.string(), Mesytec::Config::root);
+			 using namespace boost::filesystem;
+			 permissions(jsonpath, add_perms | owner_write | group_write | others_write | others_read | owner_read);
+
 		 }
 		 catch (std::exception& e) { // exception expected, //std::cout << boost::diagnostic_information(e);
-			 LOG_ERROR << e.what() << " for writing." << std::endl;
+			 LOG_ERROR << e.what() << std::endl;
 		 }
 
 		 bListmodeWriting = false;
