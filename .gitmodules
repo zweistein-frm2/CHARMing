@@ -42,3 +42,9 @@
 [submodule "nicos-install-erwin_charming/toml11"]
 	path = nicos-install-erwin_charming/toml11
 	url = https://github.com/ToruNiina/toml11.git
+[submodule "nicos-install-sans1_charming/sans1_charming"]
+	path = nicos-install-sans1_charming/sans1_charming
+	url = https://github.com/zweistein22/sans1_charming.git
+[submodule "nicos-install-sans1_charming/toml11"]
+	path = nicos-install-sans1_charming/toml11
+	url = https://github.com/ToruNiina/toml11.git
