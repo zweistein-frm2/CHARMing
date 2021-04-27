@@ -88,7 +88,7 @@ int main(int argc, char* argv[])
 	}
 	std::string appName = boost::filesystem::basename(argv[0]);
 
-	boost::shared_ptr <  Mesytec::MesytecSystem> ptrmsmtsystem1 = nullptr;
+	boost::shared_ptr <  Charm::CharmSystem> ptrmsmtsystem1 = nullptr;
 
 	unsigned long simuratedefault = 7; // 7 cts/second
 
@@ -203,12 +203,13 @@ int main(int argc, char* argv[])
 			std::cout << "SIMRATE=" << simuratedefault << std::endl;
 		}
 
-		if (bmesyteconly) ptrmsmtsystem1 = boost::shared_ptr < Mesytec::MesytecSystem>(new  Mesytec::MesytecSystem());
-		else ptrmsmtsystem1 = boost::shared_ptr <  Mesytec::MesytecSystem>(new Charm::CharmSystem());
+		ptrmsmtsystem1 = boost::shared_ptr < Charm::CharmSystem>(new  Charm::CharmSystem());
+
+		if (bmesyteconly)  ptrmsmtsystem1->systype = Zweistein::XYDetector::Systemtype::Mesytec;
+
+		//ptrmsmtsystem1 = boost::shared_ptr < Mesytec::MesytecSystem>(new  Mesytec::MesytecSystem());
+		//else ptrmsmtsystem1 = boost::shared_ptr <Charm::CharmSystem>(new Charm::CharmSystem());
 		ptrmsmtsystem1->initatomicortime_point();
-
-
-
 
 		boost::asio::signal_set signals(*ptr_ctx, SIGINT, SIGTERM);
 		signals.async_wait(boost::bind(&boost::asio::io_service::stop,& *ptr_ctx));
@@ -241,16 +242,24 @@ int main(int argc, char* argv[])
 						}
 
 
-
+						for (Mcpd8::Parameters& p : _devlist) {
+							if (!p.n_charm_units) ptrmsmtsystem1->systype = Zweistein::XYDetector::Systemtype::Mesytec;
+							// ptrmesay != null means that the listmode file is from a mesytec measurement and not charm
+						}
 						ptrmsmtsystem1->eventdataformat = Zweistein::Format::EventData::Undefined;
-						ptrmsmtsystem1->listmode_connect(_devlist, *ptr_ctx);
+						if(ptrmsmtsystem1->systype == Zweistein::XYDetector::Systemtype::Mesytec) ptrmsmtsystem1->MesytecSystem::listmode_connect(_devlist, *ptr_ctx);
+						else ptrmsmtsystem1->listmode_connect(_devlist, *ptr_ctx);
 						// find the .json file for the listmode file
 						// check if Binning file not empty, if not empty wait for
 						Zweistein::setupHistograms(*ptr_ctx,ptrmsmtsystem1,Mesytec::Config::BINNINGFILE.string());
 						bool ok = ptrmsmtsystem1->evdata.evntqueue.push(Zweistein::Event::Reset());
 						if (!ok) LOG_ERROR << " cannot push Zweistein::Event::Reset()" << std::endl;
 						try {
-							boost::function<void(Mcpd8::DataPacket&)> abfunc = boost::bind(&Mesytec::MesytecSystem::analyzebuffer, ref(ptrmsmtsystem1), boost::placeholders::_1);
+							boost::function<void(Mcpd8::DataPacket&)> abfunc;
+							if (ptrmsmtsystem1->systype == Zweistein::XYDetector::Systemtype::Mesytec) {
+								abfunc = boost::bind(&Mesytec::MesytecSystem::analyzebuffer, ref(ptrmsmtsystem1), boost::placeholders::_1);
+							}
+							else abfunc = boost::bind(&Charm::CharmSystem::charm_analyzebuffer, ref(ptrmsmtsystem1), boost::placeholders::_1);
 							boost::shared_ptr <Mesytec::listmode::Read> ptrRead = boost::shared_ptr < Mesytec::listmode::Read>(new Mesytec::listmode::Read(abfunc, ptrmsmtsystem1->data, ptrmsmtsystem1->deviceparam));
 							auto now = boost::chrono::system_clock::now();
 							ptrmsmtsystem1->setStart(now);
@@ -286,14 +295,10 @@ int main(int argc, char* argv[])
 			catch (std::exception& e) {
 				LOG_ERROR << e.what() << " for reading." << std::endl;
 			}
-
 			bool configok = Mesytec::Config::get(_devlist, inidirectory.string());
 			std::stringstream ss_1;
 			boost::property_tree::write_json(ss_1, Mesytec::Config::root);
 			LOG_INFO << ss_1.str() << std::endl;
-
-
-
 
 			if(configok) Zweistein::Logger::Add_File_Sink(Mesytec::Config::DATAHOME.string() + appName + ".log");
 			try {
@@ -322,7 +327,8 @@ int main(int argc, char* argv[])
 			t = [ &ptrmsmtsystem1, &_devlist,&write2disk]() {
 				try {
 					ptrmsmtsystem1->write2disk=write2disk;
-					ptrmsmtsystem1->connect(_devlist, *ptr_ctx);
+					if(ptrmsmtsystem1->systype == Zweistein::XYDetector::Systemtype::Mesytec) ptrmsmtsystem1->Mesytec::MesytecSystem::connect(_devlist, *ptr_ctx);
+					else ptrmsmtsystem1->connect(_devlist, *ptr_ctx);
 					ptr_ctx->run();
 				}
 
@@ -387,7 +393,7 @@ int main(int argc, char* argv[])
 							std::cout << "\r" << clessidra[l++ % 8] << " " << std::setprecision(0) << std::fixed << evtspersecond <<
 								" Events/s, (" << Zweistein::PrettyBytes((size_t)(evtspersecond * sizeof(Mesy::Mpsd8Event))) <<
 								 "/s)\t" << Mcpd8::DataPacket::deviceStatus(ptrmsmtsystem1->data.last_deviceStatusdeviceId) <<
-								" elapsed:" << total_running << " Replay speed Multiplier: "<< std::setprecision(1) << std::fixed << replayspeedmultiplier << "      ";// << std::endl;
+								" elapsed:" << total_running << " Replay speed Multiplier: "<< std::setprecision(1) << std::fixed << replayspeedmultiplier << "            ";// << std::endl;
 #ifndef _WIN32
 							std::cout << std::flush;
 #endif

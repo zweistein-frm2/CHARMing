@@ -69,7 +69,7 @@ namespace Zweistein {
 #endif
 		bool ischarm = false;
 		static double shrinkraw = 1.0;
-		if (std::string("class Charm::CharmSystem") == std::string(ptrclearclassname)) { // we don't want header dipendency, hence class name check at runtime only
+		if (pmsmtsystem1->systype == Zweistein::XYDetector::Systemtype::Charm) { // we don't want header dipendency, hence class name check at runtime only
 			ischarm = true;
 			shrinkraw = 0.25; // reduce from 1024 to 256
 		}

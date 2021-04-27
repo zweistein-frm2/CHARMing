@@ -270,6 +270,7 @@ foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3 PROJECT4)
       ${Charm_DIR}/Zweistein.GetConfigDir.cpp
       ${Charm_DIR}/Mesytec.config.cpp
       ${Charm_DIR}/Zweistein.XYDetectorSystem.cpp
+      ${Charm_DIR}/Charm.System.cpp
       ${repository}/version.cpp
     )
 

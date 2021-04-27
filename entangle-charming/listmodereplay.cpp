@@ -12,6 +12,7 @@
 #define PY_ARRAY_UNIQUE_SYMBOL pbcvt_ARRAY_API
 #include "Module.Include.hpp"
 #include "Mesytec.Mcpd8.hpp"
+#include "Charm.System.hpp"
 #include "Mesytec.config.hpp"
 #include "Mesytec.listmode.write.hpp"
 #include "Module.Globals.hpp"
@@ -36,7 +37,7 @@ struct StartMsmtParameters {
     boost::atomic<double> SecondsAcquiring;
 };
 
-void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, boost::shared_ptr <StartMsmtParameters> ptrStartParameters ) {
+void startMonitor(boost::shared_ptr < Charm::CharmSystem> ptrmsmtsystem1, boost::shared_ptr <StartMsmtParameters> ptrStartParameters ) {
 
         using namespace magic_enum::bitwise_operators; // out-of-the-box bitwise operators for enums.
 
@@ -115,14 +116,25 @@ void startMonitor(boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1, bo
                             }
                             ptrStartParameters->monitorbusy = true;
                             ptrmsmtsystem1->eventdataformat = Zweistein::Format::EventData::Undefined;
-                            ptrmsmtsystem1->listmode_connect(_devlist, *ptr_ctx);
+
+                            ptrmsmtsystem1->systype = Zweistein::XYDetector::Systemtype::Charm;
+
+                            for (Mcpd8::Parameters& p : _devlist) {
+                              if (!p.n_charm_units)  ptrmsmtsystem1->systype = Zweistein::XYDetector::Systemtype::Mesytec;
+                            }
+
+                            if(ptrmsmtsystem1->systype == Zweistein::XYDetector::Systemtype::Mesytec) ptrmsmtsystem1->Mesytec::MesytecSystem::listmode_connect(_devlist, *ptr_ctx);
+                            else   ptrmsmtsystem1->listmode_connect(_devlist, *ptr_ctx);
                             // find the .json file for the listmode file
                             // check if Binning file not empty, if not empty wait for
                             try {
                                 Zweistein::setupHistograms(*ptr_ctx, ptrmsmtsystem1, Mesytec::Config::BINNINGFILE.string());
                                 bool ok = ptrmsmtsystem1->evdata.evntqueue.push(Zweistein::Event::Reset());
                                 if (!ok) LOG_ERROR << " cannot push Zweistein::Event::Reset()" << std::endl;
-                                boost::function<void(Mcpd8::DataPacket&)> abfunc = boost::bind(&Mesytec::MesytecSystem::analyzebuffer, ptrmsmtsystem1, boost::placeholders::_1);
+
+                                boost::function<void(Mcpd8::DataPacket&)> abfunc;
+                                if(ptrmsmtsystem1->systype == Zweistein::XYDetector::Systemtype::Mesytec)  abfunc = boost::bind(&Mesytec::MesytecSystem::analyzebuffer, ptrmsmtsystem1, boost::placeholders::_1);
+                                else  abfunc = boost::bind(& Mesytec::MesytecSystem::charm_analyzebuffer, ptrmsmtsystem1, boost::placeholders::_1);
                                 boost::shared_ptr <Mesytec::listmode::Read> ptrRead = boost::shared_ptr < Mesytec::listmode::Read>(new Mesytec::listmode::Read(abfunc, ptrmsmtsystem1->data, ptrmsmtsystem1->deviceparam));
                                 // pointer to obj needed otherwise exceptions are not propagated properly
 
@@ -209,11 +221,11 @@ struct ReplayList {
      public:
 
         boost::shared_ptr<StartMsmtParameters> ptrStartParameters;
-        boost::shared_ptr < Mesytec::MesytecSystem> ptrmsmtsystem1;
+        boost::shared_ptr < Charm::CharmSystem> ptrmsmtsystem1;
 
 
         ReplayList(long loghandle):ptrStartParameters(boost::shared_ptr < StartMsmtParameters>(new StartMsmtParameters())),
-            ptrmsmtsystem1(boost::shared_ptr < Mesytec::MesytecSystem>(new Mesytec::MesytecSystem()))
+            ptrmsmtsystem1(boost::shared_ptr < Charm::CharmSystem>(new Charm::CharmSystem()))
         {
 
             Entangle::Init(loghandle);

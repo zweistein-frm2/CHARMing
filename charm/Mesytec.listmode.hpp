@@ -93,7 +93,13 @@ namespace Mesytec {
 						params.lastbufnum = datapacket.Number - 1;
 						int i = 0;
 						for (std::map<const unsigned char, Mesytec::DeviceParameter>::iterator it = deviceparam.begin(); it != deviceparam.end(); ++it) {
-							if ((*it).first == id) listmoderead_first.reset(i);
+							if ((*it).first == id) {
+								listmoderead_first.reset(i);
+								listmoderead_first.reset(0); // dirty solution, assuming id 0 is always used on mesytec devices
+								// and on charm device it is the 'control' id which is reset together with data ids.
+
+							}
+
 							i++;
 						}
 					}

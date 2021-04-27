@@ -14,5 +14,6 @@ CMakeFiles/
 bin/
 ARM/
 version.cpp
+version.h
 test_readout_6.mdat
 sans1_2016_07_13_cal105_thr40.mcfg

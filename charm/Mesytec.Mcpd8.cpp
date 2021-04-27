@@ -62,11 +62,12 @@ namespace Mesytec {
 			return rv;
 		}
 
-		MesytecSystem::MesytecSystem():recv_buf(), cmd_recv_queue(25), internalerror(cmd_errorcode::OK), currentrunid(0),
+		MesytecSystem::MesytecSystem() :recv_buf(), cmd_recv_queue(25), internalerror(cmd_errorcode::OK), currentrunid(0),
 			lastpacketqueuefull_missedcount(0), lastlistmodequeuefull_missedcount(0),
 			inputFromListmodeFile(false),
-			eventdataformat(Zweistein::Format::EventData::Undefined),b_bufnums_8BIT(false){
-
+			eventdataformat(Zweistein::Format::EventData::Undefined), b_bufnums_8BIT(false)
+		{
+			systype = Zweistein::XYDetector::Systemtype::Mesytec;
 		}
 		MesytecSystem::~MesytecSystem(){
 			closeConnection();
@@ -97,10 +98,16 @@ namespace Mesytec {
 			evdata.widthX = 0;
 			evdata.widthY = 0;
 
+			systype = Zweistein::XYDetector::Systemtype::Mesytec;
+
 			for (Mcpd8::Parameters& p : _devlist) {
 				Mesytec::DeviceParameter mp;
 				bool skip = false;
 				mp.datagenerator = p.datagenerator;
+				mp.n_charm_units = p.n_charm_units;
+
+				if (mp.n_charm_units) systype = Zweistein::XYDetector::Systemtype::Charm;
+
 				if (eventdataformat == Zweistein::Format::EventData::Undefined) {
 					eventdataformat = p.eventdataformat;
 				}
@@ -120,12 +127,18 @@ namespace Mesytec {
 					unsigned short x;
 					unsigned short y;
 
-					if (!singleModuleXYSize(eventdataformat, x, y)) {
+					bool success = false;
+
+					if (systype == Zweistein::XYDetector::Systemtype::Mesytec) success = Mesytec::MesytecSystem::singleModuleXYSize(eventdataformat, x, y);
+					if (systype == Zweistein::XYDetector::Systemtype::Charm) success = singleModuleXYSize(eventdataformat, x, y);
+
+					if (!success) {
 						LOG_ERROR << MENUMSTR(eventdataformat) << " not supported" << std::endl;
 					}
 					else {
 						evdata.widthY = y;
-						evdata.widthX += x;
+						if (systype == Zweistein::XYDetector::Systemtype::Charm) evdata.widthX += x * mp.n_charm_units;
+						else evdata.widthX += x;
 					}
 
 
@@ -137,6 +150,9 @@ namespace Mesytec {
 			if (evdata.widthX == 0) evdata.widthX = 1;
 			if (evdata.widthY == 0) evdata.widthY = 1;
 			connected = true;
+
+
+
 			boost::chrono::milliseconds ms = boost::chrono::duration_cast<boost::chrono::milliseconds> (boost::chrono::system_clock::now() - getStart());
 			{
 				LOG_INFO << "MESYTECHSYSTEM LISTMODEREAD READY: +" << ms << std::endl;
@@ -166,7 +182,8 @@ namespace Mesytec {
 #else
 			const char* ptrclearclassname = classname.c_str();
 #endif
-			ismesy = typeid(Mesytec::MesytecSystem) == typeid(*this);
+
+			if (systype == Zweistein::XYDetector::Systemtype::Mesytec)
 
 			boost::system::error_code ec ;
 			for(Mcpd8::Parameters& p:_devlist) {
@@ -213,7 +230,7 @@ namespace Mesytec {
 					eventdataformat = p.eventdataformat;
 
 
-					if (eventdataformat == Zweistein::Format::EventData::Mpsd8  && (!ismesy))
+					if (eventdataformat == Zweistein::Format::EventData::Mpsd8  && (systype == Zweistein::XYDetector::Systemtype::Charm))
 					{
 
 						LOG_ERROR << MENUMSTR(eventdataformat) << " not handled by  " << ptrclearclassname << std::endl;
@@ -253,7 +270,7 @@ namespace Mesytec {
 					else {
 						evdata.widthY = y;
 
-						if(!ismesy) evdata.widthX += x * mp.n_charm_units;
+						if(systype == Zweistein::XYDetector::Systemtype::Charm) evdata.widthX += x * mp.n_charm_units;
 						else evdata.widthX += x;
 					}
 
@@ -272,7 +289,7 @@ namespace Mesytec {
 					}
 			}
 
-			if (ismesy) {
+			if (systype == Zweistein::XYDetector::Systemtype::Mesytec) {
 				for (auto& kvp : deviceparam) {
 					Send(kvp, Mcpd8::Cmd::SETID, kvp.first); // set ids for Mcpd8 devices
 				}
@@ -291,12 +308,12 @@ namespace Mesytec {
 
 			for (auto& kvp : deviceparam) {
 
-				if (!ismesy) {
+				if (systype == Zweistein::XYDetector::Systemtype::Charm) {
 					if (kvp.first > 0) continue;  // CharmDevice must be on id 0
 				}
 
 				Send(kvp, Mcpd8::Internal_Cmd::GETVER); //
-				if (ismesy) { // charm device does not support this
+				if (systype == Zweistein::XYDetector::Systemtype::Mesytec) { // charm device does not support this
 					Send(kvp, Mcpd8::Internal_Cmd::READID);
 					Send(kvp, Mcpd8::Cmd::GETPARAMETERS);
 					for (int c = 0; c < 8; c++) {  // SETCELL
@@ -388,13 +405,13 @@ namespace Mesytec {
 			    }
 			}
 			for (auto& kvp : deviceparam) {
-				if (!ismesy) {
+				if (systype == Zweistein::XYDetector::Systemtype::Charm) {
 					if (kvp.first > 0) continue;  // CharmDevice must be on id 0
 				}
 				Send(kvp, Mcpd8::Cmd::SETCLOCK, Mesy::TimePoint::ZERO);
 			}
 			int ndevices = (int) deviceparam.size();
-			if (ndevices > 1 && ismesy) {
+			if (ndevices > 1 && (systype == Zweistein::XYDetector::Systemtype::Mesytec)) {
 				// so we have to set Master / slave  , only for Mesytec , never for Charm
 				int i = 0;
 				for (auto& kvp : deviceparam) {
@@ -422,7 +439,7 @@ namespace Mesytec {
 
 		void MesytecSystem::Send(std::pair<const unsigned char, Mesytec::DeviceParameter> &kvp,Mcpd8::Internal_Cmd cmd, unsigned long param) {
 
-			if (!ismesy) {
+			if (systype == Zweistein::XYDetector::Systemtype::Charm) {
 				if (kvp.first > 0) return;  // CharmDevice must be on id 0
 			}
 
@@ -537,7 +554,7 @@ namespace Mesytec {
 		}
 		void MesytecSystem::Send(std::pair<const unsigned char, Mesytec::DeviceParameter>& kvp,Mcpd8::Cmd cmd,unsigned long lparam) {
 
-			if (!ismesy) {
+			if (systype == Zweistein::XYDetector::Systemtype::Charm) {
 				if (kvp.first > 0) return;  // CharmDevice must be on id 0
 			}
 
@@ -895,6 +912,11 @@ namespace Mesytec {
 			}
 
 		}
+
+		void MesytecSystem::charm_analyzebuffer(Mcpd8::DataPacket& datapacket)
+		{
+		}
+
 	    void MesytecSystem::analyzebuffer(Mcpd8::DataPacket &datapacket)
 		{
 			unsigned char id = Mcpd8::DataPacket::getId(datapacket.deviceStatusdeviceId);

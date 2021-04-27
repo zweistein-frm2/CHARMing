@@ -94,8 +94,6 @@ namespace Mesytec {
 		cmd_errorcode internalerror;
 
 		Zweistein::Format::EventData eventdataformat;
-		bool ismesy = true;   // we distinguish between Mesytec and Charm devices. Mesytec is parent to Charm.
-
 
 		virtual bool singleModuleXYSize(Zweistein::Format::EventData eventdataformat, unsigned short& x, unsigned short& y) {
 			switch (eventdataformat) {
@@ -119,8 +117,7 @@ namespace Mesytec {
 		Mcpd8::Data data;
 		bool inputFromListmodeFile;
 		virtual void setStart(boost::chrono::system_clock::time_point& t);
-		bool listmode_connect(std::list<Mcpd8::Parameters>& _devlist, boost::asio::io_service& io_service);
-
+		virtual bool listmode_connect(std::list<Mcpd8::Parameters>& _devlist, boost::asio::io_service& io_service);
 
 		virtual bool connect(std::list<Mcpd8::Parameters>& _devlist, boost::asio::io_service& io_service);
 
@@ -142,7 +139,9 @@ namespace Mesytec {
 
 			try {
 				Mcpd8::DataPacket dp;
-				boost::function<void(Mcpd8::DataPacket&)> abfunc = boost::bind(&Mesytec::MesytecSystem::analyzebuffer, this, boost::placeholders::_1);
+				boost::function<void(Mcpd8::DataPacket&)> abfunc;
+				if (systype == Zweistein::XYDetector::Systemtype::Mesytec ) abfunc= boost::bind(&Mesytec::MesytecSystem::analyzebuffer, this, boost::placeholders::_1);
+				else  abfunc = boost::bind(&Mesytec::MesytecSystem::charm_analyzebuffer, this, boost::placeholders::_1);
 				do {
 					while (data.packetqueue.pop(dp)) {
 						abfunc(dp);
@@ -231,6 +230,7 @@ namespace Mesytec {
 
 		public:
 			virtual void analyzebuffer(Mcpd8::DataPacket& datapacket);
+			virtual void charm_analyzebuffer(Mcpd8::DataPacket& datapacket);
 		private:
 		udp::endpoint local_endpoint;
 

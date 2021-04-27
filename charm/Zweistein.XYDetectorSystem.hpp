@@ -11,14 +11,20 @@
 #include "Zweistein.Data.hpp"
 
 namespace Zweistein {
-
+	namespace XYDetector {
+		enum Systemtype {
+			Undefined = 0,
+			Mesytec = 1,
+			Charm = 2
+		};
+	}
 	class XYDetectorSystem {
 	public:
 		boost::asio::io_service* pio_service;
 		boost::atomic<bool> connected;
 		boost::atomic<long> simulatordatarate;
 		boost::atomic<bool> daq_running;
-
+		XYDetector::Systemtype systype;
 	private:
 		boost::atomic<boost::chrono::system_clock::time_point> started;
 	public:

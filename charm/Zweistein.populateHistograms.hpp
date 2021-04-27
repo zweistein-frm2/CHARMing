@@ -72,6 +72,10 @@ namespace Zweistein {
 		}
 
 
+		if (pmsmtsystem1->systype == Zweistein::XYDetector::Systemtype::Charm) ischarm = true;
+
+		if (pmsmtsystem1->systype == Zweistein::XYDetector::Systemtype::Mesytec) ischarm = false;
+
 
 		//LOG_DEBUG << "pmsmtsystem1->data.widthX=" << maxX << ", pmsmtsystem1->data.widthY=" << maxY << std::endl;
 		int left = 0;
