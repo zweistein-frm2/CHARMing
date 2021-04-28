@@ -6,7 +6,7 @@
 [submodule "boost"]
 	path = boost
 	url = https://github.com/boostorg/boost.git
-	ignore = dirty
+	ignore = all
 [submodule "entangle-charming/pyboostcvconverter"]
 	path = entangle-charming/pyboostcvconverter
 	url = https://github.com/Algomorph/pyboostcvconverter.git
@@ -19,11 +19,11 @@
 [submodule "entangle-install-isegCC2x/iseg"]
 	path = entangle-install-isegCC2x/iseg
 	url = https://github.com/zweistein22/iseg.git
-	ignore = dirty
+	ignore = all
 [submodule "opencv"]
 	path = opencv
 	url = https://github.com/opencv/opencv.git
-	ignore = dirty
+	ignore = all
 [submodule "charm/magic_enum"]
 	path = charm/magic_enum
 	url = https://github.com/Neargye/magic_enum.git

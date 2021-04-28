@@ -969,8 +969,10 @@ namespace Mesytec {
 						}
 					}
 				}
-				for (int c = 0; c < COUNTER_MONITOR_COUNT; c++) {
-					CounterMonitor[c] += (unsigned long long) datapacket.param[c][0] + (((unsigned long long) datapacket.param[c][1]) << 16) + (((unsigned long long)datapacket.param[c][2]) << 32);
+				if (id == 0) {
+					for (int c = 0; c < COUNTER_MONITOR_COUNT; c++) {
+						CounterMonitor[c] = (unsigned long long) datapacket.param[0][c] + (((unsigned long long) datapacket.param[1][c]) << 16) + (((unsigned long long)datapacket.param[2][c]) << 32);
+					}
 				}
 				params.lastbufnum = datapacket.Number;
 				for (int i = 0; i < numevents; i++) {
