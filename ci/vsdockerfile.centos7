@@ -33,7 +33,7 @@ RUN yum install -y rsync zip openssh-clients openssh-server initscripts && yum c
 
 RUN yum install -y which git devtoolset-9-gcc devtoolset-9-gcc-c++  make && \
   yum install -y cmake3  glibc-static && ln -s /usr/bin/cmake3 /usr/bin/cmake
-  
+
 
 
 RUN yum install -y wget dpkg

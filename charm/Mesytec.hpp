@@ -97,7 +97,38 @@ namespace Mesy {
 
 
 
+	class alignas(2) TriggerEvent {
+		uint16_t data[3];
+	public:
+		inline unsigned char ID() const {
+			return (data[2] & 0x8000) >> 15;
+		}
+		inline unsigned char TRIGID() const {
+			return (data[2] >> 12) & 0b111;
+		}
 
+		inline unsigned char DATAID() const {
+			return (data[2] >> 8) & 0b1111;
+		}
+		inline unsigned int DATA() const {
+			unsigned int rv = 0;
+			rv = (unsigned int)(data[2]) & 0b11111111 ;
+			rv <<= 13;
+			rv += data[1] >> 3;
+			return rv;
+		}
+		inline boost::chrono::nanoseconds TIMESTAMP() const {
+			unsigned long long rv = (unsigned long long)(data[1] & 0b111) << 16;
+			rv += data[0];
+			boost::chrono::nanoseconds ns(rv * 100);
+			return ns;
+
+		}
+
+		inline static TriggerEvent* fromMpsd8(Mpsd8Event* mpsd8) {
+			return reinterpret_cast<TriggerEvent*>(mpsd8);
+		}
+	};
 
 
 	class alignas(2) MdllEvent {

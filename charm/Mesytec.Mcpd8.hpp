@@ -224,8 +224,8 @@ namespace Mesytec {
 		}
 		protected:
 
-		void PushNeutronEventOnly_HandleOther(Zweistein::Event& Ev);
-
+		void PushNeutronEventOnly(Zweistein::Event& Ev);
+		void HandleTriggerEvent(Mesy::TriggerEvent* ptrigger, const boost::chrono::nanoseconds& headertime);
 
 
 		public:

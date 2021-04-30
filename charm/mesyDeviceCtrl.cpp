@@ -392,8 +392,10 @@ int main(int argc, char* argv[])
 							boost::mutex::scoped_lock lock(coutGuard);
 							std::cout << "\r" << clessidra[l++ % 8] << " " << std::setprecision(0) << std::fixed << evtspersecond <<
 								" Events/s, (" << Zweistein::PrettyBytes((size_t)(evtspersecond * sizeof(Mesy::Mpsd8Event))) <<
-								 "/s)\t" << Mcpd8::DataPacket::deviceStatus(ptrmsmtsystem1->data.last_deviceStatusdeviceId) <<
-								" elapsed:" << total_running << " Replay speed Multiplier: "<< std::setprecision(1) << std::fixed << replayspeedmultiplier << "            ";// << std::endl;
+								"/s)\t" << Mcpd8::DataPacket::deviceStatus(ptrmsmtsystem1->data.last_deviceStatusdeviceId) <<
+								" elapsed:" << total_running << ", C0("<< CounterMonitor[0]<<")" <<", C1("<< CounterMonitor[1]<<")" << ", C2(" << CounterMonitor[2] << ")" << ", C3(" << CounterMonitor[3] << ")";
+
+							// << " Replay speed Multiplier: " << std::setprecision(1) << std::fixed << replayspeedmultiplier << "            ";
 #ifndef _WIN32
 							std::cout << std::flush;
 #endif

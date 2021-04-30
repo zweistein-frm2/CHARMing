@@ -62,7 +62,7 @@ RUN cd /${projectdir} && \
 
 RUN cd /${projectdir}/entangle-charming && rm -rf out && mkdir out && cd out && cmake .. && make
 
-ENV INSTALL_DEPS=libgtk-3-0
+ENV INSTALL_DEPS=libgtk-3-0,libstdc++-9-dev
 ENV LINUX_FLAVOUR=ubuntu18
 RUN mkdir out && cd out && cmake -B /out -S /${projectdir}
 RUN mkdir package && cd out && make package && mv *.deb /package
