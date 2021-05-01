@@ -31,7 +31,7 @@ public:
     }
 
     void off() {
-        LOG_DEBUG << std::endl << "off(): begin." << std::endl;
+        LOG_INFO << std::endl << "off(): begin." << std::endl;
         cancelrequested = true;
         control_threads.join_all();
         LOG_INFO << "off(): end." << "io_service.stopped() = " << ptr_ctx->stopped() << std::endl;

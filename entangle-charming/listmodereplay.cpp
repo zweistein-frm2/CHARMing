@@ -46,12 +46,12 @@ void startMonitor(boost::shared_ptr < Charm::CharmSystem> ptrmsmtsystem1, boost:
         signals.async_wait(boost::bind(&boost::asio::io_service::stop, & *ptr_ctx));
 
         std::list<Mcpd8::Parameters> _devlist = std::list<Mcpd8::Parameters>();
-
         boost::function<void()> t;
 
             ptrmsmtsystem1->inputFromListmodeFile = true;
             t = [&ptrmsmtsystem1,&ptrStartParameters, &_devlist]() {
                 using namespace magic_enum::ostream_operators;
+                bool use_stdout = true;
                 try {
                     std::list<std::string> listmodeinputfiles = std::list<std::string>();
                     int l = 0;
@@ -88,7 +88,7 @@ void startMonitor(boost::shared_ptr < Charm::CharmSystem> ptrmsmtsystem1, boost:
                             else {
                                 ptrmsmtsystem1->daq_running = false;
                                 char clessidra[8] = { '|', '/' , '-', '\\', '|', '/', '-', '\\' };
-                                std::cout << "\r  waiting for action " << clessidra[l%8];
+                                if(use_stdout) std::cout << "\r  waiting for action " << clessidra[l%8];
                                 l++;
                                 boost::this_thread::sleep_for(boost::chrono::milliseconds(300));
                             }

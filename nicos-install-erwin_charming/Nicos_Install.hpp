@@ -328,6 +328,7 @@ void nicos_setup(boost::filesystem::path& nicos_root, std::vector<std::string>& 
     }
 #ifndef WIN32
     pythonsyspath.insert(pythonsyspath.begin(), "/opt/nicos");
+    pythonsyspath.insert(pythonsyspath.begin(), "/control");
 #endif
     int ipath = 0;
     bool dobreak = false;

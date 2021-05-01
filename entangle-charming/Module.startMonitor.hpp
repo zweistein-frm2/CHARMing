@@ -21,7 +21,7 @@ void startMonitor(boost::shared_ptr < MSMTSYSTEM> ptrmsmtsystem1, boost::shared_
     ptr_ctx.reset(new boost::asio::io_context);
     ptrmsmtsystem1->pio_service = & *ptr_ctx;
 
-    bool interactive = false;
+    bool use_stdout = true;
 
     //boost::filesystem::path exe = boost::dll::program_location();
 
@@ -82,6 +82,7 @@ void startMonitor(boost::shared_ptr < MSMTSYSTEM> ptrmsmtsystem1, boost::shared_
                 while (!cancelrequested) {
                     ptr_ctx->run_for(ms);
                 }
+                LOG_INFO << "cancelrequested == true" << std::endl;
                 for (auto& [key, value] : ptrmsmtsystem1->deviceparam) {
                     if (value.socket && value.bNewSocket) {
                         try {
@@ -186,11 +187,11 @@ void startMonitor(boost::shared_ptr < MSMTSYSTEM> ptrmsmtsystem1, boost::shared_
                 {
                     Zweistein::WriteLock w_lock(Entangle::cbLock);
 // IF YOU WANT TO DISPLAY CURRENT STATUS ON SCREEN UNCOMMENT below
-                    if(!interactive) std::cout << ss1.str();
+                    if(use_stdout) std::cout << ss1.str();
                 }
                 lastcount = currentcount;
 #ifndef _WIN32
-                std::cout << std::flush;
+                if (use_stdout) std::cout << std::flush;
 #endif
             }
             std::chrono::milliseconds maxblocking(100);
