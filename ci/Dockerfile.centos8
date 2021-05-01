@@ -16,20 +16,13 @@ RUN yum install -y dnf which git curl unzip tar wget dpkg  && \
     pip3 install numpy
 
 RUN dnf  --enablerepo=powertools install -y glibc-static --nogpgcheck
-RUN  dnf install -y gtk3 --nogpgcheck
+RUN  dnf install -y gtk3 libzstd-devel --nogpgcheck
 
 RUN wget https://forensics.cert.org/cert-forensics-tools-release-el8.rpm -O cert-forensics-tools-release*rpm --no-check-certificate  && \
    rpm -Uvh cert-forensics-tools-release*rpm
-RUN yum -y install bzip2  gcc gcc-c++  zlib-devel diffutils gmp-devel mpfr-devel libmpc-devel make --nogpgcheck 
-
-
-#RUN dnf -y install  wget make cmake gcc-toolset-9-gcc gcc-toolset-9-gcc-c++ gcc-toolset-9-make
-#ENV PATH=/opt/rh/gcc-toolset-9/root/usr/bin:$PATH
-#RUN echo " will not compile due to bug in gcc 9.2.1 which is supplied by centos 8 repository"
-#RUN echo " gcc > = 9.2.2 is working fine"
+RUN yum -y install bzip2  gcc gcc-c++  zlib-devel diffutils gmp-devel mpfr-devel libmpc-devel make --nogpgcheck
 
 RUN dnf install -y  gtk3-devel --nogpgcheck
-
 
 ARG projectdir=CHARMing
 RUN mkdir ${projectdir}
@@ -38,22 +31,22 @@ COPY . .
 
 WORKDIR /
 
-ARG gcc_wanted=9.3.0
+RUN dnf install -y centos-release-stream
+RUN dnf -y install  cmake3 rpm-build
+RUN dnf install -y  gcc-toolset-10-libstdc++-devel
+RUN dnf install -y gcc-toolset-10-gcc-c++
 
-RUN chmod +x /${projectdir}/distribution/centos8/Docker/build_gcc_9.sh && \
- /${projectdir}/distribution/centos8/Docker/build_gcc_9.sh
-
-ENV PATH=/root/opt/gcc-${gcc_wanted}/bin:$PATH
-ENV LD_LIBRARY_PATH=/root/opt/gcc-${gcc_wanted}/lib:/root/opt/gcc-${gcc_wanted}/lib64:\LD_LIBRARY_PATH
-ENV MANPATH=/root/opt/gcc-${gcc_wanted}/share/man:$MANPATH
-ENV INFOPATH=/root/opt/gcc-${gcc_wanted}/share/info:$INFOPATH
-ENV CC=/root/opt/gcc-${gcc_wanted}/bin/gcc
-ENV CXX=/root/opt/gcc-${gcc_wanted}/bin/g++
-RUN yum -y install  cmake rpm-build
-
+ENV PATH=/opt/rh/gcc-toolset-10/root/bin:$PATH
+ENV LD_LIBRARY_PATH=/opt/rh/gcc-toolset-10/root/lib:/opt/rh/gcc-toolset-10/root/lib64:\LD_LIBRARY_PATH
+ENV MANPATH=/opt/rh/gcc-toolset-10/root/share/man:$MANPATH
+ENV INFOPATH=/opt/rh/gcc-toolset-10/root/share/info:$INFOPATH
+ENV CC=/opt/rh/gcc-toolset-10/root/bin/gcc
+ENV CXX=/opt/rh/gcc-toolset-10/root/bin/g++
 
 
 
+
+RUN dnf --enablerepo=powertools -y install libarchive-devel
 RUN cd /${projectdir}/boost && rm -rf out
 RUN rm -rf /${projectdir}/out
 
@@ -76,7 +69,7 @@ RUN cd /${projectdir}/entangle-charming && rm -rf out && mkdir out && cd out && 
      make
 
 ENV PACK2RPM=ON
-ENV INSTALL_DEPS=gtk3
+ENV INSTALL_DEPS=gtk3,centos-release-stream,gcc-toolset-10-libstdc++-devel
 ENV LINUX_FLAVOUR=centos8
 
 RUN mkdir out && cd out && cmake -B /out -S /${projectdir}

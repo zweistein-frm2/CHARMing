@@ -5,7 +5,7 @@ Prerequisite: https://docs.docker.com/docker-for-windows/install/
 
 Example:
 	First: change directory one level up to CHARMing.
-	
+
     for centos7:
 
     docker build  -t vs-centos7 -f ci/vsdockerfile.centos7 .

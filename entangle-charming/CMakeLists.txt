@@ -334,9 +334,9 @@ list(APPEND ENTANGLE_FILES_DEVICE_CHARMING
 list (APPEND ENTANGLE_FILES ${ENTANGLE_FILES_DEVICE_CHARMING})
 
 list(APPEND ENTANGLE_FILES_RES
-   ${CMAKE_CURRENT_SOURCE_DIR}/entangle/example/mesytec-listmode-replay.res
-    ${CMAKE_CURRENT_SOURCE_DIR}/entangle/example/SANS1-detector.res
-    ${CMAKE_CURRENT_SOURCE_DIR}/entangle/example/ERWIN-detector.res
+   ${CMAKE_CURRENT_SOURCE_DIR}/entangle/example/listmode_replay.res
+    ${CMAKE_CURRENT_SOURCE_DIR}/entangle/example/SANS1_detector.res
+    ${CMAKE_CURRENT_SOURCE_DIR}/entangle/example/ERWIN_detector.res
   )
 
 

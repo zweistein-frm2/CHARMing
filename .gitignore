@@ -5,6 +5,7 @@
 
 !*.*
 out/
+libuv/CMakeLists.txt
 opencv/out/
 boost/out/
 .vs/
