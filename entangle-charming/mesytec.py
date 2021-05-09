@@ -35,23 +35,29 @@ class DeviceConnection(FdLogMixin, base.MLZDevice):
         self.init_fd_log('Mesytec')
         fd = self.get_log_fd()
         #print("mesytec.py:DeviceConnection.init("+str(fd)+")")
+        # pylint: disable=undefined-variable
         if msmtsystem.msmtsystem is None:
+            # pylint: disable=undefined-variable
             msmtsystem.msmtsystem = mesytecsystem.NeutronMeasurement(fd)
             self.On()
 
     #def __del__(self):
         #print("charm.py: DeviceConnection.__del__")
     def On(self):
+        # pylint: disable=undefined-variable
         if msmtsystem.msmtsystem:
             msmtsystem.msmtsystem.on()
     def Off(self):
+        # pylint: disable=undefined-variable
         if msmtsystem.msmtsystem:
             msmtsystem.msmtsystem.off()
     def read_version(self):
         ver = super().read_version()
+        # pylint: disable=undefined-variable
         if not msmtsystem.msmtsystem:
             return ver
         return ver + " "+msmtsystem.msmtsystem.version
 
     def Log(self):
+        # pylint: disable=undefined-variable
         return msmtsystem.msmtsystem.log()

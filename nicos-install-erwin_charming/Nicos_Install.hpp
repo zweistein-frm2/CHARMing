@@ -14,6 +14,9 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/regex.hpp>
 #include  "toml11/toml.hpp"
+
+//#define DEBUG
+
 #ifdef _WIN32
 #define popen _popen
 #define pclose _pclose

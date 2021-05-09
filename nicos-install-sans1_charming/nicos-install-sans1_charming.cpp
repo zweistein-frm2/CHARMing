@@ -90,6 +90,10 @@ int main(int argc, char* argv[])
             }
         };
         t("");
+        std::cout << "please edit the following files to reflect real tango_base :" << std::endl;
+        std::cout << dest.string() + "/sans1_charming/setups/sans1.py" << std::endl;
+        std::cout << dest.string() + "/sans1_charming/setups/listmode.py" << std::endl;
+
         if (nicosroot.empty()) throw  std::runtime_error("Nicos root dir not found.");
     }
     catch (boost::exception& e) {

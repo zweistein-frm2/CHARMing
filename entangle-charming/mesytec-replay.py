@@ -32,7 +32,8 @@ class DeviceConnection(FdLogMixin, base.MLZDevice):
     def init(self):
         self.init_fd_log('Replay')
         fd = self.get_log_fd()
-       # print("charm-replay.py:DeviceConnection.init("+str(fd)+")")
+        # print("charm-replay.py:DeviceConnection.init("+str(fd)+")")
+        # pylint: disable=undefined-variable
         if msmtsystem.msmtsystem is None:
             msmtsystem.msmtsystem = listmodereplay.ReplayList(fd)
 
@@ -42,11 +43,13 @@ class DeviceConnection(FdLogMixin, base.MLZDevice):
 
     def read_version(self):
         ver = super().read_version()
+        # pylint: disable=undefined-variable
         if not msmtsystem.msmtsystem:
             return ver
         return ver + " " + msmtsystem.msmtsystem.version
 
     def Log(self):
+        # pylint: disable=undefined-variable
         return msmtsystem.msmtsystem.log()
 
 __ALL__ = ['RemoveFile', 'AddFile', 'FilesInDirectory']
@@ -85,20 +88,20 @@ class CmdProcessor(object):
 
 
         for setting in __ALL_ATTRIB__:
-          if tok[0] == setting:
-              value = self.lastcmd[len(setting)+1:].strip()
-              #now we generate a member function signature of the form
-              # write_setting(self,value)
-              f_str = 'self.write_'+setting
-              try:
-                  tmpvalue = eval(value)
-                  eval(f_str)(tmpvalue)
-              except Exception as inst:
-                  print(type(inst))    # the exception instance
-                  print(inst.args)     # arguments stored in .args
-                  print(inst)          # __str__ allows args to be printed directly,
-                            # but may be overridden in exception subclasses
-              return len(msg)
+            if tok[0] == setting:
+                value = self.lastcmd[len(setting)+1:].strip()
+                #now we generate a member function signature of the form
+                # write_setting(self,value)
+                f_str = 'self.write_'+setting
+                try:
+                    tmpvalue = eval(value)
+                    eval(f_str)(tmpvalue)
+                except Exception as inst:
+                    print(type(inst))    # the exception instance
+                    print(inst.args)     # arguments stored in .args
+                    print(inst)          # __str__ allows args to be printed directly,
+                              # but may be overridden in exception subclasses
+                return len(msg)
 
         for cmd in __ALL__:
             if tok[0] == cmd:
@@ -143,6 +146,7 @@ class CmdProcessor(object):
                 index = int(tok[0])
                 # pylint: disable=chained-comparison
                 if index >= 0 and index < len(__ALL__):
+                    # pylint: disable=undefined-variable
                     tok[0] = __ALL_ATTRIB___[index]
         # pylint: disable=bare-except
         except:
@@ -188,6 +192,7 @@ class PlayList(CmdProcessor, base.StringIO):
 
     attributes = {
         __ALL_ATTRIB__[0]:
+            # pylint: disable=undefined-variable
             Attr(int, 'replay speedmultiplier',
                  writable=True, memorized=False, disallowed_read=(states.INIT, states.UNKNOWN,),
                  disallowed_write=(states.OFF, states.INIT, states.UNKNOWN,)),
@@ -219,18 +224,21 @@ class PlayList(CmdProcessor, base.StringIO):
         return (_state[0], msg)
 
     def RemoveFile(self, file):
+        # pylint: disable=undefined-variable
         if msmtsystem.msmtsystem:
             return msmtsystem.msmtsystem.removefile(file)
         return []
 
     def AddFile(self, file):
         #print("\n\rAddFile("+str(file)+")")
+        # pylint: disable=undefined-variable
         if msmtsystem.msmtsystem:
             return msmtsystem.msmtsystem.addfile(file)
         return []
 
     def FilesInDirectory(self, directory):
         #print('FilesInDirectory('+str(directory)+')')
+        # pylint: disable=undefined-variable
         if msmtsystem.msmtsystem:
             files = msmtsystem.msmtsystem.files(directory)
             return files
@@ -239,17 +247,21 @@ class PlayList(CmdProcessor, base.StringIO):
 
     def read_version(self):
         ver = super().read_version()
+        # pylint: disable=undefined-variable
         if not msmtsystem.msmtsystem:
             return ver
         return ver + "\r\n" + msmtsystem.msmtsystem.version
 
         # pylint: disable=inconsistent-return-statements
     def read_speedmultiplier(self):
+        # pylint: disable=undefined-variable
         if msmtsystem.msmtsystem:
+            # pylint: disable=undefined-variable
             return msmtsystem.msmtsystem.speedmultiplier
     # pylint: disable=inconsistent-return-statements
     def write_speedmultiplier(self, value):
-        print('write_writelistmode')
+        #print('write_writelistmode')
+        # pylint: disable=undefined-variable
         if msmtsystem.msmtsystem:
             msmtsystem.msmtsystem.speedmultiplier = value
 

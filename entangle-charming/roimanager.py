@@ -1,9 +1,9 @@
+import ctypes
 import json
 from entangle import base
-from entangle.core import states, Prop, Attr, Cmd, pair, listof, uint32, boolean
-
+from entangle.core import uint32
 import entangle.device.charming.msmtsystem as msmtsystem
-import ctypes
+
 
 
 class CmdProcessor(object):
@@ -18,7 +18,7 @@ class CmdProcessor(object):
         rv = ctypes.c_ulong(-1)
         return rv.value
 
-    def Write(self, msg:str)->uint32:
+    def Write(self, msg: str)->uint32:
         self.lastcmd = msg.rstrip()
         #print('CmdProcessor.Write('+self.lastcmd + ')')
 
@@ -35,7 +35,7 @@ class CmdProcessor(object):
             itr = int(istr)
 
         roi = self.lastcmd[len(tok[0])+1:]
-        self.write_roi(roi,itr)
+        self.write_roi(roi, itr)
         return len(msg)
 
     def ReadLine(self):
@@ -62,14 +62,14 @@ class CmdProcessor(object):
 
 
 
-class RoiManager(CmdProcessor,base.StringIO):
+class RoiManager(CmdProcessor, base.StringIO):
 
     def init(self):
         pass
 
     def state(self):
         _state = base.StringIO.state(self)
-        roil =  self.get_roidata()
+        roil = self.get_roidata()
         msg = ''
 
         if roil:
@@ -77,13 +77,13 @@ class RoiManager(CmdProcessor,base.StringIO):
             i = 0
             for tup in roil:
                 if i:
-                  msg += ','
+                    msg += ','
                 msg += tup[0]
                 i = i + 1
             msg += ']'
 
 
-        return (_state[0],msg)
+        return (_state[0], msg)
 
     def get_roidata(self):
         if not msmtsystem.msmtsystem:
@@ -91,6 +91,7 @@ class RoiManager(CmdProcessor,base.StringIO):
         l = msmtsystem.msmtsystem.getHistogram().getRoiData()
         return l
 
+    # pylint: disable=inconsistent-return-statements
     def write_roi(self, wkt, selecteditem):
         if msmtsystem.msmtsystem:
             #print(write_roi)
@@ -100,6 +101,4 @@ class RoiManager(CmdProcessor,base.StringIO):
                 return None
             if len(roilist) == selecteditem:
                 msmtsystem.msmtsystem.getHistogram().getRoi(selecteditem) # creates new Roi
-            msmtsystem.msmtsystem.getHistogram().setRoi(wkt,selecteditem)
-
-
+            msmtsystem.msmtsystem.getHistogram().setRoi(wkt, selecteditem)

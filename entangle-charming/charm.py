@@ -33,6 +33,7 @@ class DeviceConnection(FdLogMixin, base.MLZDevice):
         self.init_fd_log('Charm')
         fd = self.get_log_fd()
         #print("charm.py:DeviceConnection.init("+str(fd)+")")
+        # pylint: disable=undefined-variable
         if msmtsystem.msmtsystem is None:
             msmtsystem.msmtsystem = charmsystem.NeutronMeasurement(fd)
             self.On()
@@ -40,18 +41,22 @@ class DeviceConnection(FdLogMixin, base.MLZDevice):
         #print("charm.py: DeviceConnection.__del__")
 
     def On(self):
+        # pylint: disable=undefined-variable
         if msmtsystem.msmtsystem:
             msmtsystem.msmtsystem.on()
 
     def Off(self):
+        # pylint: disable=undefined-variable
         if msmtsystem.msmtsystem:
             msmtsystem.msmtsystem.off()
 
     def read_version(self):
         ver = super().read_version()
+        # pylint: disable=undefined-variable
         if not msmtsystem.msmtsystem:
             return ver
         return ver + " "+msmtsystem.msmtsystem.version
 
     def Log(self):
+        # pylint: disable=undefined-variable
         return msmtsystem.msmtsystem.log()

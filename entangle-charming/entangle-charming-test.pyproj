@@ -27,6 +27,7 @@
     <Compile Include="mesytec-replay.py" />
     <Compile Include="mesytec.py" />
     <Compile Include="msmtsystem.py" />
+    <Compile Include="roimanager.py" />
     <Compile Include="settings.py" />
     <Compile Include="simulator.py" />
     <Compile Include="test-replay.py" />

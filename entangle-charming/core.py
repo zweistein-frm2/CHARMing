@@ -220,10 +220,10 @@ class HistogramBase(base.ImageChannel):
         return 'cts'
 
     def Clear(self):
-         self.count = 0
-         self.selectedRoi = 0
-         self.Histogram().clear()
-         self.Histogram().update(self.mat)
+        self.count = 0
+        self.selectedRoi = 0
+        self.Histogram().clear()
+        self.Histogram().update(self.mat)
 
     def read_detectorSize(self):
         return self.Histogram().Size

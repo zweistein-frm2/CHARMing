@@ -2,7 +2,7 @@
 //
 #include <cmrc/cmrc.hpp>
 #include "Nicos_Install.hpp"
-
+#include <boost/filesystem.hpp>
 CMRC_DECLARE(resources);
 std::string PROJECT_NAME("nicos-install-erwin_charming");
 
@@ -33,6 +33,22 @@ int main(int argc, char* argv[])
         catch (std::exception& ex) {
             std::cout << ex.what() << std::endl;
         }
+
+#ifndef WIN32
+        std::string script_path("/usr/local/bin/nicos-erwin_charming");
+        std::ofstream script(script_path);
+        if (script.is_open()) {
+            using namespace boost::filesystem;
+            script << "#!/bin/bash" << std::endl;
+            script << "python3 " << dest.string() + "/erwin_charming/erwin-loader.py" << std::endl;
+            script.close();
+            permissions(script_path, add_perms | owner_exe| group_exe | others_exe);
+            std::cout << "exec script created :" << script_path << std::endl;
+        }
+
+
+#endif
+
 
         boost::filesystem::path relpath;
 
@@ -91,6 +107,13 @@ int main(int argc, char* argv[])
         };
         t("");
         if (nicosroot.empty()) throw  std::runtime_error("Nicos root dir not found.");
+        std::cout << "please edit the following files to reflect real tango_base :" << std::endl;
+        std::cout << dest.string() + "/erwin_charming/setups/charm.py" << std::endl;
+        std::cout << dest.string() + "/erwin_charming/setups/detector.py" << std::endl;
+        std::cout << dest.string() + "/erwin_charming/setups/listmode.py" << std::endl;
+
+
+
     }
     catch (boost::exception& e) {
         std::cout << boost::diagnostic_information(e) << std::endl;

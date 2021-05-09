@@ -18,6 +18,9 @@ namespace Zweistein {
 		std::string home;
 		char* p = std::getenv("HOME");
 		if (p == NULL) {
+#ifndef WIN32
+			home = "/tmp"; //hopefully always writable on linux
+#else
 			p = std::getenv("USERPROFILE");
 			if (p == NULL) {
 				p = std::getenv("HOMEDRIVE");
@@ -28,6 +31,7 @@ namespace Zweistein {
 				home += p;
 			}
 			else home = p;
+#endif
 		}
 		else home = p;
 		auto it = home.rbegin();
