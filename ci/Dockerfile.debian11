@@ -1,5 +1,18 @@
-FROM debian:10
+FROM debian:bullseye
 ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y \
+	apt-transport-https \
+	ca-certificates \
+	apt-utils \
+	gnupg \
+	software-properties-common \
+	wget \
+	git \
+	curl \
+	unzip \
+	tar
+
 
 RUN echo 'deb http://deb.debian.org/debian testing main' >> /etc/apt/sources.list
 RUN apt update -y
@@ -7,15 +20,16 @@ RUN apt-get install -y libc6 -f -o APT::Immediate-Configure=0
 RUN apt install -qq -y -t testing build-essential
 RUN apt install -y gcc cmake
 
-
 RUN export TZ=Europe/Berlin    # must be at beginning for unknown reasons,
 RUN apt-get install tzdata     # must be at beginning for unknown reasons,
 
 
-RUN apt-get install -y git curl unzip tar && \
-    apt-get install -y python3-pip python3-dev && \
+RUN apt install -y python3-pip python3-dev && \
     pip3 install numpy && \
+    #ln -s /usr/bin/python3 /usr/bin/python && \
     apt-get install -y libgtk-3-dev
+
+# we need python3 otherwise boost will not build its python support
 
 
 ARG projectdir=CHARMing
@@ -28,24 +42,29 @@ WORKDIR /
 RUN cd /${projectdir}/boost && rm -rf out
 RUN rm -rf /${projectdir}/out
 
-RUN cp /${projectdir}/distribution/debian10/${projectdir}/libuv/CMakeLists.txt /${projectdir}/libuv/CMakeLists.txt
+RUN cp /${projectdir}/distribution/debian11/${projectdir}/libuv/CMakeLists.txt /${projectdir}/libuv/CMakeLists.txt
 # basically we do overwrite the libuv CMakeLists.txt so that libuv is not installed (not needed as we link statically to it
+
+RUN python3 --version && find /usr -name "pyconfig.h"
+ENV CPLUS_INCLUDE_PATH=/usr/include/python3.9
 
 RUN cd /${projectdir} && \
    chmod +x initrepository.sh && ./initrepository.sh
 
-RUN cd /${projectdir}/entangle-charming  && rm -rf out && mkdir out && cd out && cmake .. && make
 
-ENV INSTALL_DEPS=libgtk-3-0,libstdc++-9-dev
-ENV LINUX_FLAVOUR=debian10
+RUN cd /${projectdir}/entangle-charming && rm -rf out && mkdir out && cd out && cmake .. && make
 
+ENV INSTALL_DEPS=libgtk-3-0,libstdc++-10-dev
+ENV LINUX_FLAVOUR=debian11
 RUN mkdir out && cd out && cmake -B /out -S /${projectdir}
-RUN  mkdir package && cd out &&  make package && mv *.deb /package
+RUN mkdir package && cd out && make package && mv *.deb /package
+
 
 RUN apt-get install -y ftp
 RUN cd /${projectdir}/distribution && chmod +x packageout.sh  && chmod +x ftpout.sh  && ./packageout.sh
 
-
+RUN cd /${projectdir}/nicos-install-erwin_charming  && chmod +x ftpout.sh && rm -rf out && mkdir out && cd out && cmake .. && make
+RUN cd /${projectdir}/nicos-install-erwin_charming/out && ../ftpout.sh nicos-install-erwin_charming x86_64
 
 
 
