@@ -8,6 +8,7 @@ out/
 libuv/CMakeLists.txt
 opencv/out/
 boost/out/
+entangle-install-isegCC2x/iseg/
 .vs/
 x64/
 obj/
