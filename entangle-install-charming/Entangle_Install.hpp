@@ -361,6 +361,8 @@ void entangle_setup(boost::filesystem::path& devicedir, boost::filesystem::path&
 
 
     devicedir = entangle_root;
+	if (devicedir.empty()) throw  std::runtime_error("Entangle dir not found.");
+	
     devicedir /= "device";
     resdir = Zweistein::UserIniDir();
 

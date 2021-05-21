@@ -52,7 +52,7 @@ namespace Mesytec {
 		 try {
 
 			 bio::mapped_file_params params(tmppath.string());
-			 size_t keepspace = 10LL * 1000LL * 1000LL * 1000LL; //10GB
+			 bio::stream_offset keepspace = 10LL * 1000LL * 1000LL * 1000LL; //10GB
 			 params.new_file_size = si.available > keepspace * 3 / 2 ? si.available - keepspace : si.available;
 			 params.flags = bio::mapped_file::mapmode::readwrite;
 

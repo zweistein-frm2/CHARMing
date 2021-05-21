@@ -161,7 +161,7 @@ foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3 PROJECT4)
 
     include_directories(${Python3_INCLUDE_DIRS} ${Python3_NumPy_INCLUDE_DIRS} ${Boost_INCLUDE_DIR} )
 
-    find_package(OpenCV REQUIRED)
+    find_package(OpenCV REQUIRED PATHS ${OpenCV_DIR})
 
     include_directories(${libuv_INCLUDE_DIR})
     include_directories(${Charm_DIR})
@@ -177,9 +177,18 @@ foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3 PROJECT4)
     message(STATUS "_Python3_LIBRARY_RELEASE= ${_Python3_LIBRARY_${Build_Type}}")
 
    message(STATUS "CMAKE_INTDIR=${CMAKE_INTDIR}")
-
-    if(${PROJECT_NAME} STREQUAL "DebugHelper")
+   
+   IF(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm")
+   set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -latomic")
+   ENDIF(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm")
+   
+   if(${PROJECT_NAME} STREQUAL "DebugHelper")
      message(STATUS "add_executable(${PROJECT_NAME})")
+	 
+	 IF(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm")
+     set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -lpython3.7m")
+     ENDIF(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm")
+	 
      add_executable(${PROJECT_NAME})
 
      target_compile_options(${PROJECT_NAME} PRIVATE  $<$<CXX_COMPILER_ID:GNU>: -Wno-error>)

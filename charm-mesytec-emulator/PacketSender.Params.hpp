@@ -25,8 +25,37 @@ public:
         boost::filesystem::path inipath = inidirectory;
         inipath.append(appName + ".json");
         fullpathfilename = inipath.string();
-        try { boost::property_tree::read_json(fullpathfilename, root); }
-        catch (std::exception) {}
+		std::cout << "ini file : "<< fullpathfilename << std::endl;
+        try { 
+			boost::property_tree::read_json(fullpathfilename, root);
+            unsigned short p = get_port();
+			root.put<unsigned short>(mesytecdevice + punkt + port, p);
+             
+			unsigned char n = get_n_charm_units();
+			root.put<unsigned char>(mesytecdevice + punkt + n_charm_units, n);
+				
+			setDevId(getDevId());
+			
+		}
+        catch (std::exception& e) {
+			std::cout << e.what() << std::endl;
+			try {
+			 std::cout << "create file: "<< fullpathfilename << std::endl;
+			 unsigned short p = get_port();
+			 root.put<unsigned short>(mesytecdevice + punkt + port, p);
+             
+			 unsigned char n = get_n_charm_units();
+			 root.put<unsigned char>(mesytecdevice + punkt + n_charm_units, n);
+			 
+			 setDevId(getDevId());
+			 
+			}
+			catch(std::exception& e){
+				std::cout << e.what() << std::endl;
+			}
+			
+			
+		}
     }
     static unsigned char getDevId() {
         return root.get<unsigned char>(mesytecdevice + punkt + devid, 0);

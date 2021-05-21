@@ -43,13 +43,16 @@ find_package(Boost ${boost_currentversion} REQUIRED COMPONENTS filesystem chrono
 
 #message(*** is debug==  ${$<$<CONFIG:DEBUG>:-gd>>} ****************)
 
-find_package(OpenCV  REQUIRED)
+find_package(OpenCV  REQUIRED PATHS ${OpenCV_DIR})
 message(******OpenCV_Dir=   ${OpenCV_DIR}  *************)
 
 include_directories(${libuv_INCLUDE_DIR})
 include_directories(${Boost_INCLUDE_DIR} ${OpenCV_INCLUDE_DIRS})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/asio-extensions/include)
 
+IF(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm")
+   set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -latomic")
+ENDIF(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm")
 
 
 # Add source to this project's executable.
@@ -57,7 +60,6 @@ add_executable (${PROJECT_NAME} "mesyDeviceCtrl.cpp" "Mesytec.Mcpd8.cpp" "Mcpd8.
 
 target_compile_options(${PROJECT_NAME} PRIVATE  $<$<CXX_COMPILER_ID:GNU>: -Wno-error>)
 target_link_libraries(${PROJECT_NAME} PRIVATE   ${Boost_LIBRARIES} ${OpenCV_LIBS}  uv_a )
-
 target_link_libraries(${PROJECT_NAME} PRIVATE  $<$<CXX_COMPILER_ID:GNU>:-static-libgcc>)
 target_link_libraries(${PROJECT_NAME} PRIVATE  $<$<CXX_COMPILER_ID:GNU>:-static-libstdc++>)
 
