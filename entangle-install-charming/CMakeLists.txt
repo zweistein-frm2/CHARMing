@@ -30,10 +30,10 @@ FOREACH(FPATH ${ENTANGLE_FILES_RC})
  get_filename_component(barename ${FPATH} NAME )
 
  if(${barename} MATCHES ".so$")
-  #MESSAGE("SO SO<<${barename}>>")
-  execute_process(COMMAND gzip -keep  ${FPATH}
-                WORKING_DIRECTORY ${repository}
-                ERROR_QUIET)
+  MESSAGE("gzip ${barename}")
+  execute_process(COMMAND "bash" "-c" "gzip -c  ${FPATH} > ${FPATH}.gz"
+  WORKING_DIRECTORY ${parentdir}
+                )
   file(COPY ${FPATH}.gz  DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/rcfiles)
   list(APPEND RESOURCE_FILES rcfiles/${barename}.gz)
   else()
@@ -58,7 +58,7 @@ include_directories(gzip-hpp/include)
 set(Boost_USE_STATIC_LIBS ON)
 
 
-find_package(Boost ${boost_currentversion} REQUIRED COMPONENTS filesystem chrono thread serialization  iostreams ${BOOST_PATHS}) # header only libraries must not be added here
+find_package(Boost ${boost_currentversion} REQUIRED COMPONENTS filesystem chrono thread iostreams ${BOOST_PATHS}) # header only libraries must not be added here
 include_directories("${Boost_INCLUDE_DIRS}" )
 include_directories(${Charm_DIR})
 set (THREADS_PREFER_PTHREAD_FLAG ON)

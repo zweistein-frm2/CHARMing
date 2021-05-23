@@ -177,18 +177,18 @@ foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3 PROJECT4)
     message(STATUS "_Python3_LIBRARY_RELEASE= ${_Python3_LIBRARY_${Build_Type}}")
 
    message(STATUS "CMAKE_INTDIR=${CMAKE_INTDIR}")
-   
+
    IF(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm")
    set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -latomic")
    ENDIF(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm")
-   
+
    if(${PROJECT_NAME} STREQUAL "DebugHelper")
      message(STATUS "add_executable(${PROJECT_NAME})")
-	 
+
 	 IF(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm")
      set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -lpython3.7m")
      ENDIF(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm")
-	 
+
      add_executable(${PROJECT_NAME})
 
      target_compile_options(${PROJECT_NAME} PRIVATE  $<$<CXX_COMPILER_ID:GNU>: -Wno-error>)
