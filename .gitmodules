@@ -51,3 +51,9 @@
 [submodule "nicos-install-sans1_charming/toml11"]
 	path = nicos-install-sans1_charming/toml11
 	url = https://github.com/ToruNiina/toml11.git
+[submodule "entangle-install-charming/zlib"]
+	path = entangle-install-charming/zlib
+	url = https://github.com/madler/zlib.git
+[submodule "entangle-install-charming/gzip-hpp"]
+	path = entangle-install-charming/gzip-hpp
+	url = https://github.com/mapbox/gzip-hpp.git
