@@ -18,21 +18,28 @@ file(STRINGS "${parentdir}/ENTANGLE_FILES" ENTANGLE_FILES_RC)
 
 set(RESOURCE_FILES "")
 list(LENGTH ENTANGLE_FILES_RC  LL)
-#message(LIST_LENGTH="${LL}")
+message(LIST_LENGTH="${LL}")
 
 FOREACH(FPATH ${ENTANGLE_FILES_RC})
- #message(${FPATH})
+ message(${FPATH})
  string(REGEX MATCH  "[\\[]" isdestdir "${FPATH}")
  #message(isdestdir="${isdestdir}")
  if("${isdestdir}"  STREQUAL "[")
    #message("is a destdirectory")
  else()
  get_filename_component(barename ${FPATH} NAME )
-  #MESSAGE("<<${barename}>>")
-  if(NOT DEFINED ENTANGLE_FILES_DO_NOT_COPY)
+
+ if(${barename} MATCHES ".so$")
+  #MESSAGE("SO SO<<${barename}>>")
+  execute_process(COMMAND gzip -keep  ${FPATH}
+                WORKING_DIRECTORY ${repository}
+                ERROR_QUIET)
+  file(COPY ${FPATH}.gz  DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/rcfiles)
+  list(APPEND RESOURCE_FILES rcfiles/${barename}.gz)
+  else()
   file(COPY ${FPATH}  DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/rcfiles)
-  endif()
   list(APPEND RESOURCE_FILES rcfiles/${barename})
+  endif()
  endif()
 
 ENDFOREACH()
@@ -41,9 +48,17 @@ message(RESOURCE_FILES=${RESOURCE_FILES})
 
 include(cmrc/CMakeRC.cmake)
 cmrc_add_resource_library(installer-charming ALIAS installer::rc NAMESPACE resources ${RESOURCE_FILES})
+
+add_subdirectory(zlib)
+include_directories(zlib)
+#message(${CMAKE_CURRENT_BINARY_DIR}/zlib)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/zlib)
+include_directories(gzip-hpp/include)
+
 set(Boost_USE_STATIC_LIBS ON)
 
-find_package(Boost ${boost_currentversion} REQUIRED COMPONENTS filesystem chrono thread  iostreams ${BOOST_PATHS}) # header only libraries must not be added here
+
+find_package(Boost ${boost_currentversion} REQUIRED COMPONENTS filesystem chrono thread serialization  iostreams ${BOOST_PATHS}) # header only libraries must not be added here
 include_directories("${Boost_INCLUDE_DIRS}" )
 include_directories(${Charm_DIR})
 set (THREADS_PREFER_PTHREAD_FLAG ON)
@@ -60,7 +75,7 @@ target_link_libraries( ${PROJECT_NAME} PRIVATE ${CMAKE_THREAD_LIBS_INIT} )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE  $<$<CXX_COMPILER_ID:GNU>:-static-libgcc>)
 target_link_libraries(${PROJECT_NAME} PRIVATE  $<$<CXX_COMPILER_ID:GNU>:-static-libstdc++>)
-
+target_link_libraries(${PROJECT_NAME} PRIVATE  zlibstatic )
 # TODO: Add tests and install targets if needed.
 
 

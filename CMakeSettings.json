@@ -16,17 +16,11 @@
       "remoteBuildRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/build/${name}",
       "remoteInstallRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/install/${name}",
       "remoteCopySources": true,
-      "rsyncCommandArgs": "-t --delete --exclude 'boost/bin.v2' --exclude 'boost/out'",
+      "rsyncCommandArgs": "-t --delete --exclude 'boost/bin.v2' --exclude 'boost/out' --exclude 'entangle-install-charming/rcfiles'",
       "remoteCopyBuildOutput": false,
       "remoteCopySourcesMethod": "rsync",
       "addressSanitizerRuntimeFlags": "detect_leaks=0",
-      "variables": [
-        {
-          "name": "ENTANGLE_FILES_DO_NOT_COPY",
-          "value": "True",
-          "type": "STRING"
-        }
-      ]
+      "variables": []
     },
     {
       "name": "debian11",
@@ -44,17 +38,11 @@
       "remoteBuildRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/build/${name}",
       "remoteInstallRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/install/${name}",
       "remoteCopySources": true,
-      "rsyncCommandArgs": "-t --delete --exclude 'boost/bin.v2' --exclude 'boost/out'",
+      "rsyncCommandArgs": "-t --delete --exclude 'boost/bin.v2' --exclude 'boost/out'--exclude 'entangle-install-charming/rcfiles' --exclude 'entangle-install-isegCC2x/iseg'",
       "remoteCopyBuildOutput": false,
       "remoteCopySourcesMethod": "rsync",
       "addressSanitizerRuntimeFlags": "detect_leaks=0",
-      "variables": [
-        {
-          "name": "ENTANGLE_FILES_DO_NOT_COPY",
-          "value": "True",
-          "type": "STRING"
-        }
-      ]
+      "variables": []
     },
     {
       "name": "ubuntu18",
@@ -72,17 +60,11 @@
       "remoteBuildRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/build/${name}",
       "remoteInstallRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/install/${name}",
       "remoteCopySources": true,
-      "rsyncCommandArgs": "-t --delete --exclude 'boost/bin.v2' --exclude 'boost/out'",
+      "rsyncCommandArgs": "-t --delete --exclude 'boost/bin.v2' --exclude 'boost/out' --exclude 'entangle-install-charming/rcfiles' --exclude 'entangle-install-isegCC2x/iseg'",
       "remoteCopyBuildOutput": false,
       "remoteCopySourcesMethod": "rsync",
       "addressSanitizerRuntimeFlags": "detect_leaks=0",
-      "variables": [
-        {
-          "name": "ENTANGLE_FILES_DO_NOT_COPY",
-          "value": "True",
-          "type": "STRING"
-        }
-      ]
+      "variables": []
     },
     {
       "name": "delopc2-Ubuntu20",
@@ -100,45 +82,11 @@
       "remoteBuildRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/build/${name}",
       "remoteInstallRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/install/${name}",
       "remoteCopySources": true,
-      "rsyncCommandArgs": "-t --delete --exclude 'boost/bin.v2' --exclude 'boost/out'",
+      "rsyncCommandArgs": "-t --delete --exclude 'boost/bin.v2' --exclude 'boost/out'--exclude 'entangle-install-charming/rcfiles' --exclude 'entangle-install-isegCC2x/iseg'",
       "remoteCopyBuildOutput": false,
       "remoteCopySourcesMethod": "rsync",
       "addressSanitizerRuntimeFlags": "detect_leaks=0",
-      "variables": [
-        {
-          "name": "ENTANGLE_FILES_DO_NOT_COPY",
-          "value": "True",
-          "type": "STRING"
-        }
-      ]
-    },
-    {
-      "name": "Taco07-Ubuntu20",
-      "generator": "Unix Makefiles",
-      "configurationType": "Release",
-      "cmakeExecutable": "/snap/cmake/current/bin/cmake",
-      "remoteCopySourcesExclusionList": [ ".vs", "out", "ENTANGLE_FILES", "REPOSITORY_INIT_OK" ],
-      "remoteCopyExcludeDirectories": [ "$HOME/.vs/${projectDirName}/${workspaceHash}/src/boost/out", "$HOME/.vs/${projectDirName}/${workspaceHash}/src/boost/bin.v2" ],
-      "cmakeCommandArgs": "",
-      "buildCommandArgs": "",
-      "ctestCommandArgs": "",
-      "inheritEnvironments": [ "linux_x64" ],
-      "remoteMachineName": "172.25.2.7",
-      "remoteCMakeListsRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/src",
-      "remoteBuildRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/build/${name}",
-      "remoteInstallRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/install/${name}",
-      "remoteCopySources": true,
-      "rsyncCommandArgs": "-t --delete --exclude 'boost/bin.v2' --exclude 'boost/out'",
-      "remoteCopyBuildOutput": false,
-      "remoteCopySourcesMethod": "rsync",
-      "addressSanitizerRuntimeFlags": "detect_leaks=0",
-      "variables": [
-        {
-          "name": "ENTANGLE_FILES_DO_NOT_COPY",
-          "value": "True",
-          "type": "STRING"
-        }
-      ]
+      "variables": []
     },
     {
       "name": "x64-Release",
@@ -150,13 +98,7 @@
       "buildCommandArgs": "-v",
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "msvc_x64_x64" ],
-      "variables": [
-        {
-          "name": "ENTANGLE_FILES_DO_NOT_COPY",
-          "value": "True",
-          "type": "STRING"
-        }
-      ]
+      "variables": []
     },
     {
       "name": "x64-Debug",
@@ -168,13 +110,8 @@
       "buildCommandArgs": "-v",
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "msvc_x64_x64" ],
-      "variables": [
-        {
-          "name": "ENTANGLE_FILES_DO_NOT_COPY",
-          "value": "True",
-          "type": "STRING"
-        }
-      ]
+      "variables": []
+        
     }
   ]
 }

@@ -2,9 +2,8 @@
 //
 #include <cmrc/cmrc.hpp>
 #include "Entangle_Install.hpp"
-
-
-
+#include <boost/algorithm/string/predicate.hpp>
+#include "gzip/decompress.hpp"
 CMRC_DECLARE(resources);
 std::string PROJECT_NAME("entangle-install-charming");
 
@@ -58,10 +57,27 @@ int main(int argc, char* argv[])
            dest.append(entry.filename());
 		   dest = dest.generic_path();
            std::string tmp = dest.string();
-           //if (!boost::filesystem::exists(tmp)) {
-           {
+           if (boost::algorithm::ends_with(tmp, ".gz")) {
+
+	           std::cout << tmp << " : compressed length: " << file1.size() << std::endl;
+
+               try {
+                   std::string decompressed_data = gzip::decompress(file1.begin(), file1.size());
+
+                   std::cout << " : decompressed length: " << decompressed_data.length() << std::endl;
+                   tmp = tmp.substr(0, tmp.size() - 3);
+                   std::ofstream o(tmp.c_str(), std::ofstream::binary);
+                   o.write(decompressed_data.c_str(), decompressed_data.length());
+               }
+               catch (std::exception& ex) {
+                   std::cout << ex.what() << std::endl;
+               }
+           }
+
+           else {
                std::ofstream o(dest.c_str(), std::ofstream::binary);
                o.write(file1.begin(), file1.size());
+
            }
        }
        if (devicedir.empty()) throw  std::runtime_error("Entangle device dir not found.");

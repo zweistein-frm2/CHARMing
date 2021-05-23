@@ -5,7 +5,7 @@
 
 !*.*
 out/
-entangle-charming/out
+entangle-charming/out/
 libuv/CMakeLists.txt
 opencv/out/
 boost/out/

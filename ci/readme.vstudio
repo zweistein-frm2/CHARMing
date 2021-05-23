@@ -14,7 +14,7 @@ Example:
 
     for ubuntu18:
 
-    docker build -t vs-ubuntu18 -f ci/vsDockerfile.ubuntu18 .  // only once
+    docker build -m 8g -t vs-ubuntu18 -f ci/vsDockerfile.ubuntu18 .  // only once
     docker run -p 5000:22 -i -t vs-ubuntu18 /bin/bash
     (if you have shared a local directory in
      docker-> settings then you can access the container from the host

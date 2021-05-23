@@ -36,7 +36,7 @@ RUN yum install -y which git devtoolset-9-gcc devtoolset-9-gcc-c++  make && \
 
 
 
-RUN yum install -y wget dpkg
+RUN yum install -y gzip wget dpkg
 RUN wget https://forensics.cert.org/cert-forensics-tools-release-el7.rpm && \
     rpm -Uvh cert-forensics-tools-release*rpm && \
 	yum --enablerepo=forensics install -y libiconv-static

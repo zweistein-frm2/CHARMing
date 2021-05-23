@@ -11,7 +11,7 @@ RUN yum install -y epel-release --nogpgcheck && yum repolist --nogpgcheck  && \
      rpm -ivh http://repo.okay.com.mx/centos/8/x86_64/release/okay-release-1-3.el8.noarch.rpm?
 
 
-RUN yum install -y dnf which git curl unzip tar wget dpkg  && \
+RUN yum install -y dnf which git curl gzip unzip tar wget dpkg  && \
     yum install -y python3-pip python3-devel --nogpgcheck && \
     pip3 install numpy
 
