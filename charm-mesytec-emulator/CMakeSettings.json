@@ -20,12 +20,7 @@
       "remoteCopySourcesMethod": "rsync",
       "addressSanitizerRuntimeFlags": "detect_leaks=0",
       "variables": [
-	  {
-          "name": "ENTANGLE_FILES_DO_NOT_COPY",
-          "value": "True",
-          "type": "STRING"
-        },
-		{
+	   		{
           "name": "CHARMING_DIR",
           "value": "/root/.vs/CHARMing/8b1e3cbe-1b7c-463b-a34c-4df2092ae58b/src",
           "type": "PATH"
@@ -52,12 +47,7 @@
       "remoteCopySourcesMethod": "rsync",
       "addressSanitizerRuntimeFlags": "detect_leaks=0",
       "variables": [
-	  {
-          "name": "ENTANGLE_FILES_DO_NOT_COPY",
-          "value": "True",
-          "type": "STRING"
-        },
-		{
+	  		{
           "name": "CHARMING_DIR",
           "value": "/root/.vs/CHARMing/8b1e3cbe-1b7c-463b-a34c-4df2092ae58b/src",
           "type": "PATH"
@@ -85,11 +75,6 @@
       "addressSanitizerRuntimeFlags": "detect_leaks=0",
       "variables": [
         {
-          "name": "ENTANGLE_FILES_DO_NOT_COPY",
-          "value": "True",
-          "type": "STRING"
-        },
-		{
           "name": "CHARMING_DIR",
           "value": "/home/localadmin/.vs/CHARMing/8b1e3cbe-1b7c-463b-a34c-4df2092ae58b/src",
           "type": "PATH"
@@ -117,11 +102,6 @@
       "addressSanitizerRuntimeFlags": "detect_leaks=0",
       "variables": [
         {
-          "name": "ENTANGLE_FILES_DO_NOT_COPY",
-          "value": "True",
-          "type": "STRING"
-        },
-		 {
           "name": "CHARMING_DIR",
           "value": "/home/localadmin/.vs/CHARMing/8b1e3cbe-1b7c-463b-a34c-4df2092ae58b/src",
           "type": "PATH"
@@ -139,11 +119,7 @@
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "msvc_x64_x64" ],
       "variables": [
-        {
-          "name": "ENTANGLE_ROOT",
-          "value": "C:\\Users\\alanghof\\source\\repos\\entangle",
-          "type": "PATH"
-        }
+
       ]
     },
     {
@@ -157,11 +133,7 @@
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "msvc_x64_x64" ],
       "variables": [
-        {
-          "name": "ENTANGLE_ROOT",
-          "value": "C:\\Users\\alanghof\\source\\repos\\entangle",
-          "type": "PATH"
-        }
+
       ]
     }
   ]

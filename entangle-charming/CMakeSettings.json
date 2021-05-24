@@ -134,12 +134,12 @@
       "variables": [
         {
           "name": "ENTANGLE_ROOT",
-          "value": "C:\\Users\\alanghof\\source\\repos\\entangle\\entangle",
+          "value": "C:\\Users\\Public\\Documents\\entangle\\entangle",
           "type": "PATH"
         },
         {
           "name": "ENTANGLE_RES",
-          "value": "C:\\Users\\alanghof\\source\\repos\\entangle\\example",
+          "value": "C:\\Users\\Publice\\Documents\\entangle\\example",
           "type": "PATH"
         }
       ]
@@ -157,7 +157,7 @@
       "variables": [
         {
           "name": "ENTANGLE_ROOT",
-          "value": "C:\\Users\\alanghof\\source\\repos\\entangle\\entangle",
+          "value": "C:\\Users\\Public\\Documents\\entangle\\entangle",
           "type": "PATH"
         }
       ]

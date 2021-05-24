@@ -80,7 +80,7 @@ include_directories("${Charm_DIR}")
 add_compile_options($<$<CXX_COMPILER_ID:GNU>:-Wno-narrowing>)
 configure_file( cmake_variables.h.in ${CMAKE_BINARY_DIR}/generated/cmake_variables.h )
 include_directories( ${CMAKE_BINARY_DIR}/generated/ ) # Make sure it can be included...
-add_executable (${PROJECT_NAME} "PacketSender.cpp"  ${Charm_DIR}/Mcpd8.CmdPacket.cpp ${Charm_DIR}/Mesyec.Mpsd8.cpp "glibc2.27_compat2.2.5.cpp")
+add_executable (${PROJECT_NAME} "PacketSender.cpp"  ${Charm_DIR}/Mcpd8.CmdPacket.cpp ${Charm_DIR}/Mesyec.Mpsd8.cpp ${Charm_DIR}/glibc2.27_compat2.2.5.cpp)
 
 if("${RELEASE_CODENAME}" STREQUAL "bionic")
    message(STATUS 'ubuntu 18 - bionic')

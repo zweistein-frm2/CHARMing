@@ -311,7 +311,7 @@ void entangle_setup(boost::filesystem::path& devicedir, boost::filesystem::path&
     std::vector<std::string> pythonsyspath = Zweistein::RunCmdline(cmdline);
     boost::filesystem::path entangle_root;
 #ifdef _WIN32
-    entangle_root = "C:\\Users\\alanghof\\source\\repos\\entangle\\entangle";
+    entangle_root = "C:\\Users\\Public\\Documents\\entangle\\entangle";
 #endif
     int ipath = 0;
     bool dobreak = false;
@@ -362,7 +362,7 @@ void entangle_setup(boost::filesystem::path& devicedir, boost::filesystem::path&
 
     devicedir = entangle_root;
 	if (devicedir.empty()) throw  std::runtime_error("Entangle dir not found.");
-	
+
     devicedir /= "device";
     resdir = Zweistein::UserIniDir();
 

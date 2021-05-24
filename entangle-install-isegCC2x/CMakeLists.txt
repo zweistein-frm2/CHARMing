@@ -56,7 +56,7 @@ find_package (Threads REQUIRED)
 
 include_directories(${Charm_DIR})
 # Add source to this project's executable.
-add_executable (${PROJECT_NAME} "entangle-Install-isegCC2x.cpp"  "glibc2.27_compat2.2.5.cpp")
+add_executable (${PROJECT_NAME} "entangle-Install-isegCC2x.cpp"  ${Charm_DIR}/glibc2.27_compat2.2.5.cpp)
 
 if("${RELEASE_CODENAME}" STREQUAL "bionic")
    message(STATUS 'ubuntu 18 - bionic')
