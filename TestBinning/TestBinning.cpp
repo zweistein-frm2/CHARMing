@@ -53,7 +53,7 @@ int main()
 
     std::cout << boost::geometry::wkt(roi) << std::endl;
     std::string jsonpath = "C:\\temp\\testbinning2.json";
-    std::string txtpath = "C:\\users\\alanghof\\source\\repos\\charming\\TestBinning\\pos_cal_lut_2016_07_13.txt";
+    std::string txtpath = "C:\\Users\\Public\\Documents\\CHARMing\\TestBinning\\pos_cal_lut_2016_07_13.txt";
     try {
 
         bool b = false;
