@@ -1,6 +1,7 @@
 
 if (EXISTS "${CMAKE_CURRENT_LIST_DIR}/REPOSITORY_INIT_OK")
    message("REPOSITORY_INIT_OK found, assuming repository already initialised.")
+
 else()
 message("init repository ... takes time!")
  if(WIN32)
