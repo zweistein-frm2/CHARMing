@@ -30,11 +30,31 @@ set(Boost_DIR ${BOOST_PREFIX}/lib/cmake/Boost-${boost_currentversion})
 #file(MAKE_DIRECTORY ${Boost_DIR})
 message(STATUS "BOOST_PREFIX=${BOOST_PREFIX}")
 
-#set(Charm_DIR ${parentdir}/charm )
-#set(repository ${Charm_DIR})
+set(Charm_DIR ${parentdir}/charm )
+set(repository ${Charm_DIR})
 
 set(Boost_USE_STATIC_LIBS ON)
 
+if(DEFINED CHARMING_DIR)
+# usually only done when cross compiling from a Windows machine to target linux
+if(UNIX)
+
+execute_process(COMMAND rm -r erwin_charming
+                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                OUTPUT_VARIABLE var1
+                )
+
+message(STATUS ${var1})
+
+execute_process(COMMAND git clone https://github.com/zweistein22/erwin_charming.git
+                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                OUTPUT_VARIABLE var1
+                )
+
+message(STATUS ${var1})
+
+endif()
+endif()
 
 
 execute_process(COMMAND git checkout master
@@ -56,6 +76,8 @@ execute_process(COMMAND git submodule update
                 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/erwin_charming
                 ERROR_QUIET
                 )
+
+
 
 # CMakeList.txt : CMake project for Boost_Installer, include source and define
 # project specific logic here.
@@ -99,9 +121,9 @@ include_directories("${Boost_INCLUDE_DIRS}" )
 set (THREADS_PREFER_PTHREAD_FLAG ON)
 find_package (Threads REQUIRED)
 
-#include_directories(${Charm_DIR})
+include_directories(${Charm_DIR})
 # Add source to this project's executable.
-add_executable(${PROJECT_NAME} "nicos-install-erwin_charming.cpp" "glibc2.27_compat2.2.5.cpp")
+add_executable(${PROJECT_NAME} "nicos-install-erwin_charming.cpp" ${Charm_DIR}/glibc2.27_compat2.2.5.cpp)
 
 if("${RELEASE_CODENAME}" STREQUAL "bionic")
    message(STATUS 'ubuntu 18 - bionic')

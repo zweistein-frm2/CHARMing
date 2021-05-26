@@ -96,7 +96,7 @@ foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3 PROJECT4)
     target_compile_options(uv_a PRIVATE $<$<CXX_COMPILER_ID:GNU>:-fpic>)
 
     add_definitions(-DENTANGLE_LOGGER)
-
+    #add_definitions(-DBOOST_BIND_GLOBAL_PLACEHOLDERS)
 
     #add_definitions(-DUNICODE -D_UNICODE)
     if(WIN32)

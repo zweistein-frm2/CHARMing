@@ -1,6 +1,9 @@
 #define BOOST_NUMPY_STATIC_LIB
 #define BOOST_PYTHON_STATIC_LIB
+#ifndef BOOST_BIND_GLOBAL_PLACEHOLDERS
 #define BOOST_BIND_GLOBAL_PLACEHOLDERS
+#endif
+
 #include <Python.h>
 #include <boost/python.hpp>
 #include <boost/python/tuple.hpp>
