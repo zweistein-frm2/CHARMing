@@ -5,6 +5,7 @@
 [submodule "boost"]
 	path = boost
 	url = https://github.com/boostorg/boost.git
+	ignore = all
 [submodule "entangle-charming/pyboostcvconverter"]
 	path = entangle-charming/pyboostcvconverter
 	url = https://github.com/Algomorph/pyboostcvconverter.git
@@ -21,7 +22,7 @@
 [submodule "opencv"]
 	path = opencv
 	url = https://github.com/opencv/opencv.git
-
+	ignore = all
 [submodule "charm/magic_enum"]
 	path = charm/magic_enum
 	url = https://github.com/Neargye/magic_enum.git
@@ -40,12 +41,14 @@
 [submodule "nicos-install-erwin_charming/erwin_charming"]
 	path = nicos-install-erwin_charming/erwin_charming
 	url = https://github.com/zweistein22/erwin_charming.git
+	ignore = all
 [submodule "nicos-install-erwin_charming/toml11"]
 	path = nicos-install-erwin_charming/toml11
 	url = https://github.com/ToruNiina/toml11.git
 [submodule "nicos-install-sans1_charming/sans1_charming"]
 	path = nicos-install-sans1_charming/sans1_charming
 	url = https://github.com/zweistein22/sans1_charming.git
+	ignore = all
 [submodule "nicos-install-sans1_charming/toml11"]
 	path = nicos-install-sans1_charming/toml11
 	url = https://github.com/ToruNiina/toml11.git
