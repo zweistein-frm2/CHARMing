@@ -201,18 +201,23 @@ foreach(PROJECT_NAME IN LISTS PROJECT1 PROJECT2 PROJECT3 PROJECT4)
 
     else()
      message(STATUS "add_library(${PROJECT_NAME} SHARED )")
+	 
+	 
+	 
      add_library(${PROJECT_NAME} SHARED )
-
+	 
+     if(WIN32)
+	  set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".pyd")
+      set( CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_BINARY_DIR} CACHE PATH "" FORCE )
+	  set( CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_BINARY_DIR} CACHE PATH "" FORCE)
+     else()
+      set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "")
+     endif()
      target_compile_options(${PROJECT_NAME} PRIVATE $<$<CXX_COMPILER_ID:GNU>:-fpic>)
      target_link_libraries(${PROJECT_NAME} PRIVATE ${Boost_LIBRARIES} ${OpenCV_LIBS} uv_a  )
      target_link_libraries(${PROJECT_NAME} PRIVATE "${_Python3_LIBRARY_${Build_Type}}" ${${Boost_python_library}} ${${Boost_numpy_library}})
 
-     if(WIN32)
-      set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".pyd")
-      set( CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_BINARY_DIR} )
-     else()
-      set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "")
-     endif()
+     
     endif()
     #set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS " -O3 -DNDEBUG")
     add_custom_command(
