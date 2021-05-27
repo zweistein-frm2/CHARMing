@@ -61,7 +61,7 @@ endif()
 
 
     execute_process(
-        COMMAND git diff HEAD
+        COMMAND git diff --ignore-submodules HEAD
          WORKING_DIRECTORY ${repository}
         OUTPUT_VARIABLE GIT_DIFF_HEAD)
 
