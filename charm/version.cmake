@@ -68,18 +68,18 @@ endif()
 
 if ("${GIT_DIFF_HEAD}" STREQUAL "")
     execute_process(
-        COMMAND git show -s --format=%cd --date=format:%y-%m-%dT%H_%M%z
+        COMMAND git show -s --format=%cd --date=format:%y-%m-%d_%H%M%z
          WORKING_DIRECTORY ${repository}
         OUTPUT_VARIABLE GIT_DATE)
     execute_process(
-        COMMAND git show -s --format=%cd --date=format:%y%m%d
+        COMMAND git show -s --format=%cd --date=format:%y-%m-%d
          WORKING_DIRECTORY ${repository}
         OUTPUT_VARIABLE GIT_PATCH)
 else()
-    string(TIMESTAMP CURRENT_TIME "%y-%m-%dT%H_%M")
+    string(TIMESTAMP CURRENT_TIME "%y-%m-%d_%H%M")
     set(GIT_DATE Uncommmitted-${CURRENT_TIME})
 
-     string(TIMESTAMP PATCH_TIME "%y%m%d%H%M")
+     string(TIMESTAMP PATCH_TIME "%y%m%d_%H%M")
     set(GIT_PATCH ${PATCH_TIME})
 
 endif()

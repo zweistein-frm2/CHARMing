@@ -9,7 +9,11 @@ RUN yum install tzdata   # must be at beginning for unknown reasons,
 RUN yum install -y epel-release && yum repolist  && \
      rpm -ivh http://repo.okay.com.mx/centos/7/x86_64/release/okay-release-1-3.el7.noarch.rpm?
 
-RUN yum install -y centos-sclo-rh centos-release-scl git --nogpgcheck && \
+RUN yum -y remove  git*
+RUN yum -y install https://packages.endpoint.com/rhel/7/os/x86_64/endpoint-repo-1.7-1.x86_64.rpm
+RUN yum -y install git
+
+RUN yum install -y centos-sclo-rh centos-release-scl  --nogpgcheck && \
     yum install -y python3-pip python3-devel --nogpgcheck && \
     pip3 install numpy && \
     yum install -y gtk3-devel --nogpgcheck
