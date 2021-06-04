@@ -1,0 +1,11 @@
+# escape=`
+FROM mcr.microsoft.com/windows:1809
+
+SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop';"]
+
+ADD https://aka.ms/vs/16/release/vc_redist.x64.exe /VC_redist.x64.exe
+RUN C:/VC_redist.x64.exe /quiet /install
+COPY out/build/x64-Release/charm-mesytec-emulator.exe .
+EXPOSE 54321/udp
+
+
