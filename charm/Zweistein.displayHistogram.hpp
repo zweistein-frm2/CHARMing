@@ -44,7 +44,7 @@
 namespace Zweistein {
 	void displayHistogram(boost::asio::io_service& io_service, boost::shared_ptr<Zweistein::XYDetectorSystem> pmsmtsystem1) {
 		using namespace magic_enum::bitwise_operators; // out-of-the-box bitwise operators for enums.
-		int iloop = 20;
+		int iloop = 40;
 		int waiteach = 300;
 		int il = 0;
 		for (il = 0; il < iloop; il++) {
@@ -134,7 +134,10 @@ namespace Zweistein {
 			sigslot::signal<cv::Mat&, cv::Mat&> sig;
 			bool bshow = true;
 #ifndef _WIN32
-			if (NULL == getenv("DISPLAY")) bshow = false;
+			if (NULL == getenv("DISPLAY")) {
+				LOG_WARNING << "environment variable DISPLAY not set." << std::endl;
+				bshow = false;
+			}
 #endif
 			bool bbinningwindow = false;
 			std::vector<cv::String> windows = std::vector<cv::String>();

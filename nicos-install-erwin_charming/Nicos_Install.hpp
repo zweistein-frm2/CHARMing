@@ -175,7 +175,7 @@ namespace Zweistein {
 
             std::string line;
 
-            while (std::getline(ierr, line) && !line.empty()) {
+            for (; std::getline(ierr, line);) {
                 boost::erase_all(line, "\r");
                 std::cerr << line << std::endl;
                 if (!errpushed) {
@@ -187,9 +187,9 @@ namespace Zweistein {
 
 
 
-            while (std::getline(is, line) && !line.empty()) {
+            for (; std::getline(is, line);) {
                 boost::erase_all(line, "\r");
-                data.push_back(line);
+                if(!line.empty()) data.push_back(line);
                 std::string_view sv(line);
                 if (!expectedlinestart.empty()) {
                     size_t s = sv.find(expectedlinestart);
@@ -323,7 +323,7 @@ void nicos_setup(boost::filesystem::path& nicos_root, std::vector<std::string>& 
 
 
 
-    std::string pythoncmd = R"(import sys;from distutils.sysconfig import get_python_lib;print(get_python_lib());print('\n'.join(sys.path)))";
+    std::string pythoncmd = R"(import sys;from distutils.sysconfig import get_python_lib;print(get_python_lib());print('\n'.join(sys.path));)";
     std::string cmdline = PYTHON + " -c " + "\"" + pythoncmd + "\"";
     std::vector<std::string> pythonsyspath = Zweistein::RunCmdline(cmdline);
     if (!nicos_root.empty()) {

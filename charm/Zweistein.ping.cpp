@@ -17,27 +17,33 @@
 
 
 namespace Zweistein {
-	
+
 	bool ping(std::string ipaddress) {
 
     namespace bp = boost::process;
 
     bp::ipstream is;
     bp::ipstream ierr;
-    std::string result;
+    std::string  param;
 
 
     try {
         std::vector<std::string> data;
         std::string line;
         std::error_code ec;
-        boost::filesystem::path p = bp::search_path("ping"); //
+        param = "ping";
+        boost::filesystem::path p = bp::search_path(param); //
+        if (p.empty()) {
+            LOG_ERROR << param << " not found." << std::endl;
+            return false;
+        }
         int retry = 1;
         std::string cc = "-c" + std::to_string(retry);
 #ifdef WIN32
         cc = "-n " + std::to_string(retry);
 #endif
         std::string cmdline = p.string() + " " + cc + " " + ipaddress;
+        param = cmdline;
         bp::child c(cmdline, bp::std_out > is, bp::std_err > ierr);
         c.wait_for(std::chrono::seconds(1), ec);
         if (c.running()) c.terminate();
@@ -73,12 +79,12 @@ namespace Zweistein {
         }
     }
     catch (boost::exception& e) {
-        LOG_ERROR << boost::diagnostic_information(e) << std::endl;
+        LOG_ERROR << param << " : " <<boost::diagnostic_information(e) << std::endl;
     }
     return false;
 }
-	
-	
-	
-	
+
+
+
+
 }

@@ -1,0 +1,34 @@
+{
+    "MsmtSystem": {
+        "DataHome": "\/root\/",
+        "BinningFile": "",
+        "MesytecDevice0": {
+            "mcpd_ip": "172.25.2.24",
+            "mcpd_port": "54321",
+            "mcpd_id": "0",
+            "data_host": "0.0.0.0",
+            "networkcard": "172.17.0.2",
+            "eventdataformat": "Mdll",
+            "datagenerator": "CharmSimulator",
+            "CounterADC0": "",
+            "CounterADC1": "",
+            "CounterADC2": "",
+            "CounterADC3": "",
+            "CounterADC4": "",
+            "CounterADC5": "",
+            "CounterADC6": "",
+            "CounterADC7": "",
+            "Threshold_and_Gains0": "",
+            "Threshold_and_Gains1": "",
+            "Threshold_and_Gains2": "",
+            "Threshold_and_Gains3": "",
+            "Threshold_and_Gains4": "",
+            "Threshold_and_Gains5": "",
+            "Threshold_and_Gains6": "",
+            "Threshold_and_Gains7": ""
+        },
+        "CharmDevice0": {
+            "n_charm_units": "2"
+        }
+    }
+}

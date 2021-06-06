@@ -32,8 +32,26 @@ RUN add-apt-repository -y ppa:ubuntu-toolchain-r/test && \
 
 RUN apt install -y python3-pip python3-dev && \
     pip3 install numpy && \
-    #ln -s /usr/bin/python3 /usr/bin/python && \
+    ln -s /usr/bin/python3 /usr/bin/python && \
     apt-get install -y libgtk-3-dev
+	
+RUN apt install -y python3-pip python3-dev
+RUN pip3 install --upgrade pip
+RUN pip3 install numpy
+RUN pip3 install scikit-build
+RUN pip3 install opencv-python
+RUN pip3 install psutil
+
+ENV TANGO_HOST=ictrlfs.ictrl.frm2:10000
+RUN echo "deb [trusted=yes] https://forge.frm2.tum.de/repos bionic/" >>/etc/apt/sources.list.d/mlz.list
+RUN apt-get update
+
+RUN echo "tango-common tango-common/tango-host string ${TANGO_HOST}" |  debconf-set-selections
+RUN echo 'tango-db tango-db/dbconfig-install boolean false' |  debconf-set-selections
+RUN apt-get install -y python3-pytango
+
+RUN pip3 install six
+RUN git clone https://forge.frm2.tum.de/review/frm2/tango/entangle && cd entangle && python3 setup.py install
 
 # we need python3 otherwise boost will not build its python support
 
@@ -62,6 +80,11 @@ RUN echo '#!/bin/bash' >> entrypoint.sh && \
     echo 'fg %1'  >> entrypoint.sh && \
     chmod +x entrypoint.sh
 
+EXPOSE 54321/udp
+
+RUN apt-get install -y nano
+COPY ci/vsDockerfile/charmsystem.json /etc/CHARMing/charmsystem.json
+COPY ci/vsDockerfile/ERWIN_detector.res /etc/entangle/ERWIN_detector.res
 
 ENTRYPOINT ["/entrypoint.sh"]
 

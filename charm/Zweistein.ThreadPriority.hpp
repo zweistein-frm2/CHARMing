@@ -66,15 +66,26 @@ namespace Zweistein {
 				std::vector<std::string> data;
 				std::string line;
 				std::error_code ec;
+
+				std::string cmd = "sysctl";
+
 				boost::filesystem::path p = bp::search_path("sysctl"); //
+				if (p.empty()) {
+					LOG_ERROR << cmd << " : not found." << std::endl;
+					return false;
+				}
 				std::string cmdline = p.string() + " -a";
 				bp::child c(cmdline,bp::std_out>is,bp::std_err>ierr);
 				c.wait_for(std::chrono::seconds(2), ec);
 				if (c.running()) c.terminate();
+				std::string wanted = "net.core.rmem_max";
 				while (std::getline(is, line) && !line.empty()) {
-					if(line.find("net.core.rmem_max")!=std::string::npos)	data.push_back(line);
+					if(line.find(wanted)!=std::string::npos)	data.push_back(line);
 				}
-
+				if (data.empty()) {
+					LOG_ERROR << wanted << " not found in output from " << cmdline << std::endl;
+					return false;
+				}
 				size_t t=data[0].find_first_of("=");
 				long buffersize = std::atol(data[0].substr(t + 1).c_str());
 
@@ -87,7 +98,7 @@ namespace Zweistein {
 					bool bdenied = false;
 					while (std::getline(ierr2, line) && !line.empty()) {
 						if (line.find("permission denied") != std::string::npos) bdenied = true;
-					//	std::cout << line << std::endl;
+						LOG_ERROR << line << std::endl;
 					}
 					c.wait_for(std::chrono::seconds(1), ec);
 					if (c.running()) c.terminate();
