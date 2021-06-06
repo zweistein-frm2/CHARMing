@@ -53,6 +53,11 @@ namespace Mesytec {
 				const int maxCounter = 8;
 				const int MaxDevices = 4;
 
+				int maxdevices = MaxDevices;
+				if (root.empty()) {
+					maxdevices = 1;
+				}
+
 
 
 				DATAHOME = root.get<std::string>(oursystem + punkt + datahome, Zweistein::GetHomePath().string());
@@ -61,7 +66,8 @@ namespace Mesytec {
 				BINNINGFILE = root.get<std::string>(oursystem + punkt + binningfile, inidirectory.empty()?"": (inidirectory /= "binning.json").string());
 				root.put<std::string>(oursystem + punkt + binningfile, BINNINGFILE.string());
 
-				for (int n = 0; n < MaxDevices; n++) {
+
+				for (int n = 0; n < maxdevices; n++) {
 					Mcpd8::Parameters p1;
 					std::stringstream ss;
 					ss << oursystem << punkt << mesytecdevice << n << punkt;
@@ -96,7 +102,7 @@ namespace Mesytec {
 					if (checknetwork && !Zweistein::InterfaceExists(p1.networkcard)) {
 						LOG_ERROR << s2 + "networkcard=" << p1.networkcard << " not found." << std::endl;
 						rv = false;
-						continue;
+						//continue;
 					}
 
 					if (n == 0) {
@@ -104,15 +110,20 @@ namespace Mesytec {
 						std::string m3 = std::string(a3.data(), a3.size());
 						std::string enum_tmp = root.get<std::string>(s2 + "eventdataformat", m3);
 						auto a = magic_enum::enum_cast<Zweistein::Format::EventData>(enum_tmp);
+						std::cout << "eventdataformat" << " : ";
 						if (!a) {
-							std::cout << "option not found : possible values are ";
+							std::cout << "option not found : ";
+							rv = false;
+						}
+						else p1.eventdataformat = a.value();
+     					{
+							std::cout <<"possible values are ";
 							constexpr auto & names = magic_enum::enum_names<Zweistein::Format::EventData>();
 							for (const auto& n : names) std::cout << " " << n;
 							std::cout << std::endl;
-							rv = false;
-							continue;
+
+							//continue;
 						}
-						else p1.eventdataformat = a.value();
 					}
 					else {
 						std::string enum_tmp = root.get<std::string>(s2 + "eventdataformat");
@@ -123,7 +134,7 @@ namespace Mesytec {
 							for (const auto& n : names) std::cout << " " << n;
 							std::cout << std::endl;
 							rv = false;
-							continue;
+							//continue;
 						}
 						else p1.eventdataformat = a.value();
 					}
@@ -136,15 +147,21 @@ namespace Mesytec {
 						std::string m5 = std::string(a5.data(), a5.size());
 						std::string enum_tmp = root.get<std::string>(s2 + "datagenerator", m5);
 						auto a = magic_enum::enum_cast<Zweistein::DataGenerator>(enum_tmp);
+						std::cout << "datagenerator" << " : ";
 						if (!a) {
-							std::cout << "option not found : possible values are ";
+							std::cout << "option not found :  ";
+							rv = false;
+							//continue;
+						}
+						else p1.datagenerator = a.value();
+						{
+							std::cout << "possible values are :";
 							constexpr auto& names = magic_enum::enum_names<Zweistein::DataGenerator>();
 							for (const auto& n : names) std::cout << " " << n;
 							std::cout << std::endl;
-							rv = false;
-							continue;
+
+
 						}
-						else p1.datagenerator = a.value();
 					}
 					else {
 						std::string enum_tmp = root.get<std::string>(s2 + "datagenerator");
@@ -155,7 +172,7 @@ namespace Mesytec {
 							for (const auto& n : names) std::cout << " " << n;
 							std::cout << std::endl;
 							rv = false;
-							continue;
+							//continue;
 						}
 						else p1.datagenerator = a.value();
 					}

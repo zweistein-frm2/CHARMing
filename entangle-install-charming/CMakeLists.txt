@@ -28,12 +28,20 @@ FOREACH(FPATH ${ENTANGLE_FILES_RC})
    #message("is a destdirectory")
  else()
  get_filename_component(barename ${FPATH} NAME )
+ if(EXISTS ${FPATH})
 
+ else()
+ MESSAGE(STATUS "NOT FOUND " ${FPATH})
+ set(NOT_ALL_FILES_FOUND True)
+ endif()
+ if(DEFINED NOT_ALL_FILES_FOUND)
+ else()
  if(${barename} MATCHES ".so$")
   MESSAGE("gzip ${barename}")
   execute_process(COMMAND "bash" "-c" "gzip -c  ${FPATH} > ${FPATH}.gz"
   WORKING_DIRECTORY ${parentdir}
                 )
+
   file(COPY ${FPATH}.gz  DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/rcfiles)
   list(APPEND RESOURCE_FILES rcfiles/${barename}.gz)
   else()
@@ -42,7 +50,13 @@ FOREACH(FPATH ${ENTANGLE_FILES_RC})
   endif()
  endif()
 
+ endif()
+
 ENDFOREACH()
+
+endif()
+
+if(NOT DEFINED NOT_ALL_FILES_FOUND)
 
 message(RESOURCE_FILES=${RESOURCE_FILES})
 
@@ -93,7 +107,7 @@ install(TARGETS ${PROJECT_NAME}
 
 
 else()
- message(WARNING "${parentdir}/ENTANGLE_FILES does not exist.\n"
+ message(WARNING "${parentdir}/ENTANGLE_FILES does not exist or file(s) referered in it do not exist\n"
    "please build entangle-charming to generate ENTANGLE_FILES\n"
    "${PROJECT_NAME} not build.")
 
