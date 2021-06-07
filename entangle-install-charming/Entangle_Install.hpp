@@ -320,8 +320,8 @@ void entangle_setup(boost::filesystem::path& devicedir, boost::filesystem::path&
     // remember : with syspath.py we loaded python library path first and syspath(s) second
     for (auto& psyspath : pythonsyspath) {
         std::string possibleName[2] = { "entangle","entangle-" };
+        std::cout << "Trying " << psyspath << std::endl;
         for (int i = 0; i < 2; i++) {
-            std::cout << "Trying " << psyspath << std::endl;
             boost::filesystem::path p(psyspath);
             if (!boost::filesystem::is_directory(p)) continue;
             for (auto& entry : boost::make_iterator_range(boost::filesystem::directory_iterator(p), {})) {

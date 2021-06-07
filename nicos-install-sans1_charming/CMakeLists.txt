@@ -35,6 +35,26 @@ message(STATUS "BOOST_PREFIX=${BOOST_PREFIX}")
 
 set(Boost_USE_STATIC_LIBS ON)
 
+if(DEFINED CHARMING_DIR)
+# usually only done when cross compiling from a Windows machine to target linux
+if(UNIX)
+
+execute_process(COMMAND rm -r sans1_charming
+                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                OUTPUT_VARIABLE var1
+                )
+
+message(STATUS ${var1})
+
+execute_process(COMMAND git clone https://github.com/zweistein22/sans1_charming.git
+                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                OUTPUT_VARIABLE var1
+                )
+
+message(STATUS ${var1})
+
+endif()
+endif()
 
 
 execute_process(COMMAND git checkout master

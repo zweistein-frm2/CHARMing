@@ -337,6 +337,7 @@ void nicos_setup(boost::filesystem::path& nicos_root, std::vector<std::string>& 
     bool dobreak = false;
     // remember : with syspath.py we loaded python library path first and syspath(s) second
     for (auto& psyspath : pythonsyspath) {
+        std::cout << "Trying " << psyspath << std::endl;
         std::string possibleName[1] = { "nicos"};
         for (int i = 0; i < 1; i++) {
             boost::filesystem::path p(psyspath);
