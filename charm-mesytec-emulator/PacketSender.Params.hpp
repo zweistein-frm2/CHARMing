@@ -12,6 +12,7 @@ class PacketSenderParams {
     const static std::string n_charm_units;
     const static std::string punkt;
     const static std::string port;
+    const static std::string networkcard;
 public:
     static void ReadIni(std::string appName, std::string projectname) {
         boost::filesystem::path homepath = Zweistein::GetHomePath();
@@ -26,16 +27,17 @@ public:
         inipath.append(appName + ".json");
         fullpathfilename = inipath.string();
 		std::cout << "ini file : "<< fullpathfilename << std::endl;
-        try { 
+        try {
 			boost::property_tree::read_json(fullpathfilename, root);
             unsigned short p = get_port();
 			root.put<unsigned short>(mesytecdevice + punkt + port, p);
-             
 			unsigned char n = get_n_charm_units();
 			root.put<unsigned char>(mesytecdevice + punkt + n_charm_units, n);
-				
+            std::string nic = get_nic();
+            root.put<std::string>(mesytecdevice + punkt + networkcard, nic);
+
 			setDevId(getDevId());
-			
+
 		}
         catch (std::exception& e) {
 			std::cout << e.what() << std::endl;
@@ -43,18 +45,20 @@ public:
 			 std::cout << "create file: "<< fullpathfilename << std::endl;
 			 unsigned short p = get_port();
 			 root.put<unsigned short>(mesytecdevice + punkt + port, p);
-             
+
 			 unsigned char n = get_n_charm_units();
 			 root.put<unsigned char>(mesytecdevice + punkt + n_charm_units, n);
-			 
+             std::string nic = get_nic();
+             root.put<std::string>(mesytecdevice + punkt + networkcard, nic);
+
 			 setDevId(getDevId());
-			 
+
 			}
 			catch(std::exception& e){
 				std::cout << e.what() << std::endl;
 			}
-			
-			
+
+
 		}
     }
     static unsigned char getDevId() {
@@ -69,6 +73,11 @@ public:
         return root.get<unsigned char>(mesytecdevice + punkt + n_charm_units, 2);
 
     }
+    static std::string get_nic() {
+        return root.get<std::string>(mesytecdevice + punkt + networkcard, "");
+
+    }
+
     static void setDevId(unsigned char newdevid) {
         root.put<unsigned char>(mesytecdevice + punkt + devid, newdevid);
         boost::property_tree::write_json(fullpathfilename, root);
@@ -79,5 +88,6 @@ const std::string PacketSenderParams::devid = "devid";
 const std::string PacketSenderParams::port = "port";
 const std::string PacketSenderParams::punkt = ".";
 const std::string PacketSenderParams::mesytecdevice = "MesytecDevice";
+const std::string PacketSenderParams::networkcard = "networkcard";
 boost::property_tree::ptree PacketSenderParams::root;
 std::string PacketSenderParams::fullpathfilename = "";

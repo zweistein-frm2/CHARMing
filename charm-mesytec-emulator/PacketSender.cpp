@@ -516,6 +516,7 @@ int main(int argc, char* argv[])
 	devid = PacketSenderParams::getDevId();
 	n_charm_units = PacketSenderParams::get_n_charm_units();
 	const unsigned short port = PacketSenderParams::get_port();
+	std::string nic = PacketSenderParams::get_nic();
 	boost::array< Mcpd8::DataPacket, 1> dp;
 
 	zeropoint= boost::chrono::steady_clock::now().time_since_epoch();
@@ -577,7 +578,7 @@ int main(int argc, char* argv[])
 			//signals.async_wait(boost::bind(&boost::asio::io_service::stop, &io_service));
 			signals.async_wait(&catch_ctrlc);
 
-			std::string local_ip = defaultNETWORKCARDINTERFACE;
+			std::string local_ip = nic;
 			std::list<std::string> localinterfaces = std::list<std::string>();
 			Zweistein::GetLocalInterfaces(localinterfaces);
 
