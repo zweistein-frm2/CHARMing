@@ -375,19 +375,28 @@ void entangle_setup(boost::filesystem::path& devicedir, boost::filesystem::path&
         if (!rdir.empty()) {
             resdir = rdir;
         }
+        else {
+            resdir = entangle_root.parent_path();
+            resdir /= "example";
+        }
+
         try {
             const auto& devdir = toml::find<std::string>(data, "devicedirs", "system");
             if (!devdir.empty()) {
                 devicedir = devdir;
             }
         }
-        catch(std::exception& ex) {}
+        catch(std::exception& ex) {
+
+        }
 
     }
     catch (std::exception& ex) {
         std::cout << ex.what() << std::endl;
+        resdir = entangle_root.parent_path();
+        resdir /= "example";
     }
-
+    std::cout << "Using entangle res dir : " << resdir << std::endl;
 
 
     std::cout << "Using entangle root : " << entangle_root << std::endl;
