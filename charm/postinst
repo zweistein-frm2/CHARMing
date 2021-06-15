@@ -8,7 +8,7 @@ if [ -f $FILE ] || [ -f /etc/CHARMing/mesytecsystem.json ];
 then
   printf "Keeping existing configuration.\n"
 else
-  cp /etc/CHARMing/examples/erwin.json  $FILE
+  cp /etc/CHARMing/examples/erwin-small.json  $FILE
   if [ $? -ne 0 ]
   then
     printf "\n"

@@ -13,9 +13,7 @@
  */
 
 #pragma once
-#ifdef __GNUC__
-#include <cxxabi.h>
-#endif
+
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/chrono.hpp>
@@ -56,21 +54,9 @@ namespace Zweistein {
 		}
 
 
-		std::string classname = typeid(*pmsmtsystem1).name();
-#ifdef __GNUC__
-		char output[255];
-		size_t len = 255;
-		int status;
-		const char* ptrclearclassname = __cxxabiv1::__cxa_demangle(classname.c_str(), output, &len, &status);
-#else
-		const char* ptrclearclassname = classname.c_str();
-#endif
+
 		bool ischarm = false;
 		static double shrinkraw = 1.0;
-		if (std::string("class Charm::CharmSystem") == std::string(ptrclearclassname)) { // we don't want header dipendency, hence class name check at runtime only
-			ischarm = true;
-		}
-
 
 		if (pmsmtsystem1->systype == Zweistein::XYDetector::Systemtype::Charm) ischarm = true;
 
@@ -91,7 +77,7 @@ namespace Zweistein {
 		if (ischarm) {
 			if (!binningfile1.empty() || binningfile1.length() != 0) {
 				LOG_ERROR << "skipped: " << binningfile1 << std::endl;
-				LOG_ERROR << classname << " does not support Binning files." << std::endl;
+				LOG_ERROR << magic_enum::enum_name(pmsmtsystem1->systype) << " does not support Binning files." << std::endl;
 				binningfile1 = "";
 			}
 

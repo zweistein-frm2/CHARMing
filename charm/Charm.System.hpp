@@ -22,14 +22,15 @@ namespace Charm {
 
 
 		bool singleModuleXYSize(Zweistein::Format::EventData eventdataformat, unsigned short& x, unsigned short& y) {
-
-			switch (eventdataformat) {
-			case Zweistein::Format::EventData::Mdll:
-				x = (unsigned short)Charm_sizeX;
-				y = (unsigned short)Charm_sizeY;
-				return true;
+			if (systype == Zweistein::XYDetector::Systemtype::Charm){
+				switch (eventdataformat) {
+				case Zweistein::Format::EventData::Mdll:
+					x = (unsigned short)Charm_sizeX;
+					y = (unsigned short)Charm_sizeY;
+					return true;
+				}
 			}
-			return false;
+			return MesytecSystem::singleModuleXYSize(eventdataformat, x, y);
 		}
 
 		bool listmode_connect(std::list<Mcpd8::Parameters>& _devlist, boost::asio::io_service& io_service)

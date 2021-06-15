@@ -8,12 +8,6 @@
  ~~~"~~~~~^~~   This program is free software; you can redistribute it
  and/or modify it under the terms of the GNU General Public License v3
  as published by the Free Software Foundation;*/
-
-
-#ifdef __GNUC__
-#include <cxxabi.h>
-#endif
-
 #include "stdafx.h"
 #include <boost/exception/all.hpp>
 #include <boost/array.hpp>
@@ -173,18 +167,6 @@ namespace Mesytec {
 
 	//		LOG_INFO << "MesytecSystem::connect(): " << "io_service.stopped() = " << pio_service->stopped() << std::endl;
 
-			std::string classname = typeid(*this).name();
-#ifdef __GNUC__
-			char output[255];
-			size_t len = 255;
-			int status;
-			const char* ptrclearclassname = __cxxabiv1::__cxa_demangle(classname.c_str(), output, &len, &status);
-#else
-			const char* ptrclearclassname = classname.c_str();
-#endif
-
-			if (systype == Zweistein::XYDetector::Systemtype::Mesytec)
-
 			boost::system::error_code ec ;
 			for(Mcpd8::Parameters& p:_devlist) {
 				Mesytec::DeviceParameter mp;
@@ -232,8 +214,7 @@ namespace Mesytec {
 
 					if (eventdataformat == Zweistein::Format::EventData::Mpsd8  && (systype == Zweistein::XYDetector::Systemtype::Charm))
 					{
-
-						LOG_ERROR << MENUMSTR(eventdataformat) << " not handled by  " << ptrclearclassname << std::endl;
+						LOG_ERROR << MENUMSTR(eventdataformat) << " not handled by  " << magic_enum::enum_name(systype) << std::endl;
 						eventdataformat = Zweistein::Format::EventData::Undefined;
 						skip = true;
 					}
@@ -432,7 +413,9 @@ namespace Mesytec {
 			boost::chrono::system_clock::time_point tpstarted = getStart();
 			boost::chrono::milliseconds ms = boost::chrono::duration_cast<boost::chrono::milliseconds> (boost::chrono::system_clock::now() - tpstarted);
 			{
-				std::string tmps(ptrclearclassname);
+
+				auto systype_name = magic_enum::enum_name(systype);
+				std::string tmps(systype_name);
 				boost::algorithm::to_upper(tmps);
 				LOG_INFO << tmps << " CONNECTED: +" << ms << std::endl;
 			}

@@ -35,7 +35,7 @@
 #include "PacketSender.Params.hpp"
 #include "CounterMonitor.hpp"
 #include <random>
-
+#include <boost/algorithm/string/predicate.hpp>
 using boost::asio::ip::udp;
 boost::mutex coutGuard;
 boost::thread_group worker_threads; // not used
@@ -512,6 +512,12 @@ int main(int argc, char* argv[])
 	}
 
 	std::string appName = boost::filesystem::basename(argv[0]);
+
+	for (int a = 0; a < argc; a++) {
+		if (boost::starts_with(argv[a], "--ininame=")) {
+			appName = argv[a] + 10;
+		}
+	}
 	PacketSenderParams::ReadIni(appName,"CHARMing");
 	devid = PacketSenderParams::getDevId();
 	n_charm_units = PacketSenderParams::get_n_charm_units();

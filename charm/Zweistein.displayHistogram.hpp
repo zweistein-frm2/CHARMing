@@ -11,10 +11,6 @@
 
 #pragma once
 
-#ifdef __GNUC__
-#include <cxxabi.h>
-#endif
-
 #include <boost/function.hpp>
 #include <boost/chrono.hpp>
 #include <boost/shared_ptr.hpp>
@@ -58,15 +54,6 @@ namespace Zweistein {
 
 		}
 
-		std::string classname = typeid(*pmsmtsystem1).name();
-#ifdef __GNUC__
-		char output[255];
-		size_t len = 255;
-		int status;
-		const char* ptrclearclassname = __cxxabiv1::__cxa_demangle(classname.c_str(), output, &len, &status);
-#else
-		const char* ptrclearclassname = classname.c_str();
-#endif
 		bool ischarm = false;
 		static double shrinkraw = 1.0;
 		if (pmsmtsystem1->systype == Zweistein::XYDetector::Systemtype::Charm) { // we don't want header dipendency, hence class name check at runtime only

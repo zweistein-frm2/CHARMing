@@ -25,8 +25,7 @@ namespace Zweistein {
 		Mcpd8 = 1,
 		NucleoSimulator = 2,
 		Charm = 3,
-		CharmSimulator = 4,
-		InternalRandom = 5
+		CharmSimulator = 4
 	};
 
 }
