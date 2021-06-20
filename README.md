@@ -12,3 +12,5 @@ linux and windows currently supported.
 * charm-mesytec-emulator: helper program to emulate a real mesytec or charm device generating random data and supporting the same udp commands as the real hardware.
 * nicos-install-charming:  helper program to install support for entangle-charming in [NICOS](https://www.nicos-controls.org/)
 
+compiled binaries can be found in [CHARMing binaries] (https://github.com/zweistein-frm2/CHARMing_binaries)
+
