@@ -75,8 +75,8 @@ RUN cd /${projectdir}/distribution && chmod +x packageout.sh  && chmod +x ftpout
 RUN cd /${projectdir}/nicos-install-erwin_charming  && chmod +x ftpout.sh && rm -rf out && mkdir out && cd out && cmake .. && make
 RUN cd /${projectdir}/nicos-install-erwin_charming/out && ../ftpout.sh nicos-install-erwin_charming x86_64
 
-RUN cd /${projectdir}/nicos-install-erwin_sans1  && chmod +x ftpout.sh && rm -rf out && mkdir out && cd out && cmake .. && make
-RUN cd /${projectdir}/nicos-install-erwin_sans1/out && ../ftpout.sh nicos-install-erwin_sans1 x86_64
+RUN cd /${projectdir}/nicos-install-sans1_charming  && chmod +x ftpout.sh && rm -rf out && mkdir out && cd out && cmake .. && make
+RUN cd /${projectdir}/nicos-install-sans1_charming/out && ../ftpout.sh nicos-install-sans1_charming x86_64
 
 RUN cd /${projectdir}/charm-mesytec-emulator  && chmod +x ftpout.sh && rm -rf out && mkdir out && cd out && cmake .. && make
 RUN cd /${projectdir}/charm-mesytec-emulator/out && ../ftpout.sh charm-mesytec-emulator x86_64
