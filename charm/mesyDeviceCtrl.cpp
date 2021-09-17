@@ -162,7 +162,13 @@ int main(int argc, char* argv[])
 
 		if(vm.count(MESYTECDEVICE)) bmesyteconly = true;
 
-		if(bmesyteconly ) CONFIG_FILE = "mesytecsystem";
+		if (bmesyteconly) {
+			CONFIG_FILE = "mesytecsystem";
+			Mesytec::Config::bcharmdefaults = false;
+		}
+		else {
+			Mesytec::Config::bcharmdefaults = true;
+		}
 
 		if (bmesyteconly) std::cout << "using MESYTEC device protocol" << std::endl;
 		else std::cout << "using CHARM device  protocol" << std::endl;
@@ -295,7 +301,8 @@ int main(int argc, char* argv[])
 			catch (std::exception& e) {
 				LOG_ERROR << e.what() << " for reading." << std::endl;
 			}
-			bool configok = Mesytec::Config::get(_devlist, inidirectory.string());
+
+			bool configok = Mesytec::Config::get(_devlist, defaulttocharm ?"": inidirectory.string());
 			std::stringstream ss_1;
 			boost::property_tree::write_json(ss_1, Mesytec::Config::root);
 			LOG_INFO << ss_1.str() << std::endl;

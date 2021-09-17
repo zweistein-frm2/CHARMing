@@ -6,6 +6,6 @@ namespace Mesytec {
 		boost::filesystem::path DATAHOME;
 		boost::filesystem::path BINNINGFILE;
 		boost::property_tree::ptree root;
-
+		bool bcharmdefaults;
 	}
 }

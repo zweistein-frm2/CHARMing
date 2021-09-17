@@ -31,6 +31,7 @@ namespace Mesytec {
 		extern boost::filesystem::path DATAHOME;
 		extern boost::filesystem::path BINNINGFILE;
 		extern boost::property_tree::ptree root;
+		extern bool bcharmdefaults;
 		inline bool get(std::list<Mcpd8::Parameters>& _devlist, boost::filesystem::path inidirectory,bool checknetwork=true) {
 			bool rv = true;
 
@@ -106,7 +107,7 @@ namespace Mesytec {
 					}
 
 					if (n == 0) {
-						auto a3 = magic_enum::enum_name(Zweistein::Format::EventData::Mpsd8);
+						auto a3 = magic_enum::enum_name(bcharmdefaults? Zweistein::Format::EventData::Mdll :Zweistein::Format::EventData::Mpsd8);
 						std::string m3 = std::string(a3.data(), a3.size());
 						std::string enum_tmp = root.get<std::string>(s2 + "eventdataformat", m3);
 						auto a = magic_enum::enum_cast<Zweistein::Format::EventData>(enum_tmp);
@@ -143,7 +144,7 @@ namespace Mesytec {
 					root.put<std::string>(s2 + "eventdataformat", m4);
 
 					if (n == 0) {
-						auto a5 = magic_enum::enum_name(Zweistein::DataGenerator::NucleoSimulator);
+						auto a5 = magic_enum::enum_name(bcharmdefaults? Zweistein::DataGenerator::CharmSimulator : Zweistein::DataGenerator::NucleoSimulator);
 						std::string m5 = std::string(a5.data(), a5.size());
 						std::string enum_tmp = root.get<std::string>(s2 + "datagenerator", m5);
 						auto a = magic_enum::enum_cast<Zweistein::DataGenerator>(enum_tmp);
@@ -199,7 +200,7 @@ namespace Mesytec {
 					std::stringstream ss2;
 					ss2 << oursystem << punkt << charmdevice << n << punkt;
 					std::string s3 = ss2.str();
-					if (n == 0) p1.n_charm_units = root.get<unsigned short>(s3 + "n_charm_units", Charm::Parameters::default_n_charm_units);
+					if (n == 0) p1.n_charm_units = root.get<unsigned short>(s3 + "n_charm_units", bcharmdefaults ? Charm::Parameters::default_n_charm_units : 0);
 					else p1.n_charm_units = root.get<unsigned short>(s3 + "n_charm_units", Charm::Parameters::default_n_charm_units);
 					root.put<unsigned short>(s3 + "n_charm_units", p1.n_charm_units);
 
