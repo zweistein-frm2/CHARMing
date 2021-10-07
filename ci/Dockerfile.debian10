@@ -1,7 +1,24 @@
 FROM debian:10
 ENV DEBIAN_FRONTEND=noninteractive
 
+RUN apt-get update && apt-get install -y \
+	apt-transport-https \
+	ca-certificates \
+	apt-utils \
+	gnupg \
+	software-properties-common \
+	build-essential \
+	wget \
+	git \
+	curl \
+	gzip \
+	unzip \
+	tar
+
 RUN echo 'deb http://deb.debian.org/debian testing main' >> /etc/apt/sources.list
+
+
+
 RUN apt update -y
 RUN apt-get install -y libc6 -f -o APT::Immediate-Configure=0
 RUN apt install -qq -y -t testing build-essential
