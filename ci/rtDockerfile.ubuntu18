@@ -3,6 +3,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update
 
+RUN add-apt-repository -y ppa:ubuntu-toolchain-r/test && \
+    apt-get update
 
 RUN export TZ=Europe/Berlin    # must be at beginning for unknown reasons,
 RUN apt-get install tzdata     # must be at beginning for unknown reasons,
