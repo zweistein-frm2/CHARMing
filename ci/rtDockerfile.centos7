@@ -12,12 +12,10 @@ RUN yum install -y epel-release && yum repolist  && \
 RUN yum install -y centos-sclo-rh centos-release-scl git  && \
     yum install -y python3-pip python3-devel && \
     pip3 install numpy && \
-    yum install -y gtk3
+    yum install -y gtk3 devtoolset-9-libstdc++-devel
 
-# we need python3 otherwise boost will not build its python support
 
 COPY distribution/centos7/package/*centos7.rpm ./
-
-RUN rpm --install *.rpm
+#RUN rpm --install *.rpm  #uncomment to run installation 
 
 
