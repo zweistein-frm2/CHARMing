@@ -1,0 +1,45 @@
+FROM debian:bullseye
+ENV DEBIAN_FRONTEND=noninteractive
+
+
+RUN apt-get update && apt-get install -y \
+	apt-transport-https \
+	ca-certificates \
+	apt-utils \
+	gnupg \
+	software-properties-common \
+	build-essential \
+	wget \
+	git \
+	curl \
+	gzip \
+	unzip \
+	tar
+
+RUN echo 'deb http://deb.debian.org/debian testing main' >> /etc/apt/sources.list
+
+
+
+RUN apt update -y
+RUN apt-get install -y libc6 -f -o APT::Immediate-Configure=0
+
+
+RUN export TZ=Europe/Berlin    # must be at beginning for unknown reasons,
+RUN apt-get install tzdata     # must be at beginning for unknown reasons,
+
+
+RUN apt install -y python3-pip python3-dev && \
+    pip3 install numpy && \
+    apt-get install -y libgtk-3-0 libstdc++-10-dev
+
+COPY distribution/debian11/package/*debian11.deb  ./
+
+#RUN dpkg -i *.deb
+
+
+
+
+
+
+
+
