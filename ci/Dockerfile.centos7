@@ -50,7 +50,7 @@ RUN export CPLUS_INCLUDE_PATH=/usr/include/python3.6m && cd ${projectdir} && \
     chmod +x initrepository.sh && ./initrepository.sh -sICONV_PATH=/usr/libiconv
 
 ENV PACK2RPM=ON
-ENV INSTALL_DEPS=gtk3,gcc10-libstdc++-devel
+ENV INSTALL_DEPS=gtk3,devtoolset-9-libstdc++-devel
 ENV LINUX_FLAVOUR=centos7
 
 RUN export CPLUS_INCLUDE_PATH=/usr/include/python3.6m && cd /${projectdir}/entangle-charming  && rm -rf out && mkdir out && cd out && cmake .. && make
