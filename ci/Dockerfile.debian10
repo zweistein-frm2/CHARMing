@@ -53,7 +53,7 @@ RUN cd /${projectdir} && \
 
 RUN cd /${projectdir}/entangle-charming  && rm -rf out && mkdir out && cd out && cmake .. && make
 
-ENV INSTALL_DEPS=libgtk-3-0,libstdc++-9-dev
+ENV INSTALL_DEPS=libgtk-3-0,libstdc++-10-dev
 ENV LINUX_FLAVOUR=debian10
 
 RUN mkdir out && cd out && cmake -B /out -S /${projectdir}
