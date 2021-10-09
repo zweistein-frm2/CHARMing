@@ -13,7 +13,7 @@ RUN apt-get install -y git curl unzip tar && \
     pip3 install numpy && \
     apt-get install -y libgtk-3-0
 
-COPY distribution/*ubuntu20.deb  ./
+COPY distribution/ubuntu20/package/*ubuntu20.deb  ./
 
 RUN dpkg -i *.deb
 
